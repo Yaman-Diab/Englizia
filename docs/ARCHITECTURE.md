@@ -65,6 +65,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - Tokens from "الهوية البصرية v2": `context.colors` (`AppSemanticColors`) with a `ToneColors` triple per role — `fill` (icons, borders, progress), `text` (≥4.5:1), `surface` (light background) — plus neutrals and reader tokens (karaoke highlight, sentence band, tappable underline, selected word, captions).
 - `context.texts` (`AppTextStyles`): display 28/34, title 22/30, reading 20/36, body 16/26, caption 13/20, button 16; weights 400/600; Arabic running text ≥ 1.7 line height. Sizes use `.sp` (design size 375×812).
 - `context.scheme` for Material widgets; component themes are set in `AppTheme` so widgets don't repeat overrides.
+- `AppMotion` (`app_motion.dart`): durations, curves, distances and scales for every animation (adapted from transitions.dev, no blur). `AppMotion.resolve(context, duration)` returns zero when the platform disables animations; decorative motion checks `AppMotion.reduceMotion(context)`.
 - `test/core/design_system/theme_test.dart` pins identity values and checks WCAG contrast in light and dark.
 - Fonts: Readex Pro (UI, Arabic + Latin) and Andika (kids). Not bundled yet — see `assets/fonts/README.md`.
 

@@ -12,3 +12,4 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Arabic (default) and English localization with automated parity checks.
 - Temporary foundation screen to check theme, language and direction on a device.
 - CI (analyze, format, test), Dependabot, PR template, environment files.
+- Motion tokens (`AppMotion`) with reduced-motion support.
