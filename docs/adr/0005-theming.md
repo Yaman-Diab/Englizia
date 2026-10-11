@@ -10,6 +10,7 @@ Status: Accepted · Date: 2026-10-11
 - Values stated in the doc are exact; the rest are provisional Tailwind values that pass WCAG AA, tagged `ASSUMPTION(design)`.
 - Dark mode button background is `blue400` with dark text (keeps 7:1 contrast); the doc's "#2563EB always" is read as the light-mode rule. To confirm with the designer.
 - Arabic running text uses at least 1.7 line height; headings keep the doc's ratios.
+- Fonts through `google_fonts` with the files bundled and runtime fetching disabled (offline, no dependency on Google servers from Syria).
 - Text sizes use `flutter_screenutil` `.sp` against a 375×812 design.
 
 ## Consequences

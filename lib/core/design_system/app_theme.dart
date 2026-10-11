@@ -114,7 +114,7 @@ abstract final class AppTheme {
       useMaterial3: true,
       brightness: scheme.brightness,
       colorScheme: scheme,
-      fontFamily: AppFonts.primary,
+      fontFamily: texts.body.fontFamily,
       scaffoldBackgroundColor: colors.background,
       textTheme: texts.toTextTheme(),
       extensions: [colors, texts],
@@ -186,10 +186,7 @@ abstract final class AppTheme {
         indicatorColor: colors.primary.surface,
         labelTextStyle: WidgetStateProperty.resolveWith(
           (states) => states.contains(WidgetState.selected)
-              ? texts.caption.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: colors.primary.text,
-                )
+              ? texts.captionStrong.copyWith(color: colors.primary.text)
               : texts.caption.copyWith(color: colors.textSecondary),
         ),
         iconTheme: WidgetStateProperty.resolveWith(

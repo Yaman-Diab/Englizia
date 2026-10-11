@@ -136,10 +136,7 @@ class _ToneChip extends StatelessWidget {
             const SizedBox(width: AppSpacing.xs),
             Text(
               label,
-              style: context.texts.caption.copyWith(
-                color: tone.text,
-                fontWeight: FontWeight.w600,
-              ),
+              style: context.texts.captionStrong.copyWith(color: tone.text),
             ),
           ],
         ),

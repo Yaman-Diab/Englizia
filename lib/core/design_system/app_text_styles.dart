@@ -1,13 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 
+/// Fonts come from `google_fonts`, loaded from the files bundled in
+/// `assets/fonts/` (runtime fetching is disabled in `main.dart`).
+///
+/// google_fonts gives every weight its own family, so never change
+/// `fontWeight` with `copyWith`: pick the role that already has it.
 abstract final class AppFonts {
   /// Readex Pro: UI and content, one family for Arabic and Latin so a
   /// sentence and its translation match in height and weight.
-  static const primary = 'ReadexPro';
+  static TextStyle primary(TextStyle style) =>
+      GoogleFonts.readexPro(textStyle: style);
 
   /// Andika: letters and words in kids mode (single-storey a and g).
-  static const kids = 'Andika';
+  static TextStyle kids(TextStyle style) =>
+      GoogleFonts.andika(textStyle: style);
 }
 
 /// Type roles from "الهوية البصرية v2" (size/line-height in logical px).
@@ -23,6 +31,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.body,
     required this.bodyStrong,
     required this.caption,
+    required this.captionStrong,
     required this.button,
   });
 
@@ -38,13 +47,14 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       if (isArabic && runningText && height < _arabicMinHeight) {
         height = _arabicMinHeight;
       }
-      return TextStyle(
-        fontFamily: AppFonts.primary,
-        fontSize: size.sp,
-        height: height,
-        fontWeight: weight,
-        color: color,
-        leadingDistribution: TextLeadingDistribution.even,
+      return AppFonts.primary(
+        TextStyle(
+          fontSize: size.sp,
+          height: height,
+          fontWeight: weight,
+          color: color,
+          leadingDistribution: TextLeadingDistribution.even,
+        ),
       );
     }
 
@@ -55,6 +65,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       body: style(16, 26, FontWeight.w400, runningText: true),
       bodyStrong: style(16, 26, FontWeight.w600, runningText: true),
       caption: style(13, 20, FontWeight.w400, runningText: true),
+      captionStrong: style(13, 20, FontWeight.w600, runningText: true),
       button: style(16, 24, FontWeight.w600),
     );
   }
@@ -70,12 +81,13 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// English text inside the interactive reader. 20/36, 400.
   final TextStyle reading;
 
-  /// UI text, instructions, explanations. 16/26, 400.
+  /// UI text, instructions, explanations. 16/26, 400 / 600.
   final TextStyle body;
   final TextStyle bodyStrong;
 
-  /// Labels and secondary info. 13/20, 400.
+  /// Labels and secondary info. 13/20, 400 / 600.
   final TextStyle caption;
+  final TextStyle captionStrong;
 
   /// Buttons. 16, 600.
   final TextStyle button;
@@ -93,7 +105,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     bodyMedium: body,
     bodySmall: caption,
     labelLarge: button,
-    labelMedium: caption.copyWith(fontWeight: FontWeight.w600),
+    labelMedium: captionStrong,
     labelSmall: caption,
   );
 
@@ -105,6 +117,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? body,
     TextStyle? bodyStrong,
     TextStyle? caption,
+    TextStyle? captionStrong,
     TextStyle? button,
   }) => AppTextStyles(
     display: display ?? this.display,
@@ -113,6 +126,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     body: body ?? this.body,
     bodyStrong: bodyStrong ?? this.bodyStrong,
     caption: caption ?? this.caption,
+    captionStrong: captionStrong ?? this.captionStrong,
     button: button ?? this.button,
   );
 
@@ -126,6 +140,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       body: TextStyle.lerp(body, other.body, t)!,
       bodyStrong: TextStyle.lerp(bodyStrong, other.bodyStrong, t)!,
       caption: TextStyle.lerp(caption, other.caption, t)!,
+      captionStrong: TextStyle.lerp(captionStrong, other.captionStrong, t)!,
       button: TextStyle.lerp(button, other.button, t)!,
     );
   }

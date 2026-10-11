@@ -61,7 +61,7 @@ Dependency direction: `presentation → domain ← data`.
 | One error funnel | `*RepositoryImpl` wraps calls in `guard()`; `FailureMapper` maps once; UI shows `failure.localizedMessage`. |
 | Network only via `ApiClient` | Datasources never touch Dio errors; `ApiClient` throws `ApiException`/`NetworkException`. |
 | Manual DI (GetIt) | Register interfaces, not impls. Cubits `factory`, everything else `lazySingleton`. |
-| No raw colors / text styles | Only `context.colors`, `context.scheme`, `context.texts`, `AppSpacing`/`AppRadius`/`AppSizes`. |
+| No raw colors / text styles | Only `context.colors`, `context.scheme`, `context.texts`, `AppSpacing`/`AppRadius`/`AppSizes`. Fonts via `google_fonts` from bundled assets; never `copyWith(fontWeight:)`, use a role. |
 | Color meanings are fixed | `ai` (violet) only for AI features · `reward` (amber) = XP/stars/save star · `streak` only streak. State never by color alone: icon + text. |
 | No hardcoded visible text | Every string via `'key'.tr()` with a **literal** key, in both `ar.json` and `en.json`. |
 | Directional layout | `EdgeInsetsDirectional`, `AlignmentDirectional`; let `matchTextDirection` flip icons. |
@@ -102,7 +102,7 @@ Dependency direction: `presentation → domain ← data`.
   Save every real response (sanitized) as `test/fixtures/api/<endpoint>_<case>.json` and parse it in a test.
 - **Commit after each logical change, but never `git push` without asking the user first — every time.**
 - Never rewrite history or change git config without an explicit request.
-- Pending decisions (don't change silently): application ID is still `com.example.englizia`; fonts are not bundled yet;
+- Pending decisions (don't change silently): application ID is still `com.example.englizia`;
   linux/macos/web/windows folders are kept until the user decides; palette values outside the identity doc are provisional.
 - If a problem is wider than reported, say so with evidence (file:line, command output).
 - Report results honestly: failing tests are reported with their output.
