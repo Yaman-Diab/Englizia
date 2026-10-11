@@ -43,3 +43,19 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Environments & secrets
+.env*
+!.env.example
+env/local.json
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
+key.properties
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Tooling
+.fvm/flutter_sdk
+.claude/settings.local.json
