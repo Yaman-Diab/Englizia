@@ -10,6 +10,17 @@
 > 9 Testing · 10 Git & GitHub · 11 Environments & release · 12 Production essentials ·
 > 13 Docs & AI workflow · 14 Hard-won lessons · 15 Templates
 
+> **Englizia scope.** This playbook is a general reference, distilled from a project whose
+> backend was Laravel. Where it differs from Englizia, the accepted ADRs in `docs/adr/` and
+> the current code win (current state: `docs/ARCHITECTURE.md`). For errors in particular:
+> - **Error bodies:** ASP.NET Core ProblemDetails (RFC 9457) parsed by `ApiException`
+>   (`title`, `detail`, `errors`, optional `code`), not Laravel `message`/`errors` — ADR 2.
+> - **Failures:** `Failure` is sealed and carries no user message (only `code`,
+>   `serverMessage`); Cubit state keeps the `Failure` and pages show
+>   `failure.localizedMessage` — ADR 1, ADR 2.
+> - **`guard()`** lives in `core/result/guard.dart` and leaves logging to `FailureMapper`
+>   (breadcrumbs for API/network errors, error + stack for unexpected ones) — ADR 2.
+
 ---
 
 ## 1. Day-0 setup checklist (in this order)
@@ -104,7 +115,7 @@ untestable — `sl<>()` belongs only in `BlocProvider.create` and the compositio
 | `network/dio_factory.dart` | A | main Dio + refresh Dio, AuthInterceptor, **debug-only redacting** logger, app-version headers |
 | `network/auth_interceptor.dart` | G | attach Bearer, one shared refresh on 401, one retry, then logout |
 | `network/token_refresh_service.dart` | A | refresh call — **sets its own Authorization header** (see §14) |
-| `network/api_exception.dart` | G | parses Laravel-style `message` / `errors` |
+| `network/api_exception.dart` | G | parses Laravel-style `message` / `errors` (Englizia: ProblemDetails — ADR 2) |
 | `network/api_status_codes.dart` | G | named status constants |
 | `network/api_endpoints.dart` | A | endpoint paths, one-line comments only |
 | `network/json_reader.dart` | G | ONE extension for defensive JSON reads (`readInt`, `readString`, `readMap`, `firstOf`) |
@@ -206,6 +217,7 @@ Future<void> load() async {
 }
 ```
 - `errorMessage` is cleared by `copyWith` unless passed (stale errors otherwise survive reloads).
+- Englizia: the state keeps `Failure? failure` instead of `errorMessage` (same clearing rule) and the page renders `failure.localizedMessage` — ADR 1.
 - Parallel section loading: each section keeps its own status; one failing section never blanks the screen.
 - Forms: `canSubmit` includes `!isSubmitting`; buttons disabled with a null `onPressed` (not `AbsorbPointer`).
 - Long forms: guard back/swipe with `PopScope` + "discard changes?" sheet.
@@ -227,6 +239,7 @@ Future<Result<T>> guard<T>(Future<T> Function() body) async {
   }
 }
 ```
+- Englizia: `guard()` is in `core/result/guard.dart` and does not log itself; `FailureMapper.fromError(error, stackTrace)` logs once — ADR 2.
 - Every `catch` keeps the stack trace. Nothing is swallowed silently — at minimum it is logged.
 - Endpoint-specific semantics (e.g. 401 on **login** = wrong credentials, not expired session) are handled in that repository **before** the generic mapper.
 - Consider letting `Failure` carry a type/key and translating in presentation; keeps `core/error` free of `easy_localization`.
