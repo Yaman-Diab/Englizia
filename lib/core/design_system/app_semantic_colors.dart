@@ -124,12 +124,12 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     primaryStrong: AppPalette.blue600,
     onPrimaryStrong: AppPalette.white,
     success: ToneColors(
-      fill: AppPalette.green600,
+      fill: AppPalette.green500,
       text: AppPalette.green700,
       surface: AppPalette.green100,
     ),
     streak: ToneColors(
-      fill: AppPalette.orange600,
+      fill: AppPalette.orange500,
       text: AppPalette.orange700,
       surface: AppPalette.orange100,
     ),
@@ -139,22 +139,22 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surface: AppPalette.amber100,
     ),
     ai: ToneColors(
-      fill: AppPalette.violet600,
+      fill: AppPalette.violet500,
       text: AppPalette.violet700,
       surface: AppPalette.violet100,
     ),
     error: ToneColors(
-      fill: AppPalette.red600,
+      fill: AppPalette.red500,
       text: AppPalette.red700,
       surface: AppPalette.red100,
     ),
     info: ToneColors(
-      fill: AppPalette.cyan600,
+      fill: AppPalette.cyan500,
       text: AppPalette.cyan700,
       surface: AppPalette.cyan100,
     ),
     textPrimary: AppPalette.slate800,
-    textSecondary: AppPalette.slate600,
+    textSecondary: AppPalette.slate500,
     background: AppPalette.slate50,
     surface: AppPalette.white,
     border: AppPalette.slate200,
@@ -172,8 +172,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       text: AppPalette.blue300,
       surface: AppPalette.blue900,
     ),
-    primaryStrong: AppPalette.blue400,
-    onPrimaryStrong: AppPalette.slate900,
+    // v2: the button background is #2563EB in both modes.
+    primaryStrong: AppPalette.blue600,
+    onPrimaryStrong: AppPalette.white,
     success: ToneColors(
       fill: AppPalette.green400,
       text: AppPalette.green300,
