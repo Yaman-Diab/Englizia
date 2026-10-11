@@ -1,0 +1,6 @@
+# Copy to android/key.properties (gitignored) and fill in. Never commit the real file.
+# Keep the keystore outside the repo and back it up off-machine.
+storePassword=CHANGE_ME
+keyPassword=CHANGE_ME
+keyAlias=upload
+storeFile=C:/keys/englizia-upload.jks
