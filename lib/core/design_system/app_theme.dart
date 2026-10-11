@@ -1,3 +1,4 @@
+import 'package:englizia/core/design_system/app_page_transitions.dart';
 import 'package:englizia/core/design_system/app_palette.dart';
 import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
@@ -14,6 +15,18 @@ abstract final class AppTheme {
 
   static ThemeData dark({required bool isArabic}) =>
       _build(AppSemanticColors.dark, _darkScheme, isArabic: isArabic);
+
+  /// Android uses the app's fade + slide; iOS and macOS keep the native
+  /// Cupertino transition with interactive edge-swipe back. macOS is listed
+  /// because, left out of the map, Flutter 3.41 gives it a Zoom transition
+  /// with the Cupertino duration.
+  static const pageTransitionsTheme = PageTransitionsTheme(
+    builders: {
+      TargetPlatform.android: AppPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+      TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
+    },
+  );
 
   static const _lightScheme = ColorScheme(
     brightness: Brightness.light,
@@ -118,6 +131,7 @@ abstract final class AppTheme {
       scaffoldBackgroundColor: colors.background,
       textTheme: texts.toTextTheme(),
       extensions: [colors, texts],
+      pageTransitionsTheme: pageTransitionsTheme,
       appBarTheme: AppBarTheme(
         backgroundColor: colors.background,
         foregroundColor: colors.textPrimary,
