@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    { "name": "dev", "type": "dart", "request": "launch", "program": "lib/main.dart",
+      "args": ["--dart-define-from-file=env/dev.json"] },
+    { "name": "mock", "type": "dart", "request": "launch", "program": "lib/main.dart",
+      "args": ["--dart-define-from-file=env/mock.json"] },
+    { "name": "staging", "type": "dart", "request": "launch", "program": "lib/main.dart",
+      "args": ["--dart-define-from-file=env/staging.json"] },
+    { "name": "local", "type": "dart", "request": "launch", "program": "lib/main.dart",
+      "args": ["--dart-define-from-file=env/local.json"] }
+  ]
+}

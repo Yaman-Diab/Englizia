@@ -1,0 +1,4 @@
+{
+  "APP_ENV": "mock",
+  "BASE_URL": "https://mock.invalid"
+}
