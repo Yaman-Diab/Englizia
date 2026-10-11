@@ -1,0 +1,21 @@
+# Optional local hooks: install lefthook, then run `lefthook install` once.
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.dart"
+      run: dart format --output=none --set-exit-if-changed {staged_files}
+    analyze:
+      run: flutter analyze --no-pub
+
+commit-msg:
+  commands:
+    conventional:
+      run: >
+        head -n1 {1} | grep -qE '^(feat|fix|refactor|chore|docs|test|perf|build|ci|style|revert)(\([a-z0-9,_-]+\))?!?: .+'
+        || (echo "Commit subject must follow Conventional Commits" && exit 1)
+
+pre-push:
+  commands:
+    test:
+      run: flutter test
