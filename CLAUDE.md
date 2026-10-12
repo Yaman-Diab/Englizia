@@ -63,6 +63,7 @@ Dependency direction: `presentation → domain ← data`.
 | Manual DI (GetIt) | Register interfaces, not impls. Cubits `factory`, everything else `lazySingleton`. |
 | No raw colors / text styles | Only `context.colors`, `context.scheme`, `context.texts`, `AppSpacing`/`AppRadius`/`AppSizes`. Fonts via `google_fonts` from bundled assets; never `copyWith(fontWeight:)`, use a role. |
 | Color meanings are fixed | `ai` (violet) only for AI features · `reward` (amber) = XP/stars/save star · `streak` only streak. State never by color alone: icon + text. |
+| Motion from tokens | Durations and curves only from `AppMotion`; wrap durations in `AppMotion.resolve(context, …)`. Page transitions come from `AppTheme.pageTransitionsTheme`, never per route. No blur-heavy effects. |
 | No hardcoded visible text | Every string via `'key'.tr()` with a **literal** key, in both `ar.json` and `en.json`. |
 | Directional layout | `EdgeInsetsDirectional`, `AlignmentDirectional`; let `matchTextDirection` flip icons. |
 | No `print` | Use `AppLogger`. Network logging is debug-only and redacts tokens/passwords/PII. |
