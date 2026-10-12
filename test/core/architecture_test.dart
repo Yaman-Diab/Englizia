@@ -2,9 +2,19 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// Layer rules from CLAUDE.md, enforced on import lines.
+/// Layer and layout rules from CLAUDE.md, enforced by scanning source files.
 void main() {
   final importLine = RegExp(r'''^\s*(?:import|export)\s+['"]([^'"]+)['"]''');
+
+  // Physical left/right APIs that do not flip in RTL. Direction-neutral ones
+  // (EdgeInsets.all/symmetric, Alignment.center, BorderRadius.circular) stay allowed.
+  final nonDirectional = RegExp(
+    r'\bEdgeInsets\.(only|fromLTRB)\('
+    r'|\bBorderRadius\.(only|horizontal)\('
+    r'|\bAlignment\.(topLeft|topRight|centerLeft|centerRight|bottomLeft|bottomRight)\b'
+    r'|\bPositioned\('
+    r'|\bTextAlign\.(left|right)\b',
+  );
 
   Iterable<(String, String)> importsUnder(String dir) sync* {
     final root = Directory(dir);
@@ -61,5 +71,55 @@ void main() {
           file.path,
     ];
     expect(violations, isEmpty);
+  });
+
+  test('lib/ uses directional layout only', () {
+    final violations = [
+      for (final file in Directory(
+        'lib',
+      ).listSync(recursive: true).whereType<File>())
+        if (file.path.endsWith('.dart'))
+          for (final (index, line) in file.readAsLinesSync().indexed)
+            if (!line.trimLeft().startsWith('//') &&
+                nonDirectional.hasMatch(line))
+              '${file.path}:${index + 1}',
+    ];
+    expect(
+      violations,
+      isEmpty,
+      reason:
+          'Use EdgeInsetsDirectional, AlignmentDirectional, '
+          'PositionedDirectional, BorderRadiusDirectional, TextAlign.start/end',
+    );
+  });
+
+  test('the directional-layout scan catches physical left/right APIs', () {
+    const physical = [
+      'padding: EdgeInsets.only(left: 8)',
+      'EdgeInsets.fromLTRB(1, 2, 3, 4)',
+      'BorderRadius.only(topLeft: radius)',
+      'alignment: Alignment.centerLeft',
+      'Positioned(left: 0, child: child)',
+      'textAlign: TextAlign.right',
+    ];
+    const directionalOrNeutral = [
+      'EdgeInsetsDirectional.only(start: 8)',
+      'EdgeInsets.symmetric(horizontal: 8)',
+      'EdgeInsets.all(8)',
+      'AlignmentDirectional.centerStart',
+      'Alignment.center',
+      'BorderRadius.circular(12)',
+      'BorderRadius.vertical(top: radius)',
+      'PositionedDirectional(start: 0, child: child)',
+      'Positioned.fill(child: child)',
+      'TextAlign.start',
+      'TextDirection.ltr',
+    ];
+    for (final line in physical) {
+      expect(nonDirectional.hasMatch(line), isTrue, reason: line);
+    }
+    for (final line in directionalOrNeutral) {
+      expect(nonDirectional.hasMatch(line), isFalse, reason: line);
+    }
   });
 }

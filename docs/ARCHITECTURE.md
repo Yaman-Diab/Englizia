@@ -73,7 +73,8 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - easy_localization, `assets/translations/{ar,en}.json`, flat snake_case keys prefixed by feature.
 - Device language decides at first launch; Arabic is the fallback. The onboarding language step will set it explicitly.
 - Latin digits everywhere (scores, XP, CEFR codes stay consistent across both languages).
-- `Accept-Language` follows the UI language via `CurrentLanguage`.
+- Directional layout only: `EdgeInsetsDirectional`, `AlignmentDirectional`, `PositionedDirectional`, `BorderRadiusDirectional`, `TextAlign.start/end`; icons that point somewhere use `matchTextDirection`. `architecture_test` rejects the physical left/right APIs anywhere in `lib/`. English content inside the Arabic UI (the reader) may still set `TextDirection.ltr`.
+- `Accept-Language` follows the UI language via `CurrentLanguage`; `test/app/app_test.dart` switches the language on screen and checks the header the app's Dio sends.
 - `test/localization/localization_test.dart`: parity, placeholders, unused/missing keys, hardcoded text.
 
 ## Environments
