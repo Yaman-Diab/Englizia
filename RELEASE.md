@@ -4,7 +4,6 @@
 - [ ] Final application ID / bundle ID (currently the provisional `com.example.englizia`). Change in
       `android/app/build.gradle.kts` (`namespace`, `applicationId`), move `MainActivity.kt` to the new package,
       and set `PRODUCT_BUNDLE_IDENTIFIER` in Xcode. It cannot change after the first store upload.
-- [ ] Fonts bundled (`assets/fonts/README.md`) and the `fonts:` block in `pubspec.yaml` uncommented.
 - [ ] App icon and splash generated from one source (`flutter_launcher_icons`, `flutter_native_splash`).
 - [ ] Crash reporter chosen and wired into `AppLogger.reporter` (provider must work for users in Syria).
 - [ ] `env/prod.json` has the real `BASE_URL`.

@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 double contrast(Color a, Color b) {
   final la = a.computeLuminance();
@@ -106,6 +107,20 @@ void main() {
     );
   });
 
+  testWidgets('every font weight in use loads from bundled assets', (
+    tester,
+  ) async {
+    // Runtime fetching is off (flutter_test_config.dart), so a missing or
+    // misnamed file in assets/fonts makes this throw.
+    await tester.runAsync(() async {
+      AppFonts.primary(const TextStyle(fontWeight: FontWeight.w400));
+      AppFonts.primary(const TextStyle(fontWeight: FontWeight.w600));
+      AppFonts.kids(const TextStyle(fontWeight: FontWeight.w400));
+      AppFonts.kids(const TextStyle(fontWeight: FontWeight.w700));
+      await GoogleFonts.pendingFonts();
+    });
+  });
+
   testWidgets('type scale matches the identity doc at the design width', (
     tester,
   ) async {
@@ -135,6 +150,8 @@ void main() {
     expect(english.body.height, closeTo(26 / 16, 0.001));
     expect(english.display.fontWeight, FontWeight.w600);
     expect(english.body.fontWeight, FontWeight.w400);
+    expect(english.captionStrong.fontWeight, FontWeight.w600);
+    expect(english.body.fontFamily, isNot(english.bodyStrong.fontFamily));
     // Arabic running text never goes below 1.7.
     expect(arabic.body.height, 1.7);
     expect(arabic.caption.height, 1.7);
