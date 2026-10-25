@@ -11,7 +11,7 @@
 ## Android signing (once)
 1. Create an upload keystore **outside the repo** and back it up off-machine:
    ```
-   keytool -genkey -v -keystore C:/keys/englizia-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+   keytool -genkey -v -keystore C:/keys/engleazia-upload.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
    ```
 2. Copy `android/key.properties.example` to `android/key.properties` (gitignored) and fill it in.
 3. Enroll in Play App Signing on the first upload.
@@ -20,7 +20,7 @@ Without `key.properties`, release builds are signed with the debug key — fine 
 
 ## iOS (needs a Mac — do one build in week one)
 - Localized home-screen name: add `InfoPlist.strings` to the Runner target in Xcode with
-  `CFBundleDisplayName = "إنجليزيا";` (ar) and `"Englizia"` (en). `CFBundleLocalizations` is already set.
+  `CFBundleDisplayName = "إنجليزيا";` (ar) and `"Engleazia"` (en). `CFBundleLocalizations` is already set.
 - Check every permission purpose string (microphone for shadowing/conversation from v0.4).
 
 ## Build

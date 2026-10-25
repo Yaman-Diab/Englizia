@@ -45,7 +45,7 @@ void main() {
           expect(find.byType(FoundationPage), findsOneWidget);
           final expectedName = locale == AppLocales.arabic
               ? 'إنجليزيا'
-              : 'Englizia';
+              : 'Engleazia';
           expect(find.text(expectedName), findsOneWidget);
           expect(
             Directionality.of(tester.element(find.byType(FoundationPage))),
@@ -80,7 +80,7 @@ void main() {
     await tester.tap(find.text('English'));
     await tester.pumpUntilLocalized();
 
-    expect(find.text('Englizia'), findsOneWidget);
+    expect(find.text('Engleazia'), findsOneWidget);
     expect(sl<CurrentLanguage>().code, 'en');
     expect(await sentLanguage(), 'en');
   });

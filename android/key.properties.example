@@ -3,4 +3,4 @@
 storePassword=CHANGE_ME
 keyPassword=CHANGE_ME
 keyAlias=upload
-storeFile=C:/keys/englizia-upload.jks
+storeFile=C:/keys/engleazia-upload.jks
