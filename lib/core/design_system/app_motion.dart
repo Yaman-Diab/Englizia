@@ -49,6 +49,21 @@ abstract final class AppMotion {
   /// CSS `cubic-bezier(0.34, 1.36, 0.64, 1)`.
   static const bounce = Cubic(0.34, 1.36, 0.64, 1);
 
+  /// Slow symmetric in-out for floating loops. CSS `cubic-bezier(.45, 0, .55, 1)`.
+  static const float = Cubic(0.45, 0, 0.55, 1);
+
+  /// Idle loops of the guide character, from the welcome screen design:
+  /// one wave per [characterWave], a float per [characterFloat], a blink per
+  /// [characterBlink]. Arms move to a new expression in [characterPose].
+  static const characterWave = Duration(milliseconds: 2800);
+  static const characterFloat = Duration(milliseconds: 3200);
+  static const characterBlink = Duration(milliseconds: 4000);
+  static const characterPose = fast;
+
+  /// The staggered entrance of a hero screen (welcome): items start 120–500
+  /// ms apart and each takes 600 ms, so the whole run lasts this long.
+  static const heroEntrance = Duration(milliseconds: 1250);
+
   /// Travel distances in logical pixels. Not scaled with the screen.
   static const distanceMicro = 4.0;
   static const distanceSmall = 6.0;
