@@ -104,6 +104,7 @@ Dependency direction: `presentation → domain ← data`.
 - **Commit after each logical change, but never `git push` without asking the user first — every time.**
 - Never rewrite history or change git config without an explicit request.
 - Pending decisions (don't change silently): application ID is still `com.example.englizia`;
-  linux/macos/web/windows folders are kept until the user decides; palette values outside the identity doc are provisional.
+  linux/macos/web/windows folders are kept until the user decides; palette values outside the identity doc are provisional;
+  the Flutter pin stays at 3.41.6 (upgrade deferred) — go_router and google_fonts majors are ignored in Dependabot until it moves.
 - If a problem is wider than reported, say so with evidence (file:line, command output).
 - Report results honestly: failing tests are reported with their output.
