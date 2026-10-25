@@ -1,11 +1,11 @@
 {
-    "name": "englizia",
-    "short_name": "englizia",
+    "name": "engleazia",
+    "short_name": "engleazia",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Englizia: an English learning app for Arabic speakers.",
+    "description": "Engleazia: an English learning app for Arabic speakers.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

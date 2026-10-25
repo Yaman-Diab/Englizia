@@ -1,4 +1,4 @@
-# Englizia — إنجليزيا
+# Engleazia — إنجليزيا
 
 Student app for learning English, built Arabic-first. One engine serves every track: kids (letters and topics), general English (Pre-A1 to B2, with a placement test), and the Emar school curriculum (grades 1–12). Tracks and content are created in the control panel; the app shows them, grades on the server and keeps progress safe offline.
 
