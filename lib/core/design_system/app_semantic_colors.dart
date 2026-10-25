@@ -166,18 +166,21 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     ),
   );
 
+  /// Dark neutrals, primary text, error and success follow the designs' token
+  /// table; info stays cyan like its light role (the table's blue info
+  /// conflicts with the designs' own note that info is cyan).
   static const dark = AppSemanticColors(
     primary: ToneColors(
       fill: AppPalette.blue400,
-      text: AppPalette.blue300,
+      text: AppPalette.sky300,
       surface: AppPalette.blue900,
     ),
     // v2: the button background is #2563EB in both modes.
     primaryStrong: AppPalette.blue600,
     onPrimaryStrong: AppPalette.white,
     success: ToneColors(
-      fill: AppPalette.green400,
-      text: AppPalette.green300,
+      fill: AppPalette.mint400,
+      text: AppPalette.mint300,
       surface: AppPalette.green900,
     ),
     streak: ToneColors(
@@ -196,20 +199,20 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surface: AppPalette.violet900,
     ),
     error: ToneColors(
-      fill: AppPalette.red400,
-      text: AppPalette.red300,
-      surface: AppPalette.red900,
+      fill: AppPalette.coral400,
+      text: AppPalette.coral200,
+      surface: AppPalette.coral950,
     ),
     info: ToneColors(
       fill: AppPalette.cyan400,
       text: AppPalette.cyan300,
       surface: AppPalette.cyan900,
     ),
-    textPrimary: AppPalette.slate100,
-    textSecondary: AppPalette.slate400,
-    background: AppPalette.slate900,
-    surface: AppPalette.slate800,
-    border: AppPalette.slate700,
+    textPrimary: AppPalette.night100,
+    textSecondary: AppPalette.night300,
+    background: AppPalette.night950,
+    surface: AppPalette.night900,
+    border: AppPalette.night500,
     reader: ReaderColors(
       karaokeBackground: AppPalette.blue900,
       sentenceBand: AppPalette.blue950,
