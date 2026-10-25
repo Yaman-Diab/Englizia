@@ -31,4 +31,5 @@ Rules:
 - Register interfaces in DI; Cubits as factories. Add the one-line call in `lib/app/di.dart`.
 - Add routes to `lib/app/router/app_routes.dart` and a policy in `route_policies.dart`.
 - Strings in both `ar.json` and `en.json`; colors/text only via `context.colors` / `context.texts`.
+- Update `docs/STATUS.md`: the feature row (status, data: mock/connected/confirmed) and a Deferred row for everything skipped or faked (reason + revisit trigger). For mock data, also mark the endpoint `mock` in `docs/api/`.
 - Finish with `dart format lib test`, `flutter analyze --fatal-infos`, `flutter test`, then propose commits (Conventional Commits, `CONTRIBUTING.md`). Do not push.
