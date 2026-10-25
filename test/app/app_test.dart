@@ -6,7 +6,9 @@ import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,7 +29,7 @@ void main() {
   for (final locale in AppLocales.supported) {
     for (final size in [defaultViewport, narrowViewport]) {
       testWidgets(
-        'boots from splash to home (${locale.languageCode}, ${size.width.toInt()}dp)',
+        'a guest boots from splash to welcome (${locale.languageCode}, ${size.width.toInt()}dp)',
         (tester) async {
           tester.setViewport(size);
           await tester.pumpWidget(
@@ -42,13 +44,13 @@ void main() {
           await tester.pump(const Duration(seconds: 1));
 
           expect(find.byType(SplashPage), findsNothing);
-          expect(find.byType(FoundationPage), findsOneWidget);
+          expect(find.byType(WelcomePage), findsOneWidget);
           final expectedName = locale == AppLocales.arabic
               ? 'إنجليزيا'
               : 'Engleazia';
           expect(find.text(expectedName), findsOneWidget);
           expect(
-            Directionality.of(tester.element(find.byType(FoundationPage))),
+            Directionality.of(tester.element(find.byType(WelcomePage))),
             locale == AppLocales.arabic ? TextDirection.rtl : TextDirection.ltr,
           );
           expect(tester.takeException(), isNull);
@@ -56,6 +58,26 @@ void main() {
       );
     }
   }
+
+  const tokens = AuthTokens(accessToken: 'a', refreshToken: 'r');
+
+  testWidgets('signing in leaves welcome for home', (tester) async {
+    await tester.pumpWidget(
+      localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+    );
+    await tester.pumpUntilLocalized();
+    await sl<AppSessionController>().bootstrap();
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(WelcomePage), findsOneWidget);
+
+    await sl<AppSessionController>().signIn(tokens);
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(WelcomePage), findsNothing);
+    expect(find.byType(FoundationPage), findsOneWidget);
+  });
 
   testWidgets('switching the language updates Accept-Language', (tester) async {
     /// Accept-Language as sent by the app's own Dio (DI-registered interceptors).
@@ -73,6 +95,7 @@ void main() {
     );
     await tester.pumpUntilLocalized();
     await sl<AppSessionController>().bootstrap();
+    await sl<AppSessionController>().signIn(tokens);
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
     expect(await sentLanguage(), 'ar');

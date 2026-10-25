@@ -1,6 +1,10 @@
+import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:flutter/material.dart';
 
 enum AppButtonVariant { primary, secondary, text }
+
+/// [large] is the main call to action of a hero screen (welcome, onboarding).
+enum AppButtonSize { regular, large }
 
 /// The app button, built on Material buttons for semantics, focus and ripple.
 /// Disabled while [isLoading] or when [onPressed] is null.
@@ -12,6 +16,7 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.isLoading = false,
     this.expand = true,
+    this.size = AppButtonSize.regular,
     super.key,
   });
 
@@ -21,6 +26,9 @@ class AppButton extends StatelessWidget {
   final IconData? icon;
   final bool isLoading;
   final bool expand;
+  final AppButtonSize size;
+
+  static const _largeHeight = 56.0;
 
   @override
   Widget build(BuildContext context) {
@@ -32,29 +40,44 @@ class AppButton extends StatelessWidget {
           )
         : Text(label);
     final iconWidget = icon == null || isLoading ? null : Icon(icon);
+    final style = size == AppButtonSize.large
+        ? ButtonStyle(
+            minimumSize: const WidgetStatePropertyAll(
+              Size(AppSizes.minTapTarget, _largeHeight),
+            ),
+            shape: WidgetStatePropertyAll(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+              ),
+            ),
+          )
+        : null;
 
     final button = switch (variant) {
       AppButtonVariant.primary =>
         iconWidget == null
-            ? FilledButton(onPressed: callback, child: content)
+            ? FilledButton(onPressed: callback, style: style, child: content)
             : FilledButton.icon(
                 onPressed: callback,
+                style: style,
                 icon: iconWidget,
                 label: content,
               ),
       AppButtonVariant.secondary =>
         iconWidget == null
-            ? OutlinedButton(onPressed: callback, child: content)
+            ? OutlinedButton(onPressed: callback, style: style, child: content)
             : OutlinedButton.icon(
                 onPressed: callback,
+                style: style,
                 icon: iconWidget,
                 label: content,
               ),
       AppButtonVariant.text =>
         iconWidget == null
-            ? TextButton(onPressed: callback, child: content)
+            ? TextButton(onPressed: callback, style: style, child: content)
             : TextButton.icon(
                 onPressed: callback,
+                style: style,
                 icon: iconWidget,
                 label: content,
               ),

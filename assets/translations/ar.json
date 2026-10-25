@@ -25,5 +25,11 @@
   "preview_xp": "+{count} XP",
   "preview_ai": "محادثة ذكية",
   "preview_listen": "استمع",
-  "mascot_name": "بلبل، المرشد"
+  "mascot_name": "بلبل، المرشد",
+  "app_logo_mark": "E",
+  "welcome_title": "تعلّم الإنجليزية خطوة بخطوة",
+  "welcome_body": "دروس قصيرة، كلمات من سياقها، ومحادثات تتدرّب فيها على الكلام",
+  "welcome_start": "ابدأ",
+  "welcome_have_account": "لدي حساب بالفعل",
+  "pending_body": "هذه الشاشة قيد البناء، وستتوفر في نسخة قادمة."
 }

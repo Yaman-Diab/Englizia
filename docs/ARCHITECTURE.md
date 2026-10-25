@@ -57,7 +57,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 ## Routing
 
 - `route_policies.dart` maps each route pattern to `public`, `guestOnly` or `requiresLogin`; unlisted routes require login.
-- `AppRedirect`: splash until the session is known, then the policy decides. The router listens to the session, so sign-in/out re-routes automatically.
+- `AppRedirect`: splash until the session is known, then signed-in users go home and everyone else to the welcome screen (there is no guest mode); after that the policy decides, and a guest on a `requiresLogin` route is sent to welcome. The router listens to the session, so sign-in/out re-routes automatically.
 - Tabs (Learn / Practice / Speak / Me; kids: Learn / My words / Me) will use `StatefulShellRoute` when the first tab lands.
 
 ## Design system
