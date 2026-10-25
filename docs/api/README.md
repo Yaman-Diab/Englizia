@@ -37,3 +37,4 @@ When a field is confirmed, save a sanitized real response under `test/fixtures/a
 4. Attempts accept a client-generated `attemptId` so resending never duplicates an attempt or XP (requirements §2.4, §17).
 5. Keep deprecated routes alive for one release cycle; expose `minSupportedVersion`.
 6. Lesson content follows the lesson package format in `docs/product/dashboard-requirements.md` §10 (timings in ms, stable string ids).
+7. Confirm which refresh-endpoint statuses mean the refresh token is invalid or revoked. The app signs the user out on 400/401/403 and treats every other failure (5xx, 429, timeout, malformed body) as transient.

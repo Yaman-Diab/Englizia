@@ -97,15 +97,25 @@ class AuthInterceptor extends Interceptor {
       await _tokens.write(next);
       return _Refreshed(next);
     } on DioException catch (error) {
-      if (error.response != null) {
-        AppLogger.info('Refresh rejected: ${error.response?.statusCode}');
+      final status = error.response?.statusCode;
+      // Signing out is irreversible for the user, so only a definitive
+      // rejection of the refresh token ends the session. A 5xx/429 or no
+      // response says nothing about the token; the next refresh retries.
+      // ASSUMPTION(api): 400/401/403 from the refresh endpoint mean the
+      // refresh token is invalid or revoked — confirm in docs/api/README.md.
+      if (status == ApiStatusCodes.badRequest ||
+          status == ApiStatusCodes.unauthorized ||
+          status == ApiStatusCodes.forbidden) {
+        AppLogger.info('Refresh rejected: $status');
         return const _Rejected();
       }
-      AppLogger.warning('Refresh unavailable', error.type.name);
+      AppLogger.warning('Refresh unavailable', status ?? error.type.name);
       return const _Unavailable();
     } catch (error, stackTrace) {
+      // A malformed refresh response is a server/contract bug, not proof
+      // the token is revoked: keep the session, fail the request.
       AppLogger.error(error, stackTrace, 'Refresh failed');
-      return const _Rejected();
+      return const _Unavailable();
     }
   }
 }
@@ -125,7 +135,8 @@ final class _Rejected extends _RefreshOutcome {
   const _Rejected();
 }
 
-/// No response (offline/timeout): keep the session, surface the error.
+/// No usable answer (offline, timeout, 5xx, malformed response): keep the
+/// session, surface the error; a later request refreshes again.
 final class _Unavailable extends _RefreshOutcome {
   const _Unavailable();
 }

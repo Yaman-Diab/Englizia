@@ -87,18 +87,59 @@ void main() {
     expect(refresher.calls, 1);
   });
 
-  test('a rejected refresh token expires the session once', () async {
-    final refresher = FakeTokenRefresher(
-      (_) => Future.error(
-        DioException(
+  FakeTokenRefresher refresherFailingWith(int status) => FakeTokenRefresher(
+    (_) => Future.error(
+      DioException(
+        requestOptions: RequestOptions(path: '/refresh'),
+        response: Response<Object?>(
           requestOptions: RequestOptions(path: '/refresh'),
-          response: Response<Object?>(
-            requestOptions: RequestOptions(path: '/refresh'),
-            statusCode: 401,
-          ),
-          type: DioExceptionType.badResponse,
+          statusCode: status,
         ),
+        type: DioExceptionType.badResponse,
       ),
+    ),
+  );
+
+  for (final status in [400, 401, 403]) {
+    test('a $status from the refresh endpoint expires the session', () async {
+      final dio = buildDio(
+        FakeHttpAdapter((_) => const FakeResponse(401)),
+        refresherFailingWith(status),
+      );
+
+      await expectLater(
+        dio.get<Object?>('/lessons'),
+        throwsA(
+          isA<DioException>().having(
+            (e) => e.response?.statusCode,
+            'status',
+            401,
+          ),
+        ),
+      );
+      expect(expiredCalls, 1);
+    });
+  }
+
+  for (final status in [429, 500, 502, 503]) {
+    test('a $status from the refresh endpoint keeps the session', () async {
+      final dio = buildDio(
+        FakeHttpAdapter((_) => const FakeResponse(401)),
+        refresherFailingWith(status),
+      );
+
+      await expectLater(
+        dio.get<Object?>('/lessons'),
+        throwsA(isA<DioException>()),
+      );
+      expect(expiredCalls, 0);
+      expect(storage.tokens, oldTokens);
+    });
+  }
+
+  test('a malformed refresh response keeps the session', () async {
+    final refresher = FakeTokenRefresher(
+      (_) => Future.error(const FormatException('no access token')),
     );
     final dio = buildDio(
       FakeHttpAdapter((_) => const FakeResponse(401)),
@@ -107,15 +148,10 @@ void main() {
 
     await expectLater(
       dio.get<Object?>('/lessons'),
-      throwsA(
-        isA<DioException>().having(
-          (e) => e.response?.statusCode,
-          'status',
-          401,
-        ),
-      ),
+      throwsA(isA<DioException>()),
     );
-    expect(expiredCalls, 1);
+    expect(expiredCalls, 0);
+    expect(storage.tokens, oldTokens);
   });
 
   test('an unreachable refresh endpoint keeps the session', () async {
