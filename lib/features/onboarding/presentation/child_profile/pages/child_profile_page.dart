@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
+import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
@@ -128,12 +129,10 @@ class _Greeting extends StatelessWidget {
   final String name;
 
   static const _minHeight = 80.0;
-  static const _tint = .08;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final accent = colors.primary.text;
     return Container(
       constraints: const BoxConstraints(minHeight: _minHeight),
       padding: const EdgeInsetsDirectional.symmetric(
@@ -142,10 +141,7 @@ class _Greeting extends StatelessWidget {
       ),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: Color.alphaBlend(
-          accent.withValues(alpha: _tint),
-          colors.surface,
-        ),
+        color: colors.selectionSurface,
         borderRadius: BorderRadius.circular(AppRadius.xl),
       ),
       child: Semantics(
@@ -155,7 +151,7 @@ class _Greeting extends StatelessWidget {
               ? 'onboarding_child_greeting_empty'.tr()
               : 'onboarding_child_greeting'.tr(namedArgs: {'name': name}),
           textAlign: TextAlign.center,
-          style: context.texts.display.copyWith(color: accent),
+          style: context.texts.display.copyWith(color: colors.selection),
         ),
       ),
     );
@@ -178,36 +174,20 @@ class _AgePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return MergeSemantics(
-      child: Semantics(
-        checked: selected,
-        inMutuallyExclusiveGroup: true,
-        label: 'onboarding_child_age_label'.tr(namedArgs: {'age': '$age'}),
-        child: Material(
-          color: selected ? colors.primaryStrong : colors.surface,
-          shape: StadiumBorder(
-            side: selected
-                ? BorderSide.none
-                : BorderSide(color: context.scheme.outlineVariant),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: onTap,
-            child: SizedBox(
-              height: _height,
-              child: Center(
-                // The label above already says the age in words.
-                child: ExcludeSemantics(
-                  child: Text(
-                    '$age',
-                    style: context.texts.bodyStrong.copyWith(
-                      color: selected
-                          ? colors.onPrimaryStrong
-                          : colors.textPrimary,
-                    ),
-                  ),
-                ),
-              ),
+    return ChoiceSurface(
+      selected: selected,
+      onTap: onTap,
+      shape: ChoiceShape.pill,
+      semanticLabel: 'onboarding_child_age_label'.tr(
+        namedArgs: {'age': '$age'},
+      ),
+      child: SizedBox(
+        height: _height,
+        child: Center(
+          child: Text(
+            '$age',
+            style: context.texts.bodyStrong.copyWith(
+              color: selected ? colors.onPrimaryStrong : colors.textPrimary,
             ),
           ),
         ),

@@ -115,6 +115,15 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   final ReaderColors reader;
 
+  /// The chosen answer: its border, check and highlighted text.
+  Color get selection => primary.text;
+
+  /// Background of the chosen answer: [selection] faintly over [surface].
+  Color get selectionSurface =>
+      Color.alphaBlend(selection.withValues(alpha: _selectionTint), surface);
+
+  static const _selectionTint = .08;
+
   static const light = AppSemanticColors(
     primary: ToneColors(
       fill: AppPalette.blue500,
