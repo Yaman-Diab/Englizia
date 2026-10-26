@@ -108,7 +108,7 @@ Dependency direction: `presentation → domain ← data`.
   Save every real response (sanitized) as `test/fixtures/api/<endpoint>_<case>.json` and parse it in a test.
 - **Commit after each logical change, but never `git push` without asking the user first — every time.**
 - Never rewrite history or change git config without an explicit request.
-- New packages must be reputable: pub points near the max, many likes and downloads, a recent release, a verified publisher where possible, Android + iOS, and compatible with the Flutter pin. Show those numbers and the alternatives when proposing one; prefer a little code over a weak package.
+- New packages must be reputable: pub points near the max, many likes and downloads, a recent release, a verified publisher where possible, Android + iOS, and compatible with the Flutter pin. Show those numbers and the alternatives when proposing one; prefer a little code over a weak package. Never remove or replace an existing dependency (owner's decision, 2026-10-26).
 - Pending decisions and postponed work live in `docs/STATUS.md` → Deferred; don't change them silently
   (e.g. application ID, kept platform folders, provisional palette, the Flutter 3.41.6 pin).
 - Never leave something undone without a Deferred row. Fake/mock data is a Deferred row until its endpoint is connected, then the mock data is deleted.
