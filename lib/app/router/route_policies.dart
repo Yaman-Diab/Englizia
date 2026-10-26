@@ -6,7 +6,8 @@ import 'package:englizia/core/router/route_policy.dart';
 const routePolicies = <String, RoutePolicy>{
   AppRoutes.splash: RoutePolicy.public,
   AppRoutes.welcome: RoutePolicy.guestOnly,
-  AppRoutes.onboarding: RoutePolicy.guestOnly,
+  AppRoutes.onboardingLanguage: RoutePolicy.guestOnly,
+  AppRoutes.onboardingAudience: RoutePolicy.guestOnly,
   AppRoutes.signIn: RoutePolicy.guestOnly,
 };
 
