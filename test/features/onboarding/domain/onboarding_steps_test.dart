@@ -26,6 +26,7 @@ void main() {
       OnboardingStep.audience,
       OnboardingStep.reason,
       OnboardingStep.level,
+      OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
     expect(onboardingStepsFor(emar), [
@@ -33,6 +34,7 @@ void main() {
       OnboardingStep.audience,
       OnboardingStep.grade,
       OnboardingStep.reason,
+      OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
   });
@@ -42,6 +44,7 @@ void main() {
       OnboardingStep.language,
       OnboardingStep.audience,
       OnboardingStep.childProfile,
+      OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
   });
@@ -64,17 +67,17 @@ void main() {
       onboardingStepsFor(OnboardingPath.assumed),
       onboardingStepsFor(general),
     );
-    expect(onboardingPosition(OnboardingStep.language), (current: 1, total: 5));
+    expect(onboardingPosition(OnboardingStep.language), (current: 1, total: 6));
   });
 
   test('position counts the steps of the actual path', () {
     expect(onboardingPosition(OnboardingStep.reason, path: emar), (
       current: 4,
-      total: 5,
+      total: 6,
     ));
     expect(onboardingPosition(OnboardingStep.childProfile, path: kids), (
       current: 3,
-      total: 4,
+      total: 5,
     ));
   });
 
@@ -97,6 +100,10 @@ void main() {
     );
     expect(
       onboardingNextStep(OnboardingStep.reason, path: emar),
+      OnboardingStep.reminder,
+    );
+    expect(
+      onboardingNextStep(OnboardingStep.reminder, path: kids),
       OnboardingStep.saveProgress,
     );
     expect(onboardingNextStep(OnboardingStep.saveProgress), isNull);

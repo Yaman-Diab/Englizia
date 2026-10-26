@@ -19,6 +19,8 @@ import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubi
 import 'package:englizia/features/onboarding/presentation/level/pages/level_page.dart';
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
+import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/reminder/pages/reminder_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -137,6 +139,21 @@ GoRouter createAppRouter(AppSessionController session) {
         builder: (_, _) => PendingPage(title: 'onboarding_save_title'.tr()),
       ),
       GoRoute(
+        path: AppRoutes.onboardingReminder,
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<ReminderCubit>()..load(),
+            child: ReminderPage(
+              path: path,
+              onContinue: (_) =>
+                  _pushNextStep(context, OnboardingStep.reminder, path),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.onboardingPlacement,
         builder: (_, _) => PendingPage(title: 'placement_intro_title'.tr()),
       ),
@@ -173,5 +190,6 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.grade => AppRoutes.onboardingGrade,
   OnboardingStep.reason => AppRoutes.onboardingReason,
   OnboardingStep.level => AppRoutes.onboardingLevel,
+  OnboardingStep.reminder => AppRoutes.onboardingReminder,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,
 };

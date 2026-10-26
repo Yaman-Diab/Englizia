@@ -2,10 +2,10 @@ import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:equatable/equatable.dart';
 
 /// Onboarding steps that are built (requirements v3.0 §4.2), in order. The
-/// child profile (v0.5) and the level question (v0.2) are built ahead of plan
-/// at the owner's request. Steps of later versions (goal, challenge,
-/// reminder) are added here when built; until then they are skipped without
-/// a gap.
+/// child profile (v0.5), the level question (v0.2) and the reminder time
+/// (v1.0) are built ahead of plan at the owner's request. Steps of later
+/// versions (goal, challenge) are added here when built; until then they
+/// are skipped without a gap.
 enum OnboardingStep {
   language,
   audience,
@@ -13,6 +13,7 @@ enum OnboardingStep {
   grade,
   reason,
   level,
+  reminder,
   saveProgress,
 }
 
@@ -57,6 +58,7 @@ List<OnboardingStep> onboardingStepsFor(OnboardingPath path) => [
   if (path.entryMethod == TrackEntryMethod.gradeSelection) OnboardingStep.grade,
   if (path.audience != TrackAudience.child) OnboardingStep.reason,
   if (path.entryMethod == TrackEntryMethod.placementTest) OnboardingStep.level,
+  OnboardingStep.reminder,
   OnboardingStep.saveProgress,
 ];
 

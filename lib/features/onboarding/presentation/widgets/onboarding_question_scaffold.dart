@@ -161,7 +161,7 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                       Entrance(
                         motion: EntranceMotion.up,
                         delay: QuestionEntrance.answer(0),
-                        child: _Resizing(child: lead),
+                        child: _Resizing(clip: Clip.none, child: lead),
                       ),
                       const SizedBox(height: AppSpacing.lg),
                     ],
@@ -253,15 +253,19 @@ class OnboardingQuestionScaffold extends StatelessWidget {
 
 /// Grows and shrinks with its content instead of jumping.
 class _Resizing extends StatelessWidget {
-  const _Resizing({required this.child});
+  const _Resizing({required this.child, this.clip = Clip.hardEdge});
 
   final Widget child;
+
+  /// [Clip.none] for content with a shadow, which would be cut off.
+  final Clip clip;
 
   @override
   Widget build(BuildContext context) => AnimatedSize(
     duration: AppMotion.resolve(context, AppMotion.medium),
     curve: AppMotion.smoothOut,
     alignment: AlignmentDirectional.topCenter,
+    clipBehavior: clip,
     child: child,
   );
 }

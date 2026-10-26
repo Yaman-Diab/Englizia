@@ -12,6 +12,7 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.onboardingGrade: RoutePolicy.guestOnly,
   AppRoutes.onboardingReason: RoutePolicy.guestOnly,
   AppRoutes.onboardingLevel: RoutePolicy.guestOnly,
+  AppRoutes.onboardingReminder: RoutePolicy.guestOnly,
   AppRoutes.onboardingSaveProgress: RoutePolicy.guestOnly,
   AppRoutes.onboardingPlacement: RoutePolicy.guestOnly,
   AppRoutes.signIn: RoutePolicy.guestOnly,

@@ -114,7 +114,7 @@ void main() {
           entryMethod: TrackEntryMethod.gradeSelection,
         ),
       );
-      expect(find.bySemanticsLabel('الخطوة 4 من 5'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 4 من 6'), findsOneWidget);
       handle.dispose();
     });
 
