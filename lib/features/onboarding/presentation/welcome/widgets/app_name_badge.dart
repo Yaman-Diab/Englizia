@@ -1,15 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/widgets/app_logo_mark.dart';
 import 'package:flutter/material.dart';
 
 /// The pill at the top of the welcome screen: logo mark and app name.
-// ASSUMPTION(design): the mark is a letter in a circle until the final logo
-// is approved (requirements v3.0 §26); the designs use a placeholder "A".
 class AppNameBadge extends StatelessWidget {
   const AppNameBadge({super.key});
-
-  static const _markSize = 36.0;
 
   @override
   Widget build(BuildContext context) {
@@ -42,24 +39,7 @@ class AppNameBadge extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ExcludeSemantics(
-              child: Container(
-                width: _markSize,
-                height: _markSize,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: colors.primaryStrong,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  'app_logo_mark'.tr(),
-                  style: texts.bodyStrong.copyWith(
-                    color: colors.onPrimaryStrong,
-                    height: 1,
-                  ),
-                ),
-              ),
-            ),
+            const AppLogoMark(),
             const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
             Text('app_name'.tr(), style: texts.bodyStrong),
           ],
