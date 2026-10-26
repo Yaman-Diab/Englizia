@@ -12,6 +12,7 @@ import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.da
 import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/level/cubit/level_state.dart';
 import 'package:englizia/features/onboarding/presentation/level/widgets/level_details.dart';
+import 'package:englizia/features/onboarding/presentation/widgets/onboarding_notice.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
 import 'package:flutter/material.dart';
@@ -128,7 +129,7 @@ class LevelPage extends StatelessWidget {
       return BeginnerStartCard(levelName: levelName);
     }
     if (state.testUnavailable) {
-      return LevelNotice(
+      return OnboardingNotice(
         icon: AppIcon.questionCircle,
         text: 'onboarding_level_test_unavailable'.tr(),
       );
@@ -138,7 +139,7 @@ class LevelPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         if (!state.online) ...[
-          LevelNotice(
+          OnboardingNotice(
             icon: AppIcon.wifiOff,
             text: 'onboarding_level_offline'.tr(),
           ),
