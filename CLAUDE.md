@@ -48,6 +48,8 @@ Dependency direction: `presentation → domain ← data`.
 - Five lesson types (grammar video, interactive video, interactive text, vocabulary, conversation). Interactive text and video share **one reader component**.
 - Kids mode is a setting of the same engine (bigger sizes, Andika font, audio instructions), not a separate app.
 - Grading and XP are computed **on the server**; the app only submits attempts with a stable attempt id (safe to resend).
+- Every configurable value (thresholds, limits, points, day start, texts the panel controls) is read from the server's effective settings after inheritance (global → track → level → lesson); **never hardcode one**. Doc: S §2 principle 6.
+- No guest mode: creating the account ends onboarding; onboarding answers stay on the phone until then (S §4.3).
 
 ---
 
@@ -108,5 +110,6 @@ Dependency direction: `presentation → domain ← data`.
 - Pending decisions and postponed work live in `docs/STATUS.md` → Deferred; don't change them silently
   (e.g. application ID, kept platform folders, provisional palette, the Flutter 3.41.6 pin).
 - Never leave something undone without a Deferred row. Fake/mock data is a Deferred row until its endpoint is connected, then the mock data is deleted.
+- `ui-ux-pro-max` (design skill) is **reference only**: never override the identity tokens (`docs/product/visual-identity-*`) or the approved designs, and never take palettes, fonts or styles from it. Dart/Flutter skills from the `dart-flutter` plugin may be used for Dart and Flutter tasks.
 - If a problem is wider than reported, say so with evidence (file:line, command output).
 - Report results honestly: failing tests are reported with their output.
