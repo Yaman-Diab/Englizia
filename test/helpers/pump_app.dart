@@ -42,6 +42,8 @@ Widget localizedTestRoot({required Locale locale, required Widget child}) =>
       startLocale: locale,
       saveLocale: false,
       useOnlyLangCode: true,
+      // Arabic needs its real plural forms (3–10 "few", 11–99 "many").
+      ignorePluralRules: false,
       child: child,
     );
 
