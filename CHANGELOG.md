@@ -21,9 +21,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Onboarding grade step for school students: the grades and their groups come from the curriculum track's levels.
 - Onboarding child profile: the child's name with a live greeting, and the age (5–9).
 - Onboarding "why are you learning English?": pick any of six reasons; the guide replies to the latest one.
+- Onboarding "how much English do you know?": start from the first level, or take the placement test now or later. Shows the test's duration and stages from the server, and waits for a connection before the test.
 - The guide character «بلبل», drawn in code with 12 expressions, light and dark versions and an idle wave, float and blink.
 
 ### Changed
 - The app is named Engleazia (Arabic name unchanged).
-- Dark mode uses the colors of the approved designs.
+- Dark mode uses the colors of the approved designs, including the soft blue and green bands.
+- Arabic plurals use their real forms (e.g. «مراحل» for 3–10, «مرحلة» from 11).
 - Signing in is required to reach home; guests land on the welcome screen.

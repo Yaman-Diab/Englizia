@@ -15,6 +15,8 @@ import 'package:englizia/features/onboarding/presentation/child_profile/pages/ch
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
+import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/level/pages/level_page.dart';
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
@@ -114,11 +116,29 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.onboardingLevel,
-        builder: (_, _) => PendingPage(title: 'onboarding_level_question'.tr()),
+        builder: (context, state) {
+          final path = _pathOf(state);
+          void next() => _pushNextStep(context, OnboardingStep.level, path);
+          return BlocProvider(
+            create: (_) => sl<LevelCubit>()..start(path.trackId),
+            child: LevelPage(
+              path: path,
+              onStartFromBeginning: next,
+              onTakeTest: () =>
+                  context.push(AppRoutes.onboardingPlacement, extra: path),
+              onTestLater: next,
+              onBack: () => context.pop(),
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.onboardingSaveProgress,
         builder: (_, _) => PendingPage(title: 'onboarding_save_title'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingPlacement,
+        builder: (_, _) => PendingPage(title: 'placement_intro_title'.tr()),
       ),
       GoRoute(
         path: AppRoutes.signIn,
