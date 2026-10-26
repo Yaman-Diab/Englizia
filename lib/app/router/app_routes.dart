@@ -5,6 +5,7 @@ abstract final class AppRoutes {
   static const welcome = '/welcome';
   static const onboardingLanguage = '/onboarding/language';
   static const onboardingAudience = '/onboarding/audience';
+  static const onboardingChildProfile = '/onboarding/child-profile';
   static const onboardingGrade = '/onboarding/grade';
   static const onboardingReason = '/onboarding/reason';
   static const onboardingSaveProgress = '/onboarding/save-progress';

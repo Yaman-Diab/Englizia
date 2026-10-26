@@ -17,10 +17,11 @@ void main() {
       OnboardingStep.reason,
       OnboardingStep.saveProgress,
     ]);
-    // Children skip the reasons step (and their profile step is v0.5).
+    // Children get their profile instead of the reasons step.
     expect(onboardingStepsFor(TrackAudience.child), [
       OnboardingStep.language,
       OnboardingStep.audience,
+      OnboardingStep.childProfile,
       OnboardingStep.saveProgress,
     ]);
   });
@@ -57,7 +58,7 @@ void main() {
         OnboardingStep.audience,
         audience: TrackAudience.child,
       ),
-      OnboardingStep.saveProgress,
+      OnboardingStep.childProfile,
     );
     expect(onboardingNextStep(OnboardingStep.saveProgress), isNull);
   });

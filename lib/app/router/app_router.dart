@@ -10,6 +10,8 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
+import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/child_profile/pages/child_profile_page.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
@@ -69,6 +71,23 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       // Placeholders until the next onboarding steps and sign-in exist.
       GoRoute(
+        path: AppRoutes.onboardingChildProfile,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<ChildProfileCubit>(),
+          child: ChildProfilePage(
+            onContinue: (_) => context.push(
+              _onboardingRoute(
+                onboardingNextStep(
+                  OnboardingStep.childProfile,
+                  audience: TrackAudience.child,
+                )!,
+              ),
+            ),
+            onBack: () => context.pop(),
+          ),
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.onboardingGrade,
         builder: (context, _) => BlocProvider(
           create: (_) => sl<GradeCubit>()..load(),
@@ -105,6 +124,7 @@ GoRouter createAppRouter(AppSessionController session) {
 String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.language => AppRoutes.onboardingLanguage,
   OnboardingStep.audience => AppRoutes.onboardingAudience,
+  OnboardingStep.childProfile => AppRoutes.onboardingChildProfile,
   OnboardingStep.grade => AppRoutes.onboardingGrade,
   OnboardingStep.reason => AppRoutes.onboardingReason,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,

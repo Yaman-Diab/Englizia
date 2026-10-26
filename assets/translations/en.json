@@ -51,5 +51,12 @@
   "onboarding_audience_school_desc": "The Emar curriculum, grade 1 to the baccalaureate",
   "onboarding_grade_question": "Which grade are you in?",
   "onboarding_reason_question": "Why are you learning English?",
-  "onboarding_save_title": "Save your progress"
+  "onboarding_save_title": "Save your progress",
+  "onboarding_child_question": "Tell us about your child",
+  "onboarding_child_name_label": "Child's name",
+  "onboarding_child_greeting": "Hello {name}!",
+  "onboarding_child_greeting_empty": "Hello!",
+  "onboarding_child_age_question": "How old is your child?",
+  "onboarding_child_age_label": "{age} years old",
+  "onboarding_child_helper": "The name is only shown to your child inside the app."
 }
