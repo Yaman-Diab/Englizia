@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
+import 'package:englizia/core/notifications/notification_permission.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/token_storage.dart';
 
@@ -65,4 +66,41 @@ class FakeConnectivityService implements ConnectivityService {
   Stream<bool> get onlineChanges => _changes.stream;
 
   Future<void> dispose() => _changes.close();
+}
+
+/// Answers like the phone would: [request] shows the "prompt" once and then
+/// keeps the answer, as both platforms do after a refusal.
+class FakeNotificationPermission implements NotificationPermission {
+  FakeNotificationPermission({
+    this.access = NotificationAccess.denied,
+    this.answer = NotificationAccess.granted,
+  });
+
+  /// The current state.
+  NotificationAccess access;
+
+  /// What the learner taps when the prompt shows.
+  NotificationAccess answer;
+  var prompts = 0;
+  var settingsOpened = 0;
+  var _asked = false;
+
+  @override
+  Future<NotificationAccess> status() async => access;
+
+  @override
+  Future<NotificationAccess> request() async {
+    if (!_asked && access == NotificationAccess.denied) {
+      _asked = true;
+      prompts++;
+      access = answer;
+    }
+    return access;
+  }
+
+  @override
+  Future<bool> openSettings() async {
+    settingsOpened++;
+    return true;
+  }
 }
