@@ -163,6 +163,7 @@ void main() {
       TileTone.sky: (0xFFDDF3FA, 0xFF0E7FA6, 0xFF0F2C36, 0xFF5CCBEA),
       TileTone.orange: (0xFFFFE8DA, 0xFFD2560F, 0xFF3A2012, 0xFFFF9A5C),
       TileTone.navy: (0xFFE1E6F2, 0xFF1E3A8A, 0xFF1A2236, 0xFF9DB3E8),
+      TileTone.neutral: (0xFFEEF3FB, 0xFF2563EB, 0xFF1A2640, 0xFF8AB4FF),
     };
     for (final MapEntry(key: tone, value: v) in expected.entries) {
       final light = AppSemanticColors.light.tiles.of(tone);

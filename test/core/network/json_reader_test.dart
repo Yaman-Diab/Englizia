@@ -1,3 +1,4 @@
+import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -30,6 +31,21 @@ void main() {
     expect(json.readString('blank'), isNull);
     expect(json.readMap('list'), isNull);
     expect(json.readList('map'), isNull);
+  });
+
+  test('readText reads bilingual text, null when absent', () {
+    const data = <String, Object?>{
+      'both': {'ar': 'مرحبًا', 'en': 'Hello'},
+      'arOnly': {'ar': 'مرحبًا'},
+      'plain': 'Hello',
+    };
+    expect(
+      data.readText('both'),
+      const LocalizedText(ar: 'مرحبًا', en: 'Hello'),
+    );
+    expect(data.readText('arOnly'), const LocalizedText(ar: 'مرحبًا'));
+    expect(data.readText('plain'), isNull);
+    expect(data.readText('missing'), isNull);
   });
 
   test('firstOf returns the first present candidate', () {

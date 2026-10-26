@@ -24,6 +24,7 @@ class OnboardingQuestionScaffold extends StatelessWidget {
     required this.onContinue,
     required this.onBack,
     this.subtitle,
+    this.lead,
     this.details,
     this.helper,
     this.helperIcon,
@@ -45,6 +46,9 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   final int step;
   final int totalSteps;
   final List<Widget> options;
+
+  /// Above the answers: what they change (e.g. a notification preview).
+  final Widget? lead;
 
   /// Under the answers: what the chosen answer leads to. Changes animate.
   final Widget? details;
@@ -153,6 +157,14 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (lead case final lead?) ...[
+                      Entrance(
+                        motion: EntranceMotion.up,
+                        delay: QuestionEntrance.answer(0),
+                        child: _Resizing(clip: Clip.none, child: lead),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
                     for (final (i, option) in options.indexed) ...[
                       if (i > 0) const SizedBox(height: AppSpacing.md),
                       Entrance(
@@ -241,15 +253,19 @@ class OnboardingQuestionScaffold extends StatelessWidget {
 
 /// Grows and shrinks with its content instead of jumping.
 class _Resizing extends StatelessWidget {
-  const _Resizing({required this.child});
+  const _Resizing({required this.child, this.clip = Clip.hardEdge});
 
   final Widget child;
+
+  /// [Clip.none] for content with a shadow, which would be cut off.
+  final Clip clip;
 
   @override
   Widget build(BuildContext context) => AnimatedSize(
     duration: AppMotion.resolve(context, AppMotion.medium),
     curve: AppMotion.smoothOut,
     alignment: AlignmentDirectional.topCenter,
+    clipBehavior: clip,
     child: child,
   );
 }

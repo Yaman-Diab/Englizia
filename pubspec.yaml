@@ -25,6 +25,7 @@ dependencies:
   flutter_animate: ^4.5.2
   flutter_svg: ^2.3.0
   connectivity_plus: ^7.3.2
+  permission_handler: ^13.0.2
 
 dev_dependencies:
   flutter_test:
@@ -43,6 +44,7 @@ flutter:
     # confirmed, see docs/STATUS.md.
     - assets/mock/tracks/
     - assets/mock/placement/
+    - assets/mock/settings/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.
     - assets/fonts/ReadexPro-Regular.ttf

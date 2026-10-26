@@ -25,7 +25,9 @@ void main() {
       OnboardingStep.language,
       OnboardingStep.audience,
       OnboardingStep.reason,
+      OnboardingStep.goal,
       OnboardingStep.level,
+      OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
     expect(onboardingStepsFor(emar), [
@@ -33,6 +35,8 @@ void main() {
       OnboardingStep.audience,
       OnboardingStep.grade,
       OnboardingStep.reason,
+      OnboardingStep.goal,
+      OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
   });
@@ -42,6 +46,7 @@ void main() {
       OnboardingStep.language,
       OnboardingStep.audience,
       OnboardingStep.childProfile,
+      OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
   });
@@ -64,17 +69,17 @@ void main() {
       onboardingStepsFor(OnboardingPath.assumed),
       onboardingStepsFor(general),
     );
-    expect(onboardingPosition(OnboardingStep.language), (current: 1, total: 5));
+    expect(onboardingPosition(OnboardingStep.language), (current: 1, total: 7));
   });
 
   test('position counts the steps of the actual path', () {
     expect(onboardingPosition(OnboardingStep.reason, path: emar), (
       current: 4,
-      total: 5,
+      total: 7,
     ));
     expect(onboardingPosition(OnboardingStep.childProfile, path: kids), (
       current: 3,
-      total: 4,
+      total: 5,
     ));
   });
 
@@ -93,13 +98,30 @@ void main() {
     );
     expect(
       onboardingNextStep(OnboardingStep.reason, path: general),
+      OnboardingStep.goal,
+    );
+    expect(
+      onboardingNextStep(OnboardingStep.goal, path: general),
       OnboardingStep.level,
     );
     expect(
-      onboardingNextStep(OnboardingStep.reason, path: emar),
+      onboardingNextStep(OnboardingStep.goal, path: emar),
+      OnboardingStep.reminder,
+    );
+    expect(
+      onboardingNextStep(OnboardingStep.reminder, path: kids),
       OnboardingStep.saveProgress,
     );
     expect(onboardingNextStep(OnboardingStep.saveProgress), isNull);
+  });
+
+  test('children skip the goal; the chosen goal rides on the path', () {
+    expect(onboardingStepsFor(kids), isNot(contains(OnboardingStep.goal)));
+    final chosen = general.withDailyGoal(15);
+    expect(chosen.dailyGoalMinutes, 15);
+    expect(chosen.trackId, general.trackId);
+    expect(chosen, isNot(general));
+    expect(onboardingStepsFor(chosen), onboardingStepsFor(general));
   });
 
   test('a path is built from a track', () {

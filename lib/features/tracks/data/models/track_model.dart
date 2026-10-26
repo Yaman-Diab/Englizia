@@ -14,8 +14,8 @@ final class TrackModel {
     return TrackModel(
       LearningTrack(
         id: id,
-        title: _text(json.readMap('title')),
-        description: _text(json.readMap('description')),
+        title: json.readText('title') ?? _empty,
+        description: json.readText('description') ?? _empty,
         order: json.readInt('order') ?? 0,
         // An unknown audience means "not suggested", the least privilege.
         audience: switch (json.readString('onboardingAudience')) {
@@ -35,8 +35,5 @@ final class TrackModel {
 
   final LearningTrack entity;
 
-  static LocalizedText _text(Map<String, Object?>? json) => LocalizedText(
-    ar: json?.readString('ar') ?? '',
-    en: json?.readString('en') ?? '',
-  );
+  static const _empty = LocalizedText(ar: '');
 }

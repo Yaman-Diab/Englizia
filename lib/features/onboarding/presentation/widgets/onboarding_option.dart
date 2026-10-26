@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 /// a title, an optional description and the check (radio, or checkbox when
 /// [multiple]).
 ///
-/// [large] gives the taller card of the designs' two-answer steps.
+/// [large] gives the taller card of the designs' two-answer steps; [inline]
+/// puts the description at the end of the title's line (a time, a count).
 /// Disabled when [onTap] is null. With [soonLabel] the card is "coming soon":
 /// dashed, faded, badged and never selectable.
 class OnboardingOption extends StatelessWidget {
@@ -26,10 +27,11 @@ class OnboardingOption extends StatelessWidget {
     this.soonLabel,
     this.multiple = false,
     this.large = false,
+    this.inline = false,
     super.key,
   }) : assert(
-         mark != null || art != null || icon != null,
-         'Give a mark, an art or an icon',
+         inline || mark != null || art != null || icon != null,
+         'Give a mark, an art or an icon (an inline row may have none)',
        );
 
   final String? mark;
@@ -40,6 +42,7 @@ class OnboardingOption extends StatelessWidget {
   final TileTone iconTone;
   final bool multiple;
   final bool large;
+  final bool inline;
   final String title;
   final String? description;
   final bool selected;
@@ -61,27 +64,43 @@ class OnboardingOption extends StatelessWidget {
     final texts = context.texts;
     final soon = soonLabel != null;
 
+    final descriptionColor = selected && !soon
+        ? colors.selection
+        : colors.textSecondary;
     final content = Row(
       children: [
-        ExcludeSemantics(child: _leading(context)),
-        const SizedBox(width: AppSpacing.md + AppSpacing.xxs),
+        if (mark != null || art != null || icon != null) ...[
+          ExcludeSemantics(child: _leading(context)),
+          const SizedBox(width: AppSpacing.md + AppSpacing.xxs),
+        ],
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(title, style: texts.bodyStrong),
-              if (description case final description?)
-                Text(
-                  description,
-                  style: texts.caption.copyWith(
-                    color: selected && !soon
-                        ? colors.selection
-                        : colors.textSecondary,
-                  ),
+          child: inline
+              ? Row(
+                  children: [
+                    Expanded(child: Text(title, style: texts.bodyStrong)),
+                    if (description case final description?) ...[
+                      const SizedBox(width: AppSpacing.md),
+                      Text(
+                        description,
+                        style: texts.captionStrong.copyWith(
+                          color: descriptionColor,
+                        ),
+                      ),
+                    ],
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(title, style: texts.bodyStrong),
+                    if (description case final description?)
+                      Text(
+                        description,
+                        style: texts.caption.copyWith(color: descriptionColor),
+                      ),
+                  ],
                 ),
-            ],
-          ),
         ),
       ],
     );

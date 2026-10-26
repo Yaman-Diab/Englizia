@@ -82,8 +82,9 @@ final class BadgeColors {
 
 /// Which of the six category tile colors an icon tile uses (designs,
 /// "Onboarding Option"). The tone tells the categories apart; it carries no
-/// meaning, so it never replaces a label.
-enum TileTone { blue, amber, green, sky, orange, navy }
+/// meaning, so it never replaces a label. [neutral] is the plain tile of
+/// lists whose items are not categories (reminder times).
+enum TileTone { blue, amber, green, sky, orange, navy, neutral }
 
 /// One category tile: the square's [background] and the [icon] drawn on it.
 @immutable
@@ -99,7 +100,7 @@ final class TileColors {
   );
 }
 
-/// The six category tiles, read with [of].
+/// The category tiles, read with [of].
 @immutable
 final class CategoryTiles {
   const CategoryTiles({
@@ -109,6 +110,7 @@ final class CategoryTiles {
     required this.sky,
     required this.orange,
     required this.navy,
+    required this.neutral,
   });
 
   final TileColors blue;
@@ -117,6 +119,7 @@ final class CategoryTiles {
   final TileColors sky;
   final TileColors orange;
   final TileColors navy;
+  final TileColors neutral;
 
   TileColors of(TileTone tone) => switch (tone) {
     TileTone.blue => blue,
@@ -125,6 +128,7 @@ final class CategoryTiles {
     TileTone.sky => sky,
     TileTone.orange => orange,
     TileTone.navy => navy,
+    TileTone.neutral => neutral,
   };
 
   static CategoryTiles lerp(CategoryTiles a, CategoryTiles b, double t) =>
@@ -135,6 +139,7 @@ final class CategoryTiles {
         sky: TileColors.lerp(a.sky, b.sky, t),
         orange: TileColors.lerp(a.orange, b.orange, t),
         navy: TileColors.lerp(a.navy, b.navy, t),
+        neutral: TileColors.lerp(a.neutral, b.neutral, t),
       );
 
   static const light = CategoryTiles(
@@ -162,6 +167,10 @@ final class CategoryTiles {
       background: AppPalette.tileNavyBg,
       icon: AppPalette.tileNavyFg,
     ),
+    neutral: TileColors(
+      background: AppPalette.tileNeutralBg,
+      icon: AppPalette.tileNeutralFg,
+    ),
   );
 
   static const dark = CategoryTiles(
@@ -188,6 +197,10 @@ final class CategoryTiles {
     navy: TileColors(
       background: AppPalette.tileNavyBgDark,
       icon: AppPalette.tileNavyFgDark,
+    ),
+    neutral: TileColors(
+      background: AppPalette.tileNeutralBgDark,
+      icon: AppPalette.tileNeutralFgDark,
     ),
   );
 }

@@ -138,6 +138,40 @@ enum MascotExpression {
     ),
   ),
 
+  /// At ease: arms down, a soft smile. For a gentle choice ("comfortable").
+  calm(MascotPose(cheeks: .25)),
+
+  /// Both arms up and eyes shut in a grin: a high-spirited choice.
+  excited(
+    MascotPose(
+      leftArm: MascotArm(Offset(54, 112), Offset(32, 78)),
+      rightArm: MascotArm(Offset(126, 112), Offset(148, 78)),
+      leftHand: MascotHand.ball,
+      rightHand: MascotHand.ball,
+      eyes: MascotEyes.closed,
+      brows: MascotBrows.none,
+      mouth: MascotMouth.grin,
+      cheeks: .45,
+      sparkles: true,
+    ),
+  ),
+
+  /// The most thrilled: a raised fist, a wide laugh and sparkles all round.
+  // ASSUMPTION(design): from the Daily Goal design's "ecstatic" mood.
+  ecstatic(
+    MascotPose(
+      leftArm: MascotArm(Offset(54, 112), Offset(32, 78)),
+      rightArm: MascotArm(Offset(126, 108), Offset(152, 62), Offset(155, 55)),
+      leftHand: MascotHand.ball,
+      rightHand: MascotHand.fist,
+      eyes: MascotEyes.closed,
+      brows: MascotBrows.none,
+      mouth: MascotMouth.laugh,
+      cheeks: .45,
+      sparkles: true,
+    ),
+  ),
+
   /// Thumbs up with the other hand on the hip: sure the learner can do it.
   /// Drawn in the character sheet's style (the sheet has none) and approved
   /// by the owner.
@@ -192,6 +226,21 @@ enum MascotExpression {
     confident => const MascotIdle(
       period: AppMotion.characterFloatBrisk,
       swing: -7,
+    ),
+    calm => const MascotIdle(lift: 3, period: AppMotion.characterFloatCalm),
+    excited => const MascotIdle(
+      lift: 10,
+      period: AppMotion.characterPulse,
+      sway: 1.5,
+      swing: -6,
+      stretch: .025,
+    ),
+    ecstatic => const MascotIdle(
+      lift: 16,
+      period: AppMotion.characterFloatQuick,
+      sway: 2,
+      swing: -10,
+      stretch: .035,
     ),
   };
 }

@@ -1,3 +1,5 @@
+import 'package:englizia/core/l10n/localized_text.dart';
+
 /// Defensive reads over decoded JSON. Models use these instead of casting, so
 /// a missing or oddly typed field degrades to `null` instead of throwing.
 extension JsonReader on Map<String, Object?> {
@@ -30,6 +32,16 @@ extension JsonReader on Map<String, Object?> {
     final Map<String, Object?> v => v,
     final Map<Object?, Object?> v => v.cast<String, Object?>(),
     _ => null,
+  };
+
+  /// Bilingual text `{ "ar": "…", "en": "…" }`; null when the field is
+  /// absent, a missing language reads as empty.
+  LocalizedText? readText(String key) => switch (readMap(key)) {
+    final Map<String, Object?> text => LocalizedText(
+      ar: text.readString('ar') ?? '',
+      en: text.readString('en') ?? '',
+    ),
+    null => null,
   };
 
   List<Object?>? readList(String key) => switch (this[key]) {

@@ -8,7 +8,19 @@ enum MascotEyes { open, wide, closed, soft, sleep, look }
 
 enum MascotBrows { up, calm, raise, confident, none }
 
-enum MascotMouth { grin, smile, calm, soft, small, hmm, o, bigO, tiny, proud }
+enum MascotMouth {
+  grin,
+  smile,
+  calm,
+  soft,
+  small,
+  hmm,
+  o,
+  bigO,
+  tiny,
+  proud,
+  laugh,
+}
 
 /// What the speech tuft above the head shows.
 enum MascotBubble { none, question, dots, sleep }

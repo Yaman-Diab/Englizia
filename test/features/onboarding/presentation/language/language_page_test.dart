@@ -80,7 +80,7 @@ void main() {
     await tester.pumpLocalized(page(), size: narrowViewport);
     await tester.settleEntrance(QuestionEntrance.settled);
 
-    expect(find.bySemanticsLabel('الخطوة 1 من 5'), findsOneWidget);
+    expect(find.bySemanticsLabel('الخطوة 1 من 7'), findsOneWidget);
     expect(
       tester.getSemantics(find.text('العربية')),
       isSemantics(

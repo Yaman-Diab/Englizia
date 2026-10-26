@@ -111,5 +111,57 @@
   "onboarding_level_dont_know": "يمكنك اختيار «لا أعرف»",
   "onboarding_level_offline": "الاختبار يحتاج اتصالًا بالإنترنت",
   "onboarding_level_test_unavailable": "الاختبار غير متاح الآن، وستبدأ من المستوى الأول",
-  "placement_intro_title": "لنعرف مستواك"
+  "placement_intro_title": "لنعرف مستواك",
+  "common_save": "حفظ",
+  "time_am": "ص",
+  "time_pm": "م",
+  "onboarding_reminder_question": "متى تحب أن نذكّرك بدرسك؟",
+  "onboarding_reminder_denied_reply": "لا بأس، سننتظرك في التطبيق",
+  "onboarding_reminder_morning": "الصباح",
+  "onboarding_reminder_noon": "الظهر",
+  "onboarding_reminder_evening": "المساء",
+  "onboarding_reminder_other": "وقت آخر",
+  "onboarding_reminder_pick": "اختر",
+  "onboarding_reminder_enable": "فعّل التذكير",
+  "onboarding_reminder_skip": "لا أريد تذكيرًا",
+  "onboarding_reminder_continue_without": "متابعة بدون تذكير",
+  "onboarding_reminder_open_settings": "افتح الإعدادات",
+  "onboarding_reminder_denied": "الإشعارات متوقفة. يمكنك تفعيلها لاحقًا من إعدادات الهاتف",
+  "onboarding_reminder_preview": "معاينة الإشعار",
+  "onboarding_reminder_sheet_title": "اختر وقت التذكير",
+  "onboarding_reminder_hour": "الساعة",
+  "onboarding_reminder_minute": "الدقيقة",
+  "onboarding_reminder_period": "الفترة",
+  "onboarding_goal_question": "ما هو هدفك التعليمي اليومي؟",
+  "onboarding_goal_helper": "يمكنك تغييره لاحقًا من الإعدادات",
+  "onboarding_goal_cta": "أستطيع فعل ذلك!",
+  "onboarding_goal_per_day": {
+    "one": "دقيقة واحدة / يوم",
+    "two": "دقيقتان / يوم",
+    "few": "{} دقائق / يوم",
+    "many": "{} دقيقة / يوم",
+    "other": "{} دقيقة / يوم"
+  },
+  "onboarding_goal_weekly": {
+    "one": "دقيقة واحدة في الأسبوع",
+    "two": "دقيقتان في الأسبوع",
+    "few": "{} دقائق في الأسبوع",
+    "many": "{} دقيقة في الأسبوع",
+    "other": "{} دقيقة في الأسبوع"
+  },
+  "onboarding_goal_lessons_half": "≈ نصف درس يوميًا",
+  "onboarding_goal_lessons": {
+    "one": "≈ درس واحد يوميًا",
+    "two": "≈ درسان يوميًا",
+    "few": "≈ {} دروس يوميًا",
+    "many": "≈ {} درسًا يوميًا",
+    "other": "≈ {} درس يوميًا"
+  },
+  "onboarding_goal_lessons_and_half": {
+    "one": "≈ درس ونصف يوميًا",
+    "two": "≈ درسان ونصف يوميًا",
+    "few": "≈ {} دروس ونصف يوميًا",
+    "many": "≈ {} درسًا ونصفًا يوميًا",
+    "other": "≈ {} درس ونصف يوميًا"
+  }
 }
