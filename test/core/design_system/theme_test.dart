@@ -132,6 +132,26 @@ void main() {
     expect(light.reader.captionArabic, const Color(0xFFFDE047));
   });
 
+  test("dark tokens from the designs' token table are pinned", () {
+    const dark = AppSemanticColors.dark;
+    final expected = <String, (Color, int)>{
+      'BACKGROUND': (dark.background, 0xFF0C1220),
+      'SURFACE': (dark.surface, 0xFF131C2E),
+      'BORDER': (dark.border, 0xFF5F6E8A),
+      'TEXT_PRIMARY': (dark.textPrimary, 0xFFE8EEF8),
+      'TEXT_SECONDARY': (dark.textSecondary, 0xFFA9B5C8),
+      'PRIMARY_TEXT': (dark.primary.text, 0xFF8AB4FF),
+      'ERROR': (dark.error.fill, 0xFFF28B82),
+      'ERROR_TEXT': (dark.error.text, 0xFFF2B8B5),
+      'ERROR_SURFACE': (dark.error.surface, 0xFF3A1A18),
+      'SUCCESS': (dark.success.fill, 0xFF5FD394),
+      'SUCCESS_TEXT': (dark.success.text, 0xFF8BE0B0),
+    };
+    expected.forEach((token, pair) {
+      expect(pair.$1, Color(pair.$2), reason: token);
+    });
+  });
+
   test('doc contrast figures hold', () {
     expect(
       contrast(
@@ -140,12 +160,14 @@ void main() {
       ),
       closeTo(10.3, 0.05),
     );
+    // v2 states 9.45 with a TEXT_PRIMARY it never publishes; the designs'
+    // #E8EEF8 gives this figure, still well above 4.5.
     expect(
       contrast(
         AppSemanticColors.dark.textPrimary,
         AppSemanticColors.dark.reader.karaokeBackground,
       ),
-      closeTo(9.45, 0.05),
+      closeTo(8.89, 0.05),
     );
   });
 

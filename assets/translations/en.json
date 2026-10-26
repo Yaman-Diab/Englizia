@@ -24,5 +24,12 @@
   "preview_incorrect": "Incorrect",
   "preview_xp": "+{count} XP",
   "preview_ai": "AI conversation",
-  "preview_listen": "Listen"
+  "preview_listen": "Listen",
+  "mascot_name": "Bulbul, your guide",
+  "app_logo_mark": "E",
+  "welcome_title": "Learn English step by step",
+  "welcome_body": "Short lessons, words in context, and conversations to practice speaking",
+  "welcome_start": "Get started",
+  "welcome_have_account": "I already have an account",
+  "pending_body": "This screen is still being built and will come in a later version."
 }

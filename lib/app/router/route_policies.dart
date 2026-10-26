@@ -5,7 +5,9 @@ import 'package:englizia/core/router/route_policy.dart';
 /// control; buttons may only mirror it. Unlisted routes require login.
 const routePolicies = <String, RoutePolicy>{
   AppRoutes.splash: RoutePolicy.public,
-  AppRoutes.home: RoutePolicy.public,
+  AppRoutes.welcome: RoutePolicy.guestOnly,
+  AppRoutes.onboarding: RoutePolicy.guestOnly,
+  AppRoutes.signIn: RoutePolicy.guestOnly,
 };
 
 RoutePolicy policyFor(String routePattern) =>

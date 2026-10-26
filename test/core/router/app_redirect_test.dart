@@ -6,9 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   const policies = {
     '/splash': RoutePolicy.public,
-    '/': RoutePolicy.public,
-    '/login': RoutePolicy.guestOnly,
-    '/profile': RoutePolicy.requiresLogin,
+    '/about': RoutePolicy.public,
+    '/welcome': RoutePolicy.guestOnly,
+    '/sign-in': RoutePolicy.guestOnly,
+    '/': RoutePolicy.requiresLogin,
   };
 
   String? resolve(SessionStatus status, String location) => AppRedirect(
@@ -16,30 +17,36 @@ void main() {
     policyFor: (pattern) => policies[pattern] ?? RoutePolicy.requiresLogin,
     splashLocation: '/splash',
     homeLocation: '/',
-    loginLocation: '/login',
+    guestHomeLocation: '/welcome',
   ).resolve(location: location, routePattern: location);
 
   test('holds on splash until the session is known', () {
     expect(resolve(SessionStatus.unknown, '/splash'), isNull);
-    expect(resolve(SessionStatus.unknown, '/profile'), '/splash');
+    expect(resolve(SessionStatus.unknown, '/'), '/splash');
   });
 
-  test('leaves splash once the session is known', () {
-    expect(resolve(SessionStatus.guest, '/splash'), '/');
+  test('leaves splash for home when signed in, welcome otherwise', () {
     expect(resolve(SessionStatus.authenticated, '/splash'), '/');
+    expect(resolve(SessionStatus.guest, '/splash'), '/welcome');
   });
 
-  test('guards requiresLogin routes', () {
-    expect(resolve(SessionStatus.guest, '/profile'), '/login');
-    expect(resolve(SessionStatus.authenticated, '/profile'), isNull);
+  test('sends guests from requiresLogin routes to welcome', () {
+    expect(resolve(SessionStatus.guest, '/'), '/welcome');
+    expect(resolve(SessionStatus.authenticated, '/'), isNull);
   });
 
   test('sends signed-in users away from guestOnly routes', () {
-    expect(resolve(SessionStatus.authenticated, '/login'), '/');
-    expect(resolve(SessionStatus.guest, '/login'), isNull);
+    expect(resolve(SessionStatus.authenticated, '/welcome'), '/');
+    expect(resolve(SessionStatus.authenticated, '/sign-in'), '/');
+    expect(resolve(SessionStatus.guest, '/sign-in'), isNull);
+  });
+
+  test('public routes are open to everyone', () {
+    expect(resolve(SessionStatus.guest, '/about'), isNull);
+    expect(resolve(SessionStatus.authenticated, '/about'), isNull);
   });
 
   test('unlisted routes require login (least privilege)', () {
-    expect(resolve(SessionStatus.guest, '/unknown'), '/login');
+    expect(resolve(SessionStatus.guest, '/unknown'), '/welcome');
   });
 }

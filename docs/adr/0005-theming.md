@@ -11,6 +11,7 @@ Status: Accepted · Date: 2026-10-11 · Revised: 2026-10-12
 - The 1.0 fills for success, streak, reward and info stay although they are below 3:1 on white, because the docs keep them; every state also shows an icon and text, so color is never the only signal.
 - The button background is `#2563EB` with white text in both modes ("always", v2); the selected reader word in dark mode uses `#60A5FA` (v2 reader table).
 - Text tokens, the streak/reward/AI/info surfaces and the dark values the docs do not list are provisional Tailwind values that pass WCAG AA, tagged `ASSUMPTION(design)`.
+- Dark mode takes the dark column of the token table shown in the approved designs (background, surface, border, text, primary text, error, success), as requirements v3.0 §22 makes the designs' colors the reference until the identity token block is completed. Info stays cyan in dark mode to match its light role. The table's light column is not adopted: light mode follows the identity docs by the owner's decision.
 - Arabic running text uses at least 1.7 line height; headings keep the doc's ratios.
 - Fonts through `google_fonts` with the files bundled and runtime fetching disabled (offline, no dependency on Google servers from Syria).
 - Text sizes use `flutter_screenutil` `.sp` against a 375×812 design.

@@ -15,3 +15,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - CI (analyze, format, test), Dependabot, PR template, environment files.
 - Motion tokens (`AppMotion`) with reduced-motion support.
 - Android page transition (fade + short slide, mirrored in Arabic); iOS keeps its native transition and edge-swipe back.
+- Welcome screen: the first screen for anyone without an account, with a staggered entrance.
+- The guide character «بلبل», drawn in code with 12 expressions, light and dark versions and an idle wave, float and blink.
+
+### Changed
+- The app is named Engleazia (Arabic name unchanged).
+- Dark mode uses the colors of the approved designs.
+- Signing in is required to reach home; guests land on the welcome screen.

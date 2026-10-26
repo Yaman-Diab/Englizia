@@ -6,8 +6,11 @@ import 'package:flutter/painting.dart';
 /// Light-mode role colors follow the identity docs in docs/product/:
 /// proposal 1.0 (primary, status fills, success/error surfaces, neutrals) and
 /// v2, which keeps 1.0 unless it says otherwise (reader, captions, reward dark).
-// ASSUMPTION(design): text tokens, the remaining status surfaces and most dark
-// values have no value in either doc (v2's token JSON was empty) — provisional.
+/// Dark neutrals, primary text, error and success come from the token table in
+/// the approved designs (Claude Design, "Create Account v3"), which requirements
+/// v3.0 §22 makes the reference until the identity token block is completed.
+// ASSUMPTION(design): light text tokens, the remaining status surfaces and the
+// other dark values have no value in the docs or that table — provisional.
 abstract final class AppPalette {
   static const white = Color(0xFFFFFFFF);
   static const black = Color(0xFF000000);
@@ -75,6 +78,19 @@ abstract final class AppPalette {
   static const cyan900 = Color(0xFF164E63);
 
   static const yellow300 = Color(0xFFFDE047);
+
+  // Dark column of the designs' token table.
+  static const night950 = Color(0xFF0C1220);
+  static const night900 = Color(0xFF131C2E);
+  static const night500 = Color(0xFF5F6E8A);
+  static const night300 = Color(0xFFA9B5C8);
+  static const night100 = Color(0xFFE8EEF8);
+  static const sky300 = Color(0xFF8AB4FF);
+  static const coral950 = Color(0xFF3A1A18);
+  static const coral400 = Color(0xFFF28B82);
+  static const coral200 = Color(0xFFF2B8B5);
+  static const mint400 = Color(0xFF5FD394);
+  static const mint300 = Color(0xFF8BE0B0);
 
   /// Caption background over video: black at 60%.
   static const captionScrim = Color(0x99000000);
