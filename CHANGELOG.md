@@ -16,6 +16,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Motion tokens (`AppMotion`) with reduced-motion support.
 - Android page transition (fade + short slide, mirrored in Arabic); iOS keeps its native transition and edge-swipe back.
 - Welcome screen: the first screen for anyone without an account, with a staggered entrance.
+- Onboarding language step: choosing Arabic or English switches the app at once; the progress bar follows the learner's actual path.
 - The guide character «بلبل», drawn in code with 12 expressions, light and dark versions and an idle wave, float and blink.
 
 ### Changed

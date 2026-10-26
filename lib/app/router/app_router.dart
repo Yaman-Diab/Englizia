@@ -6,6 +6,7 @@ import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
@@ -30,14 +31,23 @@ GoRouter createAppRouter(AppSessionController session) {
       GoRoute(
         path: AppRoutes.welcome,
         builder: (context, _) => WelcomePage(
-          onStart: () => context.push(AppRoutes.onboarding),
+          onStart: () => context.push(AppRoutes.onboardingLanguage),
           onSignIn: () => context.push(AppRoutes.signIn),
         ),
       ),
-      // Placeholders until the onboarding and account features exist.
       GoRoute(
-        path: AppRoutes.onboarding,
-        builder: (_, _) => PendingPage(title: 'welcome_start'.tr()),
+        path: AppRoutes.onboardingLanguage,
+        builder: (context, _) => LanguagePage(
+          onContinue: () => context.push(AppRoutes.onboardingAudience),
+          onBack: () =>
+              context.canPop() ? context.pop() : context.go(AppRoutes.welcome),
+        ),
+      ),
+      // Placeholders until the next onboarding steps and sign-in exist.
+      GoRoute(
+        path: AppRoutes.onboardingAudience,
+        builder: (_, _) =>
+            PendingPage(title: 'onboarding_audience_question'.tr()),
       ),
       GoRoute(
         path: AppRoutes.signIn,

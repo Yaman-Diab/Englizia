@@ -3,6 +3,7 @@ abstract final class AppRoutes {
   static const splash = '/splash';
   static const home = '/';
   static const welcome = '/welcome';
-  static const onboarding = '/onboarding';
+  static const onboardingLanguage = '/onboarding/language';
+  static const onboardingAudience = '/onboarding/audience';
   static const signIn = '/sign-in';
 }

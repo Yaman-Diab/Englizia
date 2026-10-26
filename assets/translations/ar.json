@@ -31,5 +31,15 @@
   "welcome_body": "دروس قصيرة، كلمات من سياقها، ومحادثات تتدرّب فيها على الكلام",
   "welcome_start": "ابدأ",
   "welcome_have_account": "لدي حساب بالفعل",
-  "pending_body": "هذه الشاشة قيد البناء، وستتوفر في نسخة قادمة."
+  "pending_body": "هذه الشاشة قيد البناء، وستتوفر في نسخة قادمة.",
+  "common_back": "رجوع",
+  "common_continue": "متابعة",
+  "onboarding_progress": "الخطوة {current} من {total}",
+  "onboarding_language_question": "بأي لغة تريد أن ترى التطبيق؟",
+  "onboarding_language_helper": "تعلّم الإنجليزية يبقى كما هو، هذا يغيّر لغة الأزرار والتعليمات فقط",
+  "onboarding_language_ar_mark": "ع",
+  "onboarding_language_ar_desc": "افتراضي",
+  "onboarding_language_en_mark": "A",
+  "onboarding_language_en_desc": "Interface in English",
+  "onboarding_audience_question": "من سيتعلّم معنا؟"
 }

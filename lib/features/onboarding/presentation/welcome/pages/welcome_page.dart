@@ -6,7 +6,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/widgets/app_name_badge.dart';
-import 'package:englizia/features/onboarding/presentation/welcome/widgets/staggered_entrance.dart';
+import 'package:englizia/features/onboarding/presentation/widgets/staggered_entrance.dart';
 import 'package:flutter/material.dart';
 
 /// First screen for anyone without an account (requirements v3.0 §4.2):

@@ -31,5 +31,15 @@
   "welcome_body": "Short lessons, words in context, and conversations to practice speaking",
   "welcome_start": "Get started",
   "welcome_have_account": "I already have an account",
-  "pending_body": "This screen is still being built and will come in a later version."
+  "pending_body": "This screen is still being built and will come in a later version.",
+  "common_back": "Back",
+  "common_continue": "Continue",
+  "onboarding_progress": "Step {current} of {total}",
+  "onboarding_language_question": "Which language would you like to use for the app?",
+  "onboarding_language_helper": "Your English lessons stay the same. This only changes buttons and instructions.",
+  "onboarding_language_ar_mark": "ع",
+  "onboarding_language_ar_desc": "Default",
+  "onboarding_language_en_mark": "A",
+  "onboarding_language_en_desc": "Interface in English",
+  "onboarding_audience_question": "Who will be learning with us?"
 }
