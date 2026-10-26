@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/app/di.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
@@ -24,6 +25,7 @@ void main() {
     expect(sl<AppSessionController>(), isNotNull);
     expect(sl<Dio>(), isNotNull);
     expect(sl<ApiClient>(), isNotNull);
+    expect(sl<SoundPlayer>(), isA<SilentSoundPlayer>());
 
     final settings = sl<SettingsCubit>();
     expect(sl<SettingsCubit>(), isNot(same(settings)), reason: 'factory');

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/network/api_client.dart';
@@ -57,6 +58,8 @@ Future<void> setupCoreDependencies(GetIt sl) async {
       ),
     )
     ..registerLazySingleton(() => ApiClient(sl()))
+    // Silent until sounds are turned on (ADR 9).
+    ..registerLazySingleton<SoundPlayer>(() => const SilentSoundPlayer())
     ..registerFactory(() => SettingsCubit(sl()));
 }
 
