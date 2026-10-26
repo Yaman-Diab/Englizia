@@ -79,6 +79,38 @@ abstract final class AppPalette {
 
   static const yellow300 = Color(0xFFFDE047);
 
+  // "Coming soon" badge (designs, "Onboarding Option").
+  static const soonBadgeBg = Color(0xFFFDF1DC);
+  static const soonBadgeText = Color(0xFF8A5300);
+  static const soonBadgeBgDark = Color(0xFF33270F);
+  static const soonBadgeTextDark = Color(0xFFF5B54E);
+
+  // Category tiles (designs, "Onboarding Option"): icon on tinted square.
+  static const tileBlueBg = Color(0xFFE3EDFE);
+  static const tileBlueFg = Color(0xFF2563EB);
+  static const tileAmberBg = Color(0xFFFDF1DC);
+  static const tileAmberFg = Color(0xFFB86E00);
+  static const tileGreenBg = Color(0xFFDDF5E8);
+  static const tileGreenFg = Color(0xFF1F8A4C);
+  static const tileSkyBg = Color(0xFFDDF3FA);
+  static const tileSkyFg = Color(0xFF0E7FA6);
+  static const tileOrangeBg = Color(0xFFFFE8DA);
+  static const tileOrangeFg = Color(0xFFD2560F);
+  static const tileNavyBg = Color(0xFFE1E6F2);
+  static const tileNavyFg = Color(0xFF1E3A8A);
+  static const tileBlueBgDark = Color(0xFF17284A);
+  static const tileBlueFgDark = Color(0xFF8AB4FF);
+  static const tileAmberBgDark = Color(0xFF33270F);
+  static const tileAmberFgDark = Color(0xFFF5B54E);
+  static const tileGreenBgDark = Color(0xFF10301F);
+  static const tileGreenFgDark = Color(0xFF5FD394);
+  static const tileSkyBgDark = Color(0xFF0F2C36);
+  static const tileSkyFgDark = Color(0xFF5CCBEA);
+  static const tileOrangeBgDark = Color(0xFF3A2012);
+  static const tileOrangeFgDark = Color(0xFFFF9A5C);
+  static const tileNavyBgDark = Color(0xFF1A2236);
+  static const tileNavyFgDark = Color(0xFF9DB3E8);
+
   // Dark column of the designs' token table.
   static const night950 = Color(0xFF0C1220);
   static const night900 = Color(0xFF131C2E);

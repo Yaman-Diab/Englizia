@@ -16,5 +16,7 @@ Status: Accepted · Date: 2026-10-11 · Revised: 2026-10-12
 - Fonts through `google_fonts` with the files bundled and runtime fetching disabled (offline, no dependency on Google servers from Syria).
 - Text sizes use `flutter_screenutil` `.sp` against a 375×812 design.
 
+- The six category tile colors (blue, amber, green, sky, orange, navy; icon on a tinted square) come from the designs' Onboarding Option tokens, light and dark, as `CategoryTiles` in `AppSemanticColors`. The owner chose them over the identity's reserved meanings (amber = reward, orange = streak): they tell categories apart and never carry meaning, since each tile also has a label. Every icon/tile pair has at least 3:1 contrast. The «قريبًا» badge also keeps the designs' amber pill, with its own `soonBadge` tokens (text ≥4.5:1) so the reward amber stays a separate role.
+
 ## Consequences
 `theme_test.dart` pins every 1.0 and v2 value and checks contrast in both modes. Replacing provisional values is a change in `AppPalette` and `AppSemanticColors` only.

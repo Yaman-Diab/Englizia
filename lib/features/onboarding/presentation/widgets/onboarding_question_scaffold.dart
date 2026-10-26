@@ -22,6 +22,7 @@ class OnboardingQuestionScaffold extends StatelessWidget {
     required this.continueLabel,
     required this.onContinue,
     required this.onBack,
+    this.subtitle,
     this.helper,
     this.helperIcon,
     this.helperIsInfo = false,
@@ -31,6 +32,9 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   });
 
   final String question;
+
+  /// A short line under the bubble, e.g. "pick all that apply".
+  final String? subtitle;
 
   /// 1-based position on the learner's path, and the path's length.
   final int step;
@@ -58,6 +62,7 @@ class OnboardingQuestionScaffold extends StatelessWidget {
 
   /// The bubble sits higher than the guide's feet, level with its head.
   static const _bubbleLiftRatio = .28;
+  static const _mascotGap = AppSpacing.sm + AppSpacing.xxs;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +88,7 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                     delay: QuestionEntrance.mascot,
                     child: Mascot(expression: expression, size: mascotSize),
                   ),
-                  const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
+                  const SizedBox(width: _mascotGap),
                   Expanded(
                     child: Padding(
                       padding: EdgeInsetsDirectional.only(
@@ -99,11 +104,34 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                 ],
               ),
             ),
+            if (subtitle case final subtitle?)
+              Padding(
+                // Aligned under the bubble, past the guide.
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl + mascotSize + _mascotGap,
+                  AppSpacing.sm + AppSpacing.xxs,
+                  AppSpacing.xl,
+                  0,
+                ),
+                child: Entrance(
+                  motion: EntranceMotion.up,
+                  delay: QuestionEntrance.subtitle,
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      subtitle,
+                      style: context.texts.caption.copyWith(
+                        color: colors.textSecondary,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsetsDirectional.fromSTEB(
+                padding: EdgeInsetsDirectional.fromSTEB(
                   AppSpacing.xl,
-                  AppSpacing.xl,
+                  subtitle == null ? AppSpacing.xl : AppSpacing.lg,
                   AppSpacing.xl,
                   AppSpacing.lg + AppSpacing.xs,
                 ),

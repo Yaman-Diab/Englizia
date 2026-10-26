@@ -20,6 +20,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Onboarding "who will learn" step: the choices come from the published tracks; one with no track shows «قريبًا». Runs on mock data until the backend is ready.
 - Onboarding grade step for school students: the grades and their groups come from the curriculum track's levels.
 - Onboarding child profile: the child's name with a live greeting, and the age (5–9).
+- Onboarding "why are you learning English?": pick any of six reasons; the guide replies to the latest one.
 - The guide character «بلبل», drawn in code with 12 expressions, light and dark versions and an idle wave, float and blink.
 
 ### Changed

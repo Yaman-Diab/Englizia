@@ -70,5 +70,6 @@ One file per endpoint group, with request, response and example; the matching mo
 3. Localize validation messages via `Accept-Language`.
 4. Attempts accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
 5. Keep deprecated routes alive for one release cycle; expose `minSupportedVersion`.
-6. Lesson content follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids); the backend delivers a JSON Schema for it with v0.1.
-7. Confirm which refresh-endpoint statuses mean the refresh token is invalid or revoked. The app signs the user out on 400/401/403 and treats every other failure (5xx, 429, timeout, malformed body) as transient.
+6. Onboarding answers travel with account creation; the "why" reasons are `communication`, `fun`, `education`, `travel`, `career`, `exams` (multi-select, at least one; not asked on the child path). Contract to be written with the save-progress step.
+7. Lesson content follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids); the backend delivers a JSON Schema for it with v0.1.
+8. Confirm which refresh-endpoint statuses mean the refresh token is invalid or revoked. The app signs the user out on 400/401/403 and treats every other failure (5xx, 429, timeout, malformed body) as transient.

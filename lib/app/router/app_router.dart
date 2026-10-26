@@ -15,6 +15,8 @@ import 'package:englizia/features/onboarding/presentation/child_profile/pages/ch
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
+import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/foundation.dart';
@@ -99,8 +101,21 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.onboardingReason,
-        builder: (_, _) =>
-            PendingPage(title: 'onboarding_reason_question'.tr()),
+        builder: (context, state) {
+          final audience = _audienceOf(state);
+          return BlocProvider(
+            create: (_) => sl<ReasonCubit>(),
+            child: ReasonPage(
+              audience: audience,
+              onContinue: (_) => _pushNextStep(
+                context,
+                OnboardingStep.reason,
+                audience: audience,
+              ),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.onboardingSaveProgress,
@@ -114,15 +129,23 @@ GoRouter createAppRouter(AppSessionController session) {
   );
 }
 
-/// Opens the step after [from] on the learner's path, if there is one.
+/// Opens the step after [from] on the learner's path, if there is one,
+/// handing the path on.
 void _pushNextStep(
   BuildContext context,
   OnboardingStep from, {
   TrackAudience? audience,
 }) {
   final next = onboardingNextStep(from, audience: audience);
-  if (next != null) context.push(_onboardingRoute(next));
+  if (next != null) context.push(_onboardingRoute(next), extra: audience);
 }
+
+/// The learner's path travels between steps as route `extra`; a step opened
+/// without it (deep link, restored route) assumes the adult path.
+TrackAudience _audienceOf(GoRouterState state) => switch (state.extra) {
+  final TrackAudience audience => audience,
+  _ => TrackAudience.self,
+};
 
 String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.language => AppRoutes.onboardingLanguage,
