@@ -1,0 +1,10 @@
+{
+  "data": {
+    "version": "2026.1",
+    "estimatedMinutes": { "min": 12, "max": 15 },
+    "stages": 2,
+    "optionalStage": true
+  },
+  "meta": null,
+  "error": null
+}

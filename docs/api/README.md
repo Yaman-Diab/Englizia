@@ -50,6 +50,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | Contract | Used by | Data in the app |
 |---|---|---|
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", later track switching | mock |
+| [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 
 ## Headers sent on every request
 
@@ -60,6 +61,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | Endpoint | Method | Body | Response | Status |
 |---|---|---|---|---|
 | `/api/v1/tracks` | GET | — | envelope, `data`: track list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/placement/summary` | GET | — | envelope, `data`: duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/tracks/{trackId}/levels` | GET | — | envelope, `data`: level list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/auth/refresh` | POST | `{refreshToken}` + `Authorization: Bearer <expired access>` | `{accessToken, refreshToken}` | assumed |
 
