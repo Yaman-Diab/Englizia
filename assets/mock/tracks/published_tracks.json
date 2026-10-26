@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "id": "trk_general",
+      "title": { "ar": "الإنجليزية العامة", "en": "General English" },
+      "description": { "ar": "من الصفر حتى B2، مع اختبار تحديد المستوى", "en": "From zero to B2, with a placement test" },
+      "coverUrl": "https://cdn.example.com/tracks/general/cover.webp",
+      "order": 1,
+      "onboardingAudience": "self",
+      "entryMethod": "placementTest",
+      "levelLabel": "level",
+      "kidsMode": false
+    },
+    {
+      "id": "trk_kids",
+      "title": { "ar": "الأطفال", "en": "Kids" },
+      "description": { "ar": "الحروف ثم المواضيع، بالصور والأصوات", "en": "Letters, then topics, with pictures and sounds" },
+      "coverUrl": "https://cdn.example.com/tracks/kids/cover.webp",
+      "order": 2,
+      "onboardingAudience": "child",
+      "entryMethod": "directStart",
+      "levelLabel": "level",
+      "kidsMode": true
+    }
+  ],
+  "meta": null,
+  "error": null
+}
