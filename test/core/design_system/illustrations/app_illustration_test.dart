@@ -1,4 +1,5 @@
 import 'package:englizia/core/design_system/illustrations/app_illustration.dart';
+import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -30,6 +31,10 @@ void main() {
         find.byType(SvgPicture),
         findsNWidgets(AppIllustration.values.length),
       );
+      expect(
+        find.byType(Mascot),
+        findsNWidgets(AppIllustration.values.length),
+      );
       expect(tester.takeException(), isNull);
     });
   }
@@ -38,7 +43,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpLocalized(
-      const AppIllustrationView(AppIllustration.sprout),
+      const AppIllustrationView(AppIllustration.hatching),
     );
     expect(
       find.descendant(

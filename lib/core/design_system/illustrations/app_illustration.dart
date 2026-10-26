@@ -1,111 +1,107 @@
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// Small scene illustrations from the approved designs (Claude Design
-/// "Onboarding Option"), drawn in a 64×64 box and shown in a 56 circle.
-/// Colors follow light and dark mode; an illustration is added when the
-/// screen that uses it is built.
+/// Small scenes of the guide for answer cards, drawn for a 56 circle (the
+/// card clips them round). They replace the designs' sprout and stairs at
+/// the owner's choice. Colors follow light and dark mode; a scene is added
+/// when the screen that uses it is built.
 enum AppIllustration {
-  /// A seedling in the ground: starting from zero.
-  sprout,
+  /// The guide hatching from an egg, waving: starting from zero.
+  hatching,
 
-  /// Stairs with a flag on the first step: a known starting level.
-  stairs;
-
-  String _svg(_IllustrationColors c) => switch (this) {
-    sprout =>
-      '<path d="M6 50 Q32 38 58 50 V64 H6 Z" fill="${c.amberDeep}"/>'
-          '<circle cx="22" cy="52" r="1.6" fill="${c.amber}"/>'
-          '<circle cx="40" cy="55" r="1.4" fill="${c.amber}"/>'
-          '<circle cx="30" cy="58" r="1.2" fill="${c.amber}"/>'
-          '<path d="M32 46 C32 40 32 35 32 28" fill="none" stroke="#2FA36B" '
-          'stroke-width="3.4" stroke-linecap="round"/>'
-          '<path d="M32 35 C23.5 35 18.5 30 18.5 23.5 C26 23.5 31 28 32 35 Z" '
-          'fill="#3DBE7A"/>'
-          '<path d="M32 30.5 C33 22.5 39 17.5 46.5 18 C46.5 25.5 40.5 30.5 32 '
-          '30.5 Z" fill="#2FA36B"/>'
-          '<path d="M23 27 Q27 29 30 33" fill="none" stroke="#2FA36B" '
-          'stroke-width="1.2" stroke-linecap="round" opacity=".7"/>',
-    stairs =>
-      '<path d="M10 54 V32 H21 V38 H32 V44 H43 V50 H54 V54 Z" '
-          'fill="${c.body}"/>'
-          '<path d="M10 32 H21 M21 38 H32 M32 44 H43 M43 50 H54" fill="none" '
-          'stroke="${c.belly}" stroke-width="2.4" stroke-linecap="round"/>'
-          '<path d="M8 54 H56" fill="none" stroke="${c.feet}" '
-          'stroke-width="2.4" stroke-linecap="round"/>'
-          '<path d="M15.5 32 V13" fill="none" stroke="${c.ink}" '
-          'stroke-width="2.2" stroke-linecap="round"/>'
-          '<path d="M15.5 13.5 L27 17.2 L15.5 21 Z" fill="${c.amber}"/>',
-  };
+  /// The guide listening in headphones, saying "Hi": knows some English.
+  listening,
 }
 
 /// Draws an [AppIllustration] at [size]. Decorative: the label beside it
 /// carries the meaning.
 class AppIllustrationView extends StatelessWidget {
-  const AppIllustrationView(this.illustration, {this.size = 56, super.key});
+  const AppIllustrationView(this.illustration, {this.size = _box, super.key});
 
   final AppIllustration illustration;
   final double size;
 
+  /// The box the scenes are composed in; other sizes scale it.
+  static const _box = 56.0;
+
+  /// The full guide, larger than the box so its head fills the circle.
+  static const _mascotSize = 84.0;
+
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    final colors =
-        (dark ? _IllustrationColors.darkMode : _IllustrationColors.lightMode)
-            .withInk(context.colors.textPrimary);
+    final scene = switch (illustration) {
+      AppIllustration.hatching => [
+        const Positioned(
+          left: -19,
+          top: -6,
+          child: Mascot(size: _mascotSize, animate: false),
+        ),
+        Positioned.fill(child: SvgPicture.string(_eggshell(dark))),
+      ],
+      AppIllustration.listening => [
+        const Positioned(
+          left: -14,
+          top: 3,
+          child: Mascot(
+            expression: MascotExpression.listen,
+            prop: MascotProp.headphones,
+            size: _mascotSize,
+            animate: false,
+          ),
+        ),
+        Positioned(
+          left: 5,
+          top: 8,
+          width: 20,
+          height: 15,
+          child: SvgPicture.string(_hiBubble(context.colors.primaryStrong)),
+        ),
+      ],
+    };
     return ExcludeSemantics(
-      child: SvgPicture.string(
-        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
-        '${illustration._svg(colors)}</svg>',
-        width: size,
-        height: size,
+      child: SizedBox.square(
+        dimension: size,
+        child: FittedBox(
+          child: SizedBox.square(
+            dimension: _box,
+            child: Stack(clipBehavior: Clip.none, children: scene),
+          ),
+        ),
       ),
     );
   }
-}
 
-/// The designs' illustration colors (CSS `--ob-m-*`, same names), as SVG hex strings.
-final class _IllustrationColors {
-  const _IllustrationColors({
-    required this.body,
-    required this.belly,
-    required this.feet,
-    required this.amber,
-    required this.amberDeep,
-    this.ink = '#0F1A2A',
-  });
+  /// The lower half of a cracked shell, in the guide's amber.
+  static String _eggshell(bool dark) {
+    final (shell, edge, spot) = dark
+        ? ('#F3EAD8', '#E3A03A', '#F5B54E')
+        : ('#FFF7E8', '#E0962A', '#F2A93B');
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">'
+        '<path d="M8 50 L14 45.5 L20 50.5 L26 45 L32 50.5 L38 45 L44 50.5 '
+        'L50 45.5 L56 50 C58 56 57 61 54 66 L10 66 C7 61 6 56 8 50 Z" '
+        'fill="$shell" stroke="$edge" stroke-width="1.6" '
+        'stroke-linejoin="round"/>'
+        '<circle cx="20" cy="57" r="2" fill="$spot"/>'
+        '<circle cx="42" cy="59" r="2.4" fill="$spot"/>'
+        '<circle cx="31" cy="55" r="1.4" fill="$spot"/>'
+        '</svg>';
+  }
 
-  final String body;
-  final String belly;
-  final String feet;
-  final String amber;
-  final String amberDeep;
-  final String ink;
-
-  static const lightMode = _IllustrationColors(
-    body: '#2F6FE0',
-    belly: '#5D91EC',
-    feet: '#1A52B8',
-    amber: '#F2A93B',
-    amberDeep: '#E0962A',
-  );
-
-  static const darkMode = _IllustrationColors(
-    body: '#3D7BEA',
-    belly: '#6B9DF0',
-    feet: '#2560C9',
-    amber: '#F5B54E',
-    amberDeep: '#E3A03A',
-  );
-
-  /// Lines drawn in the theme's text color (the flag pole).
-  _IllustrationColors withInk(Color color) => _IllustrationColors(
-    body: body,
-    belly: belly,
-    feet: feet,
-    amber: amber,
-    amberDeep: amberDeep,
-    ink: '#${(color.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0')}',
-  );
+  /// A small speech bubble with "Hi" drawn as strokes, so it is art and not
+  /// text to translate.
+  static String _hiBubble(Color fill) {
+    final hex = (fill.toARGB32() & 0xFFFFFF).toRadixString(16).padLeft(6, '0');
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 15">'
+        '<path d="M4 0.5 H16 A3.5 3.5 0 0 1 19.5 4 V8 A3.5 3.5 0 0 1 16 11.5 '
+        'H9 L6 14.5 L6 11.5 H4 A3.5 3.5 0 0 1 0.5 8 V4 A3.5 3.5 0 0 1 4 0.5 Z" '
+        'fill="#$hex"/>'
+        '<path d="M6.5 3.5 V8.5 M6.5 6 H10 M10 3.5 V8.5 M13.5 5.8 V8.5" '
+        'fill="none" stroke="#FFFFFF" stroke-width="1.5" '
+        'stroke-linecap="round"/>'
+        '<circle cx="13.5" cy="3.7" r="0.95" fill="#FFFFFF"/>'
+        '</svg>';
+  }
 }

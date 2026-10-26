@@ -86,7 +86,7 @@ class LevelPage extends StatelessWidget {
           onBack: onBack,
           options: [
             OnboardingOption(
-              art: const AppIllustrationView(AppIllustration.sprout),
+              art: const AppIllustrationView(AppIllustration.hatching),
               title: 'onboarding_level_beginner'.tr(),
               description: 'onboarding_level_beginner_desc'.tr(),
               selected: state.choice == EnglishLevelChoice.beginner,
@@ -94,7 +94,7 @@ class LevelPage extends StatelessWidget {
               onTap: () => cubit.choose(EnglishLevelChoice.beginner),
             ),
             OnboardingOption(
-              art: const AppIllustrationView(AppIllustration.stairs),
+              art: const AppIllustrationView(AppIllustration.listening),
               title: 'onboarding_level_some'.tr(),
               description: 'onboarding_level_some_desc'.tr(),
               selected: some,
