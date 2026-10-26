@@ -65,6 +65,21 @@ final class ReaderColors {
   );
 }
 
+/// A small status badge: [text] on [background] (≥4.5:1).
+@immutable
+final class BadgeColors {
+  const BadgeColors({required this.background, required this.text});
+
+  final Color background;
+  final Color text;
+
+  static BadgeColors lerp(BadgeColors a, BadgeColors b, double t) =>
+      BadgeColors(
+        background: Color.lerp(a.background, b.background, t)!,
+        text: Color.lerp(a.text, b.text, t)!,
+      );
+}
+
 /// Which of the six category tile colors an icon tile uses (designs,
 /// "Onboarding Option"). The tone tells the categories apart; it carries no
 /// meaning, so it never replaces a label.
@@ -201,6 +216,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.border,
     required this.reader,
     required this.tiles,
+    required this.soonBadge,
   });
 
   /// PRIMARY / PRIMARY_TEXT / PRIMARY_SURFACE — navigation, track progress,
@@ -230,6 +246,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
 
   /// Category tile colors, from the designs.
   final CategoryTiles tiles;
+
+  /// The «قريبًا» badge on choices that are not available yet. Its own
+  /// tokens, so reward amber keeps its meaning elsewhere.
+  final BadgeColors soonBadge;
 
   /// The chosen answer: its border, check and highlighted text.
   Color get selection => primary.text;
@@ -290,6 +310,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       selectedWord: AppPalette.blue600,
     ),
     tiles: CategoryTiles.light,
+    soonBadge: BadgeColors(
+      background: AppPalette.soonBadgeBg,
+      text: AppPalette.soonBadgeText,
+    ),
   );
 
   /// Dark neutrals, primary text, error and success follow the designs' token
@@ -346,6 +370,10 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       selectedWord: AppPalette.blue400,
     ),
     tiles: CategoryTiles.dark,
+    soonBadge: BadgeColors(
+      background: AppPalette.soonBadgeBgDark,
+      text: AppPalette.soonBadgeTextDark,
+    ),
   );
 
   @override
@@ -366,6 +394,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? border,
     ReaderColors? reader,
     CategoryTiles? tiles,
+    BadgeColors? soonBadge,
   }) => AppSemanticColors(
     primary: primary ?? this.primary,
     primaryStrong: primaryStrong ?? this.primaryStrong,
@@ -383,6 +412,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     border: border ?? this.border,
     reader: reader ?? this.reader,
     tiles: tiles ?? this.tiles,
+    soonBadge: soonBadge ?? this.soonBadge,
   );
 
   @override
@@ -405,6 +435,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       border: Color.lerp(border, other.border, t)!,
       reader: ReaderColors.lerp(reader, other.reader, t),
       tiles: CategoryTiles.lerp(tiles, other.tiles, t),
+      soonBadge: BadgeColors.lerp(soonBadge, other.soonBadge, t),
     );
   }
 }

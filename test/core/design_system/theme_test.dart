@@ -180,6 +180,21 @@ void main() {
     }
   });
 
+  test('the soon badge follows the designs and keeps its text readable', () {
+    const light = AppSemanticColors.light;
+    const dark = AppSemanticColors.dark;
+    expect(light.soonBadge.background, const Color(0xFFFDF1DC));
+    expect(light.soonBadge.text, const Color(0xFF8A5300));
+    expect(dark.soonBadge.background, const Color(0xFF33270F));
+    expect(dark.soonBadge.text, const Color(0xFFF5B54E));
+    for (final badge in [light.soonBadge, dark.soonBadge]) {
+      expect(
+        contrast(badge.text, badge.background),
+        greaterThanOrEqualTo(textMin),
+      );
+    }
+  });
+
   test('doc contrast figures hold', () {
     expect(
       contrast(

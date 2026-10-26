@@ -152,7 +152,7 @@ class OnboardingOption extends StatelessWidget {
   }
 }
 
-/// «قريبًا»: neutral on purpose, because amber is reserved for rewards.
+/// «قريبًا»: amber pill, as in the designs.
 class _SoonBadge extends StatelessWidget {
   const _SoonBadge({required this.label});
 
@@ -160,12 +160,13 @@ class _SoonBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final badge = context.colors.soonBadge;
     return Align(
       alignment: AlignmentDirectional.topEnd,
       widthFactor: 1,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: context.scheme.surfaceContainerHigh,
+          color: badge.background,
           borderRadius: BorderRadius.circular(AppRadius.pill),
         ),
         child: Padding(
@@ -175,9 +176,7 @@ class _SoonBadge extends StatelessWidget {
           ),
           child: Text(
             label,
-            style: context.texts.captionStrong.copyWith(
-              color: context.colors.textSecondary,
-            ),
+            style: context.texts.captionStrong.copyWith(color: badge.text),
           ),
         ),
       ),

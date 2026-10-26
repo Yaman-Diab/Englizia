@@ -79,6 +79,12 @@ abstract final class AppPalette {
 
   static const yellow300 = Color(0xFFFDE047);
 
+  // "Coming soon" badge (designs, "Onboarding Option").
+  static const soonBadgeBg = Color(0xFFFDF1DC);
+  static const soonBadgeText = Color(0xFF8A5300);
+  static const soonBadgeBgDark = Color(0xFF33270F);
+  static const soonBadgeTextDark = Color(0xFFF5B54E);
+
   // Category tiles (designs, "Onboarding Option"): icon on tinted square.
   static const tileBlueBg = Color(0xFFE3EDFE);
   static const tileBlueFg = Color(0xFF2563EB);
