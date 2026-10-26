@@ -57,12 +57,11 @@ class LevelPage extends StatelessWidget {
               'onboarding_level_beginner_reply'.tr(),
             EnglishLevelChoice.some => 'onboarding_level_some_reply'.tr(),
           },
-          // The designs' "encouraging" and "confident" moods, as the
-          // closest approved expressions (§22).
+          // The designs' "encouraging" and "confident" moods.
           expression: switch (state.choice) {
             null => MascotExpression.curious,
             EnglishLevelChoice.beginner => MascotExpression.encourage,
-            EnglishLevelChoice.some => MascotExpression.happy,
+            EnglishLevelChoice.some => MascotExpression.confident,
           },
           step: position.current,
           totalSteps: position.total,
