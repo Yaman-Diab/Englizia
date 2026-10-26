@@ -85,6 +85,18 @@ extension PumpApp on WidgetTester {
     await pumpUntilLocalized();
   }
 
+  /// Plays a staggered entrance to the end ([settled] from
+  /// `entrance_choreography.dart`). flutter_animate starts each animation from
+  /// a zero-length timer and counts from the next frame, and a bare `pump()`
+  /// does not advance the clock, hence the explicit ticks.
+  Future<void> settleEntrance(Duration settled) async {
+    const tick = Duration(milliseconds: 1);
+    await pump(tick); // fires the start timers
+    await pump(tick); // first animation frame
+    await pump(settled);
+    await pump(tick); // timers of anything built meanwhile
+  }
+
   /// Translations load asynchronously; a few frames are enough with
   /// [FileAssetLoader]. Avoids `pumpAndSettle`, which hangs on spinners.
   Future<void> pumpUntilLocalized() async {

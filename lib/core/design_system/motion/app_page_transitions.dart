@@ -1,4 +1,4 @@
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 
 /// Android page transition: the incoming page fades in while sliding

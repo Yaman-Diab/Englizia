@@ -1,8 +1,8 @@
 import 'dart:ui' show PathMetric;
 
-import 'package:englizia/core/design_system/app_motion.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 
 /// One answer card of an onboarding question (design "Onboarding Option"):

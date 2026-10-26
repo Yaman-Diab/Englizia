@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/pages/child_profile_page.dart';
@@ -49,7 +50,7 @@ void main() {
         size: size,
         themeMode: themeMode,
       );
-      await tester.pump(AppMotion.heroEntrance);
+      await tester.settleEntrance(QuestionEntrance.settled);
       return cubit;
     }
 

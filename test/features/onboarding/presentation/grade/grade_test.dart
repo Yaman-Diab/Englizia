@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
@@ -132,7 +133,7 @@ void main() {
         themeMode: themeMode,
       );
       await cubit.load();
-      await tester.pump(AppMotion.heroEntrance);
+      await tester.settleEntrance(QuestionEntrance.settled);
       return cubit;
     }
 

@@ -1,4 +1,4 @@
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/foundation.dart';
 
 /// The idle loop at one moment: float, wave and blink from the welcome

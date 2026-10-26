@@ -6,7 +6,7 @@ Status: Accepted · Date: 2026-10-12
 The app will animate answer feedback (shake on a wrong answer in kids mode, success check), XP changes, sheets, tabs and page changes. Without a shared scale every screen picks its own durations and curves. transitions.dev publishes a consistent motion scale (durations, easings, distances, scales) with its web transitions. Its license lets the free transitions and skills be used and modified in commercial products; the only restriction is redistributing the collection as a competing library. Its snippets are CSS and React, which Flutter cannot run, and its skill and CLI generate CSS.
 
 ## Decision
-- `core/design_system/app_motion.dart` (`AppMotion`) holds the values, read like `AppSpacing`: durations 40–500 ms, curves, distances in logical px, scales.
+- `core/design_system/motion/app_motion.dart` (`AppMotion`) holds the values, read like `AppSpacing`: durations 40–500 ms, curves, distances in logical px, scales.
 - CSS easings map one to one: `cubic-bezier(...)` → `Cubic(...)`; `ease-in-out` and `ease-out` → `Curves.easeInOut` / `Curves.easeOut` (the same control points).
 - Left out: blur tokens (expensive on the low-end Android phones most users have) and the strong hover bounce (touch screens have no hover).
 - The transitions.dev CLI and agent skill are not installed: they produce CSS and would steer agents away from Flutter.
@@ -31,3 +31,10 @@ The app will animate answer feedback (shake on a wrong answer in kids mode, succ
 
 ### Verification
 Checked against the pinned Flutter 3.41.6 (`.fvmrc`, CI): `MaterialPageRoute` reads `transitionDuration` and `reverseTransitionDuration` from the builder, so one value covers every route. `test/core/design_system/app_page_transitions_test.dart` covers duration, LTR/RTL direction on push and pop, the 30px cap, reduce motion, iOS edge-swipe back and the theme wiring; re-run it after upgrading Flutter.
+
+## Addendum: the motion module and flutter_animate (2026-10-26)
+All motion lives in `core/design_system/motion/`: `app_motion.dart` (tokens), `app_page_transitions.dart`, `entrance.dart` (the `Entrance` widget: up, down or pop, each fading in) and `entrance_choreography.dart` (when each element of a screen family starts: `HeroEntrance`, `QuestionEntrance`). Screens never hand-roll entrance controllers; changing a family's rhythm is one edit in the choreography file.
+
+Entrances are built on `flutter_animate` (gskinner.com, verified publisher; 150/160 points, 4.2k likes, 1.2M downloads a month; last release 2024-11, stable and widely used), chosen at the owner's request for a strong animation package. Alternatives: `animations` (flutter.dev) needs Flutter 3.44 in its current major and only covers page transitions; `lottie` (160/160) is kept for designer-made animation files when they exist.
+
+Delays use the effect's own timeline (`fadeIn(delay: …)`), not `Animate.delay`, which schedules a timer. flutter_animate still starts every animation from a zero-length timer and counts from the next frame, so widget tests play entrances with `tester.settleEntrance(...)` (`test/helpers/pump_app.dart`). Under reduce motion `Entrance` returns its child untouched. The guide's idle loop stays in the mascot module, driven by the same tokens.

@@ -1,8 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../../helpers/pump_app.dart';
@@ -24,7 +25,7 @@ void main() {
             size: size,
             themeMode: mode,
           );
-          await tester.pump(AppMotion.heroEntrance);
+          await tester.settleEntrance(HeroEntrance.settled);
 
           expect(tester.takeException(), isNull);
           expect(find.text('welcome_title'.tr()), findsOneWidget);
@@ -40,7 +41,7 @@ void main() {
     await tester.pumpLocalized(
       page(onStart: () => started++, onSignIn: () => signedIn++),
     );
-    await tester.pump(AppMotion.heroEntrance);
+    await tester.settleEntrance(HeroEntrance.settled);
 
     await tester.tap(find.text('welcome_start'.tr()));
     await tester.tap(find.text('welcome_have_account'.tr()));
@@ -52,7 +53,7 @@ void main() {
   testWidgets('has no undersized or unlabeled tap targets', (tester) async {
     final handle = tester.ensureSemantics();
     await tester.pumpLocalized(page(), size: narrowViewport);
-    await tester.pump(AppMotion.heroEntrance);
+    await tester.settleEntrance(HeroEntrance.settled);
 
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
@@ -75,7 +76,7 @@ void main() {
     await tester.pumpLocalized(page());
     expect(titleOpacity(tester), lessThan(1));
 
-    await tester.pump(AppMotion.heroEntrance);
+    await tester.settleEntrance(HeroEntrance.settled);
     expect(titleOpacity(tester), 1);
   });
 
@@ -86,6 +87,7 @@ void main() {
         child: page(),
       ),
     );
-    expect(titleOpacity(tester), 1);
+    expect(find.byType(Animate), findsNothing);
+    expect(find.text('welcome_title'.tr()), findsOneWidget);
   });
 }
