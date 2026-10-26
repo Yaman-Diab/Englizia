@@ -99,6 +99,32 @@ void main() {
     expect(goal.defaultOption.minutes, 5);
   });
 
+  test('challenge options are sorted and bad ones skipped', () {
+    final json = example();
+    json.readMap('motivation')!
+      ..['challengeOptions'] = [
+        {
+          'days': 30,
+          'label': {'ar': 'مذهل'},
+        },
+        {'days': -1, 'label': 'x'},
+        {
+          'days': 7,
+          'label': {'ar': 'جيد'},
+        },
+      ]
+      ..['defaultChallenge'] = 14;
+    final challenge = EffectiveSettingsModel.fromJson(json).entity.challenge;
+    expect([for (final o in challenge.options) o.days], [7, 30]);
+    expect(challenge.defaultOption.days, 7);
+  });
+
+  test('the challenge needs its question', () {
+    final json = example();
+    json.readMap('motivation')!.remove('challengeQuestion');
+    expect(() => EffectiveSettingsModel.fromJson(json), throwsFormatException);
+  });
+
   test('the lesson length is optional', () {
     final json = example();
     json.readMap('motivation')!.remove('averageLessonMinutes');

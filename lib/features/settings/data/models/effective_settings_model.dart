@@ -13,6 +13,7 @@ final class EffectiveSettingsModel {
       EffectiveSettings(
         reminder: _reminder(notifications),
         dailyGoal: _dailyGoal(motivation),
+        challenge: _challenge(motivation),
       ),
     );
   }
@@ -55,6 +56,33 @@ final class EffectiveSettingsModel {
       defaultMinutes: defaultMinutes,
       lessonMinutes: lesson != null && lesson > 0 ? lesson : null,
     );
+  }
+
+  static ChallengeSettings _challenge(Map<String, Object?>? motivation) {
+    final options = [
+      for (final item in motivation?.readList('challengeOptions') ?? const [])
+        ?_challengeOption(item),
+    ]..sort((a, b) => a.days.compareTo(b.days));
+    final defaultDays = motivation?.readInt('defaultChallenge');
+    final question = motivation?.readText('challengeQuestion');
+    if (options.isEmpty || defaultDays == null || question == null) {
+      throw const FormatException('Challenge settings are incomplete');
+    }
+    return ChallengeSettings(
+      options: options,
+      defaultDays: defaultDays,
+      question: question,
+    );
+  }
+
+  /// An option without days or label is skipped, not fatal.
+  static ChallengeOption? _challengeOption(Object? item) {
+    if (item is! Map) return null;
+    final json = item.cast<String, Object?>();
+    final days = json.readInt('days');
+    final label = json.readText('label');
+    if (days == null || days <= 0 || label == null) return null;
+    return ChallengeOption(days: days, label: label);
   }
 
   /// An option without minutes or label is skipped, not fatal.

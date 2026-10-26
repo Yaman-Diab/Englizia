@@ -95,7 +95,7 @@ class ReminderPreview extends StatelessWidget {
             tween: Tween(end: muted ? 0 : 1),
             duration: duration,
             curve: AppMotion.smoothOut,
-            // Filtered only while greying: a filter would bound the shadow.
+            // Filtered only while greying: no extra layer at full color.
             builder: (context, saturation, child) => saturation >= 1
                 ? child!
                 : ColorFiltered(

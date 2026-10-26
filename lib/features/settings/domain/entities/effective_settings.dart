@@ -99,14 +99,57 @@ final class DailyGoalSettings extends Equatable {
   List<Object?> get props => [options, defaultMinutes, lessonMinutes];
 }
 
+/// One choice of the streak challenge, worded by the panel ("جيد").
+final class ChallengeOption extends Equatable {
+  const ChallengeOption({required this.days, required this.label});
+
+  final int days;
+  final LocalizedText label;
+
+  @override
+  List<Object?> get props => [days, label];
+}
+
+/// The streak challenge's choices, default and the guide's question
+/// (server doc §17.7).
+final class ChallengeSettings extends Equatable {
+  const ChallengeSettings({
+    required this.options,
+    required this.defaultDays,
+    required this.question,
+  });
+
+  /// In display order, shortest first.
+  final List<ChallengeOption> options;
+  final int defaultDays;
+
+  /// What the guide asks, as the panel words it.
+  final LocalizedText question;
+
+  /// The option to preselect: the default, or the first when the server's
+  /// default is not among its options.
+  ChallengeOption get defaultOption => options.firstWhere(
+    (o) => o.days == defaultDays,
+    orElse: () => options.first,
+  );
+
+  @override
+  List<Object?> get props => [options, defaultDays, question];
+}
+
 /// The parts of the effective settings (after inheritance) the app reads
 /// before a track is chosen.
 final class EffectiveSettings extends Equatable {
-  const EffectiveSettings({required this.reminder, required this.dailyGoal});
+  const EffectiveSettings({
+    required this.reminder,
+    required this.dailyGoal,
+    required this.challenge,
+  });
 
   final ReminderSettings reminder;
   final DailyGoalSettings dailyGoal;
+  final ChallengeSettings challenge;
 
   @override
-  List<Object?> get props => [reminder, dailyGoal];
+  List<Object?> get props => [reminder, dailyGoal, challenge];
 }

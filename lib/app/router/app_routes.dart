@@ -9,6 +9,7 @@ abstract final class AppRoutes {
   static const onboardingGrade = '/onboarding/grade';
   static const onboardingReason = '/onboarding/reason';
   static const onboardingGoal = '/onboarding/goal';
+  static const onboardingChallenge = '/onboarding/challenge';
   static const onboardingLevel = '/onboarding/level';
   static const onboardingReminder = '/onboarding/reminder';
   static const onboardingSaveProgress = '/onboarding/save-progress';

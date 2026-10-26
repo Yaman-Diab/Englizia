@@ -26,6 +26,7 @@ void main() {
       OnboardingStep.audience,
       OnboardingStep.reason,
       OnboardingStep.goal,
+      OnboardingStep.challenge,
       OnboardingStep.level,
       OnboardingStep.reminder,
       OnboardingStep.saveProgress,
@@ -36,6 +37,7 @@ void main() {
       OnboardingStep.grade,
       OnboardingStep.reason,
       OnboardingStep.goal,
+      OnboardingStep.challenge,
       OnboardingStep.reminder,
       OnboardingStep.saveProgress,
     ]);
@@ -69,13 +71,13 @@ void main() {
       onboardingStepsFor(OnboardingPath.assumed),
       onboardingStepsFor(general),
     );
-    expect(onboardingPosition(OnboardingStep.language), (current: 1, total: 7));
+    expect(onboardingPosition(OnboardingStep.language), (current: 1, total: 8));
   });
 
   test('position counts the steps of the actual path', () {
     expect(onboardingPosition(OnboardingStep.reason, path: emar), (
       current: 4,
-      total: 7,
+      total: 8,
     ));
     expect(onboardingPosition(OnboardingStep.childProfile, path: kids), (
       current: 3,
@@ -102,10 +104,14 @@ void main() {
     );
     expect(
       onboardingNextStep(OnboardingStep.goal, path: general),
+      OnboardingStep.challenge,
+    );
+    expect(
+      onboardingNextStep(OnboardingStep.challenge, path: general),
       OnboardingStep.level,
     );
     expect(
-      onboardingNextStep(OnboardingStep.goal, path: emar),
+      onboardingNextStep(OnboardingStep.challenge, path: emar),
       OnboardingStep.reminder,
     );
     expect(
@@ -117,8 +123,11 @@ void main() {
 
   test('children skip the goal; the chosen goal rides on the path', () {
     expect(onboardingStepsFor(kids), isNot(contains(OnboardingStep.goal)));
-    final chosen = general.withDailyGoal(15);
+    expect(onboardingStepsFor(kids), isNot(contains(OnboardingStep.challenge)));
+    final chosen = general.withDailyGoal(15).withChallenge(30);
     expect(chosen.dailyGoalMinutes, 15);
+    expect(chosen.challengeDays, 30);
+    expect(chosen.withDailyGoal(20).challengeDays, 30);
     expect(chosen.trackId, general.trackId);
     expect(chosen, isNot(general));
     expect(onboardingStepsFor(chosen), onboardingStepsFor(general));

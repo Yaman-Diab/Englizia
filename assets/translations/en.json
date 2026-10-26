@@ -141,5 +141,12 @@
   "onboarding_goal_lessons_and_half": {
     "one": "≈ 1½ lessons a day",
     "other": "≈ {}½ lessons a day"
-  }
+  },
+  "onboarding_challenge_question": "How many days will you challenge yourself?",
+  "onboarding_challenge_days": {
+    "one": "1 day",
+    "other": "{} days"
+  },
+  "onboarding_challenge_helper": "Your streak counter starts with your first lesson",
+  "onboarding_challenge_cta": "Confirm goal"
 }

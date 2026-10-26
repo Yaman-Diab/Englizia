@@ -163,5 +163,15 @@
     "few": "≈ {} دروس ونصف يوميًا",
     "many": "≈ {} درسًا ونصفًا يوميًا",
     "other": "≈ {} درس ونصف يوميًا"
-  }
+  },
+  "onboarding_challenge_question": "كم يومًا تتحدى نفسك؟",
+  "onboarding_challenge_days": {
+    "one": "يوم واحد",
+    "two": "يومان",
+    "few": "{} أيام",
+    "many": "{} يومًا",
+    "other": "{} يوم"
+  },
+  "onboarding_challenge_helper": "سيبدأ عدّاد أيامك المتتالية من أول درس",
+  "onboarding_challenge_cta": "تأكيد الهدف"
 }

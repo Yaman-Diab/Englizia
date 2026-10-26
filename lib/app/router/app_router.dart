@@ -10,6 +10,8 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
+import 'package:englizia/features/onboarding/presentation/challenge/cubit/challenge_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/challenge/pages/challenge_page.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/pages/child_profile_page.dart';
 import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_cubit.dart';
@@ -137,6 +139,25 @@ GoRouter createAppRouter(AppSessionController session) {
         },
       ),
       GoRoute(
+        path: AppRoutes.onboardingChallenge,
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) =>
+                sl<ChallengeCubit>()..load(chosen: path.challengeDays),
+            child: ChallengePage(
+              path: path,
+              onContinue: (days) => _pushNextStep(
+                context,
+                OnboardingStep.challenge,
+                path.withChallenge(days),
+              ),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.onboardingLevel,
         builder: (context, state) {
           final path = _pathOf(state);
@@ -210,6 +231,7 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.grade => AppRoutes.onboardingGrade,
   OnboardingStep.reason => AppRoutes.onboardingReason,
   OnboardingStep.goal => AppRoutes.onboardingGoal,
+  OnboardingStep.challenge => AppRoutes.onboardingChallenge,
   OnboardingStep.level => AppRoutes.onboardingLevel,
   OnboardingStep.reminder => AppRoutes.onboardingReminder,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,

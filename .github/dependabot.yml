@@ -6,11 +6,14 @@ updates:
       interval: "weekly"
     ignore:
       # Blocked by the Flutter pin (3.41.6, see CLAUDE.md pending decisions):
-      # go_router 18 needs Flutter 3.44+, google_fonts 9 needs 3.47+.
+      # go_router 18 needs Flutter 3.44+, google_fonts 9 needs 3.47+;
+      # permission_handler 13 needs Android Gradle Plugin 9 and compileSdk 37.
       # Remove these entries when the pin moves.
       - dependency-name: "go_router"
         update-types: ["version-update:semver-major"]
       - dependency-name: "google_fonts"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "permission_handler"
         update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
