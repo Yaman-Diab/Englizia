@@ -1,6 +1,7 @@
 # Tracks
 
-Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/tracks/published_tracks.json`); nothing is confirmed by the backend team yet.
+Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/tracks/`); nothing is confirmed by the backend team yet.
+The mock publishes all three onboarding tracks; delete `trk_emar` from `published_tracks.json` to see the «قريبًا» state, exactly as hiding the track in the panel would.
 Requirements: student doc §3.1–3.2 and §4.2, server doc §5.2 and §19.2.
 
 ## `GET /api/v1/tracks`
@@ -53,8 +54,43 @@ Unknown enum values are treated as the least privileged: an unknown `onboardingA
 
 The common envelope errors (`docs/api/README.md`); no endpoint-specific codes.
 
+## `GET /api/v1/tracks/{trackId}/levels`
+
+Published levels of one track, in display order, with their effective settings. Used by the onboarding grade step (tracks whose entry method is `gradeSelection`) and later by the home and "Me" screens. Available without a token, like the track list. Mock: `assets/mock/tracks/levels_<trackId>.json`.
+
+### Response `200`
+
+```json
+{
+  "data": [
+    {
+      "id": "lvl_emar_07",
+      "order": 7,
+      "name": { "ar": "السابع", "en": "Grade 7" },
+      "schoolGrade": 7,
+      "cefr": null,
+      "displayGroup": { "ar": "الحلقة الثانية", "en": "Primary, cycle 2" }
+    }
+  ],
+  "meta": null,
+  "error": null
+}
+```
+
+| Field | Type | Meaning | Used by the app today |
+|---|---|---|---|
+| `id` | string | Stable level id | yes |
+| `order` | int | Display order; the first level is where a direct start begins | yes (sorting) |
+| `name` | `{ar, en}` | Display name set in the panel ("السابع", "A2 · ما قبل المتوسط") | yes (grade cell label) |
+| `schoolGrade` | int 1–12 · `null` | School grade for curriculum tracks | yes (big number on the grade cell; falls back to `order`) |
+| `cefr` | `"preA1"` … `"c1"` · `null` | CEFR link, required when the entry method is the placement test | later (placement) |
+| `displayGroup` | `{ar, en}` · `null` | Group heading on the grade screen ("الحلقة الأولى"); levels without one go under no heading | yes |
+
+Not in this list on purpose: kids mode and feature overrides per level, and the three "you will be able to…" sentences; they arrive with the level detail when a screen needs them.
+
 ## Questions for the backend team
 
 1. Confirm the path, the field names and the enum spellings above.
 2. Confirm the list is available without a token (onboarding runs before sign-up).
-3. Confirm "effective settings" means the track-level values; level overrides arrive with the levels endpoint.
+3. Confirm "effective settings" means the track-level values here and the level-level values in the levels list.
+4. Confirm the levels list is available without a token (the grade step runs before sign-up).

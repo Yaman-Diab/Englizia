@@ -3,44 +3,22 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_motion.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
-import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_state.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
-import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../../helpers/fake_track_repository.dart';
 import '../../../../helpers/pump_app.dart';
 
-LearningTrack track(String id, TrackAudience? audience) => LearningTrack(
-  id: id,
-  title: const LocalizedText(ar: 'مسار'),
-  description: const LocalizedText(ar: ''),
-  order: 0,
-  entryMethod: TrackEntryMethod.directStart,
-  audience: audience,
-);
-
-/// Serves the queued results in order, then repeats the last one.
-class FakeTrackRepository implements TrackRepository {
-  FakeTrackRepository(this.results);
-
-  final List<Result<List<LearningTrack>>> results;
-  var calls = 0;
-
-  @override
-  Future<Result<List<LearningTrack>>> getPublishedTracks() async =>
-      results[(calls++).clamp(0, results.length - 1)];
-}
-
 final publishedSelfAndChild = Ok([
-  track('general', TrackAudience.self),
-  track('kids', TrackAudience.child),
-  track('extra', null),
+  fakeTrack('general', TrackAudience.self),
+  fakeTrack('kids', TrackAudience.child),
+  fakeTrack('extra', null),
 ]);
 
 void main() {
@@ -49,7 +27,8 @@ void main() {
   group('AudienceCubit', () {
     blocTest<AudienceCubit, AudienceState>(
       'offers only audiences that have a published track',
-      build: () => AudienceCubit(FakeTrackRepository([publishedSelfAndChild])),
+      build: () =>
+          AudienceCubit(FakeTrackRepository(tracks: [publishedSelfAndChild])),
       act: (cubit) => cubit.load(),
       expect: () => const [
         AudienceState(),
@@ -62,7 +41,8 @@ void main() {
 
     blocTest<AudienceCubit, AudienceState>(
       'ignores a «soon» choice and accepts an available one',
-      build: () => AudienceCubit(FakeTrackRepository([publishedSelfAndChild])),
+      build: () =>
+          AudienceCubit(FakeTrackRepository(tracks: [publishedSelfAndChild])),
       act: (cubit) async {
         await cubit.load();
         cubit
@@ -83,10 +63,12 @@ void main() {
     blocTest<AudienceCubit, AudienceState>(
       'drops a choice whose track was hidden on reload',
       build: () => AudienceCubit(
-        FakeTrackRepository([
-          publishedSelfAndChild,
-          Ok([track('general', TrackAudience.self)]),
-        ]),
+        FakeTrackRepository(
+          tracks: [
+            publishedSelfAndChild,
+            Ok([fakeTrack('general', TrackAudience.self)]),
+          ],
+        ),
       ),
       act: (cubit) async {
         await cubit.load();
@@ -102,10 +84,9 @@ void main() {
     blocTest<AudienceCubit, AudienceState>(
       'reports a failure and recovers on retry',
       build: () => AudienceCubit(
-        FakeTrackRepository([
-          const Err(NetworkFailure()),
-          publishedSelfAndChild,
-        ]),
+        FakeTrackRepository(
+          tracks: [const Err(NetworkFailure()), publishedSelfAndChild],
+        ),
       ),
       act: (cubit) async {
         await cubit.load();
@@ -136,7 +117,7 @@ void main() {
       ThemeMode themeMode = ThemeMode.light,
     }) async {
       final cubit = AudienceCubit(
-        FakeTrackRepository([result ?? publishedSelfAndChild]),
+        FakeTrackRepository(tracks: [result ?? publishedSelfAndChild]),
       );
       addTearDown(cubit.close);
       await tester.pumpLocalized(
@@ -196,8 +177,8 @@ void main() {
       final cubit = await pumpPage(
         tester,
         result: Ok([
-          track('general', TrackAudience.self),
-          track('emar', TrackAudience.schoolStudent),
+          fakeTrack('general', TrackAudience.self),
+          fakeTrack('emar', TrackAudience.schoolStudent),
         ]),
       );
       expect(find.bySemanticsLabel('الخطوة 2 من 4'), findsOneWidget);
