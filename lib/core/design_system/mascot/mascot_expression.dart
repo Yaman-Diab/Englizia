@@ -139,8 +139,8 @@ enum MascotExpression {
   ),
 
   /// Thumbs up with the other hand on the hip: sure the learner can do it.
-  // ASSUMPTION(design): drawn in the character sheet's style at the owner's
-  // request (the sheet has no "confident"); pending the owner's look.
+  /// Drawn in the character sheet's style (the sheet has none) and approved
+  /// by the owner.
   confident(
     MascotPose(
       leftArm: MascotArm(Offset(54, 114), Offset(34, 125), Offset(49, 139)),
