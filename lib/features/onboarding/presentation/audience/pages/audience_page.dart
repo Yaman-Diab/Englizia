@@ -20,7 +20,7 @@ class AudiencePage extends StatelessWidget {
     super.key,
   });
 
-  final ValueChanged<TrackAudience> onContinue;
+  final ValueChanged<OnboardingPath> onContinue;
   final VoidCallback onBack;
 
   @override
@@ -30,7 +30,7 @@ class AudiencePage extends StatelessWidget {
         final cubit = context.read<AudienceCubit>();
         final position = onboardingPosition(
           OnboardingStep.audience,
-          audience: state.selected,
+          path: state.path ?? OnboardingPath.assumed,
         );
         return OnboardingQuestionScaffold(
           question: 'onboarding_audience_question'.tr(),
@@ -38,9 +38,7 @@ class AudiencePage extends StatelessWidget {
           step: position.current,
           totalSteps: position.total,
           continueLabel: 'common_continue'.tr(),
-          onContinue: state.canContinue
-              ? () => onContinue(state.selected!)
-              : null,
+          onContinue: state.canContinue ? () => onContinue(state.path!) : null,
           onBack: onBack,
           options: loadedAnswers(
             status: state.status,

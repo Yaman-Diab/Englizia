@@ -3,6 +3,7 @@ import 'package:englizia/app/di.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
@@ -25,6 +26,7 @@ void main() {
     expect(sl<AppSessionController>(), isNotNull);
     expect(sl<Dio>(), isNotNull);
     expect(sl<ApiClient>(), isNotNull);
+    expect(sl<ConnectivityService>(), isNotNull);
     expect(sl<SoundPlayer>(), isA<SilentSoundPlayer>());
 
     final settings = sl<SettingsCubit>();

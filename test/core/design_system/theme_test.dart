@@ -146,6 +146,9 @@ void main() {
       'ERROR_SURFACE': (dark.error.surface, 0xFF3A1A18),
       'SUCCESS': (dark.success.fill, 0xFF5FD394),
       'SUCCESS_TEXT': (dark.success.text, 0xFF8BE0B0),
+      // Soft bands from the onboarding designs.
+      'PRIMARY_SURFACE': (dark.primary.surface, 0xFF15254A),
+      'SUCCESS_SURFACE': (dark.success.surface, 0xFF10301F),
     };
     expected.forEach((token, pair) {
       expect(pair.$1, Color(pair.$2), reason: token);

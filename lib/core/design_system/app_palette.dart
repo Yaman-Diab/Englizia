@@ -124,6 +124,11 @@ abstract final class AppPalette {
   static const mint400 = Color(0xFF5FD394);
   static const mint300 = Color(0xFF8BE0B0);
 
+  // Dark soft bands of the onboarding designs (`--ob-primary-soft`,
+  // `--ob-ok-soft`).
+  static const blueSoftDark = Color(0xFF15254A);
+  static const greenSoftDark = Color(0xFF10301F);
+
   /// Caption background over video: black at 60%.
   static const captionScrim = Color(0x99000000);
 }

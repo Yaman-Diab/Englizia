@@ -5,14 +5,25 @@ import 'package:flutter_test/flutter_test.dart';
 
 /// Translation files and code stay in sync: same keys, same placeholders,
 /// no empty values, every used key defined, every defined key used, and no
-/// visible text hardcoded in Dart.
+/// visible text hardcoded in Dart. A plural key holds its forms (`zero`,
+/// `one`, `two`, `few`, `many`, `other`) and always has `other`.
 void main() {
   const locales = ['ar', 'en'];
+  const pluralForms = {'zero', 'one', 'two', 'few', 'many', 'other'};
 
-  Map<String, String> load(String locale) {
+  /// Each key's texts: one, or one per plural form.
+  Map<String, Map<String, String>> load(String locale) {
     final raw = File('assets/translations/$locale.json').readAsStringSync();
     final decoded = jsonDecode(raw) as Map<String, Object?>;
-    return decoded.map((key, value) => MapEntry(key, value! as String));
+    return decoded.map(
+      (key, value) => MapEntry(key, switch (value) {
+        final String text => {'': text},
+        final Map<String, Object?> forms => forms.map(
+          (form, text) => MapEntry(form, text! as String),
+        ),
+        _ => throw FormatException('$locale:$key is neither text nor forms'),
+      }),
+    );
   }
 
   final files = {for (final l in locales) l: load(l)};
@@ -41,8 +52,9 @@ void main() {
   test('keys are flat snake_case and appear once per file', () {
     for (final locale in locales) {
       final raw = File('assets/translations/$locale.json').readAsStringSync();
+      // Top-level keys only: plural forms are indented further.
       final keys = RegExp(
-        r'^\s*"([^"]+)"\s*:',
+        r'^  "([^"]+)"\s*:',
         multiLine: true,
       ).allMatches(raw).map((m) => m.group(1)!).toList();
       expect(keys.toSet().length, keys.length, reason: '$locale duplicates');
@@ -54,16 +66,30 @@ void main() {
 
   test('no empty values', () {
     for (final locale in locales) {
-      files[locale]!.forEach((key, value) {
-        expect(value.trim(), isNotEmpty, reason: '$locale:$key');
+      files[locale]!.forEach((key, texts) {
+        for (final text in texts.values) {
+          expect(text.trim(), isNotEmpty, reason: '$locale:$key');
+        }
+      });
+    }
+  });
+
+  test('plural keys have valid forms, including other', () {
+    for (final locale in locales) {
+      files[locale]!.forEach((key, texts) {
+        if (texts.containsKey('')) return;
+        expect(pluralForms.containsAll(texts.keys), isTrue, reason: key);
+        expect(texts.keys, contains('other'), reason: '$locale:$key');
       });
     }
   });
 
   test('placeholders match across locales', () {
     final arg = RegExp(r'\{(\w+)\}');
-    Set<String> argsOf(String text) =>
-        arg.allMatches(text).map((m) => m.group(1)!).toSet();
+    Set<String> argsOf(Map<String, String> texts) => {
+      for (final text in texts.values)
+        ...arg.allMatches(text).map((m) => m.group(1)!),
+    };
     for (final key in files['ar']!.keys) {
       final reference = argsOf(files['ar']![key]!);
       for (final locale in locales) {

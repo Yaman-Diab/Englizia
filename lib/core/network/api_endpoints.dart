@@ -5,5 +5,8 @@ abstract final class ApiEndpoints {
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static const tracks = '/api/v1/tracks';
+  // ASSUMPTION(api): docs/api/placement.md.
+  static const placementSummary = '/api/v1/placement/summary';
+
   static String trackLevels(String trackId) => '/api/v1/tracks/$trackId/levels';
 }

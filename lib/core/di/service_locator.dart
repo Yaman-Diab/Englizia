@@ -4,6 +4,7 @@ import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/app_headers_interceptor.dart';
+import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/dio_factory.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -58,6 +59,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
       ),
     )
     ..registerLazySingleton(() => ApiClient(sl()))
+    ..registerLazySingleton<ConnectivityService>(PlusConnectivityService.new)
     // Silent until sounds are turned on (ADR 9).
     ..registerLazySingleton<SoundPlayer>(() => const SilentSoundPlayer())
     ..registerFactory(() => SettingsCubit(sl()));

@@ -11,8 +11,9 @@ import 'package:flutter/material.dart';
 
 /// The shared layout of every onboarding question (design "Onboarding
 /// Question"): back + progress, the guide asking in a bubble, the answers,
-/// an optional helper line and the continue button. Only the content
-/// changes per step.
+/// optional details and helper line, and the continue button with an
+/// optional secondary action and footnote. Only the content changes per
+/// step.
 class OnboardingQuestionScaffold extends StatelessWidget {
   const OnboardingQuestionScaffold({
     required this.question,
@@ -23,11 +24,15 @@ class OnboardingQuestionScaffold extends StatelessWidget {
     required this.onContinue,
     required this.onBack,
     this.subtitle,
+    this.details,
     this.helper,
     this.helperIcon,
     this.helperIsInfo = false,
     this.expression = MascotExpression.welcome,
     this.mascotSize = defaultMascotSize,
+    this.secondaryLabel,
+    this.onSecondary,
+    this.footnote,
     super.key,
   });
 
@@ -40,6 +45,9 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   final int step;
   final int totalSteps;
   final List<Widget> options;
+
+  /// Under the answers: what the chosen answer leads to. Changes animate.
+  final Widget? details;
   final String? helper;
   final String continueLabel;
 
@@ -56,6 +64,13 @@ class OnboardingQuestionScaffold extends StatelessWidget {
 
   /// 72 by default; the design's playful steps use [playfulMascotSize].
   final double mascotSize;
+
+  /// A quieter action under the continue button, e.g. "test later".
+  final String? secondaryLabel;
+  final VoidCallback? onSecondary;
+
+  /// A short note under the buttons.
+  final String? footnote;
 
   static const defaultMascotSize = 72.0;
   static const playfulMascotSize = 104.0;
@@ -146,6 +161,14 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                         child: option,
                       ),
                     ],
+                    if (details case final details?) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      Entrance(
+                        motion: EntranceMotion.up,
+                        delay: QuestionEntrance.helper,
+                        child: _Resizing(child: details),
+                      ),
+                    ],
                     if (helper case final helper?) ...[
                       const SizedBox(height: AppSpacing.lg),
                       Entrance(
@@ -174,10 +197,38 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                   AppSpacing.xl,
                   AppSpacing.md,
                 ),
-                child: AppButton(
-                  label: continueLabel,
-                  onPressed: onContinue,
-                  size: AppButtonSize.large,
+                child: _Resizing(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppButton(
+                        label: continueLabel,
+                        onPressed: onContinue,
+                        size: AppButtonSize.large,
+                      ),
+                      if (secondaryLabel case final label?) ...[
+                        const SizedBox(height: AppSpacing.xs),
+                        AppButton(
+                          label: label,
+                          onPressed: onSecondary,
+                          variant: AppButtonVariant.text,
+                        ),
+                      ],
+                      if (footnote case final footnote?)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(
+                            top: AppSpacing.xxs,
+                          ),
+                          child: Text(
+                            footnote,
+                            textAlign: TextAlign.center,
+                            style: context.texts.caption.copyWith(
+                              color: colors.textSecondary,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -186,6 +237,21 @@ class OnboardingQuestionScaffold extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Grows and shrinks with its content instead of jumping.
+class _Resizing extends StatelessWidget {
+  const _Resizing({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => AnimatedSize(
+    duration: AppMotion.resolve(context, AppMotion.medium),
+    curve: AppMotion.smoothOut,
+    alignment: AlignmentDirectional.topCenter,
+    child: child,
+  );
 }
 
 class _Helper extends StatelessWidget {

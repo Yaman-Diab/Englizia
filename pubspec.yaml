@@ -24,6 +24,7 @@ dependencies:
   shared_preferences: ^2.5.6
   flutter_animate: ^4.5.2
   flutter_svg: ^2.3.0
+  connectivity_plus: ^7.3.2
 
 dev_dependencies:
   flutter_test:
@@ -41,6 +42,7 @@ flutter:
     # Mock mode data (env/mock.json); each file goes when its endpoint is
     # confirmed, see docs/STATUS.md.
     - assets/mock/tracks/
+    - assets/mock/placement/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.
     - assets/fonts/ReadexPro-Regular.ttf

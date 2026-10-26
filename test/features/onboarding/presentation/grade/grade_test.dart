@@ -7,6 +7,7 @@ import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_state.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
@@ -127,7 +128,14 @@ void main() {
       await tester.pumpLocalized(
         BlocProvider.value(
           value: cubit,
-          child: GradePage(onContinue: onContinue ?? (_) {}, onBack: () {}),
+          child: GradePage(
+            path: const OnboardingPath(
+              audience: TrackAudience.schoolStudent,
+              entryMethod: TrackEntryMethod.gradeSelection,
+            ),
+            onContinue: onContinue ?? (_) {},
+            onBack: () {},
+          ),
         ),
         locale: locale,
         size: size,

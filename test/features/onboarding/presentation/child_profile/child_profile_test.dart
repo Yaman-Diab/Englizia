@@ -2,8 +2,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/pages/child_profile_page.dart';
+import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -42,6 +44,10 @@ void main() {
         BlocProvider.value(
           value: cubit,
           child: ChildProfilePage(
+            path: const OnboardingPath(
+              audience: TrackAudience.child,
+              entryMethod: TrackEntryMethod.directStart,
+            ),
             onContinue: onContinue ?? (_) {},
             onBack: () {},
           ),

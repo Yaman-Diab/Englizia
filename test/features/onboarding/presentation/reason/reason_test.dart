@@ -3,6 +3,7 @@ import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
@@ -39,7 +40,7 @@ void main() {
   group('ReasonPage', () {
     Future<ReasonCubit> pumpPage(
       WidgetTester tester, {
-      TrackAudience audience = TrackAudience.self,
+      OnboardingPath path = OnboardingPath.assumed,
       ValueChanged<List<LearningReason>>? onContinue,
       LayoutCase? layout,
     }) async {
@@ -49,7 +50,7 @@ void main() {
         BlocProvider.value(
           value: cubit,
           child: ReasonPage(
-            audience: audience,
+            path: path,
             onContinue: onContinue ?? (_) {},
             onBack: () {},
           ),
@@ -106,7 +107,13 @@ void main() {
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      await pumpPage(tester, audience: TrackAudience.schoolStudent);
+      await pumpPage(
+        tester,
+        path: const OnboardingPath(
+          audience: TrackAudience.schoolStudent,
+          entryMethod: TrackEntryMethod.gradeSelection,
+        ),
+      );
       expect(find.bySemanticsLabel('الخطوة 4 من 5'), findsOneWidget);
       handle.dispose();
     });

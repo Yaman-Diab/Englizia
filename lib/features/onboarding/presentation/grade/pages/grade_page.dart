@@ -8,7 +8,6 @@ import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_stat
 import 'package:englizia/features/onboarding/presentation/grade/widgets/grade_cell.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/loaded_answers.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
-import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,17 +16,22 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// v3.0 §4.2, in v0.1 per §27). Grades and their groups come from the
 /// published curriculum track, never from the app.
 class GradePage extends StatelessWidget {
-  const GradePage({required this.onContinue, required this.onBack, super.key});
+  const GradePage({
+    required this.path,
+    required this.onContinue,
+    required this.onBack,
+    super.key,
+  });
 
   final ValueChanged<TrackLevel> onContinue;
   final VoidCallback onBack;
 
+  /// The branch the learner is on, for the progress bar.
+  final OnboardingPath path;
+
   @override
   Widget build(BuildContext context) {
-    final position = onboardingPosition(
-      OnboardingStep.grade,
-      audience: TrackAudience.schoolStudent,
-    );
+    final position = onboardingPosition(OnboardingStep.grade, path: path);
     return BlocBuilder<GradeCubit, GradeState>(
       builder: (context, state) {
         final cubit = context.read<GradeCubit>();

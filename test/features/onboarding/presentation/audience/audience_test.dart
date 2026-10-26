@@ -6,6 +6,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_state.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -17,11 +18,16 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../../helpers/fake_track_repository.dart';
 import '../../../../helpers/pump_app.dart';
 
-final publishedSelfAndChild = Ok([
-  fakeTrack('general', TrackAudience.self),
+final tracksSelfAndChild = [
+  fakeTrack(
+    'general',
+    TrackAudience.self,
+    entryMethod: TrackEntryMethod.placementTest,
+  ),
   fakeTrack('kids', TrackAudience.child),
   fakeTrack('extra', null),
-]);
+];
+final publishedSelfAndChild = Ok(tracksSelfAndChild);
 
 void main() {
   setUpAll(initLocalizationForTests);
@@ -32,13 +38,14 @@ void main() {
       build: () =>
           AudienceCubit(FakeTrackRepository(tracks: [publishedSelfAndChild])),
       act: (cubit) => cubit.load(),
-      expect: () => const [
-        AudienceState(),
-        AudienceState(
-          status: LoadStatus.ready,
-          available: {TrackAudience.self, TrackAudience.child},
-        ),
+      expect: () => [
+        const AudienceState(),
+        AudienceState(status: LoadStatus.ready, tracks: tracksSelfAndChild),
       ],
+      verify: (cubit) => expect(cubit.state.available, {
+        TrackAudience.self,
+        TrackAudience.child,
+      }),
     );
 
     blocTest<AudienceCubit, AudienceState>(
@@ -52,14 +59,32 @@ void main() {
           ..select(TrackAudience.child);
       },
       skip: 2,
-      expect: () => const [
+      expect: () => [
         AudienceState(
           status: LoadStatus.ready,
-          available: {TrackAudience.self, TrackAudience.child},
+          tracks: tracksSelfAndChild,
           selected: TrackAudience.child,
         ),
       ],
       verify: (cubit) => expect(cubit.state.canContinue, isTrue),
+    );
+
+    blocTest<AudienceCubit, AudienceState>(
+      'the choice leads to its track and entry method',
+      build: () =>
+          AudienceCubit(FakeTrackRepository(tracks: [publishedSelfAndChild])),
+      act: (cubit) async {
+        await cubit.load();
+        cubit.select(TrackAudience.self);
+      },
+      verify: (cubit) => expect(
+        cubit.state.path,
+        const OnboardingPath(
+          audience: TrackAudience.self,
+          trackId: 'general',
+          entryMethod: TrackEntryMethod.placementTest,
+        ),
+      ),
     );
 
     blocTest<AudienceCubit, AudienceState>(
@@ -94,14 +119,14 @@ void main() {
         await cubit.load();
         await cubit.load();
       },
-      expect: () => const [
-        AudienceState(),
-        AudienceState(status: LoadStatus.failure, failure: NetworkFailure()),
-        AudienceState(),
-        AudienceState(
-          status: LoadStatus.ready,
-          available: {TrackAudience.self, TrackAudience.child},
+      expect: () => [
+        const AudienceState(),
+        const AudienceState(
+          status: LoadStatus.failure,
+          failure: NetworkFailure(),
         ),
+        const AudienceState(),
+        AudienceState(status: LoadStatus.ready, tracks: tracksSelfAndChild),
       ],
     );
   });
@@ -110,7 +135,7 @@ void main() {
     Future<AudienceCubit> pumpPage(
       WidgetTester tester, {
       Result<List<LearningTrack>>? result,
-      ValueChanged<TrackAudience>? onContinue,
+      ValueChanged<OnboardingPath>? onContinue,
       Locale locale = AppLocales.arabic,
       Size size = defaultViewport,
       ThemeMode themeMode = ThemeMode.light,
@@ -157,8 +182,8 @@ void main() {
     testWidgets('continue is off until a choice, then hands it on', (
       tester,
     ) async {
-      TrackAudience? continued;
-      await pumpPage(tester, onContinue: (a) => continued = a);
+      OnboardingPath? continued;
+      await pumpPage(tester, onContinue: (path) => continued = path);
 
       await tester.tap(find.text('common_continue'.tr()));
       expect(continued, isNull);
@@ -166,7 +191,8 @@ void main() {
       await tester.tap(find.text('onboarding_audience_child_title'.tr()));
       await tester.pump(AppMotion.fast);
       await tester.tap(find.text('common_continue'.tr()));
-      expect(continued, TrackAudience.child);
+      expect(continued?.audience, TrackAudience.child);
+      expect(continued?.trackId, 'kids');
     });
 
     testWidgets('the progress follows the chosen path', (tester) async {
@@ -175,9 +201,19 @@ void main() {
         tester,
         result: Ok([
           fakeTrack('general', TrackAudience.self),
-          fakeTrack('emar', TrackAudience.schoolStudent),
+          fakeTrack(
+            'emar',
+            TrackAudience.schoolStudent,
+            entryMethod: TrackEntryMethod.gradeSelection,
+          ),
         ]),
       );
+      // Before a choice: the common path, with the level question.
+      expect(find.bySemanticsLabel('الخطوة 2 من 5'), findsOneWidget);
+
+      // This adult track starts directly, so there is no level question.
+      cubit.select(TrackAudience.self);
+      await tester.pump();
       expect(find.bySemanticsLabel('الخطوة 2 من 4'), findsOneWidget);
 
       cubit.select(TrackAudience.schoolStudent);

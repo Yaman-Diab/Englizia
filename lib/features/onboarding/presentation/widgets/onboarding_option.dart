@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 /// a title, an optional description and the check (radio, or checkbox when
 /// [multiple]).
 ///
+/// [large] gives the taller card of the designs' two-answer steps.
 /// Disabled when [onTap] is null. With [soonLabel] the card is "coming soon":
 /// dashed, faded, badged and never selectable.
 class OnboardingOption extends StatelessWidget {
@@ -24,6 +25,7 @@ class OnboardingOption extends StatelessWidget {
     this.description,
     this.soonLabel,
     this.multiple = false,
+    this.large = false,
     super.key,
   }) : assert(
          mark != null || art != null || icon != null,
@@ -37,6 +39,7 @@ class OnboardingOption extends StatelessWidget {
   /// Color of the icon tile; only used with [icon].
   final TileTone iconTone;
   final bool multiple;
+  final bool large;
   final String title;
   final String? description;
   final bool selected;
@@ -44,6 +47,7 @@ class OnboardingOption extends StatelessWidget {
   final String? soonLabel;
 
   static const _minHeight = 64.0;
+  static const _largeMinHeight = 96.0;
   static const _markSize = 40.0;
   static const _artSize = 56.0;
   static const _tileRadius = 10.0;
@@ -70,7 +74,11 @@ class OnboardingOption extends StatelessWidget {
               if (description case final description?)
                 Text(
                   description,
-                  style: texts.caption.copyWith(color: colors.textSecondary),
+                  style: texts.caption.copyWith(
+                    color: selected && !soon
+                        ? colors.selection
+                        : colors.textSecondary,
+                  ),
                 ),
             ],
           ),
@@ -86,11 +94,13 @@ class OnboardingOption extends StatelessWidget {
         dashed: soon,
         multiple: multiple,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minHeight: _minHeight),
+          constraints: BoxConstraints(
+            minHeight: large ? _largeMinHeight : _minHeight,
+          ),
           child: Padding(
-            padding: const EdgeInsetsDirectional.symmetric(
+            padding: EdgeInsetsDirectional.symmetric(
               horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
+              vertical: large ? AppSpacing.lg : AppSpacing.md,
             ),
             child: Row(
               children: [

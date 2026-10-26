@@ -71,5 +71,45 @@
   "onboarding_reason_career": "النمو الوظيفي",
   "onboarding_reason_career_reply": "خطوة مهمة لمستقبلك",
   "onboarding_reason_exams": "المذاكرة للامتحانات",
-  "onboarding_reason_exams_reply": "سنتدرّب على ما يُطلب منك"
+  "onboarding_reason_exams_reply": "سنتدرّب على ما يُطلب منك",
+  "onboarding_level_question": "كم تعرف من الإنجليزية؟",
+  "onboarding_level_beginner": "أبدأ من الصفر",
+  "onboarding_level_beginner_desc": "أعرف بعض الحروف أو الكلمات فقط",
+  "onboarding_level_beginner_reply": "ممتاز، كل متعلّم بدأ من هنا!",
+  "onboarding_level_beginner_cta": "ابدأ من البداية",
+  "onboarding_level_some": "أعرف بعض الإنجليزية",
+  "onboarding_level_some_desc": "أفهم جملًا بسيطة وأريد أن أعرف مستواي",
+  "onboarding_level_some_reply": "لنعرف مستواك حتى لا تعيد ما تعرفه",
+  "onboarding_level_take_test": "متابعة إلى الاختبار",
+  "onboarding_level_test_later": "سأختبر لاحقًا",
+  "onboarding_level_test_later_note": "ستبدأ من {level}، والاختبار متاح من ملفك الشخصي",
+  "onboarding_level_start_from": "ستبدأ من {level}",
+  "onboarding_level_start_from_desc": "الكلمات الأولى والجمل الأساسية خطوة بخطوة",
+  "onboarding_level_first_level": "المستوى الأول",
+  "onboarding_level_minutes": {
+    "zero": "{range} دقيقة",
+    "one": "{range} دقيقة",
+    "two": "{range} دقيقة",
+    "few": "{range} دقائق",
+    "many": "{range} دقيقة",
+    "other": "{range} دقيقة"
+  },
+  "onboarding_level_stages": {
+    "one": "مرحلة واحدة",
+    "two": "مرحلتان",
+    "few": "{} مراحل",
+    "many": "{} مرحلة",
+    "other": "{} مرحلة"
+  },
+  "onboarding_level_stages_optional": {
+    "one": "مرحلة واحدة، وقد تُضاف مرحلة ثانية قصيرة",
+    "two": "مرحلتان، وقد تُضاف مرحلة ثالثة قصيرة",
+    "few": "{} مراحل، وقد تُضاف مرحلة أخرى قصيرة",
+    "many": "{} مرحلة، وقد تُضاف مرحلة أخرى قصيرة",
+    "other": "{} مرحلة، وقد تُضاف مرحلة أخرى قصيرة"
+  },
+  "onboarding_level_dont_know": "يمكنك اختيار «لا أعرف»",
+  "onboarding_level_offline": "الاختبار يحتاج اتصالًا بالإنترنت",
+  "onboarding_level_test_unavailable": "الاختبار غير متاح الآن، وستبدأ من المستوى الأول",
+  "placement_intro_title": "لنعرف مستواك"
 }

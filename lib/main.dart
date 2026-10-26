@@ -42,6 +42,8 @@ Future<void> main() async {
       fallbackLocale: AppLocales.fallback,
       path: AppLocales.translationsPath,
       useOnlyLangCode: true,
+      // Arabic needs its real plural forms (3–10 "few", 11–99 "many").
+      ignorePluralRules: false,
       child: const App(),
     ),
   );

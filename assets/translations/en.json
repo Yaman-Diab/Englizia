@@ -71,5 +71,35 @@
   "onboarding_reason_career": "Growing my career",
   "onboarding_reason_career_reply": "An important step for your future",
   "onboarding_reason_exams": "Studying for exams",
-  "onboarding_reason_exams_reply": "We'll practice what you'll be asked"
+  "onboarding_reason_exams_reply": "We'll practice what you'll be asked",
+  "onboarding_level_question": "How much English do you know?",
+  "onboarding_level_beginner": "I'm starting from zero",
+  "onboarding_level_beginner_desc": "I know only a few letters or words",
+  "onboarding_level_beginner_reply": "Great, every learner started here!",
+  "onboarding_level_beginner_cta": "Start from the beginning",
+  "onboarding_level_some": "I know some English",
+  "onboarding_level_some_desc": "I understand simple sentences and want to know my level",
+  "onboarding_level_some_reply": "Let's find your level so you don't repeat what you know",
+  "onboarding_level_take_test": "Continue to the test",
+  "onboarding_level_test_later": "I'll take the test later",
+  "onboarding_level_test_later_note": "You'll start from {level}; the test stays available in your profile",
+  "onboarding_level_start_from": "You'll start from {level}",
+  "onboarding_level_start_from_desc": "First words and basic sentences, step by step",
+  "onboarding_level_first_level": "the first level",
+  "onboarding_level_minutes": {
+    "one": "{range} minute",
+    "other": "{range} minutes"
+  },
+  "onboarding_level_stages": {
+    "one": "1 stage",
+    "other": "{} stages"
+  },
+  "onboarding_level_stages_optional": {
+    "one": "1 stage, maybe a short second one",
+    "other": "{} stages, maybe a short extra one"
+  },
+  "onboarding_level_dont_know": "You can choose “I don't know”",
+  "onboarding_level_offline": "The test needs an internet connection",
+  "onboarding_level_test_unavailable": "The test isn't available now; you'll start from the first level",
+  "placement_intro_title": "Let's find your level"
 }

@@ -54,11 +54,24 @@ abstract final class AppMotion {
 
   /// Idle loops of the guide character, from the welcome screen design:
   /// one wave per [characterWave], a float per [characterFloat], a blink per
-  /// [characterBlink]. Arms move to a new expression in [characterPose].
+  /// [characterBlink].
   static const characterWave = Duration(milliseconds: 2800);
   static const characterFloat = Duration(milliseconds: 3200);
   static const characterBlink = Duration(milliseconds: 4000);
-  static const characterPose = fast;
+
+  /// Float cycles of calmer (sleep, understand) and livelier (happy,
+  /// encourage) expressions, after the onboarding designs' moods.
+  static const characterFloatCalm = Duration(milliseconds: 4000);
+  static const characterFloatBrisk = Duration(milliseconds: 2600);
+  static const characterFloatLively = Duration(milliseconds: 1800);
+
+  /// One cycle of the small loops inside an expression: the talking dots,
+  /// the drifting "z", sparkles twinkling.
+  static const characterPulse = Duration(milliseconds: 1200);
+
+  /// A change of expression: the arms settle with a small overshoot
+  /// ([bounce]) and the face swaps behind a blink.
+  static const characterPose = slow;
 
   /// How long one element of a staggered screen entrance takes to arrive.
   /// When each one starts lives in `entrance_choreography.dart`.
