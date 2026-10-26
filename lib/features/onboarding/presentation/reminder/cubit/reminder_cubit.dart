@@ -1,9 +1,9 @@
 import 'package:englizia/core/notifications/notification_permission.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
-import 'package:englizia/features/notifications/domain/repositories/reminder_settings_repository.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_state.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// "When should we remind you of your lesson?" (requirements v3.0 §4.2):
@@ -13,20 +13,21 @@ class ReminderCubit extends Cubit<ReminderState> {
   ReminderCubit(this._settings, this._permission)
     : super(const ReminderState());
 
-  final ReminderSettingsRepository _settings;
+  final SettingsRepository _settings;
   final NotificationPermission _permission;
 
   Future<void> load() async {
     emit(state.copyWith(status: LoadStatus.loading, failure: () => null));
-    final result = await _settings.getReminderSettings();
+    final result = await _settings.getSettings();
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
         emit(
           state.copyWith(
             status: LoadStatus.ready,
-            settings: () => value,
-            slot: () => state.slot ?? value.defaultPreset.slot,
+            settings: () => value.reminder,
+            defaultGoalMinutes: () => value.dailyGoal.defaultMinutes,
+            slot: () => state.slot ?? value.reminder.defaultPreset.slot,
           ),
         );
       case Err(:final failure):

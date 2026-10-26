@@ -28,15 +28,14 @@ final class ReminderPreset extends Equatable {
 }
 
 /// What the reminder step offers and how the daily reminder reads, from the
-/// server's effective settings (server doc §17.7–17.8). Nothing here is
-/// fixed in the app.
+/// server's effective settings (server doc §17.8). Nothing here is fixed in
+/// the app.
 final class ReminderSettings extends Equatable {
   const ReminderSettings({
     required this.presets,
     required this.defaultSlot,
     required this.title,
     required this.body,
-    required this.dailyGoalMinutes,
   });
 
   /// In display order.
@@ -48,25 +47,66 @@ final class ReminderSettings extends Equatable {
   final LocalizedText title;
   final LocalizedText body;
 
-  /// The goal the reminder speaks of: the default daily goal until the
-  /// learner picks one.
-  final int dailyGoalMinutes;
-
   ReminderPreset get defaultPreset => presets.firstWhere(
     (p) => p.slot == defaultSlot,
     orElse: () => presets.last,
   );
 
-  /// [body] in [languageCode] with the goal filled in.
-  String bodyIn(String languageCode) =>
-      body.of(languageCode).replaceAll('{minutes}', '$dailyGoalMinutes');
+  /// [body] in [languageCode] with the learner's daily goal filled in.
+  String bodyIn(String languageCode, {required int goalMinutes}) =>
+      body.of(languageCode).replaceAll('{minutes}', '$goalMinutes');
 
   @override
-  List<Object?> get props => [
-    presets,
-    defaultSlot,
-    title,
-    body,
-    dailyGoalMinutes,
-  ];
+  List<Object?> get props => [presets, defaultSlot, title, body];
+}
+
+/// One choice of the daily goal, worded by the panel ("مريح").
+final class DailyGoalOption extends Equatable {
+  const DailyGoalOption({required this.minutes, required this.label});
+
+  final int minutes;
+  final LocalizedText label;
+
+  @override
+  List<Object?> get props => [minutes, label];
+}
+
+/// The daily goal choices and their default (server doc §17.7).
+final class DailyGoalSettings extends Equatable {
+  const DailyGoalSettings({
+    required this.options,
+    required this.defaultMinutes,
+    this.lessonMinutes,
+  });
+
+  /// In display order, lowest first.
+  final List<DailyGoalOption> options;
+  final int defaultMinutes;
+
+  /// How long an average lesson takes, to say what a goal amounts to in
+  /// lessons. Null when the server does not say: the preview then shows the
+  /// weekly total only.
+  final int? lessonMinutes;
+
+  /// The option to preselect: the default, or the first when the server's
+  /// default is not among its options.
+  DailyGoalOption get defaultOption => options.firstWhere(
+    (o) => o.minutes == defaultMinutes,
+    orElse: () => options.first,
+  );
+
+  @override
+  List<Object?> get props => [options, defaultMinutes, lessonMinutes];
+}
+
+/// The parts of the effective settings (after inheritance) the app reads
+/// before a track is chosen.
+final class EffectiveSettings extends Equatable {
+  const EffectiveSettings({required this.reminder, required this.dailyGoal});
+
+  final ReminderSettings reminder;
+  final DailyGoalSettings dailyGoal;
+
+  @override
+  List<Object?> get props => [reminder, dailyGoal];
 }

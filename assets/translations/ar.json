@@ -131,5 +131,37 @@
   "onboarding_reminder_sheet_title": "اختر وقت التذكير",
   "onboarding_reminder_hour": "الساعة",
   "onboarding_reminder_minute": "الدقيقة",
-  "onboarding_reminder_period": "الفترة"
+  "onboarding_reminder_period": "الفترة",
+  "onboarding_goal_question": "ما هو هدفك التعليمي اليومي؟",
+  "onboarding_goal_helper": "يمكنك تغييره لاحقًا من الإعدادات",
+  "onboarding_goal_cta": "أستطيع فعل ذلك!",
+  "onboarding_goal_per_day": {
+    "one": "دقيقة واحدة / يوم",
+    "two": "دقيقتان / يوم",
+    "few": "{} دقائق / يوم",
+    "many": "{} دقيقة / يوم",
+    "other": "{} دقيقة / يوم"
+  },
+  "onboarding_goal_weekly": {
+    "one": "دقيقة واحدة في الأسبوع",
+    "two": "دقيقتان في الأسبوع",
+    "few": "{} دقائق في الأسبوع",
+    "many": "{} دقيقة في الأسبوع",
+    "other": "{} دقيقة في الأسبوع"
+  },
+  "onboarding_goal_lessons_half": "≈ نصف درس يوميًا",
+  "onboarding_goal_lessons": {
+    "one": "≈ درس واحد يوميًا",
+    "two": "≈ درسان يوميًا",
+    "few": "≈ {} دروس يوميًا",
+    "many": "≈ {} درسًا يوميًا",
+    "other": "≈ {} درس يوميًا"
+  },
+  "onboarding_goal_lessons_and_half": {
+    "one": "≈ درس ونصف يوميًا",
+    "two": "≈ درسان ونصف يوميًا",
+    "few": "≈ {} دروس ونصف يوميًا",
+    "many": "≈ {} درسًا ونصفًا يوميًا",
+    "other": "≈ {} درس ونصف يوميًا"
+  }
 }

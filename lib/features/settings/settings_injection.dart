@@ -1,18 +1,18 @@
 import 'package:englizia/core/config/app_config.dart';
-import 'package:englizia/features/notifications/data/datasources/reminder_settings_remote_data_source.dart';
-import 'package:englizia/features/notifications/data/repositories/reminder_settings_repository_impl.dart';
-import 'package:englizia/features/notifications/domain/repositories/reminder_settings_repository.dart';
+import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
+import 'package:englizia/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
-void registerNotificationsDependencies(GetIt sl) {
+void registerSettingsDependencies(GetIt sl) {
   sl
-    ..registerLazySingleton<ReminderSettingsRemoteDataSource>(
+    ..registerLazySingleton<SettingsRemoteDataSource>(
       () => AppConfig.isMock
-          ? ReminderSettingsFakeDataSource(rootBundle)
-          : ReminderSettingsRemoteDataSourceImpl(sl()),
+          ? SettingsFakeDataSource(rootBundle)
+          : SettingsRemoteDataSourceImpl(sl()),
     )
-    ..registerLazySingleton<ReminderSettingsRepository>(
-      () => ReminderSettingsRepositoryImpl(sl()),
+    ..registerLazySingleton<SettingsRepository>(
+      () => SettingsRepositoryImpl(sl()),
     );
 }

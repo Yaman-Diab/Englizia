@@ -30,8 +30,8 @@ class OnboardingOption extends StatelessWidget {
     this.inline = false,
     super.key,
   }) : assert(
-         mark != null || art != null || icon != null,
-         'Give a mark, an art or an icon',
+         inline || mark != null || art != null || icon != null,
+         'Give a mark, an art or an icon (an inline row may have none)',
        );
 
   final String? mark;
@@ -69,8 +69,10 @@ class OnboardingOption extends StatelessWidget {
         : colors.textSecondary;
     final content = Row(
       children: [
-        ExcludeSemantics(child: _leading(context)),
-        const SizedBox(width: AppSpacing.md + AppSpacing.xxs),
+        if (mark != null || art != null || icon != null) ...[
+          ExcludeSemantics(child: _leading(context)),
+          const SizedBox(width: AppSpacing.md + AppSpacing.xxs),
+        ],
         Expanded(
           child: inline
               ? Row(

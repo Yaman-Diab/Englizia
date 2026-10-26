@@ -121,5 +121,25 @@
   "onboarding_reminder_sheet_title": "Choose a reminder time",
   "onboarding_reminder_hour": "Hour",
   "onboarding_reminder_minute": "Minute",
-  "onboarding_reminder_period": "AM or PM"
+  "onboarding_reminder_period": "AM or PM",
+  "onboarding_goal_question": "What is your daily learning goal?",
+  "onboarding_goal_helper": "You can change it later in settings",
+  "onboarding_goal_cta": "I can do that!",
+  "onboarding_goal_per_day": {
+    "one": "1 minute / day",
+    "other": "{} minutes / day"
+  },
+  "onboarding_goal_weekly": {
+    "one": "1 minute a week",
+    "other": "{} minutes a week"
+  },
+  "onboarding_goal_lessons_half": "≈ half a lesson a day",
+  "onboarding_goal_lessons": {
+    "one": "≈ 1 lesson a day",
+    "other": "≈ {} lessons a day"
+  },
+  "onboarding_goal_lessons_and_half": {
+    "one": "≈ 1½ lessons a day",
+    "other": "≈ {}½ lessons a day"
+  }
 }

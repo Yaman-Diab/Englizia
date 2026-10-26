@@ -331,7 +331,7 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       await pumpPage(tester);
-      expect(find.bySemanticsLabel('الخطوة 4 من 6'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 5 من 7'), findsOneWidget);
       handle.dispose();
     });
 

@@ -12,6 +12,8 @@ import 'package:englizia/features/onboarding/presentation/audience/cubit/audienc
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/pages/child_profile_page.dart';
+import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/goal/pages/goal_page.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
@@ -117,6 +119,24 @@ GoRouter createAppRouter(AppSessionController session) {
         },
       ),
       GoRoute(
+        path: AppRoutes.onboardingGoal,
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<GoalCubit>()..load(chosen: path.dailyGoalMinutes),
+            child: GoalPage(
+              path: path,
+              onContinue: (minutes) => _pushNextStep(
+                context,
+                OnboardingStep.goal,
+                path.withDailyGoal(minutes),
+              ),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
         path: AppRoutes.onboardingLevel,
         builder: (context, state) {
           final path = _pathOf(state);
@@ -189,6 +209,7 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.childProfile => AppRoutes.onboardingChildProfile,
   OnboardingStep.grade => AppRoutes.onboardingGrade,
   OnboardingStep.reason => AppRoutes.onboardingReason,
+  OnboardingStep.goal => AppRoutes.onboardingGoal,
   OnboardingStep.level => AppRoutes.onboardingLevel,
   OnboardingStep.reminder => AppRoutes.onboardingReminder,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,

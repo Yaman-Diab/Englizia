@@ -3,23 +3,23 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
-import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/features/notifications/data/datasources/reminder_settings_remote_data_source.dart';
-import 'package:englizia/features/notifications/data/models/reminder_settings_model.dart';
-import 'package:englizia/features/notifications/data/repositories/reminder_settings_repository_impl.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
+import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
+import 'package:englizia/features/settings/data/models/effective_settings_model.dart';
+import 'package:englizia/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
+import '../../../helpers/fake_settings_repository.dart';
 
 /// The contract's example response: the same file mock mode serves.
 final exampleBody =
-    jsonDecode(File(ReminderSettingsFakeDataSource.asset).readAsStringSync())
+    jsonDecode(File(SettingsFakeDataSource.asset).readAsStringSync())
         as Map<String, Object?>;
 
 class _DiskBundle extends CachingAssetBundle {
@@ -28,41 +28,36 @@ class _DiskBundle extends CachingAssetBundle {
       ByteData.sublistView(File(key).readAsBytesSync());
 }
 
-class _FailingDataSource implements ReminderSettingsRemoteDataSource {
+/// Fails the first [failures] reads, then serves the example.
+class _FlakyDataSource implements SettingsRemoteDataSource {
+  _FlakyDataSource({this.failures = 0});
+
+  int failures;
+  var calls = 0;
+
   @override
-  Future<ReminderSettingsModel> getReminderSettings() async =>
-      throw const NetworkException('connectionError');
+  Future<EffectiveSettingsModel> getSettings() async {
+    calls++;
+    if (failures-- > 0) throw const NetworkException('connectionError');
+    return EffectiveSettingsModel.fromJson(example());
+  }
 }
 
+Map<String, Object?> example() =>
+    asJsonMap(ApiClient.unwrap(jsonDecode(jsonEncode(exampleBody))));
+
 void main() {
-  const expected = ReminderSettings(
-    presets: [
-      ReminderPreset(slot: ReminderSlot.morning, time: ReminderTime(8, 0)),
-      ReminderPreset(slot: ReminderSlot.noon, time: ReminderTime(13, 0)),
-      ReminderPreset(slot: ReminderSlot.evening, time: ReminderTime(20, 0)),
-    ],
-    defaultSlot: ReminderSlot.evening,
-    title: LocalizedText(
-      ar: 'حان وقت درسك اليومي',
-      en: 'Time for your daily lesson',
-    ),
-    body: LocalizedText(
-      ar: '{minutes} دقائق فقط وتحافظ على أيامك المتتالية',
-      en: 'Just {minutes} minutes keeps your streak going',
-    ),
-    dailyGoalMinutes: 10,
-  );
-
-  Map<String, Object?> example() =>
-      asJsonMap(ApiClient.unwrap(jsonDecode(jsonEncode(exampleBody))));
-
   test('the example response parses', () {
-    expect(ReminderSettingsModel.fromJson(example()).entity, expected);
+    expect(EffectiveSettingsModel.fromJson(example()).entity, testSettings);
   });
 
   test('the goal fills the reminder body', () {
-    expect(expected.bodyIn('ar'), '10 دقائق فقط وتحافظ على أيامك المتتالية');
-    expect(expected.defaultPreset.time, const ReminderTime(20, 0));
+    expect(
+      testSettings.reminder.bodyIn('ar', goalMinutes: 15),
+      '15 دقائق فقط وتحافظ على أيامك المتتالية',
+    );
+    expect(testSettings.reminder.defaultPreset.time, const ReminderTime(20, 0));
+    expect(testSettings.dailyGoal.defaultOption.minutes, 10);
   });
 
   test('unknown slots and malformed times are skipped', () {
@@ -74,19 +69,56 @@ void main() {
       {'slot': 'noon', 'time': '12:30'},
     ];
     notifications['defaultReminderSlot'] = 'evening';
-    final settings = ReminderSettingsModel.fromJson(json).entity;
-    expect(settings.presets, const [
+    final reminder = EffectiveSettingsModel.fromJson(json).entity.reminder;
+    expect(reminder.presets, const [
       ReminderPreset(slot: ReminderSlot.noon, time: ReminderTime(12, 30)),
     ]);
     // The default falls back to an offered time.
-    expect(settings.defaultPreset.slot, ReminderSlot.noon);
+    expect(reminder.defaultPreset.slot, ReminderSlot.noon);
+  });
+
+  test('goal options are sorted, bad ones skipped, the default may be off '
+      'the list', () {
+    final json = example();
+    json.readMap('motivation')!
+      ..['dailyGoalOptions'] = [
+        {
+          'minutes': 20,
+          'label': {'ar': 'مكثّف'},
+        },
+        {'minutes': 0, 'label': 'zero'},
+        {'minutes': 7},
+        {
+          'minutes': 5,
+          'label': {'ar': 'مريح'},
+        },
+      ]
+      ..['defaultDailyGoal'] = 12;
+    final goal = EffectiveSettingsModel.fromJson(json).entity.dailyGoal;
+    expect([for (final o in goal.options) o.minutes], [5, 20]);
+    expect(goal.defaultOption.minutes, 5);
+  });
+
+  test('the lesson length is optional', () {
+    final json = example();
+    json.readMap('motivation')!.remove('averageLessonMinutes');
+    expect(
+      EffectiveSettingsModel.fromJson(json).entity.dailyGoal.lessonMinutes,
+      isNull,
+    );
   });
 
   test('incomplete settings are rejected', () {
-    final json = example()..remove('motivation');
-    expect(() => ReminderSettingsModel.fromJson(json), throwsFormatException);
     expect(
-      () => ReminderSettingsModel.fromJson(const {}),
+      () => EffectiveSettingsModel.fromJson(example()..remove('motivation')),
+      throwsFormatException,
+    );
+    expect(
+      () => EffectiveSettingsModel.fromJson(example()..remove('notifications')),
+      throwsFormatException,
+    );
+    expect(
+      () => EffectiveSettingsModel.fromJson(const {}),
       throwsFormatException,
     );
   });
@@ -100,26 +132,40 @@ void main() {
         ..httpClientAdapter = adapter,
     );
 
-    final settings = await ReminderSettingsRemoteDataSourceImpl(
-      client,
-    ).getReminderSettings();
+    final settings = await SettingsRemoteDataSourceImpl(client).getSettings();
 
     expect(adapter.requests.single.path, '/api/v1/settings');
-    expect(settings.entity, expected);
+    expect(settings.entity, testSettings);
   });
 
   test('mock mode serves the bundled example', () async {
-    final settings = await ReminderSettingsFakeDataSource(
+    final settings = await SettingsFakeDataSource(
       _DiskBundle(),
       latency: Duration.zero,
-    ).getReminderSettings();
-    expect(settings.entity, expected);
+    ).getSettings();
+    expect(settings.entity, testSettings);
   });
 
-  test('the repository maps errors through the error funnel', () async {
-    final result = await ReminderSettingsRepositoryImpl(
-      _FailingDataSource(),
-    ).getReminderSettings();
-    expect((result as Err).failure, isA<NetworkFailure>());
+  group('SettingsRepositoryImpl', () {
+    test('maps errors through the error funnel and retries them', () async {
+      final source = _FlakyDataSource(failures: 1);
+      final repository = SettingsRepositoryImpl(source);
+
+      final first = await repository.getSettings();
+      expect((first as Err).failure, isA<NetworkFailure>());
+
+      expect(await repository.getSettings(), const Ok(testSettings));
+      expect(source.calls, 2);
+    });
+
+    test('keeps a success for the session', () async {
+      final source = _FlakyDataSource();
+      final repository = SettingsRepositoryImpl(source);
+
+      await repository.getSettings();
+      await repository.getSettings();
+
+      expect(source.calls, 1);
+    });
   });
 }

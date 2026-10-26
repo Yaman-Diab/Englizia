@@ -5,7 +5,6 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
 import 'package:englizia/core/state/load_status.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_state.dart';
@@ -15,6 +14,7 @@ import 'package:englizia/features/onboarding/presentation/widgets/loaded_answers
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_notice.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -101,7 +101,13 @@ class _ReminderPageState extends State<ReminderPage> {
                     ReminderPreview(
                       time: formatClock(time.hour, time.minute),
                       title: settings.title.of(languageCode),
-                      body: settings.bodyIn(languageCode),
+                      body: settings.bodyIn(
+                        languageCode,
+                        goalMinutes:
+                            widget.path.dailyGoalMinutes ??
+                            state.defaultGoalMinutes ??
+                            0,
+                      ),
                       muted: state.denied,
                     ),
                     if (state.denied) ...[

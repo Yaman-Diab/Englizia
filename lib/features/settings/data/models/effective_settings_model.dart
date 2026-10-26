@@ -1,14 +1,25 @@
 import 'package:englizia/core/network/json_reader.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 
-/// The reminder parts of the effective settings; contract in
-/// docs/api/settings.md.
+/// The effective settings the app reads; contract in docs/api/settings.md.
 // ASSUMPTION(api): field names proposed, not confirmed (docs/api/settings.md).
-final class ReminderSettingsModel {
-  const ReminderSettingsModel(this.entity);
+final class EffectiveSettingsModel {
+  const EffectiveSettingsModel(this.entity);
 
-  factory ReminderSettingsModel.fromJson(Map<String, Object?> json) {
+  factory EffectiveSettingsModel.fromJson(Map<String, Object?> json) {
     final notifications = json.readMap('notifications');
+    final motivation = json.readMap('motivation');
+    return EffectiveSettingsModel(
+      EffectiveSettings(
+        reminder: _reminder(notifications),
+        dailyGoal: _dailyGoal(motivation),
+      ),
+    );
+  }
+
+  final EffectiveSettings entity;
+
+  static ReminderSettings _reminder(Map<String, Object?>? notifications) {
     final reminder = notifications?.readMap('dailyReminder');
     final presets = [
       for (final item in notifications?.readList('reminderTimes') ?? const [])
@@ -16,24 +27,45 @@ final class ReminderSettingsModel {
     ];
     final title = reminder?.readText('title');
     final body = reminder?.readText('body');
-    final goal = json.readMap('motivation')?.readInt('defaultDailyGoal');
-    if (presets.isEmpty || title == null || body == null || goal == null) {
+    if (presets.isEmpty || title == null || body == null) {
       throw const FormatException('Reminder settings are incomplete');
     }
-    return ReminderSettingsModel(
-      ReminderSettings(
-        presets: presets,
-        defaultSlot:
-            _slot(notifications?.readString('defaultReminderSlot')) ??
-            presets.last.slot,
-        title: title,
-        body: body,
-        dailyGoalMinutes: goal,
-      ),
+    return ReminderSettings(
+      presets: presets,
+      defaultSlot:
+          _slot(notifications?.readString('defaultReminderSlot')) ??
+          presets.last.slot,
+      title: title,
+      body: body,
     );
   }
 
-  final ReminderSettings entity;
+  static DailyGoalSettings _dailyGoal(Map<String, Object?>? motivation) {
+    final options = [
+      for (final item in motivation?.readList('dailyGoalOptions') ?? const [])
+        ?_option(item),
+    ]..sort((a, b) => a.minutes.compareTo(b.minutes));
+    final defaultMinutes = motivation?.readInt('defaultDailyGoal');
+    if (options.isEmpty || defaultMinutes == null) {
+      throw const FormatException('Daily goal settings are incomplete');
+    }
+    final lesson = motivation?.readInt('averageLessonMinutes');
+    return DailyGoalSettings(
+      options: options,
+      defaultMinutes: defaultMinutes,
+      lessonMinutes: lesson != null && lesson > 0 ? lesson : null,
+    );
+  }
+
+  /// An option without minutes or label is skipped, not fatal.
+  static DailyGoalOption? _option(Object? item) {
+    if (item is! Map) return null;
+    final json = item.cast<String, Object?>();
+    final minutes = json.readInt('minutes');
+    final label = json.readText('label');
+    if (minutes == null || minutes <= 0 || label == null) return null;
+    return DailyGoalOption(minutes: minutes, label: label);
+  }
 
   /// An unknown slot or a malformed time is skipped, not fatal.
   static ReminderPreset? _preset(Object? item) {

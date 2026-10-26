@@ -209,16 +209,16 @@ void main() {
         ]),
       );
       // Before a choice: the common path, with the level question.
-      expect(find.bySemanticsLabel('الخطوة 2 من 6'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 2 من 7'), findsOneWidget);
 
       // This adult track starts directly, so there is no level question.
       cubit.select(TrackAudience.self);
       await tester.pump();
-      expect(find.bySemanticsLabel('الخطوة 2 من 5'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 2 من 6'), findsOneWidget);
 
       cubit.select(TrackAudience.schoolStudent);
       await tester.pump();
-      expect(find.bySemanticsLabel('الخطوة 2 من 6'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 2 من 7'), findsOneWidget);
       handle.dispose();
     });
 

@@ -2,51 +2,20 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/error/failure.dart';
-import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
-import 'package:englizia/features/notifications/domain/repositories/reminder_settings_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/pages/reminder_page.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../../helpers/fake_settings_repository.dart';
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/pump_app.dart';
-
-const _settings = ReminderSettings(
-  presets: [
-    ReminderPreset(slot: ReminderSlot.morning, time: ReminderTime(8, 0)),
-    ReminderPreset(slot: ReminderSlot.noon, time: ReminderTime(13, 0)),
-    ReminderPreset(slot: ReminderSlot.evening, time: ReminderTime(20, 0)),
-  ],
-  defaultSlot: ReminderSlot.evening,
-  title: LocalizedText(
-    ar: 'حان وقت درسك اليومي',
-    en: 'Time for your daily lesson',
-  ),
-  body: LocalizedText(
-    ar: '{minutes} دقائق فقط وتحافظ على أيامك المتتالية',
-    en: 'Just {minutes} minutes keeps your streak going',
-  ),
-  dailyGoalMinutes: 10,
-);
-
-/// Serves queued results in order, repeating the last one.
-class _FakeSettingsRepository implements ReminderSettingsRepository {
-  _FakeSettingsRepository([this.results = const [Ok(_settings)]]);
-
-  final List<Result<ReminderSettings>> results;
-  var calls = 0;
-
-  @override
-  Future<Result<ReminderSettings>> getReminderSettings() async =>
-      results[(calls++).clamp(0, results.length - 1)];
-}
 
 void main() {
   setUpAll(initLocalizationForTests);
@@ -56,8 +25,8 @@ void main() {
   setUp(() => permission = FakeNotificationPermission());
 
   ReminderCubit buildCubit({
-    List<Result<ReminderSettings>> results = const [Ok(_settings)],
-  }) => ReminderCubit(_FakeSettingsRepository(results), permission);
+    List<Result<EffectiveSettings>> results = const [Ok(testSettings)],
+  }) => ReminderCubit(FakeSettingsRepository(results), permission);
 
   group('ReminderCubit', () {
     test('preselects the configured default time', () async {
@@ -133,8 +102,9 @@ void main() {
   group('ReminderPage', () {
     Future<ReminderCubit> pumpPage(
       WidgetTester tester, {
-      List<Result<ReminderSettings>> results = const [Ok(_settings)],
+      List<Result<EffectiveSettings>> results = const [Ok(testSettings)],
       ValueChanged<ReminderTime?>? onContinue,
+      OnboardingPath path = OnboardingPath.assumed,
       LayoutCase? layout,
     }) async {
       final cubit = buildCubit(results: results);
@@ -144,7 +114,7 @@ void main() {
         BlocProvider.value(
           value: cubit,
           child: ReminderPage(
-            path: OnboardingPath.assumed,
+            path: path,
             onContinue: onContinue ?? (_) {},
             onBack: () {},
           ),
@@ -192,6 +162,16 @@ void main() {
       await tester.tap(find.text('onboarding_reminder_morning'.tr()));
       await settle(tester);
       expect(find.text('إنجليزيا • 8:00 ص'), findsOneWidget);
+    });
+
+    testWidgets('the preview speaks of the goal the learner chose', (
+      tester,
+    ) async {
+      await pumpPage(tester, path: OnboardingPath.assumed.withDailyGoal(20));
+      expect(
+        find.text('20 دقائق فقط وتحافظ على أيامك المتتالية'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('"another time" opens the picker and keeps what is saved', (
@@ -302,7 +282,7 @@ void main() {
       final sent = <ReminderTime?>[];
       await pumpPage(
         tester,
-        results: const [Err(NetworkFailure()), Ok(_settings)],
+        results: const [Err(NetworkFailure()), Ok(testSettings)],
         onContinue: sent.add,
       );
       expect(continueButton(tester).onPressed, isNull);
@@ -321,7 +301,7 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       await pumpPage(tester);
-      expect(find.bySemanticsLabel('الخطوة 5 من 6'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 6 من 7'), findsOneWidget);
       handle.dispose();
     });
 

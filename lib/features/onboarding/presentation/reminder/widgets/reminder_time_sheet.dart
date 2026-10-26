@@ -4,7 +4,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 import 'package:flutter/material.dart';
 
 /// "Choose a reminder time": hour and minute wheels and the AM/PM switch,

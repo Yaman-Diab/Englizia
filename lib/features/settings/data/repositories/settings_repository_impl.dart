@@ -1,16 +1,24 @@
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/features/notifications/data/datasources/reminder_settings_remote_data_source.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
-import 'package:englizia/features/notifications/domain/repositories/reminder_settings_repository.dart';
+import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 
-final class ReminderSettingsRepositoryImpl
-    implements ReminderSettingsRepository {
-  const ReminderSettingsRepositoryImpl(this._remote);
+final class SettingsRepositoryImpl implements SettingsRepository {
+  SettingsRepositoryImpl(this._remote);
 
-  final ReminderSettingsRemoteDataSource _remote;
+  final SettingsRemoteDataSource _remote;
+  EffectiveSettings? _loaded;
 
+  /// A success is kept for the session, so each screen that reads a setting
+  /// does not fetch it again; a failure is retried by the next call.
   @override
-  Future<Result<ReminderSettings>> getReminderSettings() =>
-      guard(() async => (await _remote.getReminderSettings()).entity);
+  Future<Result<EffectiveSettings>> getSettings() async {
+    if (_loaded case final settings?) return Ok(settings);
+    final result = await guard(
+      () async => (await _remote.getSettings()).entity,
+    );
+    if (result case Ok(:final value)) _loaded = value;
+    return result;
+  }
 }

@@ -1,7 +1,14 @@
 {
   "data": {
     "motivation": {
-      "defaultDailyGoal": 10
+      "dailyGoalOptions": [
+        { "minutes": 5, "label": { "ar": "مريح", "en": "Easy" } },
+        { "minutes": 10, "label": { "ar": "قياسي", "en": "Standard" } },
+        { "minutes": 15, "label": { "ar": "جاد", "en": "Serious" } },
+        { "minutes": 20, "label": { "ar": "مكثّف", "en": "Intensive" } }
+      ],
+      "defaultDailyGoal": 10,
+      "averageLessonMinutes": 10
     },
     "notifications": {
       "reminderTimes": [

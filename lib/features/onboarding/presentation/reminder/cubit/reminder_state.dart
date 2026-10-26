@@ -1,12 +1,13 @@
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/state/load_status.dart';
-import 'package:englizia/features/notifications/domain/entities/reminder_settings.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 import 'package:equatable/equatable.dart';
 
 final class ReminderState extends Equatable {
   const ReminderState({
     this.status = LoadStatus.loading,
     this.settings,
+    this.defaultGoalMinutes,
     this.failure,
     this.slot,
     this.custom,
@@ -17,6 +18,10 @@ final class ReminderState extends Equatable {
 
   final LoadStatus status;
   final ReminderSettings? settings;
+
+  /// The default daily goal, which the reminder speaks of when the learner
+  /// has not chosen one.
+  final int? defaultGoalMinutes;
   final Failure? failure;
 
   /// The chosen preset; ignored while [useCustom].
@@ -48,6 +53,7 @@ final class ReminderState extends Equatable {
   ReminderState copyWith({
     LoadStatus? status,
     ReminderSettings? Function()? settings,
+    int? Function()? defaultGoalMinutes,
     Failure? Function()? failure,
     ReminderSlot? Function()? slot,
     ReminderTime? Function()? custom,
@@ -57,6 +63,9 @@ final class ReminderState extends Equatable {
   }) => ReminderState(
     status: status ?? this.status,
     settings: settings != null ? settings() : this.settings,
+    defaultGoalMinutes: defaultGoalMinutes != null
+        ? defaultGoalMinutes()
+        : this.defaultGoalMinutes,
     failure: failure != null ? failure() : this.failure,
     slot: slot != null ? slot() : this.slot,
     custom: custom != null ? custom() : this.custom,
@@ -69,6 +78,7 @@ final class ReminderState extends Equatable {
   List<Object?> get props => [
     status,
     settings,
+    defaultGoalMinutes,
     failure,
     slot,
     custom,
