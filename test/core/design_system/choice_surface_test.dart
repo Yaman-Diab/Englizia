@@ -99,4 +99,27 @@ void main() {
     expect(find.byIcon(Icons.check_rounded), findsOneWidget);
     expect(find.byType(DecoratedBox), findsOneWidget);
   });
+
+  testWidgets('a multiple choice is a checkbox, outside any radio group', (
+    tester,
+  ) async {
+    final handle = tester.ensureSemantics();
+    await tester.pumpLocalized(
+      ChoiceSurface(
+        selected: true,
+        onTap: () {},
+        multiple: true,
+        child: const Text('Travel'),
+      ),
+    );
+    expect(
+      tester.getSemantics(find.text('Travel')),
+      isSemantics(
+        isChecked: true,
+        hasCheckedState: true,
+        isInMutuallyExclusiveGroup: false,
+      ),
+    );
+    handle.dispose();
+  });
 }

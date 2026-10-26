@@ -2,10 +2,12 @@ import 'dart:math' as math;
 
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/motion/swap.dart';
 import 'package:flutter/material.dart';
 
 /// What the guide says, in a bubble whose tail points back to the guide at
-/// the start side. Screen readers announce changes to [text].
+/// the start side. A new [text] swaps in with a short rise; screen readers
+/// announce it.
 class SpeechBubble extends StatelessWidget {
   const SpeechBubble({required this.text, super.key});
 
@@ -41,7 +43,13 @@ class SpeechBubble extends StatelessWidget {
               liveRegion: true,
               child: SizedBox(
                 width: double.infinity,
-                child: Text(text, style: context.texts.bodyStrong),
+                child: Swap(
+                  child: Text(
+                    text,
+                    key: ValueKey(text),
+                    style: context.texts.bodyStrong,
+                  ),
+                ),
               ),
             ),
           ),

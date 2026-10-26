@@ -21,6 +21,7 @@ abstract final class HeroEntrance {
 abstract final class QuestionEntrance {
   static const mascot = Duration(milliseconds: 120);
   static const bubble = Duration(milliseconds: 240);
+  static const subtitle = Duration(milliseconds: 300);
   static const firstAnswer = Duration(milliseconds: 340);
   static const answerStagger = Duration(milliseconds: 60);
   static const helper = Duration(milliseconds: 540);

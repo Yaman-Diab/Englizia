@@ -24,6 +24,7 @@ class ChoiceSurface extends StatelessWidget {
     required this.child,
     this.shape = ChoiceShape.card,
     this.dashed = false,
+    this.multiple = false,
     this.semanticLabel,
     super.key,
   });
@@ -33,6 +34,10 @@ class ChoiceSurface extends StatelessWidget {
   final Widget child;
   final ChoiceShape shape;
   final bool dashed;
+
+  /// One of several answers that can all be chosen (a checkbox), instead of
+  /// one of a mutually exclusive group (a radio).
+  final bool multiple;
 
   /// Replaces what screen readers would read from [child].
   final String? semanticLabel;
@@ -80,7 +85,7 @@ class ChoiceSurface extends StatelessWidget {
     return MergeSemantics(
       child: Semantics(
         checked: selected,
-        inMutuallyExclusiveGroup: true,
+        inMutuallyExclusiveGroup: !multiple,
         label: semanticLabel,
         child: content,
       ),
@@ -89,18 +94,21 @@ class ChoiceSurface extends StatelessWidget {
 }
 
 /// The selection mark of a [ChoiceSurface]: a filled check when [selected],
-/// otherwise an empty ring (or nothing without [showRing]). Pops in.
+/// otherwise an empty ring (or nothing without [showRing]); a thinner ring
+/// marks a [multiple] choice. Pops in.
 class ChoiceCheck extends StatelessWidget {
   const ChoiceCheck({
     required this.selected,
     this.size = defaultSize,
     this.showRing = true,
+    this.multiple = false,
     super.key,
   });
 
   final bool selected;
   final double size;
   final bool showRing;
+  final bool multiple;
 
   static const defaultSize = 24.0;
 
@@ -134,7 +142,7 @@ class ChoiceCheck extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: context.scheme.outlineVariant,
-                    width: 2,
+                    width: multiple ? 1.5 : 2,
                   ),
                 ),
                 child: const SizedBox.expand(),

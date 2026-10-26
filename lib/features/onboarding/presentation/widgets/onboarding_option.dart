@@ -4,8 +4,9 @@ import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:flutter/material.dart';
 
 /// One answer card of an onboarding question (design "Onboarding Option"):
-/// a leading [art] (56) or [mark] (40) in a circle, a title, an optional
-/// description and a radio check.
+/// a leading [art] (56) or [mark] (40) in a circle or an [icon] in a tile,
+/// a title, an optional description and the check (radio, or checkbox when
+/// [multiple]).
 ///
 /// Disabled when [onTap] is null. With [soonLabel] the card is "coming soon":
 /// dashed, faded, badged and never selectable.
@@ -16,13 +17,20 @@ class OnboardingOption extends StatelessWidget {
     required this.onTap,
     this.mark,
     this.art,
+    this.icon,
     this.description,
     this.soonLabel,
+    this.multiple = false,
     super.key,
-  }) : assert(mark != null || art != null, 'Give a mark or an art');
+  }) : assert(
+         mark != null || art != null || icon != null,
+         'Give a mark, an art or an icon',
+       );
 
   final String? mark;
   final Widget? art;
+  final IconData? icon;
+  final bool multiple;
   final String title;
   final String? description;
   final bool selected;
@@ -32,6 +40,7 @@ class OnboardingOption extends StatelessWidget {
   static const _minHeight = 64.0;
   static const _markSize = 40.0;
   static const _artSize = 56.0;
+  static const _tileRadius = 10.0;
   static const _disabledOpacity = .45;
   static const _soonContentOpacity = .55;
 
@@ -68,6 +77,7 @@ class OnboardingOption extends StatelessWidget {
         selected: selected && !soon,
         onTap: soon ? null : onTap,
         dashed: soon,
+        multiple: multiple,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: _minHeight),
           child: Padding(
@@ -86,7 +96,7 @@ class OnboardingOption extends StatelessWidget {
                 if (soonLabel case final label?)
                   _SoonBadge(label: label)
                 else
-                  ChoiceCheck(selected: selected),
+                  ChoiceCheck(selected: selected, multiple: multiple),
               ],
             ),
           ),
@@ -97,6 +107,21 @@ class OnboardingOption extends StatelessWidget {
 
   Widget _leading(BuildContext context) {
     final background = context.scheme.surfaceContainerHigh;
+    if (icon case final icon?) {
+      return Container(
+        width: _markSize,
+        height: _markSize,
+        decoration: BoxDecoration(
+          color: background,
+          borderRadius: BorderRadius.circular(_tileRadius),
+        ),
+        child: Icon(
+          icon,
+          size: AppSizes.iconMd - AppSpacing.xxs,
+          color: context.colors.selection,
+        ),
+      );
+    }
     if (art case final art?) {
       return Container(
         width: _artSize,

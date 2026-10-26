@@ -58,5 +58,18 @@
   "onboarding_child_greeting_empty": "مرحبًا!",
   "onboarding_child_age_question": "كم عمر طفلك؟",
   "onboarding_child_age_label": "{age} سنوات",
-  "onboarding_child_helper": "الاسم يظهر للطفل داخل التطبيق فقط"
+  "onboarding_child_helper": "الاسم يظهر للطفل داخل التطبيق فقط",
+  "onboarding_reason_subtitle": "اختر كل ما يناسبك",
+  "onboarding_reason_communication": "التواصل الفعّال",
+  "onboarding_reason_communication_reply": "سنجهّزك للمحادثات!",
+  "onboarding_reason_fun": "فقط من أجل المتعة",
+  "onboarding_reason_fun_reply": "أجمل طريقة للتعلّم!",
+  "onboarding_reason_education": "أغراض تعليمية",
+  "onboarding_reason_education_reply": "سنبني أساسًا قويًا",
+  "onboarding_reason_travel": "الاستعداد للسفر",
+  "onboarding_reason_travel_reply": "ستفهم وتُفهَم أينما ذهبت",
+  "onboarding_reason_career": "النمو الوظيفي",
+  "onboarding_reason_career_reply": "خطوة مهمة لمستقبلك",
+  "onboarding_reason_exams": "المذاكرة للامتحانات",
+  "onboarding_reason_exams_reply": "سنتدرّب على ما يُطلب منك"
 }
