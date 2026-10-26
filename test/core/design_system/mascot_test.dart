@@ -154,6 +154,23 @@ void main() {
     });
   });
 
+  test('the goal moods get livelier from calm to ecstatic', () {
+    const ladder = [
+      MascotExpression.calm,
+      MascotExpression.confident,
+      MascotExpression.excited,
+      MascotExpression.ecstatic,
+    ];
+    for (var i = 1; i < ladder.length; i++) {
+      final lower = ladder[i - 1].idle;
+      final higher = ladder[i].idle;
+      expect(higher.lift, greaterThanOrEqualTo(lower.lift));
+      expect(higher.period, lessThanOrEqualTo(lower.period));
+    }
+    expect(MascotExpression.ecstatic.pose.rightHand, MascotHand.fist);
+    expect(MascotExpression.ecstatic.pose.mouth, MascotMouth.laugh);
+  });
+
   test('confident gives a thumbs-up with the other hand on the hip', () {
     final pose = MascotExpression.confident.pose;
     expect(pose.rightHand, MascotHand.thumbsUp);

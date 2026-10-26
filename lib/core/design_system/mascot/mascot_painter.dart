@@ -460,6 +460,21 @@ class MascotPainter extends CustomPainter {
         _fill(canvas, _oval(90, 103, 4.5, 2.6), palette.blush);
       case MascotMouth.tiny:
         _fill(canvas, _oval(90, 96, 2.6, 3), ink);
+      case MascotMouth.laugh:
+        final open = Path()
+          ..moveTo(74, 90)
+          ..quadraticBezierTo(90, 120, 106, 90)
+          ..close();
+        _fill(canvas, open, ink);
+        canvas.drawPath(
+          open,
+          Paint()
+            ..color = ink
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2
+            ..strokeJoin = StrokeJoin.round,
+        );
+        _fill(canvas, _oval(90, 106, 8, 4.5), palette.blush);
       case MascotMouth.proud:
         final open = Path()
           ..moveTo(78, 92)

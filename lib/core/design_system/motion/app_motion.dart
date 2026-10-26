@@ -65,6 +65,9 @@ abstract final class AppMotion {
   static const characterFloatBrisk = Duration(milliseconds: 2600);
   static const characterFloatLively = Duration(milliseconds: 1800);
 
+  /// The fastest bounce, for the most thrilled expression.
+  static const characterFloatQuick = Duration(milliseconds: 800);
+
   /// One cycle of the small loops inside an expression: the talking dots,
   /// the drifting "z", sparkles twinkling.
   static const characterPulse = Duration(milliseconds: 1200);
