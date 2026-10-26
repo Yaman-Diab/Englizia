@@ -98,6 +98,8 @@ abstract final class AppPalette {
   static const tileOrangeFg = Color(0xFFD2560F);
   static const tileNavyBg = Color(0xFFE1E6F2);
   static const tileNavyFg = Color(0xFF1E3A8A);
+  static const tileNeutralBg = Color(0xFFEEF3FB);
+  static const tileNeutralFg = Color(0xFF2563EB);
   static const tileBlueBgDark = Color(0xFF17284A);
   static const tileBlueFgDark = Color(0xFF8AB4FF);
   static const tileAmberBgDark = Color(0xFF33270F);
@@ -110,6 +112,8 @@ abstract final class AppPalette {
   static const tileOrangeFgDark = Color(0xFFFF9A5C);
   static const tileNavyBgDark = Color(0xFF1A2236);
   static const tileNavyFgDark = Color(0xFF9DB3E8);
+  static const tileNeutralBgDark = Color(0xFF1A2640);
+  static const tileNeutralFgDark = Color(0xFF8AB4FF);
 
   // Dark column of the designs' token table.
   static const night950 = Color(0xFF0C1220);
