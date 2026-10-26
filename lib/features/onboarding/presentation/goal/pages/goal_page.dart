@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_cubit.dart';
-import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_state.dart';
 import 'package:englizia/features/onboarding/presentation/goal/widgets/goal_preview.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/loaded_answers.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
@@ -51,10 +50,12 @@ class GoalPage extends StatelessWidget {
         final cubit = context.read<GoalCubit>();
         final settings = state.settings;
         final selected = state.selected;
-        final index = state.selectedIndex;
+        final index = settings?.options.indexWhere(
+          (o) => o.minutes == selected,
+        );
         return OnboardingQuestionScaffold(
           question: 'onboarding_goal_question'.tr(),
-          expression: index == null || settings == null
+          expression: index == null || index < 0 || settings == null
               ? MascotExpression.curious
               : _moodOf(index, settings.options.length),
           step: position.current,

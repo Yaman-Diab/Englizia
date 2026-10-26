@@ -33,7 +33,6 @@ void main() {
 
       expect(cubit.state.status, LoadStatus.ready);
       expect(cubit.state.selected, 10);
-      expect(cubit.state.selectedIndex, 1);
       expect(cubit.state.canContinue, isTrue);
     });
 
@@ -216,8 +215,8 @@ void main() {
     testWidgets('without a lesson length only the weekly total shows', (
       tester,
     ) async {
-      const settings = EffectiveSettings(
-        reminder: ReminderSettings(
+      final settings = EffectiveSettings(
+        reminder: const ReminderSettings(
           presets: [
             ReminderPreset(
               slot: ReminderSlot.evening,
@@ -228,12 +227,13 @@ void main() {
           title: _text,
           body: _text,
         ),
-        dailyGoal: DailyGoalSettings(
+        dailyGoal: const DailyGoalSettings(
           options: [DailyGoalOption(minutes: 10, label: _text)],
           defaultMinutes: 10,
         ),
+        challenge: testSettings.challenge,
       );
-      await pumpPage(tester, results: const [Ok(settings)]);
+      await pumpPage(tester, results: [Ok(settings)]);
 
       expect(find.text('70 دقيقة في الأسبوع'), findsOneWidget);
       expect(find.textContaining('≈'), findsNothing);
@@ -278,7 +278,7 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       await pumpPage(tester);
-      expect(find.bySemanticsLabel('الخطوة 4 من 7'), findsOneWidget);
+      expect(find.bySemanticsLabel('الخطوة 4 من 8'), findsOneWidget);
       handle.dispose();
     });
 

@@ -1,42 +1,21 @@
-import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/state/load_status.dart';
-import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_state.dart';
-import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:englizia/features/onboarding/presentation/choice_step/choice_step_cubit.dart';
+import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 
-/// "What is your daily learning goal?": the options and the default come
-/// from the settings, and the default is preselected (requirements v3.0
-/// §4.2).
-class GoalCubit extends Cubit<GoalState> {
-  GoalCubit(this._settings) : super(const GoalState());
+typedef GoalState = ChoiceStepState<DailyGoalSettings>;
 
-  final SettingsRepository _settings;
+/// "What is your daily learning goal?": minutes a day, as the panel offers
+/// them, with its default preselected (requirements v3.0 §4.2).
+class GoalCubit extends ChoiceStepCubit<DailyGoalSettings> {
+  GoalCubit(super.settings);
 
-  /// Loads the options. [chosen] (coming back to this step) is kept when
-  /// it is still on offer.
-  Future<void> load({int? chosen}) async {
-    emit(state.copyWith(status: LoadStatus.loading, failure: () => null));
-    final result = await _settings.getSettings();
-    if (isClosed) return;
-    switch (result) {
-      case Ok(:final value):
-        final goal = value.dailyGoal;
-        final keep = chosen ?? state.selected;
-        emit(
-          state.copyWith(
-            status: LoadStatus.ready,
-            settings: () => goal,
-            selected: () => goal.options.any((o) => o.minutes == keep)
-                ? keep
-                : goal.defaultOption.minutes,
-          ),
-        );
-      case Err(:final failure):
-        emit(
-          state.copyWith(status: LoadStatus.failure, failure: () => failure),
-        );
-    }
-  }
+  @override
+  DailyGoalSettings partOf(EffectiveSettings settings) => settings.dailyGoal;
 
-  void select(int minutes) => emit(state.copyWith(selected: () => minutes));
+  @override
+  List<int> valuesOf(DailyGoalSettings settings) => [
+    for (final option in settings.options) option.minutes,
+  ];
+
+  @override
+  int defaultOf(DailyGoalSettings settings) => settings.defaultOption.minutes;
 }
