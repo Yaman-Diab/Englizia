@@ -104,6 +104,7 @@ Dependency direction: `presentation → domain ← data`.
 
 - Read `docs/PLAYBOOK.md` before creating a new feature, a new core file, CI, or release config. Use `/new-feature`.
 - Read the relevant section of `docs/product/` before building any screen; read `docs/api/` before touching a datasource or model.
+- Before building a requested screen, list its parts tagged to a **later version** than the current target (requirements §4.2 tables, §23) and ask the owner per item: build now or defer. Build only what is approved; log the rest in `docs/STATUS.md`.
   Save every real response (sanitized) as `test/fixtures/api/<endpoint>_<case>.json` and parse it in a test.
 - **Commit after each logical change, but never `git push` without asking the user first — every time.**
 - Never rewrite history or change git config without an explicit request.
