@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 /// Paints the guide in the 180×180 space of the approved drawing, scaled to
 /// the canvas. Shapes, coordinates and layer order follow Claude Design
 /// `Guide.dc.html`; [frame] adds the idle motion and triggers repaints.
+/// [blink] and [stretch] come from an expression change in progress.
 class MascotPainter extends CustomPainter {
   MascotPainter({
     required MascotPose pose,
@@ -18,6 +19,8 @@ class MascotPainter extends CustomPainter {
     required this.prop,
     required this.frame,
     this.framing = MascotFraming.full,
+    this.blink = 0,
+    this.stretch = 0,
   }) : pose = _effectivePose(pose, prop, framing),
        super(repaint: frame);
 
@@ -26,6 +29,12 @@ class MascotPainter extends CustomPainter {
   final MascotProp prop;
   final MascotFraming framing;
   final ValueListenable<MascotFrame> frame;
+
+  /// How shut the eyes are for the face swap, 0-1.
+  final double blink;
+
+  /// Extra height of the figure, as a fraction (negative crouches).
+  final double stretch;
 
   static const viewBox = 180.0;
   static const _rimWidth = 2.5;
@@ -49,6 +58,7 @@ class MascotPainter extends CustomPainter {
         leftHand: MascotHand.none,
         rightHand: MascotHand.none,
         sparkles: false,
+        glint: false,
         phone: false,
       );
     }
@@ -72,18 +82,28 @@ class MascotPainter extends CustomPainter {
         ..scale(size.width / _headBox, size.height / _headBox)
         ..translate(-_headLeft, 0);
     } else {
-      canvas
-        ..scale(size.width / viewBox, size.height / viewBox)
-        ..drawOval(
+      canvas.scale(size.width / viewBox, size.height / viewBox);
+      if (!palette.isSilhouette) {
+        canvas.drawOval(
           Rect.fromCenter(
             center: const Offset(90, 171),
             width: f.shadowRadius * 2,
             height: 12,
           ),
           Paint()..color = palette.shadow,
-        )
-        ..translate(0, -f.lift);
-      if (pose.tilt != 0) _rotate(canvas, pose.tilt, _feetPivot);
+        );
+      }
+      canvas.translate(0, -f.lift);
+      final tilt = pose.tilt + f.sway;
+      if (tilt != 0) _rotate(canvas, tilt, _feetPivot);
+      final grow = f.stretch + stretch;
+      if (grow != 0) {
+        // Taller and narrower as it rises, shorter and wider as it lands.
+        canvas
+          ..translate(_feetPivot.dx, _feetPivot.dy)
+          ..scale(1 - grow / 2, 1 + grow)
+          ..translate(-_feetPivot.dx, -_feetPivot.dy);
+      }
     }
 
     final rim = palette.outline;
@@ -98,7 +118,7 @@ class MascotPainter extends CustomPainter {
     _feet(canvas, palette.feet);
     if (tuft) {
       _fill(canvas, _bubblePath, palette.body);
-      _bubbleContent(canvas);
+      _bubbleContent(canvas, f);
     }
     _fill(canvas, _bodyPath, palette.body);
     _fill(canvas, _oval(90, 134, 28, 20), palette.belly);
@@ -128,14 +148,14 @@ class MascotPainter extends CustomPainter {
     if (prop == MascotProp.gradCap) _gradCap(canvas, rim);
     _arms(canvas, f);
     if (pose.phone) _phone(canvas);
-    if (pose.sparkles) {
-      for (final (x, y, s) in const [
+    if (pose.sparkles && !palette.isSilhouette) {
+      for (final (i, (x, y, s)) in const [
         (20.0, 42.0, 9.0),
         (162.0, 30.0, 8.0),
         (14.0, 112.0, 6.0),
         (168.0, 120.0, 6.0),
-      ]) {
-        _fill(canvas, _sparkle(x, y, s), palette.spark);
+      ].indexed) {
+        _fill(canvas, _sparkle(x, y, s * _twinkle(f, i * .25)), palette.spark);
       }
     }
     canvas.restore();
@@ -157,13 +177,24 @@ class MascotPainter extends CustomPainter {
     }
 
     canvas.save();
-    if (f.waveAngle != 0) _rotate(canvas, f.waveAngle, pose.rightArm.shoulder);
+    final angle = f.waveAngle + f.swing;
+    if (angle != 0) _rotate(canvas, angle, pose.rightArm.shoulder);
     _arm(canvas, pose.rightArm, pose.rightHand, pose.rightSplit, rim);
     if (rim == null) {
       if (pose.rightHand == MascotHand.fist) {
         _fistCrease(canvas, pose.rightArm.end);
       }
-      if (pose.rightHand == MascotHand.wave && f.waveMarks > 0) {
+      if (pose.glint && !palette.isSilhouette) {
+        final Offset(:dx, :dy) = pose.rightArm.hand;
+        _fill(
+          canvas,
+          _sparkle(dx + 15, dy - 30, 6 * _twinkle(f, 0)),
+          palette.spark,
+        );
+      }
+      if (pose.rightHand == MascotHand.wave &&
+          f.waveMarks > 0 &&
+          !palette.isSilhouette) {
         _stroke(
           canvas,
           Path()
@@ -187,14 +218,15 @@ class MascotPainter extends CustomPainter {
     double split,
     Color? rim,
   ) {
-    canvas.drawLine(
-      arm.shoulder,
-      arm.end,
-      Paint()
-        ..color = rim ?? palette.arm
-        ..strokeWidth = _armWidth + (rim == null ? 0 : _rimWidth * 2)
-        ..strokeCap = StrokeCap.round,
-    );
+    final stroke = Paint()
+      ..color = rim ?? palette.arm
+      ..strokeWidth = _armWidth + (rim == null ? 0 : _rimWidth * 2)
+      ..strokeCap = StrokeCap.round;
+    canvas.drawLine(arm.shoulder, arm.end, stroke);
+    // A bent arm (hand on the hip); a covering hand already hides the joint.
+    if (arm.hand != arm.end && hand != MascotHand.cover) {
+      canvas.drawLine(arm.end, arm.hand, stroke);
+    }
     final color = rim ?? palette.arm;
     final isRim = rim != null;
     final Offset(:dx, :dy) = arm.hand;
@@ -211,6 +243,22 @@ class MascotPainter extends CustomPainter {
         _fill(canvas, _oval(dx, dy, 10, 10), color, rim: isRim);
       case MascotHand.cover:
         _coveringHand(canvas, dx, dy, split, color, isRim);
+      case MascotHand.thumbsUp:
+        _fill(canvas, _oval(dx, dy, 11, 11), color, rim: isRim);
+        _fill(
+          canvas,
+          Path()..addRRect(
+            RRect.fromLTRBR(
+              dx - 5,
+              dy - 21,
+              dx + 4,
+              dy - 4,
+              const Radius.circular(4.5),
+            ),
+          ),
+          color,
+          rim: isRim,
+        );
     }
   }
 
@@ -324,10 +372,11 @@ class MascotPainter extends CustomPainter {
     MascotFrame f,
     VoidCallback draw,
   ) {
+    final openness = math.max(.08, f.eyeOpenness * (1 - blink));
     canvas
       ..save()
       ..translate(x, y)
-      ..scale(1, f.eyeOpenness)
+      ..scale(1, openness)
       ..translate(-x, -y);
     draw();
     canvas.restore();
@@ -346,6 +395,10 @@ class MascotPainter extends CustomPainter {
       MascotBrows.raise => const [
         (68.0, 68.0, 66.5, 68.0),
         (96.0, 63.0, 55.0, 61.0),
+      ],
+      MascotBrows.confident => const [
+        (67.0, 70.0, 65.0, 68.0),
+        (97.0, 68.0, 65.0, 70.0),
       ],
       MascotBrows.none => const <(double, double, double, double)>[],
     };
@@ -407,23 +460,73 @@ class MascotPainter extends CustomPainter {
         _fill(canvas, _oval(90, 103, 4.5, 2.6), palette.blush);
       case MascotMouth.tiny:
         _fill(canvas, _oval(90, 96, 2.6, 3), ink);
+      case MascotMouth.proud:
+        final open = Path()
+          ..moveTo(78, 92)
+          ..quadraticBezierTo(90, 106, 102, 92)
+          ..close();
+        _fill(canvas, open, ink);
+        canvas.drawPath(
+          open,
+          Paint()
+            ..color = ink
+            ..style = PaintingStyle.stroke
+            ..strokeWidth = 2
+            ..strokeJoin = StrokeJoin.round,
+        );
+        _fill(
+          canvas,
+          Path()
+            ..moveTo(80.5, 93)
+            ..quadraticBezierTo(90, 95.5, 99.5, 93)
+            ..lineTo(98.6, 96)
+            ..quadraticBezierTo(90, 98.6, 81.4, 96)
+            ..close(),
+          palette.highlight,
+        );
     }
   }
 
-  void _bubbleContent(Canvas canvas) {
+  /// The tuft's content; with a [MascotFrame.pulse] the dots type in turn,
+  /// the "?" bobs and the "z" drifts up and fades.
+  void _bubbleContent(Canvas canvas, MascotFrame f) {
+    if (palette.isSilhouette) return;
     final color = palette.belly;
+    final pulse = f.pulse;
     switch (pose.bubble) {
       case MascotBubble.none:
         break;
       case MascotBubble.dots:
-        for (final x in const [93.0, 100.0, 107.0]) {
-          _fill(canvas, _oval(x, 16, 2.3, 2.3), color);
+        for (final (i, x) in const [93.0, 100.0, 107.0].indexed) {
+          final on = pulse == null
+              ? 1.0
+              : .35 + .65 * MascotFrame.bump(pulse, center: .2 + i * .2);
+          _fill(
+            canvas,
+            _oval(x, 16 - (on - .35) * 1.5, 2.3, 2.3),
+            color.withValues(alpha: on),
+          );
         }
       case MascotBubble.question:
-        _glyph(canvas, '?', 15, const Offset(100, 21.5), color);
+        final bob = pulse == null ? 0.0 : 1.2 * math.sin(2 * math.pi * pulse);
+        _glyph(canvas, '?', 15, Offset(100, 21.5 - bob), color);
       case MascotBubble.sleep:
-        _glyph(canvas, 'z', 14, const Offset(100, 21), color);
+        final drift = pulse ?? 0;
+        _glyph(
+          canvas,
+          'z',
+          14,
+          Offset(100 + drift * 1.5, 21 - drift * 3),
+          color.withValues(alpha: 1 - drift * .55),
+        );
     }
+  }
+
+  /// Size of a sparkle [offset] into the pulse cycle: 75-100 %.
+  static double _twinkle(MascotFrame f, double offset) {
+    final pulse = f.pulse;
+    if (pulse == null) return 1;
+    return .75 + .25 * MascotFrame.bump(pulse, center: offset, width: .6);
   }
 
   /// A Latin glyph centered on [baseline], like SVG `text-anchor: middle`.
@@ -724,5 +827,7 @@ class MascotPainter extends CustomPainter {
       oldDelegate.palette != palette ||
       oldDelegate.prop != prop ||
       oldDelegate.framing != framing ||
-      oldDelegate.frame != frame;
+      oldDelegate.frame != frame ||
+      oldDelegate.blink != blink ||
+      oldDelegate.stretch != stretch;
 }

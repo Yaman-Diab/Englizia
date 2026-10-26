@@ -31,10 +31,7 @@ void main() {
         find.byType(SvgPicture),
         findsNWidgets(AppIllustration.values.length),
       );
-      expect(
-        find.byType(Mascot),
-        findsNWidgets(AppIllustration.values.length),
-      );
+      expect(find.byType(Mascot), findsNWidgets(AppIllustration.values.length));
       expect(tester.takeException(), isNull);
     });
   }

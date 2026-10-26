@@ -1,19 +1,21 @@
+import 'dart:math' as math;
 import 'dart:ui' show Offset, lerpDouble;
 
 /// Hand shape drawn at the end of an arm.
-enum MascotHand { none, fist, palm, cup, wave, ball, cover }
+enum MascotHand { none, fist, palm, cup, wave, ball, cover, thumbsUp }
 
 enum MascotEyes { open, wide, closed, soft, sleep, look }
 
-enum MascotBrows { up, calm, raise, none }
+enum MascotBrows { up, calm, raise, confident, none }
 
-enum MascotMouth { grin, smile, calm, soft, small, hmm, o, bigO, tiny }
+enum MascotMouth { grin, smile, calm, soft, small, hmm, o, bigO, tiny, proud }
 
 /// What the speech tuft above the head shows.
 enum MascotBubble { none, question, dots, sleep }
 
 /// One arm in the 180×180 drawing space: a 14-unit stroke from [shoulder] to
-/// [end], with the hand drawn at [hand] (defaults to [end]).
+/// [end], with the hand drawn at [hand] (defaults to [end]). A [hand] away
+/// from [end] bends the arm at [end], like an elbow.
 final class MascotArm {
   const MascotArm(this.shoulder, this.end, [Offset? hand]) : _hand = hand;
 
@@ -58,6 +60,7 @@ final class MascotPose {
     this.cheeks = 0,
     this.bubble = MascotBubble.none,
     this.sparkles = false,
+    this.glint = false,
     this.phone = false,
   });
 
@@ -83,8 +86,15 @@ final class MascotPose {
   final MascotBubble bubble;
   final bool sparkles;
 
+  /// One small sparkle beside the right hand (a thumbs-up "ting").
+  final bool glint;
+
   /// Holds a phone out with both hands (handing it to a parent).
   final bool phone;
+
+  /// Where in an expression change the face, hands and effects swap, as a
+  /// fraction of its linear progress; the eyes are shut at that moment.
+  static const faceSwitch = .4;
 
   MascotPose copyWith({
     double? tilt,
@@ -95,6 +105,7 @@ final class MascotPose {
     double? leftSplit,
     double? rightSplit,
     bool? sparkles,
+    bool? glint,
     bool? phone,
   }) => MascotPose(
     tilt: tilt ?? this.tilt,
@@ -110,17 +121,54 @@ final class MascotPose {
     cheeks: cheeks,
     bubble: bubble,
     sparkles: sparkles ?? this.sparkles,
+    glint: glint ?? this.glint,
     phone: phone ?? this.phone,
   );
 
-  /// [to] with the arms, tilt and finger split moved from [from] by [t].
-  /// Face and hand shapes switch at once, as in the design.
-  static MascotPose lerpGeometry(MascotPose from, MascotPose to, double t) =>
-      to.copyWith(
-        tilt: lerpDouble(from.tilt, to.tilt, t),
-        leftArm: MascotArm.lerp(from.leftArm, to.leftArm, t),
-        rightArm: MascotArm.lerp(from.rightArm, to.rightArm, t),
-        leftSplit: lerpDouble(from.leftSplit, to.leftSplit, t),
-        rightSplit: lerpDouble(from.rightSplit, to.rightSplit, t),
-      );
+  /// The in-between pose of an expression change. Arms, tilt and finger
+  /// split follow [motion], which may overshoot 1; the blush fades over the
+  /// linear [progress]; face, hands and effects swap at [faceSwitch], while
+  /// the eyes are shut ([changeBlink]).
+  static MascotPose blend(
+    MascotPose from,
+    MascotPose to, {
+    required double motion,
+    required double progress,
+  }) {
+    final face = progress < faceSwitch ? from : to;
+    return MascotPose(
+      tilt: lerpDouble(from.tilt, to.tilt, motion)!,
+      leftArm: MascotArm.lerp(from.leftArm, to.leftArm, motion),
+      rightArm: MascotArm.lerp(from.rightArm, to.rightArm, motion),
+      leftHand: face.leftHand,
+      rightHand: face.rightHand,
+      leftSplit: lerpDouble(from.leftSplit, to.leftSplit, motion)!,
+      rightSplit: lerpDouble(from.rightSplit, to.rightSplit, motion)!,
+      eyes: face.eyes,
+      brows: face.brows,
+      mouth: face.mouth,
+      cheeks: lerpDouble(from.cheeks, to.cheeks, progress)!.clamp(0, 1),
+      bubble: face.bubble,
+      sparkles: face.sparkles,
+      glint: face.glint,
+      phone: face.phone,
+    );
+  }
+
+  /// How shut the eyes are during an expression change: closing towards
+  /// [faceSwitch], open again before the end.
+  static double changeBlink(double progress) {
+    const span = faceSwitch * 2;
+    if (progress <= 0 || progress >= span) return 0;
+    return .9 * math.sin(math.pi * progress / span);
+  }
+
+  /// Extra height of the figure during an expression change, as a fraction:
+  /// a small crouch, then a stretch as it lands in the new pose.
+  static double changeStretch(double progress) {
+    if (progress <= 0 || progress >= 1) return 0;
+    return progress < .5
+        ? -.05 * math.sin(math.pi * progress / .5)
+        : .02 * math.sin(math.pi * (progress - .5) / .5);
+  }
 }

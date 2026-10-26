@@ -1,9 +1,12 @@
 import 'dart:ui' show Offset;
 
+import 'package:englizia/core/design_system/mascot/mascot_motion.dart';
 import 'package:englizia/core/design_system/mascot/mascot_pose.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 
-/// The guide's approved expressions (requirements v3.0 §22), one pose each.
-/// To add one: append a value with its [MascotPose]; nothing else changes.
+/// The guide's expressions (requirements v3.0 §22), one pose and one idle
+/// style each. To add one: append a value with its [MascotPose] and give it
+/// an [idle]; nothing else changes.
 enum MascotExpression {
   welcome(
     MascotPose(
@@ -133,11 +136,64 @@ enum MascotExpression {
       brows: MascotBrows.raise,
       cheeks: .6,
     ),
+  ),
+
+  /// Thumbs up with the other hand on the hip: sure the learner can do it.
+  // ASSUMPTION(design): drawn in the character sheet's style at the owner's
+  // request (the sheet has no "confident"); pending the owner's look.
+  confident(
+    MascotPose(
+      leftArm: MascotArm(Offset(54, 114), Offset(34, 125), Offset(49, 139)),
+      rightArm: MascotArm(Offset(126, 112), Offset(146, 88), Offset(148, 84)),
+      leftHand: MascotHand.ball,
+      rightHand: MascotHand.thumbsUp,
+      brows: MascotBrows.confident,
+      mouth: MascotMouth.proud,
+      cheeks: .3,
+      glint: true,
+    ),
   );
 
   const MascotExpression(this.pose);
 
   final MascotPose pose;
+
+  /// How the expression moves while it rests, after the onboarding designs'
+  /// moods: calm ones drift slowly, lively ones bounce, gestures repeat.
+  MascotIdle get idle => switch (this) {
+    welcome => MascotIdle.standard,
+    curious => const MascotIdle(lift: 3, sway: 1.5),
+    focused => const MascotIdle(lift: 3, period: AppMotion.characterFloatCalm),
+    happy => const MascotIdle(
+      lift: 7,
+      period: AppMotion.characterFloatLively,
+      stretch: .02,
+    ),
+    encourage => const MascotIdle(
+      lift: 6,
+      period: AppMotion.characterFloatLively,
+      swing: -8,
+      stretch: .018,
+    ),
+    listen => const MascotIdle(lift: 4, sway: 2),
+    talk => const MascotIdle(lift: 4, swing: -6),
+    understand => const MascotIdle(
+      lift: 3,
+      period: AppMotion.characterFloatCalm,
+      sway: 1.5,
+    ),
+    sleep => const MascotIdle(
+      lift: 2,
+      period: AppMotion.characterFloatCalm,
+      stretch: .02,
+    ),
+    handoff || cover => const MascotIdle(lift: 3),
+    peek => const MascotIdle(lift: 3, sway: 1),
+    confident => const MascotIdle(
+      period: AppMotion.characterFloatBrisk,
+      swing: -7,
+    ),
+  };
 }
 
 /// Something the guide holds or wears, on top of any expression.

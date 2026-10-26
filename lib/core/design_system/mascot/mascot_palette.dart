@@ -22,6 +22,7 @@ final class MascotPalette {
     required this.shadow,
     required this.stageRing,
     required this.stageFill,
+    this.isSilhouette = false,
   });
 
   final Color body;
@@ -52,6 +53,9 @@ final class MascotPalette {
   /// The circle behind the guide on hero screens.
   final Color stageRing;
   final Color stageFill;
+
+  /// One flat color for the whole shape: no face, shadow or effects.
+  final bool isSilhouette;
 
   static const light = MascotPalette(
     body: Color(0xFF5A97F2),
@@ -86,6 +90,29 @@ final class MascotPalette {
     stageRing: Color(0xFF1C2944),
     stageFill: Color(0xFF16213A),
   );
+
+  /// The design's silhouette ("الخيال"): the shape alone, for a guide not
+  /// met yet or a locked item. Near-black as designed; a muted blue in dark
+  /// mode, where black would vanish into the background.
+  static const silhouette = MascotPalette._flat(Color(0xFF0E0E10));
+  static const silhouetteDark = MascotPalette._flat(Color(0xFF34425E));
+
+  const MascotPalette._flat(Color shape)
+    : body = shape,
+      arm = shape,
+      belly = shape,
+      feet = shape,
+      scarf = shape,
+      scarfDeep = shape,
+      ink = shape,
+      highlight = shape,
+      blush = shape,
+      spark = shape,
+      outline = null,
+      shadow = const Color(0x00000000),
+      stageRing = const Color(0x00000000),
+      stageFill = const Color(0x00000000),
+      isSilhouette = true;
 
   static MascotPalette of(Brightness brightness) =>
       brightness == Brightness.dark ? dark : light;

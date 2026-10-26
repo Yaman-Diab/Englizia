@@ -15,9 +15,12 @@ export 'mascot_expression.dart'
 /// `mascot_name` translation key). Drawn in code, so it is sharp at any size,
 /// follows light and dark mode, and costs no image assets.
 ///
-/// Changing [expression] moves the arms over [AppMotion.characterPose]. With
-/// [animate] it floats and blinks, and with [waving] it waves its right arm.
-/// All motion stops when the platform asks to reduce motion.
+/// Changing [expression] moves the arms over [AppMotion.characterPose] with a
+/// small overshoot, a crouch and a blink that hides the face swap. With
+/// [animate] it idles in the expression's own way (`MascotExpression.idle`:
+/// float, sway, a repeated gesture, talking dots, twinkling sparkles), blinks,
+/// and with [waving] it waves its right arm. [silhouette] draws the shape
+/// alone. All motion stops when the platform asks to reduce motion.
 class Mascot extends StatefulWidget {
   const Mascot({
     this.expression = MascotExpression.welcome,
@@ -26,6 +29,7 @@ class Mascot extends StatefulWidget {
     this.size = 160,
     this.animate = true,
     this.waving = false,
+    this.silhouette = false,
     this.semanticLabel,
     super.key,
   });
@@ -38,6 +42,9 @@ class Mascot extends StatefulWidget {
   final double size;
   final bool animate;
   final bool waving;
+
+  /// One flat color, no face or effects (the design's "الخيال").
+  final bool silhouette;
 
   /// Defaults to the guide's name.
   final String? semanticLabel;
@@ -55,11 +62,18 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
   );
   late final _poseCurve = CurvedAnimation(
     parent: _poseChange,
-    curve: AppMotion.smoothOut,
+    curve: AppMotion.bounce,
   );
 
   MascotPose? _from;
   late MascotPose _target = widget.expression.pose;
+  MascotIdle _fromIdle = MascotIdle.standard;
+  late MascotIdle _targetIdle = widget.expression.idle;
+
+  /// Float cycles so far. Advanced by each frame's time over the current
+  /// period, so a change of pace never jumps the figure.
+  double _floatPhase = 0;
+  Duration _lastTick = Duration.zero;
 
   @override
   void didChangeDependencies() {
@@ -72,9 +86,12 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.expression != widget.expression) {
       final shown = _shownPose;
+      _fromIdle = _shownIdle;
       _target = widget.expression.pose;
+      _targetIdle = widget.expression.idle;
       if (AppMotion.reduceMotion(context)) {
         _from = null;
+        _poseChange.value = 1;
       } else {
         _from = shown;
         _poseChange.forward(from: 0);
@@ -83,11 +100,22 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
     _syncIdle();
   }
 
+  bool get _changing => _from != null && !_poseChange.isCompleted;
+
   MascotPose get _shownPose {
     final from = _from;
     if (from == null || _poseChange.isCompleted) return _target;
-    return MascotPose.lerpGeometry(from, _target, _poseCurve.value);
+    return MascotPose.blend(
+      from,
+      _target,
+      motion: _poseCurve.value,
+      progress: _poseChange.value,
+    );
   }
+
+  MascotIdle get _shownIdle => _changing
+      ? MascotIdle.lerp(_fromIdle, _targetIdle, _poseChange.value)
+      : _targetIdle;
 
   void _syncIdle() {
     final run = widget.animate && !AppMotion.reduceMotion(context);
@@ -95,12 +123,25 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
       _idle.start();
     } else if (!run && _idle.isActive) {
       _idle.stop();
+      _lastTick = Duration.zero;
       _frame.value = MascotFrame.still;
     }
   }
 
-  void _onTick(Duration elapsed) =>
-      _frame.value = MascotFrame.at(elapsed, waving: widget.waving);
+  void _onTick(Duration elapsed) {
+    final idle = _shownIdle;
+    final step = elapsed - _lastTick;
+    _lastTick = elapsed;
+    if (!step.isNegative) {
+      _floatPhase += step.inMicroseconds / idle.period.inMicroseconds;
+    }
+    _frame.value = MascotFrame.at(
+      elapsed,
+      waving: widget.waving,
+      idle: idle,
+      floatPhase: _floatPhase,
+    );
+  }
 
   @override
   void dispose() {
@@ -113,7 +154,12 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    final palette = MascotPalette.of(Theme.of(context).brightness);
+    final brightness = Theme.of(context).brightness;
+    final palette = widget.silhouette
+        ? (brightness == Brightness.dark
+              ? MascotPalette.silhouetteDark
+              : MascotPalette.silhouette)
+        : MascotPalette.of(brightness);
     return Semantics(
       image: true,
       label: widget.semanticLabel ?? 'mascot_name'.tr(),
@@ -127,6 +173,10 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
             prop: widget.prop,
             framing: widget.framing,
             frame: _frame,
+            blink: _changing ? MascotPose.changeBlink(_poseChange.value) : 0,
+            stretch: _changing
+                ? MascotPose.changeStretch(_poseChange.value)
+                : 0,
           ),
         ),
       ),
