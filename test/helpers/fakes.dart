@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/token_storage.dart';
@@ -40,4 +43,26 @@ class FakeTokenRefresher implements TokenRefresher {
     calls++;
     return _onRefresh(current);
   }
+}
+
+/// Connectivity that tests switch by hand with [online].
+class FakeConnectivityService implements ConnectivityService {
+  FakeConnectivityService({bool online = true}) : _online = online;
+
+  bool _online;
+  final _changes = StreamController<bool>.broadcast();
+
+  set online(bool value) {
+    if (value == _online) return;
+    _online = value;
+    _changes.add(value);
+  }
+
+  @override
+  Future<bool> isOnline() async => _online;
+
+  @override
+  Stream<bool> get onlineChanges => _changes.stream;
+
+  Future<void> dispose() => _changes.close();
 }
