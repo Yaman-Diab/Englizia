@@ -18,6 +18,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Welcome screen: the first screen for anyone without an account, with a staggered entrance.
 - Onboarding language step: choosing Arabic or English switches the app at once; the progress bar follows the learner's actual path.
 - Onboarding "who will learn" step: the choices come from the published tracks; one with no track shows «قريبًا». Runs on mock data until the backend is ready.
+- Onboarding grade step for school students: the grades and their groups come from the curriculum track's levels.
 - The guide character «بلبل», drawn in code with 12 expressions, light and dark versions and an idle wave, float and blink.
 
 ### Changed
