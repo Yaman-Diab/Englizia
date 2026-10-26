@@ -39,4 +39,26 @@ void main() {
       (current: 4, total: 5),
     );
   });
+
+  test('the next step depends on who will learn', () {
+    expect(
+      onboardingNextStep(OnboardingStep.audience, audience: TrackAudience.self),
+      OnboardingStep.reason,
+    );
+    expect(
+      onboardingNextStep(
+        OnboardingStep.audience,
+        audience: TrackAudience.schoolStudent,
+      ),
+      OnboardingStep.grade,
+    );
+    expect(
+      onboardingNextStep(
+        OnboardingStep.audience,
+        audience: TrackAudience.child,
+      ),
+      OnboardingStep.saveProgress,
+    );
+    expect(onboardingNextStep(OnboardingStep.saveProgress), isNull);
+  });
 }

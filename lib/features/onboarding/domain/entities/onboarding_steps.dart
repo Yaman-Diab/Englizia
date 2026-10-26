@@ -23,3 +23,13 @@ List<OnboardingStep> onboardingStepsFor(TrackAudience? audience) => [
   final steps = onboardingStepsFor(audience);
   return (current: steps.indexOf(step) + 1, total: steps.length);
 }
+
+/// The step after [step] on the learner's path, or null at the end.
+OnboardingStep? onboardingNextStep(
+  OnboardingStep step, {
+  TrackAudience? audience,
+}) {
+  final steps = onboardingStepsFor(audience);
+  final next = steps.indexOf(step) + 1;
+  return next < steps.length ? steps[next] : null;
+}

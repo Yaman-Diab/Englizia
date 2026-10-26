@@ -4,11 +4,16 @@ import 'package:englizia/app/router/route_policies.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
+import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
+import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 GoRouter createAppRouter(AppSessionController session) {
@@ -43,11 +48,35 @@ GoRouter createAppRouter(AppSessionController session) {
               context.canPop() ? context.pop() : context.go(AppRoutes.welcome),
         ),
       ),
-      // Placeholders until the next onboarding steps and sign-in exist.
       GoRoute(
         path: AppRoutes.onboardingAudience,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<AudienceCubit>()..load(),
+          child: AudiencePage(
+            onContinue: (audience) {
+              final next = onboardingNextStep(
+                OnboardingStep.audience,
+                audience: audience,
+              );
+              if (next != null) context.push(_onboardingRoute(next));
+            },
+            onBack: () => context.pop(),
+          ),
+        ),
+      ),
+      // Placeholders until the next onboarding steps and sign-in exist.
+      GoRoute(
+        path: AppRoutes.onboardingGrade,
+        builder: (_, _) => PendingPage(title: 'onboarding_grade_question'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingReason,
         builder: (_, _) =>
-            PendingPage(title: 'onboarding_audience_question'.tr()),
+            PendingPage(title: 'onboarding_reason_question'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingSaveProgress,
+        builder: (_, _) => PendingPage(title: 'onboarding_save_title'.tr()),
       ),
       GoRoute(
         path: AppRoutes.signIn,
@@ -56,3 +85,11 @@ GoRouter createAppRouter(AppSessionController session) {
     ],
   );
 }
+
+String _onboardingRoute(OnboardingStep step) => switch (step) {
+  OnboardingStep.language => AppRoutes.onboardingLanguage,
+  OnboardingStep.audience => AppRoutes.onboardingAudience,
+  OnboardingStep.grade => AppRoutes.onboardingGrade,
+  OnboardingStep.reason => AppRoutes.onboardingReason,
+  OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,
+};
