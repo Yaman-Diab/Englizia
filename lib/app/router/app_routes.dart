@@ -8,6 +8,7 @@ abstract final class AppRoutes {
   static const onboardingChildProfile = '/onboarding/child-profile';
   static const onboardingGrade = '/onboarding/grade';
   static const onboardingReason = '/onboarding/reason';
+  static const onboardingLevel = '/onboarding/level';
   static const onboardingSaveProgress = '/onboarding/save-progress';
   static const signIn = '/sign-in';
 }

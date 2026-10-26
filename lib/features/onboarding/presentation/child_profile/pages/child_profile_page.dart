@@ -6,7 +6,6 @@ import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
-import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,6 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// age. Wording never assumes the child's gender (§4.5).
 class ChildProfilePage extends StatefulWidget {
   const ChildProfilePage({
+    required this.path,
     required this.onContinue,
     required this.onBack,
     super.key,
@@ -22,6 +22,9 @@ class ChildProfilePage extends StatefulWidget {
 
   final ValueChanged<ChildProfileState> onContinue;
   final VoidCallback onBack;
+
+  /// The branch the learner is on, for the progress bar.
+  final OnboardingPath path;
 
   @override
   State<ChildProfilePage> createState() => _ChildProfilePageState();
@@ -42,7 +45,7 @@ class _ChildProfilePageState extends State<ChildProfilePage> {
   Widget build(BuildContext context) {
     final position = onboardingPosition(
       OnboardingStep.childProfile,
-      audience: TrackAudience.child,
+      path: widget.path,
     );
     final texts = context.texts;
     final colors = context.colors;

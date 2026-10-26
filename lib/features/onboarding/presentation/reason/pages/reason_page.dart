@@ -7,7 +7,6 @@ import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.da
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
-import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -16,23 +15,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// Shown to everyone except the child path.
 class ReasonPage extends StatelessWidget {
   const ReasonPage({
-    required this.audience,
+    required this.path,
     required this.onContinue,
     required this.onBack,
     super.key,
   });
 
-  /// The path the learner is on, for the progress bar.
-  final TrackAudience audience;
+  /// The branch the learner is on, for the progress bar.
+  final OnboardingPath path;
   final ValueChanged<List<LearningReason>> onContinue;
   final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
-    final position = onboardingPosition(
-      OnboardingStep.reason,
-      audience: audience,
-    );
+    final position = onboardingPosition(OnboardingStep.reason, path: path);
     return BlocBuilder<ReasonCubit, ReasonState>(
       builder: (context, state) {
         final cubit = context.read<ReasonCubit>();

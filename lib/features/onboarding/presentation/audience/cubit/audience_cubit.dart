@@ -22,7 +22,7 @@ class AudienceCubit extends Cubit<AudienceState> {
         emit(
           state.copyWith(
             status: LoadStatus.ready,
-            available: available,
+            tracks: value,
             // A choice whose track was hidden meanwhile is dropped.
             selected: () =>
                 available.contains(state.selected) ? state.selected : null,

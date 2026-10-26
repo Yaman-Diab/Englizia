@@ -18,7 +18,6 @@ import 'package:englizia/features/onboarding/presentation/language/pages/languag
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
-import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -61,11 +60,8 @@ GoRouter createAppRouter(AppSessionController session) {
         builder: (context, _) => BlocProvider(
           create: (_) => sl<AudienceCubit>()..load(),
           child: AudiencePage(
-            onContinue: (audience) => _pushNextStep(
-              context,
-              OnboardingStep.audience,
-              audience: audience,
-            ),
+            onContinue: (path) =>
+                _pushNextStep(context, OnboardingStep.audience, path),
             onBack: () => context.pop(),
           ),
         ),
@@ -73,49 +69,52 @@ GoRouter createAppRouter(AppSessionController session) {
       // Placeholders until the next onboarding steps and sign-in exist.
       GoRoute(
         path: AppRoutes.onboardingChildProfile,
-        builder: (context, _) => BlocProvider(
-          create: (_) => sl<ChildProfileCubit>(),
-          child: ChildProfilePage(
-            onContinue: (_) => _pushNextStep(
-              context,
-              OnboardingStep.childProfile,
-              audience: TrackAudience.child,
-            ),
-            onBack: () => context.pop(),
-          ),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.onboardingGrade,
-        builder: (context, _) => BlocProvider(
-          create: (_) => sl<GradeCubit>()..load(),
-          child: GradePage(
-            onContinue: (_) => _pushNextStep(
-              context,
-              OnboardingStep.grade,
-              audience: TrackAudience.schoolStudent,
-            ),
-            onBack: () => context.pop(),
-          ),
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.onboardingReason,
         builder: (context, state) {
-          final audience = _audienceOf(state);
+          final path = _pathOf(state);
           return BlocProvider(
-            create: (_) => sl<ReasonCubit>(),
-            child: ReasonPage(
-              audience: audience,
-              onContinue: (_) => _pushNextStep(
-                context,
-                OnboardingStep.reason,
-                audience: audience,
-              ),
+            create: (_) => sl<ChildProfileCubit>(),
+            child: ChildProfilePage(
+              path: path,
+              onContinue: (_) =>
+                  _pushNextStep(context, OnboardingStep.childProfile, path),
               onBack: () => context.pop(),
             ),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingGrade,
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<GradeCubit>()..load(),
+            child: GradePage(
+              path: path,
+              onContinue: (_) =>
+                  _pushNextStep(context, OnboardingStep.grade, path),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingReason,
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<ReasonCubit>(),
+            child: ReasonPage(
+              path: path,
+              onContinue: (_) =>
+                  _pushNextStep(context, OnboardingStep.reason, path),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingLevel,
+        builder: (_, _) => PendingPage(title: 'onboarding_level_question'.tr()),
       ),
       GoRoute(
         path: AppRoutes.onboardingSaveProgress,
@@ -133,18 +132,18 @@ GoRouter createAppRouter(AppSessionController session) {
 /// handing the path on.
 void _pushNextStep(
   BuildContext context,
-  OnboardingStep from, {
-  TrackAudience? audience,
-}) {
-  final next = onboardingNextStep(from, audience: audience);
-  if (next != null) context.push(_onboardingRoute(next), extra: audience);
+  OnboardingStep from,
+  OnboardingPath path,
+) {
+  final next = onboardingNextStep(from, path: path);
+  if (next != null) context.push(_onboardingRoute(next), extra: path);
 }
 
 /// The learner's path travels between steps as route `extra`; a step opened
-/// without it (deep link, restored route) assumes the adult path.
-TrackAudience _audienceOf(GoRouterState state) => switch (state.extra) {
-  final TrackAudience audience => audience,
-  _ => TrackAudience.self,
+/// without it (deep link, restored route) assumes the common adult path.
+OnboardingPath _pathOf(GoRouterState state) => switch (state.extra) {
+  final OnboardingPath path => path,
+  _ => OnboardingPath.assumed,
 };
 
 String _onboardingRoute(OnboardingStep step) => switch (step) {
@@ -153,5 +152,6 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.childProfile => AppRoutes.onboardingChildProfile,
   OnboardingStep.grade => AppRoutes.onboardingGrade,
   OnboardingStep.reason => AppRoutes.onboardingReason,
+  OnboardingStep.level => AppRoutes.onboardingLevel,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,
 };
