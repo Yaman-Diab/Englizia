@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/child_profile/pages/child_profile_page.dart';
@@ -49,23 +50,21 @@ void main() {
         size: size,
         themeMode: themeMode,
       );
-      await tester.pump(AppMotion.heroEntrance);
+      await tester.settleEntrance(QuestionEntrance.settled);
       return cubit;
     }
 
-    for (final locale in AppLocales.supported) {
-      for (final size in [defaultViewport, narrowViewport]) {
-        for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-          testWidgets('lays out without overflow (${locale.languageCode}, '
-              '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-            await pumpPage(tester, locale: locale, size: size, themeMode: mode);
-            await tester.enterText(find.byType(TextField), 'Alexandria');
-            await tester.pump();
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
+    testLayouts('lays out without overflow', (tester, layout) async {
+      await pumpPage(
+        tester,
+        locale: layout.locale,
+        size: layout.size,
+        themeMode: layout.themeMode,
+      );
+      await tester.enterText(find.byType(TextField), 'Alexandria');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('the greeting follows the typed name', (tester) async {
       await pumpPage(tester);

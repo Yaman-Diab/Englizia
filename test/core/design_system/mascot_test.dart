@@ -1,9 +1,9 @@
-import 'package:englizia/core/design_system/app_motion.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/mascot/mascot_motion.dart';
 import 'package:englizia/core/design_system/mascot/mascot_painter.dart';
 import 'package:englizia/core/design_system/mascot/mascot_palette.dart';
 import 'package:englizia/core/design_system/mascot/mascot_pose.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

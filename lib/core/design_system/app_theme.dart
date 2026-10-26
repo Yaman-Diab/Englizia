@@ -1,8 +1,8 @@
-import 'package:englizia/core/design_system/app_page_transitions.dart';
 import 'package:englizia/core/design_system/app_palette.dart';
 import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_text_styles.dart';
+import 'package:englizia/core/design_system/motion/app_page_transitions.dart';
 import 'package:flutter/material.dart';
 
 /// Light and dark themes. Call inside `ScreenUtilInit` (text uses `.sp`).

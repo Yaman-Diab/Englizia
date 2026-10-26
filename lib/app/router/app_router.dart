@@ -18,6 +18,7 @@ import 'package:englizia/features/onboarding/presentation/language/pages/languag
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -58,13 +59,11 @@ GoRouter createAppRouter(AppSessionController session) {
         builder: (context, _) => BlocProvider(
           create: (_) => sl<AudienceCubit>()..load(),
           child: AudiencePage(
-            onContinue: (audience) {
-              final next = onboardingNextStep(
-                OnboardingStep.audience,
-                audience: audience,
-              );
-              if (next != null) context.push(_onboardingRoute(next));
-            },
+            onContinue: (audience) => _pushNextStep(
+              context,
+              OnboardingStep.audience,
+              audience: audience,
+            ),
             onBack: () => context.pop(),
           ),
         ),
@@ -75,13 +74,10 @@ GoRouter createAppRouter(AppSessionController session) {
         builder: (context, _) => BlocProvider(
           create: (_) => sl<ChildProfileCubit>(),
           child: ChildProfilePage(
-            onContinue: (_) => context.push(
-              _onboardingRoute(
-                onboardingNextStep(
-                  OnboardingStep.childProfile,
-                  audience: TrackAudience.child,
-                )!,
-              ),
+            onContinue: (_) => _pushNextStep(
+              context,
+              OnboardingStep.childProfile,
+              audience: TrackAudience.child,
             ),
             onBack: () => context.pop(),
           ),
@@ -92,13 +88,10 @@ GoRouter createAppRouter(AppSessionController session) {
         builder: (context, _) => BlocProvider(
           create: (_) => sl<GradeCubit>()..load(),
           child: GradePage(
-            onContinue: (_) => context.push(
-              _onboardingRoute(
-                onboardingNextStep(
-                  OnboardingStep.grade,
-                  audience: TrackAudience.schoolStudent,
-                )!,
-              ),
+            onContinue: (_) => _pushNextStep(
+              context,
+              OnboardingStep.grade,
+              audience: TrackAudience.schoolStudent,
             ),
             onBack: () => context.pop(),
           ),
@@ -119,6 +112,16 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
     ],
   );
+}
+
+/// Opens the step after [from] on the learner's path, if there is one.
+void _pushNextStep(
+  BuildContext context,
+  OnboardingStep from, {
+  TrackAudience? audience,
+}) {
+  final next = onboardingNextStep(from, audience: audience);
+  if (next != null) context.push(_onboardingRoute(next));
 }
 
 String _onboardingRoute(OnboardingStep step) => switch (step) {

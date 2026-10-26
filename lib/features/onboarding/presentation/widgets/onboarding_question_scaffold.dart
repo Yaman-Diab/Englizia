@@ -1,11 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:englizia/core/design_system/app_motion.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/speech_bubble.dart';
-import 'package:englizia/features/onboarding/presentation/widgets/staggered_entrance.dart';
 import 'package:flutter/material.dart';
 
 /// The shared layout of every onboarding question (design "Onboarding
@@ -58,113 +59,101 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   /// The bubble sits higher than the guide's feet, level with its head.
   static const _bubbleLiftRatio = .28;
 
-  // Entrance slots, as fractions of AppMotion.heroEntrance (design delays).
-  static const _slot = .448;
-  static const _optionStart = .272;
-  static const _optionStagger = .048;
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return Scaffold(
       body: SafeArea(
-        child: StaggeredEntrance(
-          child: Column(
-            children: [
-              _TopBar(step: step, totalSteps: totalSteps, onBack: onBack),
-              Padding(
-                padding: const EdgeInsetsDirectional.fromSTEB(
-                  AppSpacing.xl,
-                  AppSpacing.md,
-                  AppSpacing.xl,
-                  0,
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    EntranceItem(
-                      motion: EntranceMotion.pop,
-                      begin: .096,
-                      end: .096 + _slot,
-                      child: Mascot(expression: expression, size: mascotSize),
-                    ),
-                    const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
-                    Expanded(
-                      child: Padding(
-                        padding: EdgeInsetsDirectional.only(
-                          bottom: mascotSize * _bubbleLiftRatio,
-                        ),
-                        child: EntranceItem(
-                          motion: EntranceMotion.pop,
-                          begin: .192,
-                          end: .192 + _slot,
-                          child: SpeechBubble(text: question),
-                        ),
+        child: Column(
+          children: [
+            _TopBar(step: step, totalSteps: totalSteps, onBack: onBack),
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.xl,
+                AppSpacing.md,
+                AppSpacing.xl,
+                0,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Entrance(
+                    motion: EntranceMotion.pop,
+                    delay: QuestionEntrance.mascot,
+                    child: Mascot(expression: expression, size: mascotSize),
+                  ),
+                  const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsetsDirectional.only(
+                        bottom: mascotSize * _bubbleLiftRatio,
+                      ),
+                      child: Entrance(
+                        motion: EntranceMotion.pop,
+                        delay: QuestionEntrance.bubble,
+                        child: SpeechBubble(text: question),
                       ),
                     ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.xl,
+                  AppSpacing.lg + AppSpacing.xs,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    for (final (i, option) in options.indexed) ...[
+                      if (i > 0) const SizedBox(height: AppSpacing.md),
+                      Entrance(
+                        motion: EntranceMotion.up,
+                        delay: QuestionEntrance.answer(i),
+                        child: option,
+                      ),
+                    ],
+                    if (helper case final helper?) ...[
+                      const SizedBox(height: AppSpacing.lg),
+                      Entrance(
+                        motion: EntranceMotion.up,
+                        delay: QuestionEntrance.helper,
+                        child: _Helper(
+                          text: helper,
+                          icon: helperIcon,
+                          color: helperIsInfo
+                              ? colors.info.text
+                              : colors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.xl,
-                    AppSpacing.xl,
-                    AppSpacing.xl,
-                    AppSpacing.lg + AppSpacing.xs,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      for (final (i, option) in options.indexed) ...[
-                        if (i > 0) const SizedBox(height: AppSpacing.md),
-                        EntranceItem(
-                          motion: EntranceMotion.up,
-                          begin: _optionStart + i * _optionStagger,
-                          end: _optionStart + i * _optionStagger + _slot,
-                          child: option,
-                        ),
-                      ],
-                      if (helper case final helper?) ...[
-                        const SizedBox(height: AppSpacing.lg),
-                        EntranceItem(
-                          motion: EntranceMotion.up,
-                          begin: .432,
-                          end: .432 + _slot,
-                          child: _Helper(
-                            text: helper,
-                            icon: helperIcon,
-                            color: helperIsInfo
-                                ? colors.info.text
-                                : colors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+            ),
+            Entrance(
+              motion: EntranceMotion.up,
+              delay: QuestionEntrance.action,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(
+                  AppSpacing.xl,
+                  AppSpacing.xs,
+                  AppSpacing.xl,
+                  AppSpacing.md,
+                ),
+                child: AppButton(
+                  label: continueLabel,
+                  onPressed: onContinue,
+                  size: AppButtonSize.large,
                 ),
               ),
-              EntranceItem(
-                motion: EntranceMotion.up,
-                begin: .48,
-                end: .48 + _slot,
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.xl,
-                    AppSpacing.xs,
-                    AppSpacing.xl,
-                    AppSpacing.md,
-                  ),
-                  child: AppButton(
-                    label: continueLabel,
-                    onPressed: onContinue,
-                    size: AppButtonSize.large,
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

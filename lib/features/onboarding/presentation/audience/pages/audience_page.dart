@@ -1,11 +1,9 @@
 import 'package:easy_localization/easy_localization.dart';
-import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
-import 'package:englizia/core/design_system/widgets/app_state_view.dart';
-import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_state.dart';
+import 'package:englizia/features/onboarding/presentation/widgets/loaded_answers.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
@@ -44,22 +42,11 @@ class AudiencePage extends StatelessWidget {
               ? () => onContinue(state.selected!)
               : null,
           onBack: onBack,
-          options: switch (state.status) {
-            AudienceStatus.loading => const [
-              Padding(
-                padding: EdgeInsetsDirectional.symmetric(
-                  vertical: AppSpacing.xxl,
-                ),
-                child: AppStateView.loading(),
-              ),
-            ],
-            AudienceStatus.failure => [
-              AppStateView.error(
-                message: state.failure!.localizedMessage,
-                onRetry: cubit.load,
-              ),
-            ],
-            AudienceStatus.ready => [
+          options: loadedAnswers(
+            status: state.status,
+            failure: state.failure,
+            onRetry: cubit.load,
+            ready: () => [
               for (final audience in TrackAudience.values)
                 _AudienceOption(
                   audience: audience,
@@ -68,7 +55,7 @@ class AudiencePage extends StatelessWidget {
                   onTap: () => cubit.select(audience),
                 ),
             ],
-          },
+          ),
         );
       },
     );

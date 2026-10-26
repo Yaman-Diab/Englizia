@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:englizia/core/design_system/app_motion.dart';
-import 'package:englizia/core/design_system/app_page_transitions.dart';
 import 'package:englizia/core/design_system/app_theme.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/app_page_transitions.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

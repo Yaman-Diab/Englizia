@@ -60,9 +60,9 @@ abstract final class AppMotion {
   static const characterBlink = Duration(milliseconds: 4000);
   static const characterPose = fast;
 
-  /// The staggered entrance of a hero screen (welcome): items start 120–500
-  /// ms apart and each takes 600 ms, so the whole run lasts this long.
-  static const heroEntrance = Duration(milliseconds: 1250);
+  /// How long one element of a staggered screen entrance takes to arrive.
+  /// When each one starts lives in `entrance_choreography.dart`.
+  static const entrance = Duration(milliseconds: 600);
 
   /// Travel distances in logical pixels. Not scaled with the screen.
   static const distanceMicro = 4.0;

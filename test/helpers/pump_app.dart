@@ -45,6 +45,30 @@ Widget localizedTestRoot({required Locale locale, required Widget child}) =>
       child: child,
     );
 
+/// One layout under test: a supported locale, a phone width, a theme mode.
+typedef LayoutCase = ({Locale locale, Size size, ThemeMode themeMode});
+
+/// Registers [body] once per supported locale, phone width
+/// ([defaultViewport], [narrowViewport]) and theme mode, named
+/// "[description] (ar, 320dp, dark)" — the Definition of Done matrix.
+void testLayouts(
+  String description,
+  Future<void> Function(WidgetTester tester, LayoutCase layout) body,
+) {
+  for (final locale in AppLocales.supported) {
+    for (final size in [defaultViewport, narrowViewport]) {
+      for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
+        testWidgets(
+          '$description (${locale.languageCode}, '
+          '${size.width.toInt()}dp, ${themeMode.name})',
+          (tester) =>
+              body(tester, (locale: locale, size: size, themeMode: themeMode)),
+        );
+      }
+    }
+  }
+}
+
 extension PumpApp on WidgetTester {
   void setViewport(Size size) {
     view
@@ -83,6 +107,18 @@ extension PumpApp on WidgetTester {
       ),
     );
     await pumpUntilLocalized();
+  }
+
+  /// Plays a staggered entrance to the end ([settled] from
+  /// `entrance_choreography.dart`). flutter_animate starts each animation from
+  /// a zero-length timer and counts from the next frame, and a bare `pump()`
+  /// does not advance the clock, hence the explicit ticks.
+  Future<void> settleEntrance(Duration settled) async {
+    const tick = Duration(milliseconds: 1);
+    await pump(tick); // fires the start timers
+    await pump(tick); // first animation frame
+    await pump(settled);
+    await pump(tick); // timers of anything built meanwhile
   }
 
   /// Translations load asynchronously; a few frames are enough with

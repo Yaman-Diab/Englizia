@@ -1,4 +1,5 @@
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_state.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
@@ -12,7 +13,7 @@ class AudienceCubit extends Cubit<AudienceState> {
   final TrackRepository _tracks;
 
   Future<void> load() async {
-    emit(state.copyWith(status: AudienceStatus.loading, failure: () => null));
+    emit(state.copyWith(status: LoadStatus.loading, failure: () => null));
     final result = await _tracks.getPublishedTracks();
     if (isClosed) return;
     switch (result) {
@@ -20,7 +21,7 @@ class AudienceCubit extends Cubit<AudienceState> {
         final available = {for (final track in value) ?track.audience};
         emit(
           state.copyWith(
-            status: AudienceStatus.ready,
+            status: LoadStatus.ready,
             available: available,
             // A choice whose track was hidden meanwhile is dropped.
             selected: () =>
@@ -29,10 +30,7 @@ class AudienceCubit extends Cubit<AudienceState> {
         );
       case Err(:final failure):
         emit(
-          state.copyWith(
-            status: AudienceStatus.failure,
-            failure: () => failure,
-          ),
+          state.copyWith(status: LoadStatus.failure, failure: () => failure),
         );
     }
   }

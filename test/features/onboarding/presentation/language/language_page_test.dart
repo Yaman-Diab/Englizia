@@ -1,5 +1,5 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
-import 'package:englizia/core/design_system/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
@@ -17,26 +17,20 @@ void main() {
   OnboardingOption option(WidgetTester tester, String title) => tester
       .widget<OnboardingOption>(find.widgetWithText(OnboardingOption, title));
 
-  for (final locale in AppLocales.supported) {
-    for (final size in [defaultViewport, narrowViewport]) {
-      for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-        testWidgets('lays out without overflow (${locale.languageCode}, '
-            '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-          await tester.pumpLocalized(
-            page(),
-            locale: locale,
-            size: size,
-            themeMode: mode,
-          );
-          await tester.pump(AppMotion.heroEntrance);
-          expect(tester.takeException(), isNull);
-        });
-      }
-    }
-  }
+  testLayouts('lays out without overflow', (tester, layout) async {
+    await tester.pumpLocalized(
+      page(),
+      locale: layout.locale,
+      size: layout.size,
+      themeMode: layout.themeMode,
+    );
+    await tester.settleEntrance(QuestionEntrance.settled);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('the current language is preselected', (tester) async {
     await tester.pumpLocalized(page(), locale: AppLocales.english);
+    await tester.settleEntrance(QuestionEntrance.settled);
     expect(option(tester, 'English').selected, isTrue);
     expect(option(tester, 'العربية').selected, isFalse);
   });
@@ -45,7 +39,7 @@ void main() {
     tester,
   ) async {
     await tester.pumpLocalized(page());
-    await tester.pump(AppMotion.heroEntrance);
+    await tester.settleEntrance(QuestionEntrance.settled);
     expect(
       Directionality.of(tester.element(find.byType(LanguagePage))),
       TextDirection.rtl,
@@ -70,7 +64,7 @@ void main() {
     await tester.pumpLocalized(
       page(onContinue: () => continued++, onBack: () => back++),
     );
-    await tester.pump(AppMotion.heroEntrance);
+    await tester.settleEntrance(QuestionEntrance.settled);
 
     await tester.tap(find.text('common_continue'.tr()));
     await tester.tap(find.byTooltip('common_back'.tr()));
@@ -84,7 +78,7 @@ void main() {
   ) async {
     final handle = tester.ensureSemantics();
     await tester.pumpLocalized(page(), size: narrowViewport);
-    await tester.pump(AppMotion.heroEntrance);
+    await tester.settleEntrance(QuestionEntrance.settled);
 
     expect(find.bySemanticsLabel('الخطوة 1 من 4'), findsOneWidget);
     expect(
