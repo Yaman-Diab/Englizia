@@ -103,4 +103,67 @@ void main() {
       throwsA(isA<NetworkException>()),
     );
   });
+
+  group('unified envelope', () {
+    test('returns data of an enveloped success', () async {
+      adapter = FakeHttpAdapter(
+        (_) => const FakeResponse(
+          200,
+          body: {
+            'data': [
+              {'id': 'trk_01'},
+            ],
+            'meta': null,
+            'error': null,
+          },
+        ),
+      );
+
+      expect(await buildClient(adapter).get('/tracks'), [
+        {'id': 'trk_01'},
+      ]);
+    });
+
+    test('leaves a plain body that merely has a data field alone', () async {
+      adapter = FakeHttpAdapter(
+        (_) => const FakeResponse(200, body: {'data': 1, 'other': 2}),
+      );
+
+      expect(await buildClient(adapter).get('/x'), {'data': 1, 'other': 2});
+    });
+
+    test('reads the error object of an enveloped failure', () async {
+      adapter = FakeHttpAdapter(
+        (_) => const FakeResponse(
+          422,
+          body: {
+            'data': null,
+            'meta': null,
+            'error': {
+              'code': 'email_taken',
+              'message': 'Email is taken',
+              'fieldErrors': {
+                'Email': ['Taken'],
+              },
+              'traceId': '00-abc',
+            },
+          },
+        ),
+      );
+
+      await expectLater(
+        buildClient(adapter).post('/auth/register'),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.statusCode, 'status', 422)
+              .having((e) => e.code, 'code', 'email_taken')
+              .having((e) => e.detail, 'detail', 'Email is taken')
+              .having((e) => e.fieldErrors, 'fieldErrors', {
+                'email': ['Taken'],
+              })
+              .having((e) => e.traceId, 'traceId', '00-abc'),
+        ),
+      );
+    });
+  });
 }

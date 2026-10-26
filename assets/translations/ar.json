@@ -41,5 +41,22 @@
   "onboarding_language_ar_desc": "افتراضي",
   "onboarding_language_en_mark": "A",
   "onboarding_language_en_desc": "Interface in English",
-  "onboarding_audience_question": "من سيتعلّم معنا؟"
+  "onboarding_audience_question": "من سيتعلّم معنا؟",
+  "common_soon": "قريبًا",
+  "onboarding_audience_self_title": "أنا",
+  "onboarding_audience_self_desc": "للكبار، من الصفر حتى B2",
+  "onboarding_audience_child_title": "طفلي",
+  "onboarding_audience_child_desc": "من 5 إلى 9 سنوات، بالصور والأصوات",
+  "onboarding_audience_school_title": "طالب مدرسة",
+  "onboarding_audience_school_desc": "منهاج إيمار، من الصف الأول حتى البكالوريا",
+  "onboarding_grade_question": "في أي صف أنت؟",
+  "onboarding_reason_question": "لماذا تتعلّم الإنجليزية؟",
+  "onboarding_save_title": "احفظ تقدّمك",
+  "onboarding_child_question": "عرّفنا على طفلك",
+  "onboarding_child_name_label": "اسم الطفل",
+  "onboarding_child_greeting": "مرحبًا {name}!",
+  "onboarding_child_greeting_empty": "مرحبًا!",
+  "onboarding_child_age_question": "كم عمر طفلك؟",
+  "onboarding_child_age_label": "{age} سنوات",
+  "onboarding_child_helper": "الاسم يظهر للطفل داخل التطبيق فقط"
 }

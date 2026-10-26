@@ -12,7 +12,7 @@ When a field is confirmed, save a sanitized real response under `test/fixtures/a
 |---|---|---|
 | JSON casing | camelCase (System.Text.Json web defaults) | assumed |
 | Base path | `/api/v1/...` | assumed |
-| Errors | Error messages for the app carry **stable codes** and the app shows its own Arabic text (§19.1, required). Body shape: RFC 9457 ProblemDetails (`title`, `detail`, `status`, `errors: {Field: [msg]}`, `code`) — or the proposed `{data, meta, error}` envelope, not yet agreed | codes required, shape assumed |
+| Envelope and errors | Every response is the unified envelope below; error messages for the app carry **stable codes** and the app shows its own Arabic text (§19.1, required). `ApiClient` unwraps `data`, and `ApiException` reads `error`, falling back to RFC 9457 ProblemDetails while the envelope is not agreed | codes required, envelope proposed |
 | Field names in `errors` | normalized by the app: `$.Email` / `request.Email` / `Email` → `email` | app-side |
 | Rate limiting | Too many failed logins return a wait time to the app (§19.8, required); modeled as 429 with `Retry-After` in seconds | wait time required, shape assumed |
 | Auth | Short-lived access key + refresh key, role and permission checked on every request (§19.1, required); JWT Bearer assumed | required (concept) / assumed (format) |
@@ -20,6 +20,36 @@ When a field is confirmed, save a sanitized real response under `test/fixtures/a
 | App gate | The server returns the minimum allowed app version per platform (v0.1) and the recommended one (v1.0) (§19.2, required); path and field names assumed: `GET /api/v1/app/config` → `minSupportedVersion` | required (concept) / assumed (shape) |
 | Effective settings | The server returns settings after inheritance (global → track → level → lesson); the app reads them on open and caches them; no setting is hardcoded in the app (§19.2, student §2 principle 6) | required |
 | Times | Stored in UTC; the student's day uses their time zone and a configurable day start, default 04:00 (§19.1) | required |
+
+## Unified response envelope (proposed to the backend team)
+
+Every response, success or failure, has the same three fields; exactly one of `data` and `error` is non-null.
+
+```json
+{ "data": { "id": "trk_01" }, "meta": null, "error": null }
+```
+
+Lists carry paging in `meta` (only where a list is paged):
+
+```json
+{ "data": [ ... ], "meta": { "page": 1, "pageSize": 20, "total": 134, "hasMore": true }, "error": null }
+```
+
+Failures keep an honest HTTP status (401 token, 403 forbidden, 404, 409, 422 validation, 429 rate limit with `Retry-After`, 5xx):
+
+```json
+{ "data": null, "meta": null, "error": { "code": "email_taken", "message": "…", "fieldErrors": { "email": ["…"] }, "traceId": "00-ab12…" } }
+```
+
+Rules: camelCase; ids are strings; times ISO-8601 UTC; absolute media URLs; enums are lower-camel strings and an unknown value is treated as the least privileged one; bilingual text is `{ "ar": "…", "en": "…" }` (as in the content package, server doc §20.1). `message` is for logs only — the app never shows it. In ASP.NET Core this needs a custom `InvalidModelStateResponseFactory` and an exception-handling middleware that write the `error` object instead of the default ProblemDetails.
+
+## Endpoint contracts
+
+One file per endpoint group, with request, response and example; the matching mock data and test fixture use the same JSON.
+
+| Contract | Used by | Data in the app |
+|---|---|---|
+| [`tracks.md`](tracks.md) | Onboarding "who will learn", later track switching | mock |
 
 ## Headers sent on every request
 
@@ -29,6 +59,8 @@ When a field is confirmed, save a sanitized real response under `test/fixtures/a
 
 | Endpoint | Method | Body | Response | Status |
 |---|---|---|---|---|
+| `/api/v1/tracks` | GET | — | envelope, `data`: track list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/tracks/{trackId}/levels` | GET | — | envelope, `data`: level list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/auth/refresh` | POST | `{refreshToken}` + `Authorization: Bearer <expired access>` | `{accessToken, refreshToken}` | assumed |
 
 ## Requests to raise with the backend team

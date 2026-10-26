@@ -372,7 +372,9 @@ if `BASE_URL` is empty. Show a small env badge in non-prod builds.
 Add Android flavors / iOS schemes only when you need side-by-side installs or different app IDs/icons.
 
 **Mock mode** (`env/mock.json` → `APP_ENV=mock`): `configureDependencies()` registers fake
-datasources that read `test/fixtures/api/*.json` instead of the real Dio ones. You can then
+datasources that read `test/fixtures/api/*.json` instead of the real Dio ones.
+Englizia: the fakes read `assets/mock/<feature>/*.json` (fixtures under `test/` are not bundled),
+and the tests parse those same files; `test/fixtures/api/` holds real responses once they exist. You can then
 develop, demo to a client, and record screenshots without depending on a teammate's server
 or an ngrok tunnel. Same fixtures power the tests.
 

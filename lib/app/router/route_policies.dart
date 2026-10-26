@@ -8,6 +8,10 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.welcome: RoutePolicy.guestOnly,
   AppRoutes.onboardingLanguage: RoutePolicy.guestOnly,
   AppRoutes.onboardingAudience: RoutePolicy.guestOnly,
+  AppRoutes.onboardingChildProfile: RoutePolicy.guestOnly,
+  AppRoutes.onboardingGrade: RoutePolicy.guestOnly,
+  AppRoutes.onboardingReason: RoutePolicy.guestOnly,
+  AppRoutes.onboardingSaveProgress: RoutePolicy.guestOnly,
   AppRoutes.signIn: RoutePolicy.guestOnly,
 };
 

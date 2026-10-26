@@ -17,12 +17,14 @@ class MascotPainter extends CustomPainter {
     required this.palette,
     required this.prop,
     required this.frame,
-  }) : pose = prop == MascotProp.key ? _holdingKey(pose) : pose,
+    this.framing = MascotFraming.full,
+  }) : pose = _effectivePose(pose, prop, framing),
        super(repaint: frame);
 
   final MascotPose pose;
   final MascotPalette palette;
   final MascotProp prop;
+  final MascotFraming framing;
   final ValueListenable<MascotFrame> frame;
 
   static const viewBox = 180.0;
@@ -30,42 +32,74 @@ class MascotPainter extends CustomPainter {
   static const _armWidth = 14.0;
   static const _feetPivot = Offset(90, 166);
 
-  static MascotPose _holdingKey(MascotPose pose) => pose.copyWith(
-    rightArm: const MascotArm(Offset(126, 114), Offset(146, 102)),
-    rightHand: MascotHand.fist,
-  );
+  /// The head framing crops to this square of the drawing (design value).
+  static const _headLeft = 34.0;
+  static const _headBox = 112.0;
+
+  static MascotPose _effectivePose(
+    MascotPose pose,
+    MascotProp prop,
+    MascotFraming framing,
+  ) {
+    if (framing == MascotFraming.head) {
+      return pose.copyWith(
+        tilt: 0,
+        leftArm: MascotPose.restLeft,
+        rightArm: MascotPose.restRight,
+        leftHand: MascotHand.none,
+        rightHand: MascotHand.none,
+        sparkles: false,
+        phone: false,
+      );
+    }
+    if (prop == MascotProp.key) {
+      return pose.copyWith(
+        rightArm: const MascotArm(Offset(126, 114), Offset(146, 102)),
+        rightHand: MascotHand.fist,
+      );
+    }
+    return pose;
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
     final f = frame.value;
-    canvas
-      ..save()
-      ..scale(size.width / viewBox, size.height / viewBox);
-
-    canvas.drawOval(
-      Rect.fromCenter(
-        center: const Offset(90, 171),
-        width: f.shadowRadius * 2,
-        height: 12,
-      ),
-      Paint()..color = palette.shadow,
-    );
-
-    canvas.translate(0, -f.lift);
-    if (pose.tilt != 0) _rotate(canvas, pose.tilt, _feetPivot);
+    final tuft = !prop.isHat;
+    canvas.save();
+    if (framing == MascotFraming.head) {
+      canvas
+        ..clipRect(Offset.zero & size)
+        ..scale(size.width / _headBox, size.height / _headBox)
+        ..translate(-_headLeft, 0);
+    } else {
+      canvas
+        ..scale(size.width / viewBox, size.height / viewBox)
+        ..drawOval(
+          Rect.fromCenter(
+            center: const Offset(90, 171),
+            width: f.shadowRadius * 2,
+            height: 12,
+          ),
+          Paint()..color = palette.shadow,
+        )
+        ..translate(0, -f.lift);
+      if (pose.tilt != 0) _rotate(canvas, pose.tilt, _feetPivot);
+    }
 
     final rim = palette.outline;
     if (rim != null) {
       _feet(canvas, rim, rim: true);
-      _fill(canvas, _bubblePath, rim, rim: true);
+      if (tuft) _fill(canvas, _bubblePath, rim, rim: true);
       _fill(canvas, _bodyPath, rim, rim: true);
       _fill(canvas, _tailPath, rim, rim: true);
       _arms(canvas, f, rim: rim);
     }
 
     _feet(canvas, palette.feet);
-    _fill(canvas, _bubblePath, palette.body);
-    _bubbleContent(canvas);
+    if (tuft) {
+      _fill(canvas, _bubblePath, palette.body);
+      _bubbleContent(canvas);
+    }
     _fill(canvas, _bodyPath, palette.body);
     _fill(canvas, _oval(90, 134, 28, 20), palette.belly);
     _fill(canvas, _tailPath, palette.scarfDeep);
@@ -84,9 +118,14 @@ class MascotPainter extends CustomPainter {
     }
     _eye(canvas, 76, f);
     _eye(canvas, 104, f);
+    if (prop == MascotProp.glasses) _glasses(canvas);
     _brows(canvas);
     _mouth(canvas);
-    if (prop == MascotProp.headphones) _headphones(canvas);
+    if (prop == MascotProp.headphones && framing == MascotFraming.full) {
+      _headphones(canvas);
+    }
+    if (prop == MascotProp.beanie) _beanie(canvas, rim);
+    if (prop == MascotProp.gradCap) _gradCap(canvas, rim);
     _arms(canvas, f);
     if (pose.phone) _phone(canvas);
     if (pose.sparkles) {
@@ -458,6 +497,108 @@ class MascotPainter extends CustomPainter {
     }
   }
 
+  void _glasses(Canvas canvas) {
+    final ink = palette.ink;
+    for (final x in const [76.0, 104.0]) {
+      _fill(
+        canvas,
+        _oval(x, 80, 11, 11),
+        palette.highlight.withValues(alpha: .12),
+      );
+      canvas.drawCircle(
+        Offset(x, 80),
+        11,
+        Paint()
+          ..color = ink
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.8,
+      );
+    }
+    _stroke(
+      canvas,
+      Path()
+        ..moveTo(87, 79)
+        ..quadraticBezierTo(90, 76.5, 93, 79)
+        ..moveTo(65, 79)
+        ..lineTo(53, 76)
+        ..moveTo(115, 79)
+        ..lineTo(127, 76),
+      2.8,
+      ink,
+    );
+  }
+
+  /// A dome over the top of the head with a brim and a two-blade propeller.
+  void _beanie(Canvas canvas, Color? rim) {
+    final dome = Path()
+      ..moveTo(52, 58)
+      ..cubicTo(52, 22, 128, 22, 128, 58)
+      ..close();
+    final brim = Path()
+      ..addRRect(RRect.fromLTRBR(48, 53, 132, 62, const Radius.circular(4.5)));
+    if (rim != null) {
+      _fill(canvas, dome, rim, rim: true);
+      _fill(canvas, brim, rim, rim: true);
+    }
+    _fill(canvas, dome, palette.scarf);
+    _fill(
+      canvas,
+      Path()
+        ..moveTo(84, 54)
+        ..cubicTo(84, 34, 96, 34, 96, 54)
+        ..close(),
+      palette.belly,
+    );
+    _fill(canvas, brim, palette.scarfDeep);
+    _stroke(
+      canvas,
+      Path()
+        ..moveTo(90, 32)
+        ..lineTo(90, 22),
+      2.6,
+      palette.ink,
+    );
+    _fill(canvas, _oval(80, 20, 9, 3.2), palette.belly);
+    _fill(canvas, _oval(100, 20, 9, 3.2), palette.body);
+    _fill(canvas, _oval(90, 20.5, 2.8, 2.8), palette.ink);
+  }
+
+  /// A mortarboard sitting on the head, with an amber tassel.
+  void _gradCap(Canvas canvas, Color? rim) {
+    final skull = Path()
+      ..moveTo(54, 58)
+      ..cubicTo(54, 34, 126, 34, 126, 58)
+      ..close();
+    final board = Path()
+      ..moveTo(90, 15)
+      ..lineTo(140, 31)
+      ..lineTo(90, 47)
+      ..lineTo(40, 31)
+      ..close();
+    if (rim != null) {
+      _fill(canvas, skull, rim, rim: true);
+      _fill(canvas, board, rim, rim: true);
+    }
+    _fill(canvas, skull, palette.ink);
+    _fill(canvas, board, palette.ink);
+    _stroke(
+      canvas,
+      Path()
+        ..moveTo(90, 31)
+        ..lineTo(126, 35)
+        ..lineTo(127, 52),
+      2.6,
+      palette.scarf,
+    );
+    _fill(canvas, _oval(90, 31, 3.2, 3.2), palette.scarf);
+    _fill(
+      canvas,
+      Path()
+        ..addRRect(RRect.fromLTRBR(123, 50, 131, 61, const Radius.circular(3))),
+      palette.scarf,
+    );
+  }
+
   void _key(Canvas canvas, Offset hand) {
     final Offset(dx: x, dy: y) = hand;
     canvas.drawCircle(
@@ -582,5 +723,6 @@ class MascotPainter extends CustomPainter {
       oldDelegate.pose != pose ||
       oldDelegate.palette != palette ||
       oldDelegate.prop != prop ||
+      oldDelegate.framing != framing ||
       oldDelegate.frame != frame;
 }

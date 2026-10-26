@@ -22,7 +22,10 @@ class OnboardingQuestionScaffold extends StatelessWidget {
     required this.onContinue,
     required this.onBack,
     this.helper,
+    this.helperIcon,
+    this.helperIsInfo = false,
     this.expression = MascotExpression.welcome,
+    this.mascotSize = defaultMascotSize,
     super.key,
   });
 
@@ -40,10 +43,20 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   final VoidCallback onBack;
   final MascotExpression expression;
 
-  static const _mascotSize = 72.0;
+  /// Shown before [helper], e.g. a lock for privacy notes.
+  final IconData? helperIcon;
+
+  /// Info tone (hints, privacy) instead of the muted default.
+  final bool helperIsInfo;
+
+  /// 72 by default; the design's playful steps use [playfulMascotSize].
+  final double mascotSize;
+
+  static const defaultMascotSize = 72.0;
+  static const playfulMascotSize = 104.0;
 
   /// The bubble sits higher than the guide's feet, level with its head.
-  static const _bubbleLift = _mascotSize * .28;
+  static const _bubbleLiftRatio = .28;
 
   // Entrance slots, as fractions of AppMotion.heroEntrance (design delays).
   static const _slot = .448;
@@ -52,7 +65,6 @@ class OnboardingQuestionScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final texts = context.texts;
     final colors = context.colors;
 
     return Scaffold(
@@ -75,13 +87,13 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                       motion: EntranceMotion.pop,
                       begin: .096,
                       end: .096 + _slot,
-                      child: Mascot(expression: expression, size: _mascotSize),
+                      child: Mascot(expression: expression, size: mascotSize),
                     ),
                     const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
                     Expanded(
                       child: Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          bottom: _bubbleLift,
+                        padding: EdgeInsetsDirectional.only(
+                          bottom: mascotSize * _bubbleLiftRatio,
                         ),
                         child: EntranceItem(
                           motion: EntranceMotion.pop,
@@ -120,11 +132,12 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                           motion: EntranceMotion.up,
                           begin: .432,
                           end: .432 + _slot,
-                          child: Text(
-                            helper,
-                            style: texts.caption.copyWith(
-                              color: colors.textSecondary,
-                            ),
+                          child: _Helper(
+                            text: helper,
+                            icon: helperIcon,
+                            color: helperIsInfo
+                                ? colors.info.text
+                                : colors.textSecondary,
                           ),
                         ),
                       ],
@@ -154,6 +167,32 @@ class OnboardingQuestionScaffold extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _Helper extends StatelessWidget {
+  const _Helper({required this.text, required this.color, this.icon});
+
+  final String text;
+  final IconData? icon;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = context.texts.caption.copyWith(color: color);
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (icon case final icon?) ...[
+          Padding(
+            padding: const EdgeInsetsDirectional.only(top: AppSpacing.xxs),
+            child: Icon(icon, size: AppSizes.iconSm, color: color),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+        ],
+        Expanded(child: Text(text, style: style)),
+      ],
     );
   }
 }

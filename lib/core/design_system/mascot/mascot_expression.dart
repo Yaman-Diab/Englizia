@@ -149,4 +149,27 @@ enum MascotProp {
 
   /// Wears headphones (placement test).
   headphones,
+
+  /// Round glasses: the adult learner on "who will learn".
+  // ASSUMPTION(design): glasses, beanie and graduation cap are proposals for
+  // the "who will learn" avatars, not yet in the approved drawing.
+  glasses,
+
+  /// A kid's cap with a little propeller: the child learner.
+  beanie,
+
+  /// A graduation cap with a tassel: the school student.
+  gradCap;
+
+  /// Hats replace the speech tuft, which would poke through them.
+  bool get isHat => this == beanie || this == gradCap;
+}
+
+/// How much of the guide is shown.
+enum MascotFraming {
+  /// The whole figure with its ground shadow.
+  full,
+
+  /// Head and shoulders, for avatars; arms, tilt and effects are dropped.
+  head,
 }

@@ -72,6 +72,28 @@ void main() {
     expect(painter.pose.rightArm.end, const Offset(146, 102));
   });
 
+  test('the head framing drops arms, tilt and effects', () {
+    final painter = MascotPainter(
+      pose: MascotExpression.happy.pose,
+      palette: MascotPalette.light,
+      prop: MascotProp.none,
+      framing: MascotFraming.head,
+      frame: ValueNotifier(MascotFrame.still),
+    );
+    expect(painter.pose.leftArm, MascotPose.restLeft);
+    expect(painter.pose.rightArm, MascotPose.restRight);
+    expect(painter.pose.sparkles, isFalse);
+    expect(painter.pose.tilt, 0);
+    // The face is kept.
+    expect(painter.pose.mouth, MascotExpression.happy.pose.mouth);
+  });
+
+  test('hats replace the speech tuft', () {
+    expect(MascotProp.beanie.isHat, isTrue);
+    expect(MascotProp.gradCap.isHat, isTrue);
+    expect(MascotProp.glasses.isHat, isFalse);
+  });
+
   for (final mode in [ThemeMode.light, ThemeMode.dark]) {
     testWidgets('every expression and prop paints (${mode.name})', (
       tester,
@@ -82,12 +104,14 @@ void main() {
             children: [
               for (final expression in MascotExpression.values)
                 for (final prop in MascotProp.values)
-                  Mascot(
-                    expression: expression,
-                    prop: prop,
-                    size: 60,
-                    animate: false,
-                  ),
+                  for (final framing in MascotFraming.values)
+                    Mascot(
+                      expression: expression,
+                      prop: prop,
+                      framing: framing,
+                      size: 60,
+                      animate: false,
+                    ),
             ],
           ),
         ),
@@ -97,7 +121,9 @@ void main() {
       expect(
         find.byType(Mascot),
         findsNWidgets(
-          MascotExpression.values.length * MascotProp.values.length,
+          MascotExpression.values.length *
+              MascotProp.values.length *
+              MascotFraming.values.length,
         ),
       );
     });

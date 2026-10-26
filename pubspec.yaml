@@ -36,6 +36,9 @@ flutter:
 
   assets:
     - assets/translations/
+    # Mock mode data (env/mock.json); each file goes when its endpoint is
+    # confirmed, see docs/STATUS.md.
+    - assets/mock/tracks/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.
     - assets/fonts/ReadexPro-Regular.ttf
