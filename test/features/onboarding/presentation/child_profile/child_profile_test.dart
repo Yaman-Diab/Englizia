@@ -54,19 +54,17 @@ void main() {
       return cubit;
     }
 
-    for (final locale in AppLocales.supported) {
-      for (final size in [defaultViewport, narrowViewport]) {
-        for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-          testWidgets('lays out without overflow (${locale.languageCode}, '
-              '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-            await pumpPage(tester, locale: locale, size: size, themeMode: mode);
-            await tester.enterText(find.byType(TextField), 'Alexandria');
-            await tester.pump();
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
+    testLayouts('lays out without overflow', (tester, layout) async {
+      await pumpPage(
+        tester,
+        locale: layout.locale,
+        size: layout.size,
+        themeMode: layout.themeMode,
+      );
+      await tester.enterText(find.byType(TextField), 'Alexandria');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('the greeting follows the typed name', (tester) async {
       await pumpPage(tester);

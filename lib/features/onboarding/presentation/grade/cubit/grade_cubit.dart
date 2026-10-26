@@ -1,5 +1,6 @@
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_state.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
@@ -14,14 +15,14 @@ class GradeCubit extends Cubit<GradeState> {
   final TrackRepository _tracks;
 
   Future<void> load() async {
-    emit(state.copyWith(status: GradeStatus.loading, failure: () => null));
+    emit(state.copyWith(status: LoadStatus.loading, failure: () => null));
     final result = await _loadLevels();
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
         emit(
           state.copyWith(
-            status: GradeStatus.ready,
+            status: LoadStatus.ready,
             groups: groupLevels(value),
             selected: () =>
                 value.contains(state.selected) ? state.selected : null,
@@ -29,7 +30,7 @@ class GradeCubit extends Cubit<GradeState> {
         );
       case Err(:final failure):
         emit(
-          state.copyWith(status: GradeStatus.failure, failure: () => failure),
+          state.copyWith(status: LoadStatus.failure, failure: () => failure),
         );
     }
   }

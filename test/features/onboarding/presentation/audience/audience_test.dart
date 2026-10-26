@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_state.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -34,7 +35,7 @@ void main() {
       expect: () => const [
         AudienceState(),
         AudienceState(
-          status: AudienceStatus.ready,
+          status: LoadStatus.ready,
           available: {TrackAudience.self, TrackAudience.child},
         ),
       ],
@@ -53,7 +54,7 @@ void main() {
       skip: 2,
       expect: () => const [
         AudienceState(
-          status: AudienceStatus.ready,
+          status: LoadStatus.ready,
           available: {TrackAudience.self, TrackAudience.child},
           selected: TrackAudience.child,
         ),
@@ -95,13 +96,10 @@ void main() {
       },
       expect: () => const [
         AudienceState(),
-        AudienceState(
-          status: AudienceStatus.failure,
-          failure: NetworkFailure(),
-        ),
+        AudienceState(status: LoadStatus.failure, failure: NetworkFailure()),
         AudienceState(),
         AudienceState(
-          status: AudienceStatus.ready,
+          status: LoadStatus.ready,
           available: {TrackAudience.self, TrackAudience.child},
         ),
       ],
@@ -135,17 +133,15 @@ void main() {
       return cubit;
     }
 
-    for (final locale in AppLocales.supported) {
-      for (final size in [defaultViewport, narrowViewport]) {
-        for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-          testWidgets('lays out without overflow (${locale.languageCode}, '
-              '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-            await pumpPage(tester, locale: locale, size: size, themeMode: mode);
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
+    testLayouts('lays out without overflow', (tester, layout) async {
+      await pumpPage(
+        tester,
+        locale: layout.locale,
+        size: layout.size,
+        themeMode: layout.themeMode,
+      );
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('an audience without a published track is «soon»', (
       tester,
@@ -193,7 +189,7 @@ void main() {
     testWidgets('a failed load offers a retry', (tester) async {
       final cubit = await pumpPage(tester, result: const Err(NetworkFailure()));
 
-      expect(cubit.state.status, AudienceStatus.failure);
+      expect(cubit.state.status, LoadStatus.failure);
       expect(find.text('common_retry'.tr()), findsOneWidget);
     });
 

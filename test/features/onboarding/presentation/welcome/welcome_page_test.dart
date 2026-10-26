@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
-import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -14,26 +13,19 @@ void main() {
   Widget page({VoidCallback? onStart, VoidCallback? onSignIn}) =>
       WelcomePage(onStart: onStart ?? () {}, onSignIn: onSignIn ?? () {});
 
-  for (final locale in AppLocales.supported) {
-    for (final size in [defaultViewport, narrowViewport]) {
-      for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-        testWidgets('lays out without overflow (${locale.languageCode}, '
-            '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-          await tester.pumpLocalized(
-            page(),
-            locale: locale,
-            size: size,
-            themeMode: mode,
-          );
-          await tester.settleEntrance(HeroEntrance.settled);
+  testLayouts('lays out without overflow', (tester, layout) async {
+    await tester.pumpLocalized(
+      page(),
+      locale: layout.locale,
+      size: layout.size,
+      themeMode: layout.themeMode,
+    );
+    await tester.settleEntrance(HeroEntrance.settled);
 
-          expect(tester.takeException(), isNull);
-          expect(find.text('welcome_title'.tr()), findsOneWidget);
-          expect(find.text('app_name'.tr()), findsOneWidget);
-        });
-      }
-    }
-  }
+    expect(tester.takeException(), isNull);
+    expect(find.text('welcome_title'.tr()), findsOneWidget);
+    expect(find.text('app_name'.tr()), findsOneWidget);
+  });
 
   testWidgets('the buttons hand navigation to the router', (tester) async {
     var started = 0;

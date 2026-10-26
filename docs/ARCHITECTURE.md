@@ -93,3 +93,4 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 | Whole app boot | `test/app/` | `pumpLocalized`, 375 and 320 widths, AR + EN, a11y guidelines |
 | DI | `test/di/` | `configureDependencies()` |
 | Rules | `architecture_test`, `localization_test` | file scans |
+| Screens | `test/features/<feature>/` | `testLayouts` (every locale × 375/320 × light/dark), `settleEntrance` to play an entrance, `FakeTrackRepository` and other shared fakes in `test/helpers/` |

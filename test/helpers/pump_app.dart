@@ -45,6 +45,30 @@ Widget localizedTestRoot({required Locale locale, required Widget child}) =>
       child: child,
     );
 
+/// One layout under test: a supported locale, a phone width, a theme mode.
+typedef LayoutCase = ({Locale locale, Size size, ThemeMode themeMode});
+
+/// Registers [body] once per supported locale, phone width
+/// ([defaultViewport], [narrowViewport]) and theme mode, named
+/// "[description] (ar, 320dp, dark)" — the Definition of Done matrix.
+void testLayouts(
+  String description,
+  Future<void> Function(WidgetTester tester, LayoutCase layout) body,
+) {
+  for (final locale in AppLocales.supported) {
+    for (final size in [defaultViewport, narrowViewport]) {
+      for (final themeMode in [ThemeMode.light, ThemeMode.dark]) {
+        testWidgets(
+          '$description (${locale.languageCode}, '
+          '${size.width.toInt()}dp, ${themeMode.name})',
+          (tester) =>
+              body(tester, (locale: locale, size: size, themeMode: themeMode)),
+        );
+      }
+    }
+  }
+}
+
 extension PumpApp on WidgetTester {
   void setViewport(Size size) {
     view

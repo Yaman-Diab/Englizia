@@ -6,6 +6,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_state.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
@@ -48,7 +49,7 @@ void main() {
       await cubit.load();
 
       expect(repo.levelRequests, ['emar']);
-      expect(cubit.state.status, GradeStatus.ready);
+      expect(cubit.state.status, LoadStatus.ready);
       expect(cubit.state.groups.map((g) => g.levels.length), [6, 3, 3]);
       expect(cubit.state.groups.first.title?.ar, 'الحلقة الأولى');
     });
@@ -86,7 +87,7 @@ void main() {
       act: (cubit) => cubit.load(),
       skip: 1,
       expect: () => const [
-        GradeState(status: GradeStatus.failure, failure: NotFoundFailure()),
+        GradeState(status: LoadStatus.failure, failure: NotFoundFailure()),
       ],
     );
 
@@ -137,17 +138,15 @@ void main() {
       return cubit;
     }
 
-    for (final locale in AppLocales.supported) {
-      for (final size in [defaultViewport, narrowViewport]) {
-        for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-          testWidgets('lays out without overflow (${locale.languageCode}, '
-              '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-            await pumpPage(tester, locale: locale, size: size, themeMode: mode);
-            expect(tester.takeException(), isNull);
-          });
-        }
-      }
-    }
+    testLayouts('lays out without overflow', (tester, layout) async {
+      await pumpPage(
+        tester,
+        locale: layout.locale,
+        size: layout.size,
+        themeMode: layout.themeMode,
+      );
+      expect(tester.takeException(), isNull);
+    });
 
     testWidgets('shows the groups and hands the chosen grade on', (
       tester,

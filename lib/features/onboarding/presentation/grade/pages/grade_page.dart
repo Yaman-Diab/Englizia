@@ -2,12 +2,11 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
-import 'package:englizia/core/design_system/widgets/app_state_view.dart';
-import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_state.dart';
 import 'package:englizia/features/onboarding/presentation/grade/widgets/grade_cell.dart';
+import 'package:englizia/features/onboarding/presentation/widgets/loaded_answers.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
@@ -42,22 +41,11 @@ class GradePage extends StatelessWidget {
               ? () => onContinue(state.selected!)
               : null,
           onBack: onBack,
-          options: switch (state.status) {
-            GradeStatus.loading => const [
-              Padding(
-                padding: EdgeInsetsDirectional.symmetric(
-                  vertical: AppSpacing.xxl,
-                ),
-                child: AppStateView.loading(),
-              ),
-            ],
-            GradeStatus.failure => [
-              AppStateView.error(
-                message: state.failure!.localizedMessage,
-                onRetry: cubit.load,
-              ),
-            ],
-            GradeStatus.ready => [
+          options: loadedAnswers(
+            status: state.status,
+            failure: state.failure,
+            onRetry: cubit.load,
+            ready: () => [
               for (final group in state.groups)
                 _GradeSection(
                   group: group,
@@ -65,7 +53,7 @@ class GradePage extends StatelessWidget {
                   onSelect: cubit.select,
                 ),
             ],
-          },
+          ),
         );
       },
     );

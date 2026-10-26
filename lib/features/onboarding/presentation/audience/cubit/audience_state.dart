@@ -1,18 +1,17 @@
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:equatable/equatable.dart';
 
-enum AudienceStatus { loading, ready, failure }
-
 final class AudienceState extends Equatable {
   const AudienceState({
-    this.status = AudienceStatus.loading,
+    this.status = LoadStatus.loading,
     this.available = const {},
     this.selected,
     this.failure,
   });
 
-  final AudienceStatus status;
+  final LoadStatus status;
 
   /// Audiences with at least one published track; the others are «قريبًا».
   final Set<TrackAudience> available;
@@ -21,11 +20,11 @@ final class AudienceState extends Equatable {
   final TrackAudience? selected;
   final Failure? failure;
 
-  bool get canContinue => status == AudienceStatus.ready && selected != null;
+  bool get canContinue => status == LoadStatus.ready && selected != null;
 
   /// Nullable fields take a function so they can be cleared: `selected: () => null`.
   AudienceState copyWith({
-    AudienceStatus? status,
+    LoadStatus? status,
     Set<TrackAudience>? available,
     TrackAudience? Function()? selected,
     Failure? Function()? failure,

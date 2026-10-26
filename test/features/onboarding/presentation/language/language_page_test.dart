@@ -17,23 +17,16 @@ void main() {
   OnboardingOption option(WidgetTester tester, String title) => tester
       .widget<OnboardingOption>(find.widgetWithText(OnboardingOption, title));
 
-  for (final locale in AppLocales.supported) {
-    for (final size in [defaultViewport, narrowViewport]) {
-      for (final mode in [ThemeMode.light, ThemeMode.dark]) {
-        testWidgets('lays out without overflow (${locale.languageCode}, '
-            '${size.width.toInt()}dp, ${mode.name})', (tester) async {
-          await tester.pumpLocalized(
-            page(),
-            locale: locale,
-            size: size,
-            themeMode: mode,
-          );
-          await tester.settleEntrance(QuestionEntrance.settled);
-          expect(tester.takeException(), isNull);
-        });
-      }
-    }
-  }
+  testLayouts('lays out without overflow', (tester, layout) async {
+    await tester.pumpLocalized(
+      page(),
+      locale: layout.locale,
+      size: layout.size,
+      themeMode: layout.themeMode,
+    );
+    await tester.settleEntrance(QuestionEntrance.settled);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('the current language is preselected', (tester) async {
     await tester.pumpLocalized(page(), locale: AppLocales.english);
