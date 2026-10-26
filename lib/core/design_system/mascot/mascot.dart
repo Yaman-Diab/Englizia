@@ -8,7 +8,8 @@ import 'package:englizia/core/design_system/mascot/mascot_pose.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-export 'mascot_expression.dart' show MascotExpression, MascotProp;
+export 'mascot_expression.dart'
+    show MascotExpression, MascotFraming, MascotProp;
 
 /// The app's guide character ("بلبل" for now; the name lives in the
 /// `mascot_name` translation key). Drawn in code, so it is sharp at any size,
@@ -21,6 +22,7 @@ class Mascot extends StatefulWidget {
   const Mascot({
     this.expression = MascotExpression.welcome,
     this.prop = MascotProp.none,
+    this.framing = MascotFraming.full,
     this.size = 160,
     this.animate = true,
     this.waving = false,
@@ -30,6 +32,7 @@ class Mascot extends StatefulWidget {
 
   final MascotExpression expression;
   final MascotProp prop;
+  final MascotFraming framing;
 
   /// Width and height in logical pixels.
   final double size;
@@ -122,6 +125,7 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
             pose: _shownPose,
             palette: palette,
             prop: widget.prop,
+            framing: widget.framing,
             frame: _frame,
           ),
         ),

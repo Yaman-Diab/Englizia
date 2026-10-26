@@ -94,6 +94,8 @@ final class MascotPose {
     MascotHand? rightHand,
     double? leftSplit,
     double? rightSplit,
+    bool? sparkles,
+    bool? phone,
   }) => MascotPose(
     tilt: tilt ?? this.tilt,
     leftArm: leftArm ?? this.leftArm,
@@ -107,8 +109,8 @@ final class MascotPose {
     mouth: mouth,
     cheeks: cheeks,
     bubble: bubble,
-    sparkles: sparkles,
-    phone: phone,
+    sparkles: sparkles ?? this.sparkles,
+    phone: phone ?? this.phone,
   );
 
   /// [to] with the arms, tilt and finger split moved from [from] by [t].
