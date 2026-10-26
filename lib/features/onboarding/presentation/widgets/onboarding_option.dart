@@ -1,3 +1,4 @@
+import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
@@ -19,6 +20,7 @@ class OnboardingOption extends StatelessWidget {
     this.mark,
     this.art,
     this.icon,
+    this.iconTone = TileTone.blue,
     this.description,
     this.soonLabel,
     this.multiple = false,
@@ -31,6 +33,9 @@ class OnboardingOption extends StatelessWidget {
   final String? mark;
   final Widget? art;
   final AppIcon? icon;
+
+  /// Color of the icon tile; only used with [icon].
+  final TileTone iconTone;
   final bool multiple;
   final String title;
   final String? description;
@@ -110,19 +115,16 @@ class OnboardingOption extends StatelessWidget {
   Widget _leading(BuildContext context) {
     final background = context.scheme.surfaceContainerHigh;
     if (icon case final icon?) {
+      final tile = context.colors.tiles.of(iconTone);
       return Container(
         width: _markSize,
         height: _markSize,
         decoration: BoxDecoration(
-          color: background,
+          color: tile.background,
           borderRadius: BorderRadius.circular(_tileRadius),
         ),
         alignment: Alignment.center,
-        child: AppIconView(
-          icon,
-          size: _iconSize,
-          color: context.colors.selection,
-        ),
+        child: AppIconView(icon, size: _iconSize, color: tile.icon),
       );
     }
     if (art case final art?) {

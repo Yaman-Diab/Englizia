@@ -65,6 +65,118 @@ final class ReaderColors {
   );
 }
 
+/// Which of the six category tile colors an icon tile uses (designs,
+/// "Onboarding Option"). The tone tells the categories apart; it carries no
+/// meaning, so it never replaces a label.
+enum TileTone { blue, amber, green, sky, orange, navy }
+
+/// One category tile: the square's [background] and the [icon] drawn on it.
+@immutable
+final class TileColors {
+  const TileColors({required this.background, required this.icon});
+
+  final Color background;
+  final Color icon;
+
+  static TileColors lerp(TileColors a, TileColors b, double t) => TileColors(
+    background: Color.lerp(a.background, b.background, t)!,
+    icon: Color.lerp(a.icon, b.icon, t)!,
+  );
+}
+
+/// The six category tiles, read with [of].
+@immutable
+final class CategoryTiles {
+  const CategoryTiles({
+    required this.blue,
+    required this.amber,
+    required this.green,
+    required this.sky,
+    required this.orange,
+    required this.navy,
+  });
+
+  final TileColors blue;
+  final TileColors amber;
+  final TileColors green;
+  final TileColors sky;
+  final TileColors orange;
+  final TileColors navy;
+
+  TileColors of(TileTone tone) => switch (tone) {
+    TileTone.blue => blue,
+    TileTone.amber => amber,
+    TileTone.green => green,
+    TileTone.sky => sky,
+    TileTone.orange => orange,
+    TileTone.navy => navy,
+  };
+
+  static CategoryTiles lerp(CategoryTiles a, CategoryTiles b, double t) =>
+      CategoryTiles(
+        blue: TileColors.lerp(a.blue, b.blue, t),
+        amber: TileColors.lerp(a.amber, b.amber, t),
+        green: TileColors.lerp(a.green, b.green, t),
+        sky: TileColors.lerp(a.sky, b.sky, t),
+        orange: TileColors.lerp(a.orange, b.orange, t),
+        navy: TileColors.lerp(a.navy, b.navy, t),
+      );
+
+  static const light = CategoryTiles(
+    blue: TileColors(
+      background: AppPalette.tileBlueBg,
+      icon: AppPalette.tileBlueFg,
+    ),
+    amber: TileColors(
+      background: AppPalette.tileAmberBg,
+      icon: AppPalette.tileAmberFg,
+    ),
+    green: TileColors(
+      background: AppPalette.tileGreenBg,
+      icon: AppPalette.tileGreenFg,
+    ),
+    sky: TileColors(
+      background: AppPalette.tileSkyBg,
+      icon: AppPalette.tileSkyFg,
+    ),
+    orange: TileColors(
+      background: AppPalette.tileOrangeBg,
+      icon: AppPalette.tileOrangeFg,
+    ),
+    navy: TileColors(
+      background: AppPalette.tileNavyBg,
+      icon: AppPalette.tileNavyFg,
+    ),
+  );
+
+  static const dark = CategoryTiles(
+    blue: TileColors(
+      background: AppPalette.tileBlueBgDark,
+      icon: AppPalette.tileBlueFgDark,
+    ),
+    amber: TileColors(
+      background: AppPalette.tileAmberBgDark,
+      icon: AppPalette.tileAmberFgDark,
+    ),
+    green: TileColors(
+      background: AppPalette.tileGreenBgDark,
+      icon: AppPalette.tileGreenFgDark,
+    ),
+    sky: TileColors(
+      background: AppPalette.tileSkyBgDark,
+      icon: AppPalette.tileSkyFgDark,
+    ),
+    orange: TileColors(
+      background: AppPalette.tileOrangeBgDark,
+      icon: AppPalette.tileOrangeFgDark,
+    ),
+    navy: TileColors(
+      background: AppPalette.tileNavyBgDark,
+      icon: AppPalette.tileNavyFgDark,
+    ),
+  );
+}
+
 /// Semantic tokens of "الهوية البصرية v2". Read with `context.colors`.
 ///
 /// Role meanings are fixed: [ai] (violet) is only for AI features; [reward]
@@ -88,6 +200,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     required this.surface,
     required this.border,
     required this.reader,
+    required this.tiles,
   });
 
   /// PRIMARY / PRIMARY_TEXT / PRIMARY_SURFACE — navigation, track progress,
@@ -114,6 +227,9 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
   final Color border;
 
   final ReaderColors reader;
+
+  /// Category tile colors, from the designs.
+  final CategoryTiles tiles;
 
   /// The chosen answer: its border, check and highlighted text.
   Color get selection => primary.text;
@@ -173,6 +289,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       tappableUnderline: AppPalette.blue500,
       selectedWord: AppPalette.blue600,
     ),
+    tiles: CategoryTiles.light,
   );
 
   /// Dark neutrals, primary text, error and success follow the designs' token
@@ -228,6 +345,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       tappableUnderline: AppPalette.blue400,
       selectedWord: AppPalette.blue400,
     ),
+    tiles: CategoryTiles.dark,
   );
 
   @override
@@ -247,6 +365,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     Color? surface,
     Color? border,
     ReaderColors? reader,
+    CategoryTiles? tiles,
   }) => AppSemanticColors(
     primary: primary ?? this.primary,
     primaryStrong: primaryStrong ?? this.primaryStrong,
@@ -263,6 +382,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
     surface: surface ?? this.surface,
     border: border ?? this.border,
     reader: reader ?? this.reader,
+    tiles: tiles ?? this.tiles,
   );
 
   @override
@@ -284,6 +404,7 @@ final class AppSemanticColors extends ThemeExtension<AppSemanticColors> {
       surface: Color.lerp(surface, other.surface, t)!,
       border: Color.lerp(border, other.border, t)!,
       reader: ReaderColors.lerp(reader, other.reader, t),
+      tiles: CategoryTiles.lerp(tiles, other.tiles, t),
     );
   }
 }

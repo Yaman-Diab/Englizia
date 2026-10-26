@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
@@ -53,6 +54,7 @@ class ReasonPage extends StatelessWidget {
             for (final reason in LearningReason.values)
               OnboardingOption(
                 icon: _icon(reason),
+                iconTone: _tone(reason),
                 title: _title(reason),
                 selected: state.picks.contains(reason),
                 multiple: true,
@@ -71,6 +73,15 @@ class ReasonPage extends StatelessWidget {
     LearningReason.travel => AppIcon.plane,
     LearningReason.career => AppIcon.briefcase,
     LearningReason.exams => AppIcon.examSheet,
+  };
+
+  static TileTone _tone(LearningReason reason) => switch (reason) {
+    LearningReason.communication => TileTone.blue,
+    LearningReason.fun => TileTone.amber,
+    LearningReason.education => TileTone.green,
+    LearningReason.travel => TileTone.sky,
+    LearningReason.career => TileTone.orange,
+    LearningReason.exams => TileTone.navy,
   };
 
   static String _title(LearningReason reason) => switch (reason) {

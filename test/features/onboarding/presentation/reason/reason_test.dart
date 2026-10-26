@@ -1,9 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
+import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -107,6 +109,24 @@ void main() {
       await pumpPage(tester, audience: TrackAudience.schoolStudent);
       expect(find.bySemanticsLabel('الخطوة 4 من 5'), findsOneWidget);
       handle.dispose();
+    });
+
+    testWidgets('each reason has its own tile color from the designs', (
+      tester,
+    ) async {
+      await pumpPage(tester);
+      final tones = tester
+          .widgetList<OnboardingOption>(find.byType(OnboardingOption))
+          .map((option) => option.iconTone)
+          .toList();
+      expect(tones, [
+        TileTone.blue,
+        TileTone.amber,
+        TileTone.green,
+        TileTone.sky,
+        TileTone.orange,
+        TileTone.navy,
+      ]);
     });
 
     testWidgets('reasons are checkboxes, not a radio group', (tester) async {

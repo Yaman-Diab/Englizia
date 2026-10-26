@@ -152,6 +152,34 @@ void main() {
     });
   });
 
+  test('category tiles follow the designs and keep the icon readable', () {
+    const expected = {
+      TileTone.blue: (0xFFE3EDFE, 0xFF2563EB, 0xFF17284A, 0xFF8AB4FF),
+      TileTone.amber: (0xFFFDF1DC, 0xFFB86E00, 0xFF33270F, 0xFFF5B54E),
+      TileTone.green: (0xFFDDF5E8, 0xFF1F8A4C, 0xFF10301F, 0xFF5FD394),
+      TileTone.sky: (0xFFDDF3FA, 0xFF0E7FA6, 0xFF0F2C36, 0xFF5CCBEA),
+      TileTone.orange: (0xFFFFE8DA, 0xFFD2560F, 0xFF3A2012, 0xFFFF9A5C),
+      TileTone.navy: (0xFFE1E6F2, 0xFF1E3A8A, 0xFF1A2236, 0xFF9DB3E8),
+    };
+    for (final MapEntry(key: tone, value: v) in expected.entries) {
+      final light = AppSemanticColors.light.tiles.of(tone);
+      final dark = AppSemanticColors.dark.tiles.of(tone);
+      expect(light.background, Color(v.$1), reason: '$tone light bg');
+      expect(light.icon, Color(v.$2), reason: '$tone light icon');
+      expect(dark.background, Color(v.$3), reason: '$tone dark bg');
+      expect(dark.icon, Color(v.$4), reason: '$tone dark icon');
+      // Icons need 3:1 against what they sit on.
+      expect(
+        contrast(light.icon, light.background),
+        greaterThanOrEqualTo(fillMin),
+      );
+      expect(
+        contrast(dark.icon, dark.background),
+        greaterThanOrEqualTo(fillMin),
+      );
+    }
+  });
+
   test('doc contrast figures hold', () {
     expect(
       contrast(
