@@ -1,4 +1,5 @@
 import 'package:englizia/core/di/service_locator.dart';
+import 'package:englizia/features/notifications/notifications_injection.dart';
 import 'package:englizia/features/onboarding/onboarding_injection.dart';
 import 'package:englizia/features/placement/placement_injection.dart';
 import 'package:englizia/features/tracks/tracks_injection.dart';
@@ -10,5 +11,6 @@ Future<void> configureDependencies() async {
   // Each feature adds one line here.
   registerTracksDependencies(sl);
   registerPlacementDependencies(sl);
+  registerNotificationsDependencies(sl);
   registerOnboardingDependencies(sl);
 }

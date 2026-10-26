@@ -44,6 +44,7 @@ flutter:
     # confirmed, see docs/STATUS.md.
     - assets/mock/tracks/
     - assets/mock/placement/
+    - assets/mock/settings/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.
     - assets/fonts/ReadexPro-Regular.ttf
