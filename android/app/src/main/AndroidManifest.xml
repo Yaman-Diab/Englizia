@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Declared here, not only in debug: release builds need it too. -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Android 13+: asked for on the onboarding reminder step. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:label="@string/app_name"
