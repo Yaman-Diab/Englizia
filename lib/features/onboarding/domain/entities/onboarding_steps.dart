@@ -2,10 +2,9 @@ import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:equatable/equatable.dart';
 
 /// Onboarding steps that are built (requirements v3.0 §4.2), in order. The
-/// child profile (v0.5), the level question (v0.2), the daily goal and the
-/// reminder time (v1.0) are built ahead of plan at the owner's request. Steps
-/// of later versions (challenge) are added here when built; until then they
-/// are skipped without a gap.
+/// child profile (v0.5), the level question (v0.2), the daily goal, the
+/// streak challenge and the reminder time (v1.0) are built ahead of plan at
+/// the owner's request.
 enum OnboardingStep {
   language,
   audience,
@@ -13,6 +12,7 @@ enum OnboardingStep {
   grade,
   reason,
   goal,
+  challenge,
   level,
   reminder,
   saveProgress,
@@ -24,14 +24,15 @@ const childAges = [5, 6, 7, 8, 9];
 /// The branch of onboarding the learner is on: who it is for, and the track
 /// chosen for them with its entry method. The entry method decides the
 /// branch (requirements §3.1), so a track changed in the control panel
-/// changes the steps without a release. It also carries the one answer a
-/// later step speaks of: the daily goal.
+/// changes the steps without a release. It also carries the answers later
+/// steps speak of: the daily goal and the streak challenge.
 final class OnboardingPath extends Equatable {
   const OnboardingPath({
     this.audience,
     this.trackId,
     this.entryMethod,
     this.dailyGoalMinutes,
+    this.challengeDays,
   });
 
   OnboardingPath.forTrack(LearningTrack track)
@@ -56,15 +57,33 @@ final class OnboardingPath extends Equatable {
   /// The goal chosen on the goal step, in minutes; null until then.
   final int? dailyGoalMinutes;
 
+  /// The streak challenge chosen, in days; null until then.
+  final int? challengeDays;
+
   OnboardingPath withDailyGoal(int minutes) => OnboardingPath(
     audience: audience,
     trackId: trackId,
     entryMethod: entryMethod,
     dailyGoalMinutes: minutes,
+    challengeDays: challengeDays,
+  );
+
+  OnboardingPath withChallenge(int days) => OnboardingPath(
+    audience: audience,
+    trackId: trackId,
+    entryMethod: entryMethod,
+    dailyGoalMinutes: dailyGoalMinutes,
+    challengeDays: days,
   );
 
   @override
-  List<Object?> get props => [audience, trackId, entryMethod, dailyGoalMinutes];
+  List<Object?> get props => [
+    audience,
+    trackId,
+    entryMethod,
+    dailyGoalMinutes,
+    challengeDays,
+  ];
 }
 
 /// The steps of [path], in order.
@@ -76,6 +95,7 @@ List<OnboardingStep> onboardingStepsFor(OnboardingPath path) => [
   if (path.audience != TrackAudience.child) ...[
     OnboardingStep.reason,
     OnboardingStep.goal,
+    OnboardingStep.challenge,
   ],
   if (path.entryMethod == TrackEntryMethod.placementTest) OnboardingStep.level,
   OnboardingStep.reminder,

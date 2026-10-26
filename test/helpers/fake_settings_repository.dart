@@ -43,6 +43,33 @@ const testSettings = EffectiveSettings(
     defaultMinutes: 10,
     lessonMinutes: 10,
   ),
+  challenge: ChallengeSettings(
+    options: [
+      ChallengeOption(
+        days: 7,
+        label: LocalizedText(ar: 'جيد', en: 'Good'),
+      ),
+      ChallengeOption(
+        days: 14,
+        label: LocalizedText(ar: 'رائع', en: 'Great'),
+      ),
+      ChallengeOption(
+        days: 30,
+        label: LocalizedText(ar: 'مذهل', en: 'Amazing'),
+      ),
+      ChallengeOption(
+        days: 40,
+        label: LocalizedText(ar: 'مثالي', en: 'Perfect'),
+      ),
+    ],
+    defaultDays: 7,
+    question: LocalizedText(
+      ar: 'من يحدد هدفًا يستمر أكثر. كم يومًا تتحدى نفسك؟',
+      en:
+          'People who set a goal stick with it longer. How many days will '
+          'you challenge yourself?',
+    ),
+  ),
 );
 
 /// Serves queued results in order, repeating the last one.

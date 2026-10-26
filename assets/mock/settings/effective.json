@@ -2,25 +2,99 @@
   "data": {
     "motivation": {
       "dailyGoalOptions": [
-        { "minutes": 5, "label": { "ar": "مريح", "en": "Easy" } },
-        { "minutes": 10, "label": { "ar": "قياسي", "en": "Standard" } },
-        { "minutes": 15, "label": { "ar": "جاد", "en": "Serious" } },
-        { "minutes": 20, "label": { "ar": "مكثّف", "en": "Intensive" } }
+        {
+          "minutes": 5,
+          "label": {
+            "ar": "مريح",
+            "en": "Easy"
+          }
+        },
+        {
+          "minutes": 10,
+          "label": {
+            "ar": "قياسي",
+            "en": "Standard"
+          }
+        },
+        {
+          "minutes": 15,
+          "label": {
+            "ar": "جاد",
+            "en": "Serious"
+          }
+        },
+        {
+          "minutes": 20,
+          "label": {
+            "ar": "مكثّف",
+            "en": "Intensive"
+          }
+        }
       ],
       "defaultDailyGoal": 10,
-      "averageLessonMinutes": 10
+      "averageLessonMinutes": 10,
+      "challengeOptions": [
+        {
+          "days": 7,
+          "label": {
+            "ar": "جيد",
+            "en": "Good"
+          }
+        },
+        {
+          "days": 14,
+          "label": {
+            "ar": "رائع",
+            "en": "Great"
+          }
+        },
+        {
+          "days": 30,
+          "label": {
+            "ar": "مذهل",
+            "en": "Amazing"
+          }
+        },
+        {
+          "days": 40,
+          "label": {
+            "ar": "مثالي",
+            "en": "Perfect"
+          }
+        }
+      ],
+      "defaultChallenge": 7,
+      "challengeQuestion": {
+        "ar": "من يحدد هدفًا يستمر أكثر. كم يومًا تتحدى نفسك؟",
+        "en": "People who set a goal stick with it longer. How many days will you challenge yourself?"
+      }
     },
     "notifications": {
       "reminderTimes": [
-        { "slot": "morning", "time": "08:00" },
-        { "slot": "noon", "time": "13:00" },
-        { "slot": "evening", "time": "20:00" }
+        {
+          "slot": "morning",
+          "time": "08:00"
+        },
+        {
+          "slot": "noon",
+          "time": "13:00"
+        },
+        {
+          "slot": "evening",
+          "time": "20:00"
+        }
       ],
       "defaultReminderSlot": "evening",
       "dailyReminder": {
         "enabled": true,
-        "title": { "ar": "حان وقت درسك اليومي", "en": "Time for your daily lesson" },
-        "body": { "ar": "{minutes} دقائق فقط وتحافظ على أيامك المتتالية", "en": "Just {minutes} minutes keeps your streak going" }
+        "title": {
+          "ar": "حان وقت درسك اليومي",
+          "en": "Time for your daily lesson"
+        },
+        "body": {
+          "ar": "{minutes} دقائق فقط وتحافظ على أيامك المتتالية",
+          "en": "Just {minutes} minutes keeps your streak going"
+        }
       }
     }
   },

@@ -20,7 +20,15 @@ The global settings after inheritance, as the app needs them before any track is
         { "minutes": 20, "label": { "ar": "مكثّف", "en": "Intensive" } }
       ],
       "defaultDailyGoal": 10,
-      "averageLessonMinutes": 10
+      "averageLessonMinutes": 10,
+      "challengeOptions": [
+        { "days": 7, "label": { "ar": "جيد", "en": "Good" } },
+        { "days": 14, "label": { "ar": "رائع", "en": "Great" } },
+        { "days": 30, "label": { "ar": "مذهل", "en": "Amazing" } },
+        { "days": 40, "label": { "ar": "مثالي", "en": "Perfect" } }
+      ],
+      "defaultChallenge": 7,
+      "challengeQuestion": { "ar": "من يحدد هدفًا يستمر أكثر. كم يومًا تتحدى نفسك؟", "en": "People who set a goal stick with it longer. How many days will you challenge yourself?" }
     },
     "notifications": {
       "reminderTimes": [
@@ -46,13 +54,16 @@ The global settings after inheritance, as the app needs them before any track is
 | `motivation.dailyGoalOptions[]` | `{minutes, label}`, four of them | The goal choices and the panel's word for each (§17.7: «مريح», «قياسي», «جاد», «مكثّف»); the app sorts them by minutes | yes (the goal step) |
 | `motivation.defaultDailyGoal` | int (minutes) | The preselected goal; when it is not among the options the first one is used | yes |
 | `motivation.averageLessonMinutes` | int (minutes), optional | How long an average lesson takes, so the goal step can say "≈ درس ونصف يوميًا" (10 minutes → one lesson). **Our proposal**: §17.7 names no such setting. Without it the preview shows the weekly total only | yes |
+| `motivation.challengeOptions[]` | `{days, label}`, four of them | The streak challenge lengths and the panel's word for each (§17.7); the app sorts them by days | yes (the challenge step) |
+| `motivation.defaultChallenge` | int (days) | The preselected length; when it is not among the options the first one is used | yes |
+| `motivation.challengeQuestion` | bilingual text | The guide's question on the challenge step, as edited in the panel (§17.7) | yes |
 | `notifications.reminderTimes[].slot` | `morning` \| `noon` \| `evening` | Which preset this is; the app names and draws it | yes |
 | `notifications.reminderTimes[].time` | `"HH:mm"`, 24-hour, phone time | The preset's time (§17.8) | yes |
 | `notifications.defaultReminderSlot` | slot | The preselected time (§17.8: evening) | yes |
 | `notifications.dailyReminder.enabled` | bool | Whether the daily reminder is on | not yet |
 | `notifications.dailyReminder.title` / `.body` | bilingual text | The reminder's text as edited in the panel; `{minutes}` is the learner's daily goal | yes (the preview) |
 
-An unknown slot, a malformed time, or a goal option without minutes or label is skipped. A response without any usable time, the reminder text, any goal option or the default goal is rejected.
+An unknown slot, a malformed time, or a goal or challenge option without its number or label is skipped. A response without any usable time, the reminder text, any goal or challenge option, their defaults or the challenge question is rejected.
 
 ### Errors
 

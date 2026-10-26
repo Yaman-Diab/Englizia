@@ -79,6 +79,10 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   static const defaultMascotSize = 72.0;
   static const playfulMascotSize = 104.0;
 
+  /// The default guide on screens shorter than [_compactHeight] (designs).
+  static const compactMascotSize = 56.0;
+  static const _compactHeight = 700.0;
+
   /// The bubble sits higher than the guide's feet, level with its head.
   static const _bubbleLiftRatio = .28;
   static const _mascotGap = AppSpacing.sm + AppSpacing.xxs;
@@ -86,6 +90,11 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final mascotSize =
+        this.mascotSize == defaultMascotSize &&
+            MediaQuery.sizeOf(context).height < _compactHeight
+        ? compactMascotSize
+        : this.mascotSize;
 
     return Scaffold(
       body: SafeArea(
