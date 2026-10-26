@@ -34,16 +34,16 @@ class AppIllustrationView extends StatelessWidget {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final scene = switch (illustration) {
       AppIllustration.hatching => [
-        const Positioned(
-          left: -19,
+        const PositionedDirectional(
+          start: -19,
           top: -6,
           child: Mascot(size: _mascotSize, animate: false),
         ),
         Positioned.fill(child: SvgPicture.string(_eggshell(dark))),
       ],
       AppIllustration.listening => [
-        const Positioned(
-          left: -14,
+        const PositionedDirectional(
+          start: -14,
           top: 3,
           child: Mascot(
             expression: MascotExpression.listen,
@@ -52,8 +52,8 @@ class AppIllustrationView extends StatelessWidget {
             animate: false,
           ),
         ),
-        Positioned(
-          left: 5,
+        PositionedDirectional(
+          start: 5,
           top: 8,
           width: 20,
           height: 15,
@@ -67,7 +67,11 @@ class AppIllustrationView extends StatelessWidget {
         child: FittedBox(
           child: SizedBox.square(
             dimension: _box,
-            child: Stack(clipBehavior: Clip.none, children: scene),
+            // Art, not layout: the scene looks the same in Arabic.
+            child: Directionality(
+              textDirection: TextDirection.ltr,
+              child: Stack(clipBehavior: Clip.none, children: scene),
+            ),
           ),
         ),
       ),
