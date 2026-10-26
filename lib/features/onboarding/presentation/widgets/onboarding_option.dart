@@ -1,5 +1,6 @@
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:flutter/material.dart';
 
@@ -29,7 +30,7 @@ class OnboardingOption extends StatelessWidget {
 
   final String? mark;
   final Widget? art;
-  final IconData? icon;
+  final AppIcon? icon;
   final bool multiple;
   final String title;
   final String? description;
@@ -41,6 +42,7 @@ class OnboardingOption extends StatelessWidget {
   static const _markSize = 40.0;
   static const _artSize = 56.0;
   static const _tileRadius = 10.0;
+  static const _iconSize = 22.0;
   static const _disabledOpacity = .45;
   static const _soonContentOpacity = .55;
 
@@ -115,9 +117,10 @@ class OnboardingOption extends StatelessWidget {
           color: background,
           borderRadius: BorderRadius.circular(_tileRadius),
         ),
-        child: Icon(
+        alignment: Alignment.center,
+        child: AppIconView(
           icon,
-          size: AppSizes.iconMd - AppSpacing.xxs,
+          size: _iconSize,
           color: context.colors.selection,
         ),
       );

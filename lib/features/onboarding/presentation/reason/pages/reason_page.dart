@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -63,13 +64,13 @@ class ReasonPage extends StatelessWidget {
     );
   }
 
-  static IconData _icon(LearningReason reason) => switch (reason) {
-    LearningReason.communication => Icons.forum_outlined,
-    LearningReason.fun => Icons.celebration_outlined,
-    LearningReason.education => Icons.school_outlined,
-    LearningReason.travel => Icons.flight_takeoff_rounded,
-    LearningReason.career => Icons.work_outline_rounded,
-    LearningReason.exams => Icons.fact_check_outlined,
+  static AppIcon _icon(LearningReason reason) => switch (reason) {
+    LearningReason.communication => AppIcon.chat,
+    LearningReason.fun => AppIcon.sparkle,
+    LearningReason.education => AppIcon.graduationCap,
+    LearningReason.travel => AppIcon.plane,
+    LearningReason.career => AppIcon.briefcase,
+    LearningReason.exams => AppIcon.examSheet,
   };
 
   static String _title(LearningReason reason) => switch (reason) {
