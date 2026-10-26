@@ -1,8 +1,10 @@
 import 'package:englizia/core/network/json_reader.dart';
 
-/// A non-2xx response, parsed from ASP.NET Core `ProblemDetails` (RFC 9457).
-// ASSUMPTION(api): error bodies are ProblemDetails, validation errors come as
-// `errors: {Field: [messages]}`, business errors carry a `code` extension —
+/// A non-2xx response. Reads the `error` object of the unified envelope
+/// (`{code, message, fieldErrors, traceId}`), else ASP.NET Core
+/// `ProblemDetails` (RFC 9457).
+// ASSUMPTION(api): neither shape is confirmed; validation errors come as
+// `{Field: [messages]}` in both, business errors carry a stable `code` —
 // confirm in docs/api/README.md.
 final class ApiException implements Exception {
   const ApiException({
@@ -12,6 +14,7 @@ final class ApiException implements Exception {
     this.code,
     this.fieldErrors = const {},
     this.retryAfter,
+    this.traceId,
   });
 
   factory ApiException.fromResponse({
@@ -23,6 +26,17 @@ final class ApiException implements Exception {
       final Map<Object?, Object?> map => map.cast<String, Object?>(),
       _ => const <String, Object?>{},
     };
+    final envelopeError = json.readMap('error');
+    if (envelopeError != null) {
+      return ApiException(
+        statusCode: statusCode,
+        detail: envelopeError.readString('message'),
+        code: envelopeError.readString('code'),
+        fieldErrors: _parseFieldErrors(envelopeError['fieldErrors']),
+        retryAfter: _parseRetryAfter(retryAfterHeader),
+        traceId: envelopeError.readString('traceId'),
+      );
+    }
     return ApiException(
       statusCode: statusCode,
       title: json.readString('title'),
@@ -30,6 +44,7 @@ final class ApiException implements Exception {
       code: json.firstOf(['code', 'errorCode'], json.readString),
       fieldErrors: _parseFieldErrors(json['errors']),
       retryAfter: _parseRetryAfter(retryAfterHeader),
+      traceId: json.readString('traceId'),
     );
   }
 
@@ -39,6 +54,9 @@ final class ApiException implements Exception {
   final String? code;
   final Map<String, List<String>> fieldErrors;
   final Duration? retryAfter;
+
+  /// Server correlation id, for support and logs.
+  final String? traceId;
 
   /// `$.Email`, `request.Email` and `Email` all become `email`.
   static String normalizeField(String key) {
