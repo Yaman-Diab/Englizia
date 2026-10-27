@@ -43,6 +43,22 @@ void main() {
     expect(tokens.refreshToken, 'r1');
   });
 
+  test('a guest stays a guest after a refresh', () async {
+    final adapter = FakeHttpAdapter(
+      (_) => const FakeResponse(200, body: {'accessToken': 'a2'}),
+    );
+
+    final tokens = await buildService(adapter).refresh(
+      const AuthTokens(
+        accessToken: 'old',
+        refreshToken: 'r1',
+        kind: AccountKind.guest,
+      ),
+    );
+
+    expect(tokens.kind, AccountKind.guest);
+  });
+
   test('throws when the response has no access token', () async {
     final adapter = FakeHttpAdapter(
       (_) => const FakeResponse(200, body: {'token_type': 'Bearer'}),

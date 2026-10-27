@@ -34,9 +34,12 @@ final class TokenRefreshService implements TokenRefresher {
     if (access == null) {
       throw const FormatException('Refresh response has no access token');
     }
-    final refresh =
-        json.firstOf(['refreshToken', 'refresh_token'], json.readString) ??
-        current.refreshToken;
-    return AuthTokens(accessToken: access, refreshToken: refresh);
+    return current.renewed(
+      accessToken: access,
+      refreshToken: json.firstOf([
+        'refreshToken',
+        'refresh_token',
+      ], json.readString),
+    );
   }
 }

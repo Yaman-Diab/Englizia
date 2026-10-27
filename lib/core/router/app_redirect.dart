@@ -5,15 +5,15 @@ import 'package:go_router/go_router.dart';
 
 /// Route guard: splash until the session is known, then the policy of the
 /// matched route decides. Policies come from `app/router/route_policies.dart`.
-/// Signed-in users land on [homeLocation]; everyone else on
-/// [guestHomeLocation], the entry to onboarding and sign-in.
+/// Guests and members land on [homeLocation]; signed-out users on
+/// [signedOutLocation], the entry to onboarding and sign-in.
 final class AppRedirect {
   const AppRedirect({
     required SessionStatus Function() status,
     required RoutePolicy Function(String routePattern) policyFor,
     required this.splashLocation,
     required this.homeLocation,
-    required this.guestHomeLocation,
+    required this.signedOutLocation,
   }) : _status = status,
        _policyFor = policyFor;
 
@@ -21,7 +21,7 @@ final class AppRedirect {
   final RoutePolicy Function(String routePattern) _policyFor;
   final String splashLocation;
   final String homeLocation;
-  final String guestHomeLocation;
+  final String signedOutLocation;
 
   String? call(BuildContext context, GoRouterState state) => resolve(
     location: state.matchedLocation,
@@ -34,13 +34,15 @@ final class AppRedirect {
     if (status == SessionStatus.unknown) {
       return atSplash ? null : splashLocation;
     }
-    final signedIn = status == SessionStatus.authenticated;
-    if (atSplash) return signedIn ? homeLocation : guestHomeLocation;
+    final hasSession = status != SessionStatus.signedOut;
+    if (atSplash) return hasSession ? homeLocation : signedOutLocation;
 
     final target = switch (_policyFor(routePattern)) {
       RoutePolicy.public => null,
-      RoutePolicy.guestOnly => signedIn ? homeLocation : null,
-      RoutePolicy.requiresLogin => signedIn ? null : guestHomeLocation,
+      RoutePolicy.signedOutOnly => hasSession ? homeLocation : null,
+      RoutePolicy.withoutAccount =>
+        status == SessionStatus.member ? homeLocation : null,
+      RoutePolicy.requiresSession => hasSession ? null : signedOutLocation,
     };
     return target == location ? null : target;
   }

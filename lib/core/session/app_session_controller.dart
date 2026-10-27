@@ -4,7 +4,21 @@ import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/core/storage/token_storage.dart';
 import 'package:flutter/foundation.dart';
 
-enum SessionStatus { unknown, guest, authenticated }
+/// Who is using the app (ADR 10).
+enum SessionStatus {
+  /// Not read from storage yet: the splash screen shows.
+  unknown,
+
+  /// No account on this phone: welcome, onboarding and sign-in.
+  signedOut,
+
+  /// An anonymous guest account: the app works, but the progress can only
+  /// be reached from this phone until the learner creates an account.
+  guest,
+
+  /// A full account.
+  member,
+}
 
 /// Who is using the app. GoRouter listens to it (`refreshListenable`), so
 /// every status change re-runs the route guard.
@@ -23,10 +37,12 @@ class AppSessionController extends ChangeNotifier {
 
   SessionStatus get status => _status;
 
-  bool get isAuthenticated => _status == SessionStatus.authenticated;
+  /// A guest or member account is in use.
+  bool get hasSession =>
+      _status == SessionStatus.guest || _status == SessionStatus.member;
 
   /// Restores the session at startup. Never throws: any failure falls back
-  /// to guest so the app always leaves the splash screen.
+  /// to signed out so the app always leaves the splash screen.
   Future<void> bootstrap() async {
     try {
       // iOS keeps Keychain items after uninstall; a fresh install must not
@@ -36,31 +52,36 @@ class AppSessionController extends ChangeNotifier {
         await _settings.markLaunched();
       }
       final tokens = await _tokens.read();
-      _setStatus(
-        tokens == null ? SessionStatus.guest : SessionStatus.authenticated,
-      );
+      _setStatus(_statusOf(tokens));
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Session bootstrap failed');
-      _setStatus(SessionStatus.guest);
+      _setStatus(SessionStatus.signedOut);
     }
   }
 
+  /// Starts a session with [tokens]: a guest's or a member's, as they say.
   Future<void> signIn(AuthTokens tokens) async {
     await _tokens.write(tokens);
-    _setStatus(SessionStatus.authenticated);
+    _setStatus(_statusOf(tokens));
   }
 
   /// Local sign-out. The auth feature calls the server logout first
-  /// (best effort), then this.
+  /// (best effort), then this. A guest who signs out loses the account.
   Future<void> signOut() async {
     await _tokens.clear();
-    _setStatus(SessionStatus.guest);
+    _setStatus(SessionStatus.signedOut);
   }
+
+  static SessionStatus _statusOf(AuthTokens? tokens) => switch (tokens?.kind) {
+    null => SessionStatus.signedOut,
+    AccountKind.guest => SessionStatus.guest,
+    AccountKind.member => SessionStatus.member,
+  };
 
   /// Called when the server rejects the refresh token. Parallel failing
   /// requests collapse into a single sign-out.
   Future<void> expire() async {
-    if (_expiring || _status != SessionStatus.authenticated) return;
+    if (_expiring || !hasSession) return;
     _expiring = true;
     try {
       AppLogger.info('Session expired');

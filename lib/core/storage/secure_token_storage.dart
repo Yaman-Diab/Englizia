@@ -11,6 +11,7 @@ final class SecureTokenStorage implements TokenStorage {
 
   static const _accessKey = 'auth.access_token';
   static const _refreshKey = 'auth.refresh_token';
+  static const _kindKey = 'auth.account_kind';
 
   final FlutterSecureStorage _storage;
   AuthTokens? _cache;
@@ -22,9 +23,17 @@ final class SecureTokenStorage implements TokenStorage {
     try {
       final access = await _storage.read(key: _accessKey);
       final refresh = await _storage.read(key: _refreshKey);
+      final kind = await _storage.read(key: _kindKey);
       _cache = access == null || refresh == null
           ? null
-          : AuthTokens(accessToken: access, refreshToken: refresh);
+          : AuthTokens(
+              accessToken: access,
+              refreshToken: refresh,
+              // Tokens stored before guest accounts existed are members'.
+              kind: kind == AccountKind.guest.name
+                  ? AccountKind.guest
+                  : AccountKind.member,
+            );
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage read failed');
       _cache = null;
@@ -40,6 +49,7 @@ final class SecureTokenStorage implements TokenStorage {
     try {
       await _storage.write(key: _accessKey, value: tokens.accessToken);
       await _storage.write(key: _refreshKey, value: tokens.refreshToken);
+      await _storage.write(key: _kindKey, value: tokens.kind.name);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage write failed');
     }
@@ -52,6 +62,7 @@ final class SecureTokenStorage implements TokenStorage {
     try {
       await _storage.delete(key: _accessKey);
       await _storage.delete(key: _refreshKey);
+      await _storage.delete(key: _kindKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage clear failed');
     }

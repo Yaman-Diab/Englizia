@@ -37,7 +37,7 @@ GoRouter createAppRouter(AppSessionController session) {
     policyFor: policyFor,
     splashLocation: AppRoutes.splash,
     homeLocation: AppRoutes.home,
-    guestHomeLocation: AppRoutes.welcome,
+    signedOutLocation: AppRoutes.welcome,
   );
 
   return GoRouter(
