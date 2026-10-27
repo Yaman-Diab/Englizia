@@ -124,10 +124,10 @@ void main() {
   test('children skip the goal; the chosen goal rides on the path', () {
     expect(onboardingStepsFor(kids), isNot(contains(OnboardingStep.goal)));
     expect(onboardingStepsFor(kids), isNot(contains(OnboardingStep.challenge)));
-    final chosen = general.withDailyGoal(15).withChallenge(30);
+    final chosen = general.copyWith(dailyGoalMinutes: 15, challengeDays: 30);
     expect(chosen.dailyGoalMinutes, 15);
     expect(chosen.challengeDays, 30);
-    expect(chosen.withDailyGoal(20).challengeDays, 30);
+    expect(chosen.copyWith(dailyGoalMinutes: 20).challengeDays, 30);
     expect(chosen.trackId, general.trackId);
     expect(chosen, isNot(general));
     expect(onboardingStepsFor(chosen), onboardingStepsFor(general));
@@ -142,6 +142,10 @@ void main() {
       entryMethod: TrackEntryMethod.gradeSelection,
       audience: TrackAudience.schoolStudent,
     );
-    expect(OnboardingPath.forTrack(track), emar);
+    final path = OnboardingPath.forTrack(track);
+    expect(path.audience, emar.audience);
+    expect(path.trackId, emar.trackId);
+    expect(path.entryMethod, emar.entryMethod);
+    expect(path.trackTitle, track.title);
   });
 }

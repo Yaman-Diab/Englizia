@@ -163,9 +163,9 @@ void main() {
     Future<LevelCubit> pumpPage(
       WidgetTester tester, {
       List<Result<PlacementSummary>> summaries = const [Ok(_summary)],
-      VoidCallback? onStartFromBeginning,
+      ValueChanged<TrackLevel?>? onStartFromBeginning,
       VoidCallback? onTakeTest,
-      VoidCallback? onTestLater,
+      ValueChanged<TrackLevel?>? onTestLater,
       LayoutCase? layout,
     }) async {
       final cubit = buildCubit(summaries: summaries);
@@ -176,9 +176,9 @@ void main() {
           value: cubit,
           child: LevelPage(
             path: OnboardingPath.assumed,
-            onStartFromBeginning: onStartFromBeginning ?? () {},
+            onStartFromBeginning: onStartFromBeginning ?? (_) {},
             onTakeTest: onTakeTest ?? () {},
-            onTestLater: onTestLater ?? () {},
+            onTestLater: onTestLater ?? (_) {},
             onBack: () {},
           ),
         ),
@@ -229,7 +229,10 @@ void main() {
       tester,
     ) async {
       var started = false;
-      await pumpPage(tester, onStartFromBeginning: () => started = true);
+      await pumpPage(
+        tester,
+        onStartFromBeginning: (level) => started = level == _firstLevel,
+      );
 
       await tester.tap(find.text('onboarding_level_beginner'.tr()));
       await settle(tester);
@@ -248,7 +251,7 @@ void main() {
       await pumpPage(
         tester,
         onTakeTest: () => tested = true,
-        onTestLater: () => later = true,
+        onTestLater: (level) => later = level == _firstLevel,
       );
 
       await tester.tap(find.text('onboarding_level_some'.tr()));
@@ -275,7 +278,7 @@ void main() {
     ) async {
       final handle = tester.ensureSemantics();
       var later = false;
-      final cubit = await pumpPage(tester, onTestLater: () => later = true);
+      final cubit = await pumpPage(tester, onTestLater: (_) => later = true);
       cubit.choose(EnglishLevelChoice.some);
       connectivity.online = false;
       await settle(tester);

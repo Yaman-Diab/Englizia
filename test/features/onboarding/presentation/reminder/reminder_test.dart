@@ -167,7 +167,10 @@ void main() {
     testWidgets('the preview speaks of the goal the learner chose', (
       tester,
     ) async {
-      await pumpPage(tester, path: OnboardingPath.assumed.withDailyGoal(20));
+      await pumpPage(
+        tester,
+        path: OnboardingPath.assumed.copyWith(dailyGoalMinutes: 20),
+      );
       expect(
         find.text('20 دقائق فقط وتحافظ على أيامك المتتالية'),
         findsOneWidget,
