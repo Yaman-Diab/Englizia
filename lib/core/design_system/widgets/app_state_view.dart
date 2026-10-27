@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:flutter/material.dart';
 
 enum _StateKind { loading, error, empty }
@@ -38,9 +39,10 @@ class AppStateView extends StatelessWidget {
   Widget build(BuildContext context) {
     if (_kind == _StateKind.loading) {
       return Center(
-        child: Semantics(
-          label: 'common_loading'.tr(),
-          child: const CircularProgressIndicator(),
+        child: AppSpinner(
+          size: AppSpinner.pageSize,
+          color: context.colors.primary.fill,
+          semanticLabel: 'common_loading'.tr(),
         ),
       );
     }

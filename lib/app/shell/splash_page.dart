@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:flutter/material.dart';
 
 /// Shown while the session bootstraps; the router leaves it automatically.
@@ -21,7 +22,11 @@ class SplashPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: AppSpacing.xl),
-            const CircularProgressIndicator(),
+            AppSpinner(
+              size: AppSpinner.pageSize,
+              color: context.colors.primary.fill,
+              semanticLabel: 'common_loading'.tr(),
+            ),
           ],
         ),
       ),
