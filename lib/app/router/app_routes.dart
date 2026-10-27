@@ -16,6 +16,7 @@ abstract final class AppRoutes {
   static const onboardingPlacement = '/onboarding/placement-test';
   static const signIn = '/sign-in';
   static const signUp = '/sign-up';
+  static const signUpWithProvider = '/sign-up/provider';
   static const legalTerms = '/legal/terms';
   static const legalPrivacy = '/legal/privacy';
 }

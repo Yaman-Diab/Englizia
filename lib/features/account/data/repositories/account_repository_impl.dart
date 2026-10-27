@@ -3,16 +3,25 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
+import 'package:englizia/features/account/data/models/register_model.dart';
+import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
 final class AccountRepositoryImpl implements AccountRepository {
-  const AccountRepositoryImpl(this._remote, {required this.installationId});
+  const AccountRepositoryImpl(
+    this._remote, {
+    required this.installationId,
+    required this.devicePlatform,
+  });
 
   final AccountRemoteDataSource _remote;
 
   /// This install's id, which the guest account is tied to.
   final Future<String> Function() installationId;
+
+  /// The server's `DevicePlatform` for this phone, or null when it has none.
+  final String? devicePlatform;
 
   @override
   Future<Result<AuthTokens>> createGuestAccount({
@@ -27,6 +36,13 @@ final class AccountRepositoryImpl implements AccountRepository {
         languageCode: languageCode,
         utcOffsetMinutes: utcOffsetMinutes,
       ),
+    ),
+  );
+
+  @override
+  Future<Result<AuthTokens>> createAccount(NewAccount account) => guard(
+    () => _remote.createAccount(
+      RegisterModel.request(account, platform: devicePlatform),
     ),
   );
 }

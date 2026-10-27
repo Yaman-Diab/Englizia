@@ -32,3 +32,13 @@ abstract final class QuestionEntrance {
   /// When the last element has arrived.
   static Duration get settled => action + AppMotion.entrance;
 }
+
+/// Form screens (account): the header, then each field, then the action.
+abstract final class FormEntrance {
+  static const header = Duration(milliseconds: 120);
+  static const firstField = Duration(milliseconds: 200);
+  static const fieldStagger = Duration(milliseconds: 80);
+  static const action = Duration(milliseconds: 440);
+
+  static Duration field(int index) => firstField + fieldStagger * index;
+}

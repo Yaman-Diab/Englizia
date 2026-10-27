@@ -48,6 +48,13 @@ class _RecordingDataSource implements AccountRemoteDataSource {
       kind: AccountKind.guest,
     );
   }
+
+  @override
+  Future<AuthTokens> createAccount(Map<String, Object?> request) async {
+    requests.add(request);
+    if (fail) throw const NetworkException('connectionError');
+    return const AuthTokens(accessToken: 'a', refreshToken: 'r');
+  }
 }
 
 void main() {
@@ -161,6 +168,7 @@ void main() {
           await AccountRepositoryImpl(
             source,
             installationId: () async => 'install-1',
+            devicePlatform: 'android',
           ).createGuestAccount(
             answers: adult,
             languageCode: 'en',
@@ -179,6 +187,7 @@ void main() {
           await AccountRepositoryImpl(
             _RecordingDataSource(fail: true),
             installationId: () async => 'install-1',
+            devicePlatform: 'android',
           ).createGuestAccount(
             answers: adult,
             languageCode: 'ar',

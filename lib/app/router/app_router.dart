@@ -7,6 +7,8 @@ import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
+import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -204,8 +206,12 @@ GoRouter createAppRouter(AppSessionController session) {
             create: (_) => sl<SaveProgressCubit>()..start(),
             child: SaveProgressPage(
               path: path,
-              onCreateAccount: (_) =>
-                  context.push(AppRoutes.signUp, extra: path),
+              onCreateAccount: (provider) => context.push(
+                provider == AccountProvider.email
+                    ? AppRoutes.signUp
+                    : AppRoutes.signUpWithProvider,
+                extra: path,
+              ),
               onTerms: () => context.push(AppRoutes.legalTerms),
               onPrivacy: () => context.push(AppRoutes.legalPrivacy),
               onBack: () => context.pop(),
@@ -215,6 +221,17 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.signUp,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<SignUpCubit>(),
+          child: SignUpPage(
+            onSignIn: (email) => context.push(AppRoutes.signIn, extra: email),
+            onBack: () => context.pop(),
+          ),
+        ),
+      ),
+      // Google and Apple sign-up are not built yet.
+      GoRoute(
+        path: AppRoutes.signUpWithProvider,
         builder: (_, _) => PendingPage(title: 'account_create_title'.tr()),
       ),
       GoRoute(

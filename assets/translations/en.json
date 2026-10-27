@@ -180,5 +180,22 @@
   "onboarding_save_guest_body": "If you delete the app or change phones, it's lost. You can create an account any time from your profile",
   "onboarding_save_guest_create": "Create an account now",
   "onboarding_save_guest_continue": "Continue as a guest",
-  "account_create_title": "Create an account"
+  "account_create_title": "Create your account",
+  "account_create_subtitle": "Sign in with it on any phone",
+  "account_field_name": "Name",
+  "account_field_email": "Email",
+  "account_field_password": "Password",
+  "account_name_invalid": "Enter your name",
+  "account_email_invalid": "Check the email is written correctly",
+  "account_password_rule": {
+    "one": "At least {} character",
+    "other": "At least {} characters"
+  },
+  "account_create_submit": "Create account",
+  "account_have_account": "Have an account?",
+  "account_sign_in": "Sign in",
+  "account_email_taken": "This email already has an account",
+  "account_email_taken_sign_in": "Sign in instead",
+  "field_password_show": "Show password",
+  "field_password_hide": "Hide password"
 }

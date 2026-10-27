@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/auth_interceptor.dart';
 import 'package:englizia/core/network/network_exception.dart';
 
 /// The only HTTP entry point for datasources.
@@ -12,6 +13,12 @@ final class ApiClient {
   ApiClient(this._dio);
 
   final Dio _dio;
+
+  /// For an endpoint called without a session (register, login): no
+  /// `Authorization` header and no refresh on 401.
+  static final publicOptions = Options(
+    extra: {AuthInterceptor.skipAuthKey: true},
+  );
 
   Future<Object?> get(
     String path, {

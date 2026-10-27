@@ -58,7 +58,7 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Contract | Used by | Data in the app |
 |---|---|---|
-| [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | refresh only (sign-up and sign-in screens are not built) |
+| [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register and refresh (sign-in is not built) |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", later track switching | mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 | [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
@@ -72,7 +72,7 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Endpoint | Method | Body | Response `data` | Status |
 |---|---|---|---|---|
-| `/api/v1/auth/register` | POST | `RegisterRequest {email, password, displayName, deviceId, platform}` | `TokenResponse` (201) | live, not used yet |
+| `/api/v1/auth/register` | POST | `RegisterRequest {email, password, displayName, deviceId, platform}` | `TokenResponse` (201); 409 when the email has an account | live, used (email sign-up) |
 | `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse` | live, not used yet |
 | `/api/v1/auth/refresh` | POST | `RefreshRequest {refreshToken}` | `TokenResponse` | live, used |
 | `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, not used yet |
@@ -95,7 +95,7 @@ Paste-ready; each item names what the app needs and why.
 4. **Onboarding answers with account creation.** `RegisterRequest` (and the guest and social endpoints) should accept the `onboarding` object from [auth.md](auth.md) (audience, track, child profile, grade, reasons, daily goal, challenge, start level, placement choice, reminder time), so the plan is ready on first sign-in (S §4.3).
 5. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/tracks`, `GET /app/tracks/{trackId}/levels`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the tracks, levels and settings calls must work **without a token**, because onboarding reads them before an account exists.
 6. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
-7. **The full list of `error.code` values** per endpoint, kept in the OpenAPI document: at least email taken (409 on register), wrong credentials (401 on login), account locked or disabled (403 on login), rate limited (429), and the `details` codes beyond `not_empty`. The app shows its own text per code.
+7. **The password policy and the full list of `error.code` values** per endpoint, kept in the OpenAPI document: the minimum password length (the app checks 8, S §4.3) and any name length limit as `minLength`/`maxLength`, and the codes for at least email taken (409 on register), wrong credentials (401 on login), account locked or disabled (403 on login), rate limited (429), and the `details` codes beyond `not_empty`. The app shows its own text per code.
 8. **`Retry-After` on 429** (seconds), so the app can tell the learner how long to wait after too many failed logins (§19.8).
 9. **Refresh semantics.** Confirm that 400/401/403 from refresh always mean the session is over (the app signs out on them) and anything else is transient; whether the refresh token rotates on every call (the app stores the new one when it comes back); and whether refresh should accept the expired access token header or ignore it.
 10. **App gate.** An endpoint for the minimum and recommended app version per platform (§19.2), e.g. `GET /api/v1/app/config`.

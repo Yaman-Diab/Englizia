@@ -5,9 +5,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
-import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
-import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
@@ -18,31 +16,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../../helpers/fake_accounts.dart';
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/pump_app.dart';
-
-const _guestTokens = AuthTokens(
-  accessToken: 'g',
-  refreshToken: 'r',
-  kind: AccountKind.guest,
-);
-
-class _FakeAccounts implements AccountRepository {
-  _FakeAccounts([this.results = const [Ok(_guestTokens)]]);
-
-  final List<Result<AuthTokens>> results;
-  final sent = <OnboardingPath>[];
-
-  @override
-  Future<Result<AuthTokens>> createGuestAccount({
-    required OnboardingPath answers,
-    required String languageCode,
-    required int utcOffsetMinutes,
-  }) async {
-    sent.add(answers);
-    return results[(sent.length - 1).clamp(0, results.length - 1)];
-  }
-}
 
 const _adult = OnboardingPath(
   audience: TrackAudience.self,
@@ -87,7 +63,7 @@ void main() {
     test(
       'continuing as a guest creates the account and starts its session',
       () async {
-        final accounts = _FakeAccounts();
+        final accounts = FakeAccountRepository();
         final cubit = SaveProgressCubit(accounts, session, connectivity);
         addTearDown(cubit.close);
 
@@ -97,14 +73,16 @@ void main() {
           utcOffsetMinutes: 180,
         );
 
-        expect(accounts.sent.single, _adult);
+        expect(accounts.guestAnswers.single, _adult);
         expect(session.status, SessionStatus.guest);
       },
     );
 
     test('a failure is kept for a retry, and the retry clears it', () async {
       final cubit = SaveProgressCubit(
-        _FakeAccounts(const [Err(NetworkFailure()), Ok(_guestTokens)]),
+        FakeAccountRepository(
+          guestResults: const [Err(NetworkFailure()), Ok(guestTokens)],
+        ),
         session,
         connectivity,
       );
@@ -128,7 +106,11 @@ void main() {
     });
 
     test('follows the connection', () async {
-      final cubit = SaveProgressCubit(_FakeAccounts(), session, connectivity);
+      final cubit = SaveProgressCubit(
+        FakeAccountRepository(),
+        session,
+        connectivity,
+      );
       addTearDown(cubit.close);
       await cubit.start();
       expect(cubit.state.online, isTrue);
@@ -143,13 +125,13 @@ void main() {
     Future<SaveProgressCubit> pumpPage(
       WidgetTester tester, {
       OnboardingPath path = _adult,
-      _FakeAccounts? accounts,
+      FakeAccountRepository? accounts,
       ValueChanged<AccountProvider>? onCreateAccount,
       LayoutCase? layout,
       TargetPlatform? platform,
     }) async {
       final cubit = SaveProgressCubit(
-        accounts ?? _FakeAccounts(),
+        accounts ?? FakeAccountRepository(),
         session,
         connectivity,
       );
@@ -257,7 +239,7 @@ void main() {
     testWidgets('«لاحقًا» explains, and going back keeps the learner here', (
       tester,
     ) async {
-      final accounts = _FakeAccounts();
+      final accounts = FakeAccountRepository();
       await pumpPage(tester, accounts: accounts);
 
       await tester.tap(find.text('onboarding_save_later'.tr()));
@@ -267,14 +249,14 @@ void main() {
       await tester.tap(find.text('onboarding_save_guest_create'.tr()));
       await settle(tester);
       expect(find.text('onboarding_save_guest_title'.tr()), findsNothing);
-      expect(accounts.sent, isEmpty);
+      expect(accounts.guestAnswers, isEmpty);
       expect(session.status, SessionStatus.signedOut);
     });
 
     testWidgets(
       'continuing as a guest sends the answers and starts the guest',
       (tester) async {
-        final accounts = _FakeAccounts();
+        final accounts = FakeAccountRepository();
         await pumpPage(tester, accounts: accounts);
 
         await tester.tap(find.text('onboarding_save_later'.tr()));
@@ -282,7 +264,7 @@ void main() {
         await tester.tap(find.text('onboarding_save_guest_continue'.tr()));
         await settle(tester);
 
-        expect(accounts.sent.single, _adult);
+        expect(accounts.guestAnswers.single, _adult);
         expect(session.status, SessionStatus.guest);
       },
     );
@@ -290,10 +272,9 @@ void main() {
     testWidgets('a failed guest account says so and offers a retry', (
       tester,
     ) async {
-      final accounts = _FakeAccounts(const [
-        Err(NetworkFailure()),
-        Ok(_guestTokens),
-      ]);
+      final accounts = FakeAccountRepository(
+        guestResults: const [Err(NetworkFailure()), Ok(guestTokens)],
+      );
       await pumpPage(tester, accounts: accounts);
 
       await tester.tap(find.text('onboarding_save_later'.tr()));
@@ -304,7 +285,7 @@ void main() {
 
       await tester.tap(find.text('common_retry'.tr()));
       await settle(tester);
-      expect(accounts.sent, hasLength(2));
+      expect(accounts.guestAnswers, hasLength(2));
       expect(session.status, SessionStatus.guest);
     });
 

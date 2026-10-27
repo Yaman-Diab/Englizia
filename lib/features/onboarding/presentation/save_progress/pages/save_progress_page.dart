@@ -5,7 +5,7 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/icons/brand_mark.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
-import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/widgets/account_button.dart';
@@ -66,9 +66,15 @@ class SaveProgressPage extends StatelessWidget {
     return BlocConsumer<SaveProgressCubit, SaveProgressState>(
       listenWhen: (before, now) =>
           now.failure != null && before.failure != now.failure,
-      listener: (context, state) => ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(_failureBar(context, state)),
+      listener: (context, state) => showFailureSnackBar(
+        context,
+        state.failure!,
+        onRetry: () => context.read<SaveProgressCubit>().continueAsGuest(
+          answers: path,
+          languageCode: context.locale.languageCode,
+          utcOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
+        ),
+      ),
       builder: (context, state) {
         final enabled = state.online && !state.busy;
         VoidCallback? create(AccountProvider provider) =>
@@ -133,35 +139,6 @@ class SaveProgressPage extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  SnackBar _failureBar(BuildContext context, SaveProgressState state) {
-    final error = context.colors.error;
-    return SnackBar(
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: error.surface,
-      content: Row(
-        children: [
-          AppIconView(AppIcon.wifiOff, size: 20, color: error.text),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Text(
-              state.failure!.localizedMessage,
-              style: context.texts.bodyStrong.copyWith(color: error.text),
-            ),
-          ),
-        ],
-      ),
-      action: SnackBarAction(
-        label: 'common_retry'.tr(),
-        textColor: error.text,
-        onPressed: () => context.read<SaveProgressCubit>().continueAsGuest(
-          answers: path,
-          languageCode: context.locale.languageCode,
-          utcOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
-        ),
-      ),
     );
   }
 }

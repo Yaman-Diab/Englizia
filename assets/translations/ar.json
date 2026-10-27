@@ -214,5 +214,26 @@
   "onboarding_save_guest_body": "إذا حذفت التطبيق أو غيّرت هاتفك سيضيع. يمكنك إنشاء حساب في أي وقت من ملفك الشخصي",
   "onboarding_save_guest_create": "أنشئ حسابًا الآن",
   "onboarding_save_guest_continue": "متابعة كضيف",
-  "account_create_title": "إنشاء حساب"
+  "account_create_title": "أنشئ حسابك",
+  "account_create_subtitle": "ستدخل به من أي هاتف",
+  "account_field_name": "الاسم",
+  "account_field_email": "البريد الإلكتروني",
+  "account_field_password": "كلمة المرور",
+  "account_name_invalid": "اكتب اسمك",
+  "account_email_invalid": "تأكد من كتابة البريد بشكل صحيح",
+  "account_password_rule": {
+    "zero": "{} حرف على الأقل",
+    "one": "حرف واحد على الأقل",
+    "two": "حرفان على الأقل",
+    "few": "{} أحرف على الأقل",
+    "many": "{} حرفًا على الأقل",
+    "other": "{} حرف على الأقل"
+  },
+  "account_create_submit": "إنشاء الحساب",
+  "account_have_account": "لديك حساب؟",
+  "account_sign_in": "سجّل الدخول",
+  "account_email_taken": "هذا البريد لديه حساب بالفعل",
+  "account_email_taken_sign_in": "سجّل الدخول بدلًا من ذلك",
+  "field_password_show": "إظهار كلمة المرور",
+  "field_password_hide": "إخفاء كلمة المرور"
 }
