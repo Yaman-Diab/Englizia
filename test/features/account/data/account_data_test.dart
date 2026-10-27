@@ -110,16 +110,18 @@ void main() {
   });
 
   test('the example response is a guest session', () {
-    final tokens = GuestAccountModel.tokens(
-      Map<String, Object?>.from(ApiClient.unwrap(exampleBody)! as Map),
-    );
+    final now = DateTime.utc(2026, 10, 28);
+    final tokens = GuestAccountModel.tokens(exampleBody, now: now);
     expect(tokens.kind, AccountKind.guest);
     expect(tokens.accessToken, 'mock-guest-access-token');
+    expect(tokens.accessExpiresAt, now.add(const Duration(seconds: 900)));
   });
 
   test('a response without tokens is rejected', () {
     expect(
-      () => GuestAccountModel.tokens(const {'accessToken': 'a'}),
+      () => GuestAccountModel.tokens(const {
+        'accessToken': 'a',
+      }, now: DateTime.utc(2026)),
       throwsFormatException,
     );
   });

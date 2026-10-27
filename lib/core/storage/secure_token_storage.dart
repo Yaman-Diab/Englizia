@@ -12,6 +12,8 @@ final class SecureTokenStorage implements TokenStorage {
   static const _accessKey = 'auth.access_token';
   static const _refreshKey = 'auth.refresh_token';
   static const _kindKey = 'auth.account_kind';
+  static const _accessExpiryKey = 'auth.access_expires_at';
+  static const _refreshExpiryKey = 'auth.refresh_expires_at';
 
   final FlutterSecureStorage _storage;
   AuthTokens? _cache;
@@ -24,6 +26,8 @@ final class SecureTokenStorage implements TokenStorage {
       final access = await _storage.read(key: _accessKey);
       final refresh = await _storage.read(key: _refreshKey);
       final kind = await _storage.read(key: _kindKey);
+      final accessExpiry = await _storage.read(key: _accessExpiryKey);
+      final refreshExpiry = await _storage.read(key: _refreshExpiryKey);
       _cache = access == null || refresh == null
           ? null
           : AuthTokens(
@@ -33,6 +37,8 @@ final class SecureTokenStorage implements TokenStorage {
               kind: kind == AccountKind.guest.name
                   ? AccountKind.guest
                   : AccountKind.member,
+              accessExpiresAt: DateTime.tryParse(accessExpiry ?? ''),
+              refreshExpiresAt: DateTime.tryParse(refreshExpiry ?? ''),
             );
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage read failed');
@@ -50,6 +56,8 @@ final class SecureTokenStorage implements TokenStorage {
       await _storage.write(key: _accessKey, value: tokens.accessToken);
       await _storage.write(key: _refreshKey, value: tokens.refreshToken);
       await _storage.write(key: _kindKey, value: tokens.kind.name);
+      await _writeTime(_accessExpiryKey, tokens.accessExpiresAt);
+      await _writeTime(_refreshExpiryKey, tokens.refreshExpiresAt);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage write failed');
     }
@@ -63,8 +71,14 @@ final class SecureTokenStorage implements TokenStorage {
       await _storage.delete(key: _accessKey);
       await _storage.delete(key: _refreshKey);
       await _storage.delete(key: _kindKey);
+      await _storage.delete(key: _accessExpiryKey);
+      await _storage.delete(key: _refreshExpiryKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage clear failed');
     }
   }
+
+  Future<void> _writeTime(String key, DateTime? time) => time == null
+      ? _storage.delete(key: key)
+      : _storage.write(key: key, value: time.toUtc().toIso8601String());
 }

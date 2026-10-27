@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
-import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/core/network/token_response.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 
 abstract interface class TokenRefresher {
@@ -8,17 +8,18 @@ abstract interface class TokenRefresher {
   Future<AuthTokens> refresh(AuthTokens current);
 }
 
-/// Calls the refresh endpoint on a bare Dio (no auth interceptor), so it
-/// must attach the Authorization header itself.
+/// Calls the refresh endpoint on a bare Dio (no auth interceptor). The
+/// server needs only the refresh token in the body (`RefreshRequest`); the
+/// expired access token rides along in `Authorization` for its logs.
 final class TokenRefreshService implements TokenRefresher {
-  TokenRefreshService(this._dio);
+  TokenRefreshService(this._dio, {DateTime Function()? now})
+    : _now = now ?? DateTime.now;
 
   final Dio _dio;
+  final DateTime Function() _now;
 
   @override
   Future<AuthTokens> refresh(AuthTokens current) async {
-    // ASSUMPTION(api): body `{refreshToken}`, response `{accessToken, refreshToken}`
-    // (camelCase, ASP.NET default) — confirm in docs/api/README.md.
     final response = await _dio.post<Object?>(
       ApiEndpoints.refreshToken,
       data: {'refreshToken': current.refreshToken},
@@ -26,20 +27,6 @@ final class TokenRefreshService implements TokenRefresher {
         headers: {'Authorization': 'Bearer ${current.accessToken}'},
       ),
     );
-    final json = asJsonMap(response.data);
-    final access = json.firstOf([
-      'accessToken',
-      'access_token',
-    ], json.readString);
-    if (access == null) {
-      throw const FormatException('Refresh response has no access token');
-    }
-    return current.renewed(
-      accessToken: access,
-      refreshToken: json.firstOf([
-        'refreshToken',
-        'refresh_token',
-      ], json.readString),
-    );
+    return TokenResponse.parse(response.data, now: _now(), current: current);
   }
 }

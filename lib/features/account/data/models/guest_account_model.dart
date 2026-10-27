@@ -1,4 +1,4 @@
-import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/core/network/token_response.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
@@ -43,20 +43,11 @@ abstract final class GuestAccountModel {
     },
   };
 
-  /// The session of the new guest. The account is a guest's whatever the
-  /// response says, since this endpoint only makes guests.
-  static AuthTokens tokens(Map<String, Object?> json) {
-    final access = json.readString('accessToken');
-    final refresh = json.readString('refreshToken');
-    if (access == null || refresh == null) {
-      throw const FormatException('Guest account response has no tokens');
-    }
-    return AuthTokens(
-      accessToken: access,
-      refreshToken: refresh,
-      kind: AccountKind.guest,
-    );
-  }
+  /// The session of the new guest: the server's `TokenResponse`, as for
+  /// login and register. The account is a guest's whatever the response
+  /// says, since this endpoint only makes guests.
+  static AuthTokens tokens(Object? body, {required DateTime now}) =>
+      TokenResponse.parse(body, now: now, kind: AccountKind.guest);
 
   static String _clock(ReminderTime time) =>
       '${time.hour.toString().padLeft(2, '0')}:'

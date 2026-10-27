@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
-import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:flutter/services.dart';
@@ -20,7 +19,8 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   @override
   Future<AuthTokens> createGuestAccount(Map<String, Object?> request) async =>
       GuestAccountModel.tokens(
-        asJsonMap(await _client.post(ApiEndpoints.guestAccount, data: request)),
+        await _client.post(ApiEndpoints.guestAccount, data: request),
+        now: DateTime.now(),
       );
 }
 
@@ -41,6 +41,6 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   Future<AuthTokens> createGuestAccount(Map<String, Object?> request) async {
     await Future<void>.delayed(latency);
     final body = jsonDecode(await _bundle.loadString(asset));
-    return GuestAccountModel.tokens(asJsonMap(ApiClient.unwrap(body)));
+    return GuestAccountModel.tokens(body, now: DateTime.now());
   }
 }

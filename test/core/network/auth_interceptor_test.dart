@@ -18,6 +18,8 @@ void main() {
     expiredCalls = 0;
   });
 
+  final clock = DateTime.utc(2026, 10, 28, 12);
+
   Dio buildDio(FakeHttpAdapter adapter, FakeTokenRefresher refresher) {
     final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
       ..httpClientAdapter = adapter;
@@ -27,6 +29,7 @@ void main() {
         refresher: refresher,
         retry: dio.fetch<Object?>,
         onSessionExpired: () async => expiredCalls++,
+        now: () => clock,
       ),
     );
     return dio;
@@ -188,5 +191,96 @@ void main() {
       throwsA(isA<DioException>()),
     );
     expect(refresher.calls, 1);
+  });
+
+  group('before the access token expires', () {
+    AuthTokens expiringIn(Duration left) => AuthTokens(
+      accessToken: 'old',
+      refreshToken: 'r1',
+      accessExpiresAt: clock.add(left),
+    );
+
+    test('refreshes first, then sends the new token', () async {
+      storage = FakeTokenStorage(expiringIn(const Duration(seconds: 10)));
+      final adapter = FakeHttpAdapter((_) => const FakeResponse(200));
+      final refresher = FakeTokenRefresher((_) async => newTokens);
+
+      await buildDio(adapter, refresher).get<Object?>('/me');
+
+      expect(refresher.calls, 1);
+      expect(storage.tokens, newTokens);
+      expect(adapter.requests.single.headers['Authorization'], 'Bearer new');
+    });
+
+    test('a token with time left is sent as it is', () async {
+      storage = FakeTokenStorage(expiringIn(const Duration(minutes: 5)));
+      final adapter = FakeHttpAdapter((_) => const FakeResponse(200));
+      final refresher = FakeTokenRefresher((_) async => newTokens);
+
+      await buildDio(adapter, refresher).get<Object?>('/me');
+
+      expect(refresher.calls, 0);
+      expect(adapter.requests.single.headers['Authorization'], 'Bearer old');
+    });
+
+    test('concurrent requests share one early refresh', () async {
+      storage = FakeTokenStorage(expiringIn(Duration.zero));
+      final adapter = FakeHttpAdapter((_) => const FakeResponse(200));
+      final refresher = FakeTokenRefresher((_) async {
+        await Future<void>.delayed(const Duration(milliseconds: 20));
+        return newTokens;
+      });
+      final dio = buildDio(adapter, refresher);
+
+      await Future.wait([
+        dio.get<Object?>('/a'),
+        dio.get<Object?>('/b'),
+        dio.get<Object?>('/c'),
+      ]);
+
+      expect(refresher.calls, 1);
+      expect(adapter.requests.map((r) => r.headers['Authorization']).toSet(), {
+        'Bearer new',
+      });
+    });
+
+    test('a rejected refresh ends the session', () async {
+      storage = FakeTokenStorage(expiringIn(Duration.zero));
+      final adapter = FakeHttpAdapter((_) => const FakeResponse(200));
+      final refresher = FakeTokenRefresher(
+        (_) async => throw DioException(
+          requestOptions: RequestOptions(path: '/api/v1/auth/refresh'),
+          response: Response(
+            requestOptions: RequestOptions(path: '/api/v1/auth/refresh'),
+            statusCode: 401,
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
+
+      await buildDio(adapter, refresher).get<Object?>('/me');
+
+      expect(expiredCalls, 1);
+      expect(
+        adapter.requests.single.headers.containsKey('Authorization'),
+        isFalse,
+      );
+    });
+
+    test('an unreachable refresh still sends the current token', () async {
+      storage = FakeTokenStorage(expiringIn(Duration.zero));
+      final adapter = FakeHttpAdapter((_) => const FakeResponse(200));
+      final refresher = FakeTokenRefresher(
+        (_) async => throw DioException(
+          requestOptions: RequestOptions(path: '/api/v1/auth/refresh'),
+          type: DioExceptionType.connectionError,
+        ),
+      );
+
+      await buildDio(adapter, refresher).get<Object?>('/me');
+
+      expect(expiredCalls, 0);
+      expect(adapter.requests.single.headers['Authorization'], 'Bearer old');
+    });
   });
 }
