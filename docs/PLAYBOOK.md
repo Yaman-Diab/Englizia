@@ -13,8 +13,9 @@
 > **Englizia scope.** This playbook is a general reference, distilled from a project whose
 > backend was Laravel. Where it differs from Englizia, the accepted ADRs in `docs/adr/` and
 > the current code win (current state: `docs/ARCHITECTURE.md`). For errors in particular:
-> - **Error bodies:** ASP.NET Core ProblemDetails (RFC 9457) parsed by `ApiException`
->   (`title`, `detail`, `errors`, optional `code`), not Laravel `message`/`errors` — ADR 2.
+> - **Error bodies:** the server envelope's `error: {code, details: [{field, code, message}]}`
+>   parsed by `ApiException` (ProblemDetails as a fallback), not Laravel `message`/`errors` —
+>   ADR 2, `docs/api/README.md`.
 > - **Failures:** `Failure` is sealed and carries no user message (only `code`,
 >   `serverMessage`); Cubit state keeps the `Failure` and pages show
 >   `failure.localizedMessage` — ADR 1, ADR 2.
@@ -115,7 +116,7 @@ untestable — `sl<>()` belongs only in `BlocProvider.create` and the compositio
 | `network/dio_factory.dart` | A | main Dio + refresh Dio, AuthInterceptor, **debug-only redacting** logger, app-version headers |
 | `network/auth_interceptor.dart` | G | attach Bearer, one shared refresh on 401, one retry, then logout |
 | `network/token_refresh_service.dart` | A | refresh call — **sets its own Authorization header** (see §14) |
-| `network/api_exception.dart` | G | parses Laravel-style `message` / `errors` (Englizia: ProblemDetails — ADR 2) |
+| `network/api_exception.dart` | G | parses Laravel-style `message` / `errors` (Englizia: the server envelope — `docs/api/README.md`) |
 | `network/api_status_codes.dart` | G | named status constants |
 | `network/api_endpoints.dart` | A | endpoint paths, one-line comments only |
 | `network/json_reader.dart` | G | ONE extension for defensive JSON reads (`readInt`, `readString`, `readMap`, `firstOf`) |

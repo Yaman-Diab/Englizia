@@ -89,7 +89,7 @@ void main() {
     });
   });
 
-  test('the remote data source calls GET /api/v1/tracks', () async {
+  test('the remote data source calls GET /api/v1/app/tracks', () async {
     final adapter = FakeHttpAdapter(
       (_) => FakeResponse(200, body: exampleBody),
     );
@@ -100,7 +100,7 @@ void main() {
 
     final tracks = await TrackRemoteDataSourceImpl(client).getPublishedTracks();
 
-    expect(adapter.requests.single.path, '/api/v1/tracks');
+    expect(adapter.requests.single.path, '/api/v1/app/tracks');
     expect(tracks, hasLength(3));
   });
 
@@ -170,7 +170,7 @@ void main() {
       expect(level.schoolGrade, isNull);
     });
 
-    test('GET /api/v1/tracks/{id}/levels', () async {
+    test('GET /api/v1/app/tracks/{id}/levels', () async {
       final adapter = FakeHttpAdapter(
         (_) => FakeResponse(200, body: levelsBody),
       );
@@ -183,7 +183,10 @@ void main() {
         client,
       ).getLevels('trk_emar');
 
-      expect(adapter.requests.single.path, '/api/v1/tracks/trk_emar/levels');
+      expect(
+        adapter.requests.single.path,
+        '/api/v1/app/tracks/trk_emar/levels',
+      );
       expect(levels, hasLength(12));
     });
 

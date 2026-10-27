@@ -4,7 +4,7 @@ Status: **proposed** — the app runs on this contract in mock mode (`assets/moc
 The mock publishes all three onboarding tracks; delete `trk_emar` from `published_tracks.json` to see the «قريبًا» state, exactly as hiding the track in the panel would.
 Requirements: student doc §3.1–3.2 and §4.2, server doc §5.2 and §19.2.
 
-## `GET /api/v1/tracks`
+## `GET /api/v1/app/tracks`
 
 Published tracks only (a track is visible when it and everything above it is published), with their **effective** settings after inheritance. No paging: there are a handful of tracks. Sent with or without a token, because onboarding calls it before the account exists.
 
@@ -14,6 +14,8 @@ Request headers: the common ones (`Accept-Language`, `X-App-Version`, `X-Platfor
 
 ```json
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": [
     {
       "id": "trk_general",
@@ -27,8 +29,8 @@ Request headers: the common ones (`Accept-Language`, `X-App-Version`, `X-Platfor
       "kidsMode": false
     }
   ],
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "0HN7…"
 }
 ```
 
@@ -52,9 +54,9 @@ Unknown enum values are treated as the least privileged: an unknown `onboardingA
 
 ### Errors
 
-The common envelope errors (`docs/api/README.md`); no endpoint-specific codes.
+The common errors (`docs/api/README.md`); no endpoint-specific codes.
 
-## `GET /api/v1/tracks/{trackId}/levels`
+## `GET /api/v1/app/tracks/{trackId}/levels`
 
 Published levels of one track, in display order, with their effective settings. Used by the onboarding grade step (tracks whose entry method is `gradeSelection`) and later by the home and "Me" screens. Available without a token, like the track list. Mock: `assets/mock/tracks/levels_<trackId>.json`.
 
@@ -62,6 +64,8 @@ Published levels of one track, in display order, with their effective settings. 
 
 ```json
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": [
     {
       "id": "lvl_emar_07",
@@ -72,8 +76,8 @@ Published levels of one track, in display order, with their effective settings. 
       "displayGroup": { "ar": "الحلقة الثانية", "en": "Primary, cycle 2" }
     }
   ],
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "0HN7…"
 }
 ```
 

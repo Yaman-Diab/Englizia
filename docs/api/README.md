@@ -1,47 +1,56 @@
 # Backend API contract
 
-Backend: **.NET** (ASP.NET Core) REST API, separate team. Per `docs/product/dashboard-server-requirements.md` §19.1 the backend delivers an **OpenAPI document with every release** (app and control panel share it), plus a JSON Schema for the lesson package with v0.1. None has arrived yet, so everything below is an assumption except where the Status column says "required".
-When the OpenAPI arrives, commit it here as `openapi.json` and reconcile this file, the fake data sources and the fixtures against it.
+Backend: **.NET** (ASP.NET Core) REST API, separate team. Per `docs/product/dashboard-server-requirements.md` §19.1 the backend delivers an **OpenAPI document with every release** (app and control panel share it), plus a JSON Schema for the lesson package with v0.1.
 
-Every assumption in code is tagged `// ASSUMPTION(api): ...` — `grep -rn "ASSUMPTION(api)" lib` lists them.
-When a field is confirmed, save a sanitized real response under `test/fixtures/api/` and parse it in a test.
+- **Dev server:** `https://api-dev.engleazia.com` (`env/dev.json`). Interactive docs at `/scalar/#app-api`, the document itself at `/openapi/app.json`.
+- **[`openapi.json`](openapi.json)** is the committed copy of the app's OpenAPI document; replace it with every release and reconcile this folder, the fake data sources and the fixtures against it.
+- Everything the document does not cover is an assumption, tagged in code as `// ASSUMPTION(api): ...` (`grep -rn "ASSUMPTION(api)" lib` lists them).
+- Real responses are saved, sanitized, under `test/fixtures/api/<endpoint>_<case>.json` and parsed in tests (`test/helpers/api_fixtures.dart`).
 
-## Conventions the app assumes
+## Conventions
 
-| Topic | Assumption | Status |
+| Topic | Contract | Status |
 |---|---|---|
-| JSON casing | camelCase (System.Text.Json web defaults) | assumed |
-| Base path | `/api/v1/...` | assumed |
-| Envelope and errors | Every response is the unified envelope below; error messages for the app carry **stable codes** and the app shows its own Arabic text (§19.1, required). `ApiClient` unwraps `data`, and `ApiException` reads `error`, falling back to RFC 9457 ProblemDetails while the envelope is not agreed | codes required, envelope proposed |
-| Field names in `errors` | normalized by the app: `$.Email` / `request.Email` / `Email` → `email` | app-side |
-| Rate limiting | Too many failed logins return a wait time to the app (§19.8, required); modeled as 429 with `Retry-After` in seconds | wait time required, shape assumed |
-| Auth | Short-lived access key + refresh key, role and permission checked on every request (§19.1, required); JWT Bearer assumed | required (concept) / assumed (format) |
-| Localization | server reads `Accept-Language` (`ar` / `en`) and localizes messages | to request |
-| App gate | The server returns the minimum allowed app version per platform (v0.1) and the recommended one (v1.0) (§19.2, required); path and field names assumed: `GET /api/v1/app/config` → `minSupportedVersion` | required (concept) / assumed (shape) |
-| Effective settings | The server returns settings after inheritance (global → track → level → lesson); the app reads them on open and caches them; no setting is hardcoded in the app (§19.2, student §2 principle 6) | required |
-| Times | Stored in UTC; the student's day uses their time zone and a configurable day start, default 04:00 (§19.1) | required |
+| JSON casing | camelCase | confirmed |
+| Base path | Account endpoints under `/api/v1/auth/...`; everything the signed-in app reads under `/api/v1/app/...` (`/app/me`, `/app/system/ping`). The app's proposed endpoints follow the same split | confirmed (prefix) / proposed (new paths) |
+| Envelope | Every response, success or failure, is `{statusCode, message, data, error, traceId}`; `ApiClient` unwraps `data` | confirmed |
+| Errors | `error: {code, details}`, `details: [{field, code, message}]` or null. The app keys its behavior on `error.code` and shows its own Arabic text; `message` is only logged. Field names are normalized by the app (`$.Email` / `request.Email` / `Email` → `email`). ProblemDetails (RFC 9457) is still parsed as a fallback | confirmed |
+| Error codes | Dotted lower-case: `validation.failed` (400, with `details` codes such as `not_empty`), `auth.unauthenticated` (401, no or bad access token), `auth.refresh_token_invalid` (401 from refresh). Constants in `lib/core/network/api_error_codes.dart` | confirmed (these three); the full list is requested |
+| Auth | JWT Bearer access token with `expiresIn` seconds, plus a refresh token with `refreshTokenExpiresAt`, both in `TokenResponse`. The app refreshes 30 s before the access token expires and once more on a 401, sharing one refresh call; a 400/401/403 from refresh signs the user out | confirmed |
+| Devices | Login and register take `deviceId` (null on the first login; the server returns one in `TokenResponse`) and `platform` (`DevicePlatform`: `android`, `web`) | confirmed; `ios` is missing |
+| User | `UserDto {id (uuid), userName, email?, displayName, emailVerified, roles[], timeZone, uiLanguage (ar\|en)}`, changed through `PUT /api/v1/app/me` | confirmed |
+| Rate limiting | Register and login document `429`; the app treats it as "wait and retry" and reads `Retry-After` in seconds when present | 429 confirmed, wait time not |
+| Localization | The app sends `Accept-Language` (`ar` / `en`); whether `message` is localized is unknown, and it is not shown anyway | to confirm |
+| App gate | The server returns the minimum allowed app version per platform (v0.1) and the recommended one (v1.0) (§19.2, required); no endpoint yet | required, not in the document |
+| Effective settings | The server returns settings after inheritance (global → track → level → lesson); the app reads them on open and caches them; no setting is hardcoded in the app (§19.2, student §2 principle 6) | required, proposed in [settings.md](settings.md) |
+| Times | ISO-8601 UTC; the student's day uses their time zone and a configurable day start, default 04:00 (§19.1) | confirmed (format) |
 
-## Unified response envelope (proposed to the backend team)
+Proposed contracts keep these rules too: ids are strings, absolute media URLs, enums are lower-camel strings and an unknown value is treated as the least privileged one, bilingual text is `{ "ar": "…", "en": "…" }` (as in the content package, server doc §20.1).
 
-Every response, success or failure, has the same three fields; exactly one of `data` and `error` is non-null.
+### Envelope examples (real responses)
 
-```json
-{ "data": { "id": "trk_01" }, "meta": null, "error": null }
-```
-
-Lists carry paging in `meta` (only where a list is paged):
-
-```json
-{ "data": [ ... ], "meta": { "page": 1, "pageSize": 20, "total": 134, "hasMore": true }, "error": null }
-```
-
-Failures keep an honest HTTP status (401 token, 403 forbidden, 404, 409, 422 validation, 429 rate limit with `Retry-After`, 5xx):
+Success (`test/fixtures/api/system_ping_ok.json`):
 
 ```json
-{ "data": null, "meta": null, "error": { "code": "email_taken", "message": "…", "fieldErrors": { "email": ["…"] }, "traceId": "00-ab12…" } }
+{ "statusCode": 200, "message": "…", "data": { "status": "ok", "serverTime": "2026-10-28T09:00:00Z" }, "error": null, "traceId": "…" }
 ```
 
-Rules: camelCase; ids are strings; times ISO-8601 UTC; absolute media URLs; enums are lower-camel strings and an unknown value is treated as the least privileged one; bilingual text is `{ "ar": "…", "en": "…" }` (as in the content package, server doc §20.1). `message` is for logs only — the app never shows it. In ASP.NET Core this needs a custom `InvalidModelStateResponseFactory` and an exception-handling middleware that write the `error` object instead of the default ProblemDetails.
+Validation failure (`test/fixtures/api/auth_login_validation_failed.json`):
+
+```json
+{
+  "statusCode": 400,
+  "message": "One or more fields are invalid.",
+  "data": null,
+  "error": {
+    "code": "validation.failed",
+    "details": [
+      { "field": "email", "code": "not_empty", "message": "'Email' must not be empty." }
+    ]
+  },
+  "traceId": "…"
+}
+```
 
 ## Endpoint contracts
 
@@ -49,33 +58,48 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Contract | Used by | Data in the app |
 |---|---|---|
+| [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | refresh only (sign-up and sign-in screens are not built) |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", later track switching | mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
-| [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10); later sign-up and sign-in | mock |
+| [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
 ## Headers sent on every request
 
-`Accept: application/json` · `Accept-Language: ar|en` · `X-App-Version: <semver>` · `X-Platform: android|ios` · `Authorization: Bearer <token>` (unless the request opts out).
+`Accept: application/json` · `Accept-Language: ar|en` · `X-App-Version: <semver>` · `X-Platform: android|ios` · `Authorization: Bearer <token>` (unless the request opts out). The document declares only `Authorization`; the other headers are the app's, for the app gate and localization. Refresh also sends the expired access token as `Authorization`, which the server does not require.
 
 ## Endpoints
 
-| Endpoint | Method | Body | Response | Status |
+| Endpoint | Method | Body | Response `data` | Status |
 |---|---|---|---|---|
-| `/api/v1/tracks` | GET | — | envelope, `data`: track list ([tracks.md](tracks.md)) | proposed, mock |
-| `/api/v1/placement/summary` | GET | — | envelope, `data`: duration and stages ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/settings` | GET | — | envelope, `data`: effective settings by section ([settings.md](settings.md)) | proposed, mock |
-| `/api/v1/tracks/{trackId}/levels` | GET | — | envelope, `data`: level list ([tracks.md](tracks.md)) | proposed, mock |
-| `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | envelope, `data`: guest tokens ([auth.md](auth.md)) | proposed, mock |
-| `/api/v1/auth/refresh` | POST | `{refreshToken}` + `Authorization: Bearer <expired access>` | `{accessToken, refreshToken}` | assumed |
+| `/api/v1/auth/register` | POST | `RegisterRequest {email, password, displayName, deviceId, platform}` | `TokenResponse` (201) | live, not used yet |
+| `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse` | live, not used yet |
+| `/api/v1/auth/refresh` | POST | `RefreshRequest {refreshToken}` | `TokenResponse` | live, used |
+| `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, not used yet |
+| `/api/v1/app/me` | GET | — | `UserDto` | live, not used yet |
+| `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, not used yet |
+| `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
+| `/api/v1/app/tracks` | GET | — | track list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
+| `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
+| `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team
 
-1. Share the OpenAPI document and keep it updated per release.
-2. Return a stable machine `code` for business errors (e.g. `email_taken`, `attempt_duplicate`).
-3. Localize validation messages via `Accept-Language`.
-4. Attempts accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
-5. Keep deprecated routes alive for one release cycle; expose `minSupportedVersion`.
-6. Onboarding answers travel with account creation; the "why" reasons are `communication`, `fun`, `education`, `travel`, `career`, `exams` (multi-select, at least one; not asked on the child path). Contract to be written with the save-progress step.
-7. Lesson content follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids); the backend delivers a JSON Schema for it with v0.1.
-8. Confirm which refresh-endpoint statuses mean the refresh token is invalid or revoked. The app signs the user out on 400/401/403 and treats every other failure (5xx, 429, timeout, malformed body) as transient.
+Paste-ready; each item names what the app needs and why.
+
+1. **`ios` in `DevicePlatform`.** The enum has `android` and `web` only; the app ships on iPhone too, so login and register from an iPhone cannot send a valid platform.
+2. **Guest account (ADR 10).** `POST /api/v1/auth/guest` as in [auth.md](auth.md): no token, idempotent on `installationId`, returns the same `TokenResponse` with `roles: ["guest"]`. Plus the **upgrade**: signing up while holding a guest token turns that guest into the member account and keeps its progress; agree the endpoint and what happens when the email already has an account.
+3. **Google and Apple sign-in.** Endpoints that take the provider's ID token and return `TokenResponse` (and upgrade a guest the same way). Apple sign-in is required on iOS when Google is offered.
+4. **Onboarding answers with account creation.** `RegisterRequest` (and the guest and social endpoints) should accept the `onboarding` object from [auth.md](auth.md) (audience, track, child profile, grade, reasons, daily goal, challenge, start level, placement choice, reminder time), so the plan is ready on first sign-in (S §4.3).
+5. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/tracks`, `GET /app/tracks/{trackId}/levels`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the tracks, levels and settings calls must work **without a token**, because onboarding reads them before an account exists.
+6. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
+7. **The full list of `error.code` values** per endpoint, kept in the OpenAPI document: at least email taken (409 on register), wrong credentials (401 on login), account locked or disabled (403 on login), rate limited (429), and the `details` codes beyond `not_empty`. The app shows its own text per code.
+8. **`Retry-After` on 429** (seconds), so the app can tell the learner how long to wait after too many failed logins (§19.8).
+9. **Refresh semantics.** Confirm that 400/401/403 from refresh always mean the session is over (the app signs out on them) and anything else is transient; whether the refresh token rotates on every call (the app stores the new one when it comes back); and whether refresh should accept the expired access token header or ignore it.
+10. **App gate.** An endpoint for the minimum and recommended app version per platform (§19.2), e.g. `GET /api/v1/app/config`.
+11. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
+12. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
+13. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.
+14. **Lesson content** follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids), with its JSON Schema in v0.1.

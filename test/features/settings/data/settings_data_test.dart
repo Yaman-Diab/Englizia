@@ -149,7 +149,7 @@ void main() {
     );
   });
 
-  test('GET /api/v1/settings', () async {
+  test('GET /api/v1/app/settings', () async {
     final adapter = FakeHttpAdapter(
       (_) => FakeResponse(200, body: exampleBody),
     );
@@ -160,7 +160,7 @@ void main() {
 
     final settings = await SettingsRemoteDataSourceImpl(client).getSettings();
 
-    expect(adapter.requests.single.path, '/api/v1/settings');
+    expect(adapter.requests.single.path, '/api/v1/app/settings');
     expect(settings.entity, testSettings);
   });
 

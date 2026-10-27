@@ -19,7 +19,7 @@ lib/
 │   ├── error/         Failure (sealed) · FailureMapper
 │   ├── l10n/          AppLocales · CurrentLanguage · FailureL10n (failure → translated text)
 │   ├── logging/       AppLogger · Redactor · CrashReporter (no-op until a provider is chosen)
-│   ├── network/       ApiClient · ApiException (ProblemDetails) · NetworkException · interceptors · DioFactory · JsonReader
+│   ├── network/       ApiClient · ApiException (server envelope) · NetworkException · TokenResponse · interceptors · DioFactory · JsonReader
 │   ├── session/       AuthTokens · AppSessionController (GoRouter refreshListenable)
 │   ├── storage/       TokenStorage (secure) · SettingsStorageService (SharedPreferences, non-sensitive)
 │   ├── router/        RoutePolicy · AppRedirect
@@ -42,7 +42,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 ```
 
 - Datasources return **models**; `RepositoryImpl` maps to entities inside `guard()`.
-- `ApiClient` turns Dio errors into `ApiException` (non-2xx, parsed from ASP.NET ProblemDetails) or `NetworkException` (no response).
+- `ApiClient` unwraps the server envelope `{statusCode, message, data, error, traceId}` (`docs/api/openapi.json`) and turns Dio errors into `ApiException` (non-2xx: `error.code` and per-field `error.details`, with ProblemDetails as a fallback) or `NetworkException` (no response).
 - `guard()` → `FailureMapper.fromError()` → typed `Failure`, mapped **once**. Unexpected errors are logged with stack trace.
 - Cubit state keeps the `Failure`; the page shows `failure.localizedMessage` and a retry action.
 - Endpoint-specific meaning (e.g. 401 on login = wrong credentials) is handled in that repository before `guard` maps it.

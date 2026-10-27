@@ -46,23 +46,40 @@ Creates the anonymous guest account of this phone when the learner chooses «م�
 
 ### Response `200`
 
+The server's `TokenResponse`, exactly as login and register return it (`docs/api/openapi.json`), so the guest's session is handled by the same code:
+
 ```json
 {
+  "statusCode": 201,
+  "message": "Created",
   "data": {
     "accessToken": "…",
+    "expiresIn": 900,
+    "tokenType": "Bearer",
     "refreshToken": "…",
-    "account": { "id": "acc_guest_00000000000", "kind": "guest" }
+    "refreshTokenExpiresAt": "2026-12-31T00:00:00Z",
+    "deviceId": "00000000-0000-4000-8000-000000000000",
+    "user": {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "userName": "guest-00000000000",
+      "email": null,
+      "displayName": "",
+      "emailVerified": false,
+      "roles": ["guest"],
+      "timeZone": "Asia/Damascus",
+      "uiLanguage": "ar"
+    }
   },
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "0HN7…"
 }
 ```
 
-The tokens work like a member's (same refresh endpoint, same headers); the app stores them as a guest's. The access token's role should be `guest` so the server can refuse member-only actions.
+The tokens work like a member's (same refresh endpoint, same headers); the app stores them as a guest's. `roles` should hold `guest` so the server can refuse member-only actions.
 
 ### Errors
 
-The common envelope errors (`docs/api/README.md`). Creating a guest needs a connection; the app says so and offers to retry.
+The common errors (`docs/api/README.md`). Creating a guest needs a connection; the app says so and offers to retry.
 
 ## Questions for the backend team
 

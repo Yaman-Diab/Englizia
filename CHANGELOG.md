@@ -30,6 +30,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Changed
+- The app talks to the dev server (`api-dev.engleazia.com`): it reads the server's response and error format, and renews the sign-in shortly before it expires instead of waiting for a request to fail.
 - The guide moves with more life: each expression idles its own way, and changing expression overshoots slightly and swaps the face behind a blink.
 - The level step's guide gives a confident thumbs-up when you know some English.
 - The app is named Engleazia (Arabic name unchanged).

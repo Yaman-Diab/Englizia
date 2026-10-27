@@ -3,7 +3,7 @@
 Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/settings/`); nothing is confirmed by the backend team yet.
 Requirements: server doc §17.1 (inheritance and reading), §17.7 (motivation), §17.8 (notifications), §19.2 ("the app reads the effective settings on open and caches them"); student doc §4.2 (reminder step) and §20.
 
-## `GET /api/v1/settings`
+## `GET /api/v1/app/settings`
 
 The global settings after inheritance, as the app needs them before any track is chosen. Available without a token, since onboarding runs before sign-up. Grouped by the panel's sections; each app version reads the groups it knows and ignores the rest, so the response grows with each version (§19.2). Track, level and lesson values arrive with those resources (`docs/api/tracks.md`).
 
@@ -11,6 +11,8 @@ The global settings after inheritance, as the app needs them before any track is
 
 ```json
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": {
     "motivation": {
       "dailyGoalOptions": [
@@ -44,8 +46,8 @@ The global settings after inheritance, as the app needs them before any track is
       }
     }
   },
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "0HN7…"
 }
 ```
 
@@ -67,7 +69,7 @@ An unknown slot, a malformed time, or a goal or challenge option without its num
 
 ### Errors
 
-The common envelope errors (`docs/api/README.md`).
+The common errors (`docs/api/README.md`).
 
 ## Questions for the backend team
 

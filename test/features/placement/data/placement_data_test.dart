@@ -65,7 +65,7 @@ void main() {
     expect(summary.mayAddStage, isFalse);
   });
 
-  test('GET /api/v1/placement/summary', () async {
+  test('GET /api/v1/app/placement/summary', () async {
     final adapter = FakeHttpAdapter(
       (_) => FakeResponse(200, body: exampleBody),
     );
@@ -76,7 +76,7 @@ void main() {
 
     final summary = await PlacementRemoteDataSourceImpl(client).getSummary();
 
-    expect(adapter.requests.single.path, '/api/v1/placement/summary');
+    expect(adapter.requests.single.path, '/api/v1/app/placement/summary');
     expect(summary.entity, expected);
   });
 

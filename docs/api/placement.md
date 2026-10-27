@@ -3,7 +3,7 @@
 Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/placement/`); nothing is confirmed by the backend team yet.
 Requirements: student doc §4.2 (the "how much English do you know?" step) and §12, server doc §12 and §19.3.
 
-## `GET /api/v1/placement/summary`
+## `GET /api/v1/app/placement/summary`
 
 The published placement test as it is introduced to the learner, before any question is loaded. Used by the onboarding level step (and later the test's intro screen). Available without a token, since onboarding runs before sign-up. Answer keys never reach the app; this endpoint carries no questions.
 
@@ -11,14 +11,16 @@ The published placement test as it is introduced to the learner, before any ques
 
 ```json
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": {
     "version": "2026.1",
     "estimatedMinutes": { "min": 12, "max": 15 },
     "stages": 2,
     "optionalStage": true
   },
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "0HN7…"
 }
 ```
 
@@ -31,7 +33,7 @@ The published placement test as it is introduced to the learner, before any ques
 
 ### Errors
 
-The common envelope errors (`docs/api/README.md`). With no published test version, `404` with code `placement_unavailable`; the app then hides the test and offers a start from the first level.
+The common errors (`docs/api/README.md`). With no published test version, `404` with code `placement_unavailable`; the app then hides the test and offers a start from the first level.
 
 ## Questions for the backend team
 
