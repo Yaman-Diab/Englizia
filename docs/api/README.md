@@ -51,6 +51,7 @@ One file per endpoint group, with request, response and example; the matching mo
 |---|---|---|
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", later track switching | mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
+| [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10); later sign-up and sign-in | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
 ## Headers sent on every request
@@ -65,6 +66,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/placement/summary` | GET | — | envelope, `data`: duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/settings` | GET | — | envelope, `data`: effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/tracks/{trackId}/levels` | GET | — | envelope, `data`: level list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | envelope, `data`: guest tokens ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/refresh` | POST | `{refreshToken}` + `Authorization: Bearer <expired access>` | `{accessToken, refreshToken}` | assumed |
 
 ## Requests to raise with the backend team

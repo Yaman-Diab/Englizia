@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +9,7 @@ final class SettingsStorageService {
 
   static const _themeModeKey = 'settings.theme_mode';
   static const _hasLaunchedKey = 'app.has_launched';
+  static const _installationIdKey = 'app.installation_id';
 
   final SharedPreferences _prefs;
 
@@ -22,5 +25,27 @@ final class SettingsStorageService {
 
   Future<void> markLaunched() async {
     await _prefs.setBool(_hasLaunchedKey, true);
+  }
+
+  /// A random id for this install, made on first use. Not personal: the
+  /// guest account is tied to it, and a retried request reuses it (ADR 10).
+  Future<String> installationId() async {
+    if (_prefs.getString(_installationIdKey) case final saved?) return saved;
+    final id = _randomId();
+    await _prefs.setString(_installationIdKey, id);
+    return id;
+  }
+
+  /// 128 random bits as a version-4 UUID.
+  static String _randomId() {
+    final random = Random.secure();
+    final bytes = [for (var i = 0; i < 16; i++) random.nextInt(256)];
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+    final hex = [
+      for (final b in bytes) b.toRadixString(16).padLeft(2, '0'),
+    ].join();
+    return '${hex.substring(0, 8)}-${hex.substring(8, 12)}-'
+        '${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20)}';
   }
 }

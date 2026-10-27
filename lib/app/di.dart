@@ -1,4 +1,5 @@
 import 'package:englizia/core/di/service_locator.dart';
+import 'package:englizia/features/account/account_injection.dart';
 import 'package:englizia/features/onboarding/onboarding_injection.dart';
 import 'package:englizia/features/placement/placement_injection.dart';
 import 'package:englizia/features/settings/settings_injection.dart';
@@ -12,5 +13,6 @@ Future<void> configureDependencies() async {
   registerTracksDependencies(sl);
   registerPlacementDependencies(sl);
   registerSettingsDependencies(sl);
+  registerAccountDependencies(sl);
   registerOnboardingDependencies(sl);
 }

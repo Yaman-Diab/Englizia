@@ -1,0 +1,9 @@
+{
+  "data": {
+    "accessToken": "mock-guest-access-token",
+    "refreshToken": "mock-guest-refresh-token",
+    "account": { "id": "acc_guest_00000000000", "kind": "guest" }
+  },
+  "meta": null,
+  "error": null
+}
