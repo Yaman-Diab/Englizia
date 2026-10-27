@@ -81,6 +81,34 @@ enum AppIcon {
     '2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 '
     '1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
   ),
+  target(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<circle cx="12" cy="12" r="5"/>'
+    '<path d="M12 12h.01"/>',
+  ),
+  child(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<path d="M8.5 14a4 4 0 0 0 7 0"/>'
+    '<path d="M9 9.5h.01M15 9.5h.01"/>',
+  ),
+  route(
+    '<circle cx="6" cy="19" r="2.5"/>'
+    '<path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/>'
+    '<circle cx="18" cy="5" r="2.5"/>',
+  ),
+  mail(
+    '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/>'
+    '<path d="M3 7l9 6 9-6"/>',
+  ),
+  person(
+    '<circle cx="12" cy="8" r="4"/>'
+    '<path d="M4 21a8 8 0 0 1 16 0"/>',
+  ),
+  phone(
+    '<rect x="6" y="2.5" width="12" height="19" rx="2.5"/>'
+    '<path d="M11 18h2"/>',
+  ),
+  check('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
   questionCircle(
     '<circle cx="12" cy="12" r="9"/>'
     '<path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/>'
