@@ -42,17 +42,24 @@ final class ConflictFailure extends Failure {
 final class ValidationFailure extends Failure {
   const ValidationFailure({
     this.fieldErrors = const {},
+    this.fieldCodes = const {},
     super.code,
     super.serverMessage,
   });
 
-  /// Field name (camelCase) → messages.
+  /// Field name (camelCase) → the server's messages (for logs).
   final Map<String, List<String>> fieldErrors;
+
+  /// Field name (camelCase) → stable codes (`not_empty`, …): forms show
+  /// their own text by code.
+  final Map<String, List<String>> fieldCodes;
 
   String? firstErrorFor(String field) => fieldErrors[field]?.firstOrNull;
 
+  String? firstCodeFor(String field) => fieldCodes[field]?.firstOrNull;
+
   @override
-  List<Object?> get props => [...super.props, fieldErrors];
+  List<Object?> get props => [...super.props, fieldErrors, fieldCodes];
 }
 
 final class RateLimitFailure extends Failure {

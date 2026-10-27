@@ -1,11 +1,8 @@
 import 'package:englizia/core/network/json_reader.dart';
 
-/// A non-2xx response. Reads the `error` object of the unified envelope
-/// (`{code, message, fieldErrors, traceId}`), else ASP.NET Core
-/// `ProblemDetails` (RFC 9457).
-// ASSUMPTION(api): neither shape is confirmed; validation errors come as
-// `{Field: [messages]}` in both, business errors carry a stable `code` —
-// confirm in docs/api/README.md.
+/// A non-2xx response. Reads the server's envelope
+/// (`{statusCode, message, data, error: {code, details}, traceId}`,
+/// docs/api/openapi.json), else ASP.NET Core `ProblemDetails` (RFC 9457).
 final class ApiException implements Exception {
   const ApiException({
     required this.statusCode,
@@ -13,6 +10,7 @@ final class ApiException implements Exception {
     this.detail,
     this.code,
     this.fieldErrors = const {},
+    this.fieldCodes = const {},
     this.retryAfter,
     this.traceId,
   });
@@ -28,13 +26,15 @@ final class ApiException implements Exception {
     };
     final envelopeError = json.readMap('error');
     if (envelopeError != null) {
+      final details = _parseDetails(envelopeError.readList('details'));
       return ApiException(
         statusCode: statusCode,
-        detail: envelopeError.readString('message'),
+        detail: json.readString('message'),
         code: envelopeError.readString('code'),
-        fieldErrors: _parseFieldErrors(envelopeError['fieldErrors']),
+        fieldErrors: details.messages,
+        fieldCodes: details.codes,
         retryAfter: _parseRetryAfter(retryAfterHeader),
-        traceId: envelopeError.readString('traceId'),
+        traceId: json.readString('traceId'),
       );
     }
     return ApiException(
@@ -50,9 +50,17 @@ final class ApiException implements Exception {
 
   final int statusCode;
   final String? title;
+
+  /// The server's own message, for logs only: the app shows its own text.
   final String? detail;
   final String? code;
+
+  /// Field name (camelCase) → the server's messages.
   final Map<String, List<String>> fieldErrors;
+
+  /// Field name (camelCase) → stable codes (`not_empty`, …), for the app's
+  /// own field messages.
+  final Map<String, List<String>> fieldCodes;
   final Duration? retryAfter;
 
   /// Server correlation id, for support and logs.
@@ -65,6 +73,29 @@ final class ApiException implements Exception {
     return last[0].toLowerCase() + last.substring(1);
   }
 
+  /// `error.details`: `[{field, code, message}]`; a detail without a field
+  /// is about the whole request and stays out of the field maps.
+  static ({Map<String, List<String>> messages, Map<String, List<String>> codes})
+  _parseDetails(List<Object?>? raw) {
+    final messages = <String, List<String>>{};
+    final codes = <String, List<String>>{};
+    for (final item in raw ?? const <Object?>[]) {
+      if (item is! Map) continue;
+      final detail = item.cast<String, Object?>();
+      final field = detail.readString('field');
+      if (field == null) continue;
+      final key = normalizeField(field);
+      if (detail.readString('message') case final message?) {
+        messages[key] = [...?messages[key], message];
+      }
+      if (detail.readString('code') case final code?) {
+        codes[key] = [...?codes[key], code];
+      }
+    }
+    return (messages: messages, codes: codes);
+  }
+
+  /// ProblemDetails `errors`: `{Field: [messages]}`.
   static Map<String, List<String>> _parseFieldErrors(Object? raw) {
     if (raw is! Map<Object?, Object?>) return const {};
     final result = <String, List<String>>{};

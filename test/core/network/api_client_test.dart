@@ -1,10 +1,12 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/app_headers_interceptor.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../helpers/api_fixtures.dart';
 import '../../helpers/fake_http_adapter.dart';
 
 void main() {
@@ -104,24 +106,16 @@ void main() {
     );
   });
 
-  group('unified envelope', () {
-    test('returns data of an enveloped success', () async {
+  group('the server envelope (real responses, test/fixtures/api)', () {
+    test('returns data of a success', () async {
       adapter = FakeHttpAdapter(
-        (_) => const FakeResponse(
-          200,
-          body: {
-            'data': [
-              {'id': 'trk_01'},
-            ],
-            'meta': null,
-            'error': null,
-          },
-        ),
+        (_) => FakeResponse(200, body: apiFixture('system_ping_ok')),
       );
 
-      expect(await buildClient(adapter).get('/tracks'), [
-        {'id': 'trk_01'},
-      ]);
+      final data = await buildClient(adapter).get('/api/v1/app/system/ping');
+
+      expect(data, isA<Map<String, Object?>>());
+      expect((data! as Map)['status'], 'ok');
     });
 
     test('leaves a plain body that merely has a data field alone', () async {
@@ -132,36 +126,46 @@ void main() {
       expect(await buildClient(adapter).get('/x'), {'data': 1, 'other': 2});
     });
 
-    test('reads the error object of an enveloped failure', () async {
+    test('reads a validation failure with its field details', () async {
       adapter = FakeHttpAdapter(
-        (_) => const FakeResponse(
-          422,
-          body: {
-            'data': null,
-            'meta': null,
-            'error': {
-              'code': 'email_taken',
-              'message': 'Email is taken',
-              'fieldErrors': {
-                'Email': ['Taken'],
-              },
-              'traceId': '00-abc',
-            },
-          },
-        ),
+        (_) =>
+            FakeResponse(400, body: apiFixture('auth_login_validation_failed')),
       );
 
       await expectLater(
-        buildClient(adapter).post('/auth/register'),
+        buildClient(adapter).post('/api/v1/auth/login'),
         throwsA(
           isA<ApiException>()
-              .having((e) => e.statusCode, 'status', 422)
-              .having((e) => e.code, 'code', 'email_taken')
-              .having((e) => e.detail, 'detail', 'Email is taken')
-              .having((e) => e.fieldErrors, 'fieldErrors', {
-                'email': ['Taken'],
+              .having((e) => e.statusCode, 'status', 400)
+              .having((e) => e.code, 'code', ApiErrorCodes.validationFailed)
+              .having(
+                (e) => e.detail,
+                'detail',
+                'One or more fields are invalid.',
+              )
+              .having((e) => e.fieldCodes, 'fieldCodes', {
+                'email': ['not_empty'],
+                'password': ['not_empty'],
               })
-              .having((e) => e.traceId, 'traceId', '00-abc'),
+              .having((e) => e.fieldErrors['email'], 'email message', [
+                "'Email' must not be empty.",
+              ])
+              .having((e) => e.traceId, 'traceId', isNotEmpty),
+        ),
+      );
+    });
+
+    test('reads an error without details', () async {
+      adapter = FakeHttpAdapter(
+        (_) => FakeResponse(401, body: apiFixture('app_me_unauthenticated')),
+      );
+
+      await expectLater(
+        buildClient(adapter).get('/api/v1/app/me'),
+        throwsA(
+          isA<ApiException>()
+              .having((e) => e.code, 'code', ApiErrorCodes.unauthenticated)
+              .having((e) => e.fieldErrors, 'fieldErrors', isEmpty),
         ),
       );
     });
