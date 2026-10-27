@@ -49,7 +49,7 @@ Dependency direction: `presentation → domain ← data`.
 - Kids mode is a setting of the same engine (bigger sizes, Andika font, audio instructions), not a separate app.
 - Grading and XP are computed **on the server**; the app only submits attempts with a stable attempt id (safe to resend).
 - Every configurable value (thresholds, limits, points, day start, texts the panel controls) is read from the server's effective settings after inheritance (global → track → level → lesson); **never hardcode one**. Doc: S §2 principle 6.
-- No guest mode: creating the account ends onboarding; onboarding answers stay on the phone until then (S §4.3).
+- Guest mode is back (owner, 2026-10-27; ADR 10, overrides S §4.3): «لاحقًا» on "save progress" creates a **server-side guest account** tied to the phone; a full account later must upgrade it. Onboarding answers travel on `OnboardingPath` and are sent with the account.
 
 ---
 

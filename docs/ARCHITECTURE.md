@@ -49,15 +49,15 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 ## Session and auth
 
-- `AppSessionController` status: `unknown → guest | authenticated`. `bootstrap()` never throws; on first launch after install it clears the keystore (iOS keeps Keychain items after uninstall).
+- `AppSessionController` status: `unknown → signedOut | guest | member` (ADR 10). Tokens carry their `AccountKind`, kept through refresh and secure storage. `bootstrap()` never throws; on first launch after install it clears the keystore (iOS keeps Keychain items after uninstall).
 - `AuthInterceptor` attaches the bearer token, shares **one** refresh among concurrent 401s, retries each request once, and expires the session only when the server rejects the refresh token (offline keeps the session).
 - `TokenRefreshService` uses a separate Dio without the auth interceptor and sets `Authorization` itself.
 - Public endpoints set `extra[AuthInterceptor.skipAuthKey] = true`.
 
 ## Routing
 
-- `route_policies.dart` maps each route pattern to `public`, `guestOnly` or `requiresLogin`; unlisted routes require login.
-- `AppRedirect`: splash until the session is known, then signed-in users go home and everyone else to the welcome screen (there is no guest mode); after that the policy decides, and a guest on a `requiresLogin` route is sent to welcome. The router listens to the session, so sign-in/out re-routes automatically.
+- `route_policies.dart` maps each route pattern to `public`, `signedOutOnly` (welcome, onboarding), `withoutAccount` (sign-in, sign-up; open to guests) or `requiresSession` (the app; guests and members); unlisted routes need a session.
+- `AppRedirect`: splash until the session is known, then guests and members go home and signed-out users to the welcome screen; after that the policy decides. The router listens to the session, so creating a guest account, signing in or out re-routes automatically.
 - Tabs (Learn / Practice / Speak / Me; kids: Learn / My words / Me) will use `StatefulShellRoute` when the first tab lands.
 
 ## Design system

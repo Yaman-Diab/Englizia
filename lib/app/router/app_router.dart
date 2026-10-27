@@ -25,6 +25,8 @@ import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cu
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/pages/reminder_page.dart';
+import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
@@ -196,7 +198,32 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.onboardingSaveProgress,
-        builder: (_, _) => PendingPage(title: 'onboarding_save_title'.tr()),
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<SaveProgressCubit>()..start(),
+            child: SaveProgressPage(
+              path: path,
+              onCreateAccount: (_) =>
+                  context.push(AppRoutes.signUp, extra: path),
+              onTerms: () => context.push(AppRoutes.legalTerms),
+              onPrivacy: () => context.push(AppRoutes.legalPrivacy),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.signUp,
+        builder: (_, _) => PendingPage(title: 'account_create_title'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.legalTerms,
+        builder: (_, _) => PendingPage(title: 'onboarding_save_terms'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.legalPrivacy,
+        builder: (_, _) => PendingPage(title: 'onboarding_save_privacy'.tr()),
       ),
       GoRoute(
         path: AppRoutes.onboardingReminder,

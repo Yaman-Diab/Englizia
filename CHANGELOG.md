@@ -22,6 +22,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Onboarding child profile: the child's name with a live greeting, and the age (5–9).
 - Onboarding "why are you learning English?": pick any of six reasons; the guide replies to the latest one.
 - Onboarding daily goal: choose 5, 10, 15 or 20 minutes (as set in the control panel), with what it amounts to in lessons and minutes a week; the guide gets more excited with each step up.
+- Onboarding "save your progress": your plan from the answers, then Google, Apple (iPhone) or email, or «لاحقًا» to carry on as a guest of this phone after a clear warning.
+- Guest mode: a guest account on the server, tied to this phone, so you can learn now and create an account later.
 - Onboarding streak challenge: 7, 14, 30 or 40 days, shown on a calendar in the streak color with a flame that beats when you change your mind.
 - Onboarding reminder time: morning, noon, evening or a time of your own, with a preview of the reminder. Notifications are asked for only after you choose; if you refuse, you can open the phone settings or go on without a reminder.
 - Onboarding "how much English do you know?": start from the first level, or take the placement test now or later. Shows the test's duration and stages from the server, and waits for a connection before the test.

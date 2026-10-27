@@ -19,6 +19,9 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.onboardingSaveProgress: RoutePolicy.signedOutOnly,
   AppRoutes.onboardingPlacement: RoutePolicy.signedOutOnly,
   AppRoutes.signIn: RoutePolicy.withoutAccount,
+  AppRoutes.signUp: RoutePolicy.withoutAccount,
+  AppRoutes.legalTerms: RoutePolicy.public,
+  AppRoutes.legalPrivacy: RoutePolicy.public,
 };
 
 RoutePolicy policyFor(String routePattern) =>
