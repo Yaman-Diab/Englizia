@@ -81,6 +81,64 @@ enum AppIcon {
     '2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 '
     '1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
   ),
+  target(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<circle cx="12" cy="12" r="5"/>'
+    '<path d="M12 12h.01"/>',
+  ),
+  child(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<path d="M8.5 14a4 4 0 0 0 7 0"/>'
+    '<path d="M9 9.5h.01M15 9.5h.01"/>',
+  ),
+  route(
+    '<circle cx="6" cy="19" r="2.5"/>'
+    '<path d="M8.5 19H17a3.5 3.5 0 0 0 0-7H7a3.5 3.5 0 0 1 0-7h8.5"/>'
+    '<circle cx="18" cy="5" r="2.5"/>',
+  ),
+  mail(
+    '<rect x="2.5" y="5" width="19" height="14" rx="2.5"/>'
+    '<path d="M3 7l9 6 9-6"/>',
+  ),
+  person(
+    '<circle cx="12" cy="8" r="4"/>'
+    '<path d="M4 21a8 8 0 0 1 16 0"/>',
+  ),
+  phone(
+    '<rect x="6" y="2.5" width="12" height="19" rx="2.5"/>'
+    '<path d="M11 18h2"/>',
+  ),
+  check('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  lock(
+    '<rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/>'
+    '<path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',
+  ),
+  eye(
+    '<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/>'
+    '<circle cx="12" cy="12" r="3"/>',
+  ),
+  eyeOff(
+    '<path d="M10.7 5.1A10.7 10.7 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-2.6 3.5"/>'
+    '<path d="M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/>'
+    '<path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/>'
+    '<path d="M2 2l20 20"/>',
+  ),
+  personCheck(
+    '<circle cx="12" cy="8" r="4"/>'
+    '<path d="M4 21a8 8 0 0 1 13.5-5.8"/>'
+    '<path d="M16.5 19.5l2 2 3.5-4"/>',
+  ),
+
+  /// The three marks of a field's message: wrong, right, not yet.
+  errorCircle(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<path d="M9 9l6 6M15 9l-6 6"/>',
+  ),
+  checkCircle(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<path d="M8 12.5l2.8 2.8L16.5 9.5"/>',
+  ),
+  circle('<circle cx="12" cy="12" r="8.5"/>'),
   questionCircle(
     '<circle cx="12" cy="12" r="9"/>'
     '<path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/>'

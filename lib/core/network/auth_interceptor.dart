@@ -7,28 +7,35 @@ import 'package:englizia/core/storage/token_storage.dart';
 
 typedef RequestRetrier = Future<Response<Object?>> Function(RequestOptions);
 
-/// Attaches the bearer token and recovers from an expired access token:
-/// one shared refresh for all concurrent 401s, one retry per request, and a
-/// session expiry only when the server rejects the refresh token.
+/// Attaches the bearer token and keeps it valid: refreshes it shortly before
+/// it expires, and recovers from a 401 anyway — one shared refresh for all
+/// concurrent requests, one retry per request, and a session expiry only
+/// when the server rejects the refresh token.
 class AuthInterceptor extends Interceptor {
   AuthInterceptor({
     required TokenStorage tokens,
     required TokenRefresher refresher,
     required RequestRetrier retry,
     required Future<void> Function() onSessionExpired,
+    DateTime Function()? now,
   }) : _tokens = tokens,
        _refresher = refresher,
        _retry = retry,
-       _onSessionExpired = onSessionExpired;
+       _onSessionExpired = onSessionExpired,
+       _now = now ?? DateTime.now;
 
   /// Set `extra[skipAuthKey] = true` for public endpoints (login, register).
   static const skipAuthKey = 'auth.skip';
   static const _retriedKey = 'auth.retried';
 
+  /// How long before the access token expires it is refreshed.
+  static const refreshMargin = Duration(seconds: 30);
+
   final TokenStorage _tokens;
   final TokenRefresher _refresher;
   final RequestRetrier _retry;
   final Future<void> Function() _onSessionExpired;
+  final DateTime Function() _now;
 
   Future<_RefreshOutcome>? _inFlight;
 
@@ -38,7 +45,20 @@ class AuthInterceptor extends Interceptor {
     RequestInterceptorHandler handler,
   ) async {
     if (options.extra[skipAuthKey] != true) {
-      final tokens = await _tokens.read();
+      var tokens = await _tokens.read();
+      if (tokens != null &&
+          tokens.expiresSoon(_now().toUtc(), margin: refreshMargin)) {
+        switch (await _refreshShared(tokens)) {
+          case _Refreshed(tokens: final fresh):
+            tokens = fresh;
+          case _Rejected():
+            await _onSessionExpired();
+            tokens = null;
+          case _Unavailable():
+            // Send the current token; a 401 takes the usual recovery path.
+            break;
+        }
+      }
       if (tokens != null) {
         options.headers['Authorization'] = 'Bearer ${tokens.accessToken}';
       }
@@ -88,8 +108,11 @@ class AuthInterceptor extends Interceptor {
     if (sentAuthorization != 'Bearer ${current.accessToken}') {
       return _Refreshed(current);
     }
-    return _inFlight ??= _refresh(current).whenComplete(() => _inFlight = null);
+    return _refreshShared(current);
   }
+
+  Future<_RefreshOutcome> _refreshShared(AuthTokens current) =>
+      _inFlight ??= _refresh(current).whenComplete(() => _inFlight = null);
 
   Future<_RefreshOutcome> _refresh(AuthTokens current) async {
     try {
@@ -101,8 +124,9 @@ class AuthInterceptor extends Interceptor {
       // Signing out is irreversible for the user, so only a definitive
       // rejection of the refresh token ends the session. A 5xx/429 or no
       // response says nothing about the token; the next refresh retries.
-      // ASSUMPTION(api): 400/401/403 from the refresh endpoint mean the
-      // refresh token is invalid or revoked — confirm in docs/api/README.md.
+      // The server answers an invalid, expired or revoked refresh token with
+      // 401 `auth.refresh_token_invalid`; 400 and 403 are its other refusals
+      // (docs/api/openapi.json).
       if (status == ApiStatusCodes.badRequest ||
           status == ApiStatusCodes.unauthorized ||
           status == ApiStatusCodes.forbidden) {

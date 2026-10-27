@@ -4,6 +4,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -82,6 +83,7 @@ void main() {
         const OnboardingPath(
           audience: TrackAudience.self,
           trackId: 'general',
+          trackTitle: LocalizedText(ar: 'مسار'),
           entryMethod: TrackEntryMethod.placementTest,
         ),
       ),

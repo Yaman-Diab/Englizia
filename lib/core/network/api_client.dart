@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/auth_interceptor.dart';
 import 'package:englizia/core/network/network_exception.dart';
 
 /// The only HTTP entry point for datasources.
@@ -12,6 +13,12 @@ final class ApiClient {
   ApiClient(this._dio);
 
   final Dio _dio;
+
+  /// For an endpoint called without a session (register, login): no
+  /// `Authorization` header and no refresh on 401.
+  static final publicOptions = Options(
+    extra: {AuthInterceptor.skipAuthKey: true},
+  );
 
   Future<Object?> get(
     String path, {
@@ -55,13 +62,12 @@ final class ApiClient {
     }
   }
 
-  /// `data` of an enveloped body `{data, meta, error}`; any other body as is.
-  // ASSUMPTION(api): the unified envelope is proposed to the backend, not yet
-  // agreed (docs/api/README.md); plain bodies keep working until it is.
+  /// `data` of the server's envelope (`{statusCode, message, data, error,
+  /// traceId}`, docs/api/openapi.json); any other body as is.
   static Object? unwrap(Object? body) => switch (body) {
     final Map<Object?, Object?> map
         when map.containsKey('data') &&
-            (map.containsKey('error') || map.containsKey('meta')) =>
+            (map.containsKey('error') || map.containsKey('statusCode')) =>
       map['data'],
     _ => body,
   };

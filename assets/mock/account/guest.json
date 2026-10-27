@@ -1,0 +1,26 @@
+{
+  "statusCode": 201,
+  "message": "Created",
+  "data": {
+    "accessToken": "mock-guest-access-token",
+    "expiresIn": 900,
+    "tokenType": "Bearer",
+    "refreshToken": "mock-guest-refresh-token",
+    "refreshTokenExpiresAt": "2026-12-31T00:00:00Z",
+    "deviceId": "00000000-0000-4000-8000-000000000000",
+    "user": {
+      "id": "00000000-0000-0000-0000-000000000000",
+      "userName": "guest-00000000000",
+      "email": null,
+      "displayName": "",
+      "emailVerified": false,
+      "roles": [
+        "guest"
+      ],
+      "timeZone": "Asia/Damascus",
+      "uiLanguage": "ar"
+    }
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

@@ -43,6 +43,7 @@ flutter:
     # Mock mode data (env/mock.json); each file goes when its endpoint is
     # confirmed, see docs/STATUS.md.
     - assets/mock/tracks/
+    - assets/mock/account/
     - assets/mock/placement/
     - assets/mock/settings/
     # Read by google_fonts instead of fetching at runtime; licenses are

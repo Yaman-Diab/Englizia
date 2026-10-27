@@ -51,7 +51,6 @@
   "onboarding_audience_school_desc": "The Emar curriculum, grade 1 to the baccalaureate",
   "onboarding_grade_question": "Which grade are you in?",
   "onboarding_reason_question": "Why are you learning English?",
-  "onboarding_save_title": "Save your progress",
   "onboarding_child_question": "Tell us about your child",
   "onboarding_child_name_label": "Child's name",
   "onboarding_child_greeting": "Hello {name}!",
@@ -148,5 +147,55 @@
     "other": "{} days"
   },
   "onboarding_challenge_helper": "Your streak counter starts with your first lesson",
-  "onboarding_challenge_cta": "Confirm goal"
+  "onboarding_challenge_cta": "Confirm goal",
+  "onboarding_progress_complete": "All steps done",
+  "onboarding_save_question": "Great! Save your progress so it isn't lost",
+  "onboarding_save_question_parent": "Save {name}'s progress so it isn't lost",
+  "onboarding_save_plan": "Your plan",
+  "onboarding_save_goal": {
+    "one": "1 minute a day",
+    "other": "{} minutes a day"
+  },
+  "onboarding_save_challenge": {
+    "one": "1-day challenge",
+    "other": "{}-day challenge"
+  },
+  "onboarding_save_child": {
+    "one": "{name}, 1 year old",
+    "other": "{name}, {} years old"
+  },
+  "onboarding_save_test": "Placement test",
+  "onboarding_save_start": "Starting at {level}",
+  "onboarding_save_parent_note": "The account is in your name; your child learns through it",
+  "onboarding_save_offline": "Creating an account needs an internet connection",
+  "onboarding_save_apple": "Continue with Apple",
+  "onboarding_save_google": "Continue with Google",
+  "onboarding_save_email": "Continue with email",
+  "onboarding_save_later": "Later",
+  "onboarding_save_terms_prefix": "By continuing you agree to the",
+  "onboarding_save_terms": "Terms",
+  "onboarding_save_and": "and",
+  "onboarding_save_privacy": "Privacy Policy",
+  "onboarding_save_guest_title": "Your progress stays on this phone only",
+  "onboarding_save_guest_body": "If you delete the app or change phones, it's lost. You can create an account any time from your profile",
+  "onboarding_save_guest_create": "Create an account now",
+  "onboarding_save_guest_continue": "Continue as a guest",
+  "account_create_title": "Create your account",
+  "account_create_subtitle": "Sign in with it on any phone",
+  "account_field_name": "Name",
+  "account_field_email": "Email",
+  "account_field_password": "Password",
+  "account_name_invalid": "Enter your name",
+  "account_email_invalid": "Check the email is written correctly",
+  "account_password_rule": {
+    "one": "At least {} character",
+    "other": "At least {} characters"
+  },
+  "account_create_submit": "Create account",
+  "account_have_account": "Have an account?",
+  "account_sign_in": "Sign in",
+  "account_email_taken": "This email already has an account",
+  "account_email_taken_sign_in": "Sign in instead",
+  "field_password_show": "Show password",
+  "field_password_hide": "Hide password"
 }

@@ -1,0 +1,1 @@
+{"statusCode":400,"message":"One or more fields are invalid.","data":null,"error":{"code":"validation.failed","details":[{"field":"email","code":"not_empty","message":"'Email' must not be empty."},{"field":"password","code":"not_empty","message":"'Password' must not be empty."}]},"traceId":"185ac2bab652c31d631cbba81b808350"}

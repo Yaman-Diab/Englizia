@@ -1,11 +1,63 @@
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": [
-    { "id": "lvl_gen_prea1", "order": 1, "name": { "ar": "Pre-A1 · البداية", "en": "Pre-A1 · Starter" }, "schoolGrade": null, "cefr": "preA1", "displayGroup": null },
-    { "id": "lvl_gen_a1", "order": 2, "name": { "ar": "A1 · مبتدئ", "en": "A1 · Beginner" }, "schoolGrade": null, "cefr": "a1", "displayGroup": null },
-    { "id": "lvl_gen_a2", "order": 3, "name": { "ar": "A2 · ما قبل المتوسط", "en": "A2 · Pre-intermediate" }, "schoolGrade": null, "cefr": "a2", "displayGroup": null },
-    { "id": "lvl_gen_b1", "order": 4, "name": { "ar": "B1 · متوسط", "en": "B1 · Intermediate" }, "schoolGrade": null, "cefr": "b1", "displayGroup": null },
-    { "id": "lvl_gen_b2", "order": 5, "name": { "ar": "B2 · فوق المتوسط", "en": "B2 · Upper-intermediate" }, "schoolGrade": null, "cefr": "b2", "displayGroup": null }
+    {
+      "id": "lvl_gen_prea1",
+      "order": 1,
+      "name": {
+        "ar": "Pre-A1 · البداية",
+        "en": "Pre-A1 · Starter"
+      },
+      "schoolGrade": null,
+      "cefr": "preA1",
+      "displayGroup": null
+    },
+    {
+      "id": "lvl_gen_a1",
+      "order": 2,
+      "name": {
+        "ar": "A1 · مبتدئ",
+        "en": "A1 · Beginner"
+      },
+      "schoolGrade": null,
+      "cefr": "a1",
+      "displayGroup": null
+    },
+    {
+      "id": "lvl_gen_a2",
+      "order": 3,
+      "name": {
+        "ar": "A2 · ما قبل المتوسط",
+        "en": "A2 · Pre-intermediate"
+      },
+      "schoolGrade": null,
+      "cefr": "a2",
+      "displayGroup": null
+    },
+    {
+      "id": "lvl_gen_b1",
+      "order": 4,
+      "name": {
+        "ar": "B1 · متوسط",
+        "en": "B1 · Intermediate"
+      },
+      "schoolGrade": null,
+      "cefr": "b1",
+      "displayGroup": null
+    },
+    {
+      "id": "lvl_gen_b2",
+      "order": 5,
+      "name": {
+        "ar": "B2 · فوق المتوسط",
+        "en": "B2 · Upper-intermediate"
+      },
+      "schoolGrade": null,
+      "cefr": "b2",
+      "displayGroup": null
+    }
   ],
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
 }

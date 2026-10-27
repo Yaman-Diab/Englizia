@@ -13,8 +13,9 @@
 > **Englizia scope.** This playbook is a general reference, distilled from a project whose
 > backend was Laravel. Where it differs from Englizia, the accepted ADRs in `docs/adr/` and
 > the current code win (current state: `docs/ARCHITECTURE.md`). For errors in particular:
-> - **Error bodies:** ASP.NET Core ProblemDetails (RFC 9457) parsed by `ApiException`
->   (`title`, `detail`, `errors`, optional `code`), not Laravel `message`/`errors` — ADR 2.
+> - **Error bodies:** the server envelope's `error: {code, details: [{field, code, message}]}`
+>   parsed by `ApiException` (ProblemDetails as a fallback), not Laravel `message`/`errors` —
+>   ADR 2, `docs/api/README.md`.
 > - **Failures:** `Failure` is sealed and carries no user message (only `code`,
 >   `serverMessage`); Cubit state keeps the `Failure` and pages show
 >   `failure.localizedMessage` — ADR 1, ADR 2.
@@ -60,7 +61,7 @@ lib/
 │   ├── di.dart               configureDependencies(): core + every feature (used by main AND tests)
 │   └── router/
 │       ├── app_router.dart   GoRouter + StatefulShellRoute (imports feature pages)
-│       └── route_policies.dart  route → {public | requiresLogin | requiresVerified}
+│       └── route_policies.dart  route → {public | signedOutOnly | withoutAccount | requiresSession}
 ├── core/                     shared kernel — imports NOTHING from app/ or features/
 └── features/<feature>/
     ├── <feature>_injection.dart      void register<Feature>Dependencies(GetIt sl)
@@ -115,7 +116,7 @@ untestable — `sl<>()` belongs only in `BlocProvider.create` and the compositio
 | `network/dio_factory.dart` | A | main Dio + refresh Dio, AuthInterceptor, **debug-only redacting** logger, app-version headers |
 | `network/auth_interceptor.dart` | G | attach Bearer, one shared refresh on 401, one retry, then logout |
 | `network/token_refresh_service.dart` | A | refresh call — **sets its own Authorization header** (see §14) |
-| `network/api_exception.dart` | G | parses Laravel-style `message` / `errors` (Englizia: ProblemDetails — ADR 2) |
+| `network/api_exception.dart` | G | parses Laravel-style `message` / `errors` (Englizia: the server envelope — `docs/api/README.md`) |
 | `network/api_status_codes.dart` | G | named status constants |
 | `network/api_endpoints.dart` | A | endpoint paths, one-line comments only |
 | `network/json_reader.dart` | G | ONE extension for defensive JSON reads (`readInt`, `readString`, `readMap`, `firstOf`) |
@@ -124,7 +125,7 @@ untestable — `sl<>()` belongs only in `BlocProvider.create` and the compositio
 | `di/service_locator.dart` | G | `final sl = GetIt.instance; setupCoreDependencies()` |
 | `router/app_redirect.dart` | G | splash → onboarding → auth → policy guard (driven by `route_policies`) |
 | `router/route_args.dart` | G | typed args for `extra` |
-| `session/app_session_controller.dart` | G | `ChangeNotifier` as GoRouter `refreshListenable`; bootstrap with try/catch → guest fallback |
+| `session/app_session_controller.dart` | G | `ChangeNotifier` as GoRouter `refreshListenable`; bootstrap with try/catch → signed-out fallback |
 | `session/session_manager.dart` | G | re-entrancy guard around logout-on-401 |
 | `storage/secure_storage_service.dart` | G | token + session (flutter_secure_storage); writes wrapped in try/catch |
 | `storage/settings_storage_service.dart` | G | non-sensitive prefs (SharedPreferences) |
@@ -253,7 +254,7 @@ Future<Result<T>> guard<T>(Future<T> Function() body) async {
 - **Timeouts**: short (≈20 s) for JSON; **per-request** long/zero `sendTimeout` + `onSendProgress` for multipart uploads. Compress/cap video before upload.
 - **Refresh**: the refresh Dio has no interceptors → it must set `Authorization: Bearer <current>` itself. Pin this with a test that asserts the header.
 - **Logout** calls the server (best effort, short timeout) **then** clears local state.
-- **Guests never call protected endpoints** — a 401 triggers logout logic.
+- **Signed-out users never call protected endpoints** — a 401 triggers logout logic. Guests hold a guest account's tokens (ADR 10) and call them like members.
 - **JSON**: one `json_reader.dart` extension (or `json_serializable`/`freezed`); never re-implement `_asInt` per model. Turn on `strict-casts`.
 - **Contract**: real responses saved as sanitized fixtures; a renamed backend field must fail a test, not silently show `0`.
 - **Pagination** from the first list; no N+1 per-item enrichment calls — ask the backend for aggregated fields. If unavoidable, limit to visible items and cache.
@@ -411,7 +412,7 @@ flutter build ipa --release --obfuscate --split-debug-info=build/symbols \
 | Concern | Minimum |
 |---|---|
 | Crash reporting | Sentry (`sentry_flutter`) or Firebase Crashlytics, enabled for staging/prod, symbols uploaded. |
-| Global handlers | `FlutterError.onError`, `PlatformDispatcher.instance.onError`, release `ErrorWidget.builder`; `bootstrap()` in try/catch with guest fallback. |
+| Global handlers | `FlutterError.onError`, `PlatformDispatcher.instance.onError`, release `ErrorWidget.builder`; `bootstrap()` in try/catch with signed-out fallback. |
 | Logging | `AppLogger` only. `print` banned (`avoid_print: error`). Dio logger only `if (kDebugMode)` and redacting `Authorization`, `password*`, `token`, national ID, phone numbers. `GoRouter(debugLogDiagnostics: kDebugMode)`. |
 | Security | flutter_secure_storage for tokens; no PII in SharedPreferences; HTTPS only (no cleartext in release); clear secure storage on first launch after reinstall (iOS Keychain survives uninstall); delete temp media (ID photos) after upload and on logout; optional certificate pinning once the prod domain is stable. |
 | Platform | portrait lock; `image_picker.retrieveLostData()` on Android; Android 13 `POST_NOTIFICATIONS` if push. |
@@ -612,7 +613,7 @@ Future<void> main() async {
   await configureDependencies();
 
   runApp(const App());
-  await sl<AppSessionController>().bootstrap(); // try/catch inside → guest fallback
+  await sl<AppSessionController>().bootstrap(); // try/catch inside → signed-out fallback
 }
 ```
 

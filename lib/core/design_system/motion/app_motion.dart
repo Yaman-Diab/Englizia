@@ -76,6 +76,13 @@ abstract final class AppMotion {
   /// ([bounce]) and the face swaps behind a blink.
   static const characterPose = slow;
 
+  /// One turn of `AppSpinner`, from the account designs. Essential motion
+  /// (it says the app is working), so it keeps turning under reduce motion.
+  static const spinnerTurn = Duration(milliseconds: 800);
+
+  /// A field that refused the input shakes this long (account designs).
+  static const shake = slow;
+
   /// How long one element of a staggered screen entrance takes to arrive.
   /// When each one starts lives in `entrance_choreography.dart`.
   static const entrance = Duration(milliseconds: 600);

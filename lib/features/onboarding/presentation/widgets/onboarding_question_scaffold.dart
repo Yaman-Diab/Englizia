@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
@@ -20,8 +21,8 @@ class OnboardingQuestionScaffold extends StatelessWidget {
     required this.step,
     required this.totalSteps,
     required this.options,
-    required this.continueLabel,
-    required this.onContinue,
+    this.continueLabel,
+    this.onContinue,
     required this.onBack,
     this.subtitle,
     this.lead,
@@ -34,8 +35,13 @@ class OnboardingQuestionScaffold extends StatelessWidget {
     this.secondaryLabel,
     this.onSecondary,
     this.footnote,
+    this.footer,
+    this.complete = false,
     super.key,
-  });
+  }) : assert(
+         continueLabel != null || footer != null,
+         'Give a continue button or a footer',
+       );
 
   final String question;
 
@@ -53,7 +59,7 @@ class OnboardingQuestionScaffold extends StatelessWidget {
   /// Under the answers: what the chosen answer leads to. Changes animate.
   final Widget? details;
   final String? helper;
-  final String continueLabel;
+  final String? continueLabel;
 
   /// Null keeps the button disabled (nothing chosen yet).
   final VoidCallback? onContinue;
@@ -75,6 +81,13 @@ class OnboardingQuestionScaffold extends StatelessWidget {
 
   /// A short note under the buttons.
   final String? footnote;
+
+  /// Replaces the continue button, secondary action and footnote, for a
+  /// step with its own actions (save progress).
+  final Widget? footer;
+
+  /// The last step: the bar is full and a check closes it.
+  final bool complete;
 
   static const defaultMascotSize = 72.0;
   static const playfulMascotSize = 104.0;
@@ -100,7 +113,12 @@ class OnboardingQuestionScaffold extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            _TopBar(step: step, totalSteps: totalSteps, onBack: onBack),
+            _TopBar(
+              step: step,
+              totalSteps: totalSteps,
+              complete: complete,
+              onBack: onBack,
+            ),
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(
                 AppSpacing.xl,
@@ -219,37 +237,39 @@ class OnboardingQuestionScaffold extends StatelessWidget {
                   AppSpacing.md,
                 ),
                 child: _Resizing(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      AppButton(
-                        label: continueLabel,
-                        onPressed: onContinue,
-                        size: AppButtonSize.large,
-                      ),
-                      if (secondaryLabel case final label?) ...[
-                        const SizedBox(height: AppSpacing.xs),
-                        AppButton(
-                          label: label,
-                          onPressed: onSecondary,
-                          variant: AppButtonVariant.text,
-                        ),
-                      ],
-                      if (footnote case final footnote?)
-                        Padding(
-                          padding: const EdgeInsetsDirectional.only(
-                            top: AppSpacing.xxs,
+                  child:
+                      footer ??
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          AppButton(
+                            label: continueLabel!,
+                            onPressed: onContinue,
+                            size: AppButtonSize.large,
                           ),
-                          child: Text(
-                            footnote,
-                            textAlign: TextAlign.center,
-                            style: context.texts.caption.copyWith(
-                              color: colors.textSecondary,
+                          if (secondaryLabel case final label?) ...[
+                            const SizedBox(height: AppSpacing.xs),
+                            AppButton(
+                              label: label,
+                              onPressed: onSecondary,
+                              variant: AppButtonVariant.text,
                             ),
-                          ),
-                        ),
-                    ],
-                  ),
+                          ],
+                          if (footnote case final footnote?)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                top: AppSpacing.xxs,
+                              ),
+                              child: Text(
+                                footnote,
+                                textAlign: TextAlign.center,
+                                style: context.texts.caption.copyWith(
+                                  color: colors.textSecondary,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                 ),
               ),
             ),
@@ -309,15 +329,19 @@ class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.step,
     required this.totalSteps,
+    required this.complete,
     required this.onBack,
   });
 
   final int step;
   final int totalSteps;
+  final bool complete;
   final VoidCallback onBack;
 
   static const _height = 56.0;
   static const _trackHeight = 8.0;
+  static const _doneSize = 20.0;
+  static const _doneIconSize = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -340,9 +364,11 @@ class _TopBar extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Semantics(
-                label: 'onboarding_progress'.tr(
-                  namedArgs: {'current': '$step', 'total': '$totalSteps'},
-                ),
+                label: complete
+                    ? 'onboarding_progress_complete'.tr()
+                    : 'onboarding_progress'.tr(
+                        namedArgs: {'current': '$step', 'total': '$totalSteps'},
+                      ),
                 child: ExcludeSemantics(
                   child: TweenAnimationBuilder<double>(
                     // Grows from the previous step so the move is visible.
@@ -362,6 +388,27 @@ class _TopBar extends StatelessWidget {
                 ),
               ),
             ),
+            if (complete) ...[
+              const SizedBox(width: AppSpacing.sm),
+              Entrance(
+                motion: EntranceMotion.pop,
+                delay: QuestionEntrance.bubble,
+                child: Container(
+                  width: _doneSize,
+                  height: _doneSize,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: colors.primaryStrong,
+                    shape: BoxShape.circle,
+                  ),
+                  child: AppIconView(
+                    AppIcon.check,
+                    size: _doneIconSize,
+                    color: colors.onPrimaryStrong,
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

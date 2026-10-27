@@ -39,6 +39,7 @@ abstract final class FailureMapper {
       ApiStatusCodes.badRequest ||
       ApiStatusCodes.unprocessableEntity => ValidationFailure(
         fieldErrors: e.fieldErrors,
+        fieldCodes: e.fieldCodes,
         code: code,
         serverMessage: message,
       ),

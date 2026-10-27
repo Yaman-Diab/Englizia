@@ -15,6 +15,7 @@ import 'package:englizia/features/onboarding/presentation/level/widgets/level_de
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_notice.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
+import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -34,9 +35,13 @@ class LevelPage extends StatelessWidget {
 
   /// The branch the learner is on, for the progress bar.
   final OnboardingPath path;
-  final VoidCallback onStartFromBeginning;
+
+  /// The track's first level, where the learner starts; null when unknown.
+  final ValueChanged<TrackLevel?> onStartFromBeginning;
   final VoidCallback onTakeTest;
-  final VoidCallback onTestLater;
+
+  /// Starts from the first level too, the test left for later.
+  final ValueChanged<TrackLevel?> onTestLater;
   final VoidCallback onBack;
 
   @override
@@ -73,11 +78,13 @@ class LevelPage extends StatelessWidget {
           },
           onContinue: switch (state.choice) {
             null => null,
-            EnglishLevelChoice.beginner => onStartFromBeginning,
+            EnglishLevelChoice.beginner => () => onStartFromBeginning(
+              state.firstLevel,
+            ),
             EnglishLevelChoice.some => state.canTakeTest ? onTakeTest : null,
           },
           secondaryLabel: some ? 'onboarding_level_test_later'.tr() : null,
-          onSecondary: onTestLater,
+          onSecondary: () => onTestLater(state.firstLevel),
           footnote: some
               ? 'onboarding_level_test_later_note'.tr(
                   namedArgs: {'level': levelName},

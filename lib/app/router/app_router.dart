@@ -7,6 +7,8 @@ import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
+import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -25,7 +27,10 @@ import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cu
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/pages/reminder_page.dart';
+import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
+import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -37,7 +42,7 @@ GoRouter createAppRouter(AppSessionController session) {
     policyFor: policyFor,
     splashLocation: AppRoutes.splash,
     homeLocation: AppRoutes.home,
-    guestHomeLocation: AppRoutes.welcome,
+    signedOutLocation: AppRoutes.welcome,
   );
 
   return GoRouter(
@@ -83,8 +88,14 @@ GoRouter createAppRouter(AppSessionController session) {
             create: (_) => sl<ChildProfileCubit>(),
             child: ChildProfilePage(
               path: path,
-              onContinue: (_) =>
-                  _pushNextStep(context, OnboardingStep.childProfile, path),
+              onContinue: (child) => _pushNextStep(
+                context,
+                OnboardingStep.childProfile,
+                path.copyWith(
+                  childName: child.name.trim(),
+                  childAge: child.age,
+                ),
+              ),
               onBack: () => context.pop(),
             ),
           );
@@ -98,8 +109,11 @@ GoRouter createAppRouter(AppSessionController session) {
             create: (_) => sl<GradeCubit>()..load(),
             child: GradePage(
               path: path,
-              onContinue: (_) =>
-                  _pushNextStep(context, OnboardingStep.grade, path),
+              onContinue: (grade) => _pushNextStep(
+                context,
+                OnboardingStep.grade,
+                path.copyWith(grade: grade),
+              ),
               onBack: () => context.pop(),
             ),
           );
@@ -113,8 +127,11 @@ GoRouter createAppRouter(AppSessionController session) {
             create: (_) => sl<ReasonCubit>(),
             child: ReasonPage(
               path: path,
-              onContinue: (_) =>
-                  _pushNextStep(context, OnboardingStep.reason, path),
+              onContinue: (reasons) => _pushNextStep(
+                context,
+                OnboardingStep.reason,
+                path.copyWith(reasons: reasons),
+              ),
               onBack: () => context.pop(),
             ),
           );
@@ -131,7 +148,7 @@ GoRouter createAppRouter(AppSessionController session) {
               onContinue: (minutes) => _pushNextStep(
                 context,
                 OnboardingStep.goal,
-                path.withDailyGoal(minutes),
+                path.copyWith(dailyGoalMinutes: minutes),
               ),
               onBack: () => context.pop(),
             ),
@@ -150,7 +167,7 @@ GoRouter createAppRouter(AppSessionController session) {
               onContinue: (days) => _pushNextStep(
                 context,
                 OnboardingStep.challenge,
-                path.withChallenge(days),
+                path.copyWith(challengeDays: days),
               ),
               onBack: () => context.pop(),
             ),
@@ -161,14 +178,20 @@ GoRouter createAppRouter(AppSessionController session) {
         path: AppRoutes.onboardingLevel,
         builder: (context, state) {
           final path = _pathOf(state);
-          void next() => _pushNextStep(context, OnboardingStep.level, path);
+          void next(TrackLevel? start) => _pushNextStep(
+            context,
+            OnboardingStep.level,
+            path.copyWith(startLevel: start),
+          );
           return BlocProvider(
             create: (_) => sl<LevelCubit>()..start(path.trackId),
             child: LevelPage(
               path: path,
               onStartFromBeginning: next,
-              onTakeTest: () =>
-                  context.push(AppRoutes.onboardingPlacement, extra: path),
+              onTakeTest: () => context.push(
+                AppRoutes.onboardingPlacement,
+                extra: path.copyWith(placementTest: true),
+              ),
               onTestLater: next,
               onBack: () => context.pop(),
             ),
@@ -177,7 +200,47 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.onboardingSaveProgress,
-        builder: (_, _) => PendingPage(title: 'onboarding_save_title'.tr()),
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<SaveProgressCubit>()..start(),
+            child: SaveProgressPage(
+              path: path,
+              onCreateAccount: (provider) => context.push(
+                provider == AccountProvider.email
+                    ? AppRoutes.signUp
+                    : AppRoutes.signUpWithProvider,
+                extra: path,
+              ),
+              onTerms: () => context.push(AppRoutes.legalTerms),
+              onPrivacy: () => context.push(AppRoutes.legalPrivacy),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.signUp,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<SignUpCubit>(),
+          child: SignUpPage(
+            onSignIn: (email) => context.push(AppRoutes.signIn, extra: email),
+            onBack: () => context.pop(),
+          ),
+        ),
+      ),
+      // Google and Apple sign-up are not built yet.
+      GoRoute(
+        path: AppRoutes.signUpWithProvider,
+        builder: (_, _) => PendingPage(title: 'account_create_title'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.legalTerms,
+        builder: (_, _) => PendingPage(title: 'onboarding_save_terms'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.legalPrivacy,
+        builder: (_, _) => PendingPage(title: 'onboarding_save_privacy'.tr()),
       ),
       GoRoute(
         path: AppRoutes.onboardingReminder,
@@ -187,8 +250,11 @@ GoRouter createAppRouter(AppSessionController session) {
             create: (_) => sl<ReminderCubit>()..load(),
             child: ReminderPage(
               path: path,
-              onContinue: (_) =>
-                  _pushNextStep(context, OnboardingStep.reminder, path),
+              onContinue: (time) => _pushNextStep(
+                context,
+                OnboardingStep.reminder,
+                path.copyWith(reminder: time),
+              ),
               onBack: () => context.pop(),
             ),
           );

@@ -1,4 +1,6 @@
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": [
     {
       "id": "trk_general",
@@ -52,6 +54,6 @@
       "kidsMode": false
     }
   ],
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
 }

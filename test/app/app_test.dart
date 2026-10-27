@@ -29,7 +29,7 @@ void main() {
   for (final locale in AppLocales.supported) {
     for (final size in [defaultViewport, narrowViewport]) {
       testWidgets(
-        'a guest boots from splash to welcome (${locale.languageCode}, ${size.width.toInt()}dp)',
+        'a new visitor boots from splash to welcome (${locale.languageCode}, ${size.width.toInt()}dp)',
         (tester) async {
           tester.setViewport(size);
           await tester.pumpWidget(
@@ -75,6 +75,31 @@ void main() {
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
 
+    expect(find.byType(WelcomePage), findsNothing);
+    expect(find.byType(FoundationPage), findsOneWidget);
+  });
+
+  testWidgets('a guest account leaves welcome for home too', (tester) async {
+    await tester.pumpWidget(
+      localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+    );
+    await tester.pumpUntilLocalized();
+    await sl<AppSessionController>().bootstrap();
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(WelcomePage), findsOneWidget);
+
+    await sl<AppSessionController>().signIn(
+      const AuthTokens(
+        accessToken: 'g',
+        refreshToken: 'r',
+        kind: AccountKind.guest,
+      ),
+    );
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(sl<AppSessionController>().status, SessionStatus.guest);
     expect(find.byType(WelcomePage), findsNothing);
     expect(find.byType(FoundationPage), findsOneWidget);
   });

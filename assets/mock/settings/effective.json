@@ -1,4 +1,6 @@
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": {
     "motivation": {
       "dailyGoalOptions": [
@@ -98,6 +100,6 @@
       }
     }
   },
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
 }

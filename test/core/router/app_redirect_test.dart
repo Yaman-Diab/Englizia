@@ -7,46 +7,61 @@ void main() {
   const policies = {
     '/splash': RoutePolicy.public,
     '/about': RoutePolicy.public,
-    '/welcome': RoutePolicy.guestOnly,
-    '/sign-in': RoutePolicy.guestOnly,
-    '/': RoutePolicy.requiresLogin,
+    '/welcome': RoutePolicy.signedOutOnly,
+    '/onboarding/goal': RoutePolicy.signedOutOnly,
+    '/sign-in': RoutePolicy.withoutAccount,
+    '/': RoutePolicy.requiresSession,
   };
 
   String? resolve(SessionStatus status, String location) => AppRedirect(
     status: () => status,
-    policyFor: (pattern) => policies[pattern] ?? RoutePolicy.requiresLogin,
+    policyFor: (pattern) => policies[pattern] ?? RoutePolicy.requiresSession,
     splashLocation: '/splash',
     homeLocation: '/',
-    guestHomeLocation: '/welcome',
+    signedOutLocation: '/welcome',
   ).resolve(location: location, routePattern: location);
 
-  test('holds on splash until the session is known', () {
+  test('holds everyone on the splash until the session is known', () {
     expect(resolve(SessionStatus.unknown, '/splash'), isNull);
     expect(resolve(SessionStatus.unknown, '/'), '/splash');
   });
 
-  test('leaves splash for home when signed in, welcome otherwise', () {
-    expect(resolve(SessionStatus.authenticated, '/splash'), '/');
-    expect(resolve(SessionStatus.guest, '/splash'), '/welcome');
+  test('leaves the splash for home with an account, else welcome', () {
+    expect(resolve(SessionStatus.member, '/splash'), '/');
+    expect(resolve(SessionStatus.guest, '/splash'), '/');
+    expect(resolve(SessionStatus.signedOut, '/splash'), '/welcome');
   });
 
-  test('sends guests from requiresLogin routes to welcome', () {
-    expect(resolve(SessionStatus.guest, '/'), '/welcome');
-    expect(resolve(SessionStatus.authenticated, '/'), isNull);
+  test('the app needs a guest or member account', () {
+    expect(resolve(SessionStatus.signedOut, '/'), '/welcome');
+    expect(resolve(SessionStatus.guest, '/'), isNull);
+    expect(resolve(SessionStatus.member, '/'), isNull);
   });
 
-  test('sends signed-in users away from guestOnly routes', () {
-    expect(resolve(SessionStatus.authenticated, '/welcome'), '/');
-    expect(resolve(SessionStatus.authenticated, '/sign-in'), '/');
+  test('welcome and onboarding are for those without any account', () {
+    expect(resolve(SessionStatus.signedOut, '/onboarding/goal'), isNull);
+    expect(resolve(SessionStatus.guest, '/onboarding/goal'), '/');
+    expect(resolve(SessionStatus.member, '/welcome'), '/');
+  });
+
+  test('a guest may still sign in or create an account; a member not', () {
+    expect(resolve(SessionStatus.signedOut, '/sign-in'), isNull);
     expect(resolve(SessionStatus.guest, '/sign-in'), isNull);
+    expect(resolve(SessionStatus.member, '/sign-in'), '/');
   });
 
-  test('public routes are open to everyone', () {
-    expect(resolve(SessionStatus.guest, '/about'), isNull);
-    expect(resolve(SessionStatus.authenticated, '/about'), isNull);
+  test('public routes are open to all', () {
+    for (final status in [
+      SessionStatus.signedOut,
+      SessionStatus.guest,
+      SessionStatus.member,
+    ]) {
+      expect(resolve(status, '/about'), isNull);
+    }
   });
 
-  test('unlisted routes require login (least privilege)', () {
-    expect(resolve(SessionStatus.guest, '/unknown'), '/welcome');
+  test('unlisted routes need a session', () {
+    expect(resolve(SessionStatus.signedOut, '/unknown'), '/welcome');
+    expect(resolve(SessionStatus.guest, '/unknown'), isNull);
   });
 }

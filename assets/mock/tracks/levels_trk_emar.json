@@ -1,18 +1,176 @@
 {
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
   "data": [
-    { "id": "lvl_emar_01", "order": 1, "name": { "ar": "الأول", "en": "Grade 1" }, "schoolGrade": 1, "cefr": null, "displayGroup": { "ar": "الحلقة الأولى", "en": "Primary, cycle 1" } },
-    { "id": "lvl_emar_02", "order": 2, "name": { "ar": "الثاني", "en": "Grade 2" }, "schoolGrade": 2, "cefr": null, "displayGroup": { "ar": "الحلقة الأولى", "en": "Primary, cycle 1" } },
-    { "id": "lvl_emar_03", "order": 3, "name": { "ar": "الثالث", "en": "Grade 3" }, "schoolGrade": 3, "cefr": null, "displayGroup": { "ar": "الحلقة الأولى", "en": "Primary, cycle 1" } },
-    { "id": "lvl_emar_04", "order": 4, "name": { "ar": "الرابع", "en": "Grade 4" }, "schoolGrade": 4, "cefr": null, "displayGroup": { "ar": "الحلقة الأولى", "en": "Primary, cycle 1" } },
-    { "id": "lvl_emar_05", "order": 5, "name": { "ar": "الخامس", "en": "Grade 5" }, "schoolGrade": 5, "cefr": null, "displayGroup": { "ar": "الحلقة الأولى", "en": "Primary, cycle 1" } },
-    { "id": "lvl_emar_06", "order": 6, "name": { "ar": "السادس", "en": "Grade 6" }, "schoolGrade": 6, "cefr": null, "displayGroup": { "ar": "الحلقة الأولى", "en": "Primary, cycle 1" } },
-    { "id": "lvl_emar_07", "order": 7, "name": { "ar": "السابع", "en": "Grade 7" }, "schoolGrade": 7, "cefr": null, "displayGroup": { "ar": "الحلقة الثانية", "en": "Primary, cycle 2" } },
-    { "id": "lvl_emar_08", "order": 8, "name": { "ar": "الثامن", "en": "Grade 8" }, "schoolGrade": 8, "cefr": null, "displayGroup": { "ar": "الحلقة الثانية", "en": "Primary, cycle 2" } },
-    { "id": "lvl_emar_09", "order": 9, "name": { "ar": "التاسع", "en": "Grade 9" }, "schoolGrade": 9, "cefr": null, "displayGroup": { "ar": "الحلقة الثانية", "en": "Primary, cycle 2" } },
-    { "id": "lvl_emar_10", "order": 10, "name": { "ar": "العاشر", "en": "Grade 10" }, "schoolGrade": 10, "cefr": null, "displayGroup": { "ar": "الثانوية", "en": "Secondary" } },
-    { "id": "lvl_emar_11", "order": 11, "name": { "ar": "الحادي عشر", "en": "Grade 11" }, "schoolGrade": 11, "cefr": null, "displayGroup": { "ar": "الثانوية", "en": "Secondary" } },
-    { "id": "lvl_emar_12", "order": 12, "name": { "ar": "البكالوريا", "en": "Baccalaureate" }, "schoolGrade": 12, "cefr": null, "displayGroup": { "ar": "الثانوية", "en": "Secondary" } }
+    {
+      "id": "lvl_emar_01",
+      "order": 1,
+      "name": {
+        "ar": "الأول",
+        "en": "Grade 1"
+      },
+      "schoolGrade": 1,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الأولى",
+        "en": "Primary, cycle 1"
+      }
+    },
+    {
+      "id": "lvl_emar_02",
+      "order": 2,
+      "name": {
+        "ar": "الثاني",
+        "en": "Grade 2"
+      },
+      "schoolGrade": 2,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الأولى",
+        "en": "Primary, cycle 1"
+      }
+    },
+    {
+      "id": "lvl_emar_03",
+      "order": 3,
+      "name": {
+        "ar": "الثالث",
+        "en": "Grade 3"
+      },
+      "schoolGrade": 3,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الأولى",
+        "en": "Primary, cycle 1"
+      }
+    },
+    {
+      "id": "lvl_emar_04",
+      "order": 4,
+      "name": {
+        "ar": "الرابع",
+        "en": "Grade 4"
+      },
+      "schoolGrade": 4,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الأولى",
+        "en": "Primary, cycle 1"
+      }
+    },
+    {
+      "id": "lvl_emar_05",
+      "order": 5,
+      "name": {
+        "ar": "الخامس",
+        "en": "Grade 5"
+      },
+      "schoolGrade": 5,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الأولى",
+        "en": "Primary, cycle 1"
+      }
+    },
+    {
+      "id": "lvl_emar_06",
+      "order": 6,
+      "name": {
+        "ar": "السادس",
+        "en": "Grade 6"
+      },
+      "schoolGrade": 6,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الأولى",
+        "en": "Primary, cycle 1"
+      }
+    },
+    {
+      "id": "lvl_emar_07",
+      "order": 7,
+      "name": {
+        "ar": "السابع",
+        "en": "Grade 7"
+      },
+      "schoolGrade": 7,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الثانية",
+        "en": "Primary, cycle 2"
+      }
+    },
+    {
+      "id": "lvl_emar_08",
+      "order": 8,
+      "name": {
+        "ar": "الثامن",
+        "en": "Grade 8"
+      },
+      "schoolGrade": 8,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الثانية",
+        "en": "Primary, cycle 2"
+      }
+    },
+    {
+      "id": "lvl_emar_09",
+      "order": 9,
+      "name": {
+        "ar": "التاسع",
+        "en": "Grade 9"
+      },
+      "schoolGrade": 9,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الحلقة الثانية",
+        "en": "Primary, cycle 2"
+      }
+    },
+    {
+      "id": "lvl_emar_10",
+      "order": 10,
+      "name": {
+        "ar": "العاشر",
+        "en": "Grade 10"
+      },
+      "schoolGrade": 10,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الثانوية",
+        "en": "Secondary"
+      }
+    },
+    {
+      "id": "lvl_emar_11",
+      "order": 11,
+      "name": {
+        "ar": "الحادي عشر",
+        "en": "Grade 11"
+      },
+      "schoolGrade": 11,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الثانوية",
+        "en": "Secondary"
+      }
+    },
+    {
+      "id": "lvl_emar_12",
+      "order": 12,
+      "name": {
+        "ar": "البكالوريا",
+        "en": "Baccalaureate"
+      },
+      "schoolGrade": 12,
+      "cefr": null,
+      "displayGroup": {
+        "ar": "الثانوية",
+        "en": "Secondary"
+      }
+    }
   ],
-  "meta": null,
-  "error": null
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
 }
