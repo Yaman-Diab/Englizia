@@ -1,6 +1,7 @@
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
@@ -11,11 +12,13 @@ import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.da
 final class AccountRepositoryImpl implements AccountRepository {
   const AccountRepositoryImpl(
     this._remote, {
+    required TokenStorage tokens,
     required this.installationId,
     required this.devicePlatform,
-  });
+  }) : _tokens = tokens;
 
   final AccountRemoteDataSource _remote;
+  final TokenStorage _tokens;
 
   /// This install's id, which the guest account is tied to.
   final Future<String> Function() installationId;
@@ -45,4 +48,18 @@ final class AccountRepositoryImpl implements AccountRepository {
       RegisterModel.request(account, platform: devicePlatform),
     ),
   );
+
+  // ASSUMPTION(api): the upgrade takes register's fields (docs/api/auth.md).
+  @override
+  Future<Result<AuthTokens>> upgradeGuest(NewAccount account) => guard(
+    () => _remote.upgradeGuest(
+      RegisterModel.request(account, platform: devicePlatform),
+    ),
+  );
+
+  @override
+  Future<Result<void>> logOut() => guard(() async {
+    final tokens = await _tokens.read();
+    if (tokens != null) await _remote.logOut(tokens.refreshToken);
+  });
 }

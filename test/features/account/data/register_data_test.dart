@@ -126,6 +126,7 @@ void main() {
       );
       final result = await AccountRepositoryImpl(
         AccountRemoteDataSourceImpl(client),
+        tokens: FakeTokenStorage(),
         installationId: () async => 'install-1',
         devicePlatform: null,
       ).createAccount(account);
@@ -148,6 +149,7 @@ void main() {
       final result =
           await AccountRepositoryImpl(
             source(),
+            tokens: FakeTokenStorage(),
             installationId: () async => 'install-1',
             devicePlatform: 'android',
           ).createAccount(

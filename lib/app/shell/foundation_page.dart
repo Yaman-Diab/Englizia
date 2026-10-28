@@ -1,14 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
+import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
+import 'package:englizia/features/account/presentation/account/widgets/account_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
-/// Temporary home: lets you check theme, language and direction on a device.
-/// Replaced by the "Learn" tab in v0.1.
+/// Temporary home: lets you check theme, language and direction on a device,
+/// and holds the account card until «أنا» exists. Replaced by the "Learn"
+/// tab in v0.1.
 class FoundationPage extends StatelessWidget {
   const FoundationPage({super.key});
 
@@ -99,6 +105,13 @@ class FoundationPage extends StatelessWidget {
                 label: 'preview_listen'.tr(),
               ),
             ],
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          BlocProvider(
+            create: (_) => sl<AccountCubit>(),
+            child: AccountCard(
+              onCreateAccount: () => context.push(AppRoutes.signUp),
+            ),
           ),
         ],
       ),

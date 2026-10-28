@@ -10,8 +10,9 @@ Requirements v3.0 removed guest mode (student doc §4.3: "no guest mode, no «ل
 - A random UUID made on first use and kept in local preferences (`SettingsStorageService.installationId`) ties the guest to the install and makes the request safe to retry.
 - Tokens carry an `AccountKind` (`guest` or `member`), kept through refresh and in secure storage. `AppSessionController` reports `signedOut`, `guest` or `member`.
 - Route policies: `signedOutOnly` (welcome, onboarding), `withoutAccount` (sign-in, sign-up: open to a guest about to create an account), `requiresSession` (the app: guests and members), `public`.
-- Creating a full account later must **upgrade the same server account**, so nothing is lost; that endpoint belongs to the account feature and the backend team (docs/api/auth.md, question 2).
+- Creating a full account later **upgrades the same server account**, so nothing is lost: a guest who signs up sends `POST /api/v1/auth/guest/upgrade` with the guest's token (proposed, docs/api/auth.md), never register, and goes back to the app as a member, without "preparing".
+- Signing out as a guest warns first («ستفقد تقدّمك لأنه غير محفوظ في حساب») and offers the account instead.
 - The onboarding answers travel on `OnboardingPath` to "save progress", which shows them in "your plan" and sends them with the account.
 
 ## Consequences
-The guest has no credentials: signing out, deleting the app or losing the phone loses the account, which is what the sheet tells the learner. The requirements documents (student §4.3 and its design-conflict row, server §26) and the backend need updating to match; until then this ADR and docs/api/auth.md are the reference. «أنا»'s guest card, "create an account" from the profile and the guest's sign-out warning come with the «أنا» screen (docs/STATUS.md).
+The guest has no credentials: signing out, deleting the app or losing the phone loses the account, which is what the sheet tells the learner. The requirements documents (student §4.3 and its design-conflict row, server §26) and the backend need updating to match; until then this ADR and docs/api/auth.md are the reference. The guest card, "create an account" and the sign-out warning are built (`AccountCard`) and sit on the temporary home until «أنا» exists (docs/STATUS.md).

@@ -1,10 +1,19 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
+import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:flutter/material.dart';
 
-enum AppButtonVariant { primary, secondary, text }
+enum AppButtonVariant {
+  primary,
+  secondary,
+  text,
+
+  /// A text button in the error color, for an action that loses something
+  /// (sign out as a guest). Never the primary action of a screen.
+  destructive,
+}
 
 /// [large] is the main call to action of a hero screen (welcome, onboarding).
 enum AppButtonSize { regular, large }
@@ -68,9 +77,13 @@ class AppButton extends StatelessWidget {
             ),
           )
         : null;
+    final tone = variant == AppButtonVariant.destructive
+        ? TextButton.styleFrom(foregroundColor: context.colors.error.text)
+        : null;
+    final shaped = tone?.merge(sizeStyle) ?? sizeStyle;
     final style = isLoading
-        ? _enabledLook(context).merge(sizeStyle)
-        : sizeStyle;
+        ? _enabledLook(context, tone).merge(shaped)
+        : shaped;
 
     final button = switch (variant) {
       AppButtonVariant.primary =>
@@ -103,7 +116,7 @@ class AppButton extends StatelessWidget {
                 icon: iconWidget,
                 label: content,
               ),
-      AppButtonVariant.text =>
+      AppButtonVariant.text || AppButtonVariant.destructive =>
         iconWidget == null
             ? TextButton(
                 onPressed: callback,
@@ -125,12 +138,14 @@ class AppButton extends StatelessWidget {
 
   /// The variant's enabled colors, so a loading button does not fade like a
   /// disabled one.
-  ButtonStyle _enabledLook(BuildContext context) {
+  ButtonStyle _enabledLook(BuildContext context, ButtonStyle? tone) {
     final theme = Theme.of(context);
     final themed = switch (variant) {
       AppButtonVariant.primary => theme.filledButtonTheme.style,
       AppButtonVariant.secondary => theme.outlinedButtonTheme.style,
       AppButtonVariant.text => theme.textButtonTheme.style,
+      AppButtonVariant.destructive =>
+        tone?.merge(theme.textButtonTheme.style) ?? tone,
     };
     const enabled = <WidgetState>{};
     return ButtonStyle(

@@ -15,6 +15,11 @@ abstract interface class AccountRemoteDataSource {
 
   /// [request] is [RegisterModel.request].
   Future<AuthTokens> createAccount(Map<String, Object?> request);
+
+  /// Sent with the guest's own token; [request] is [RegisterModel.request].
+  Future<AuthTokens> upgradeGuest(Map<String, Object?> request);
+
+  Future<void> logOut(String refreshToken);
 }
 
 final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
@@ -39,6 +44,20 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         ),
         now: DateTime.now(),
       );
+
+  @override
+  Future<AuthTokens> upgradeGuest(Map<String, Object?> request) async =>
+      RegisterModel.tokens(
+        await _client.post(ApiEndpoints.upgradeGuest, data: request),
+        now: DateTime.now(),
+      );
+
+  @override
+  Future<void> logOut(String refreshToken) => _client.post(
+    ApiEndpoints.logout,
+    data: {'refreshToken': refreshToken},
+    options: ApiClient.publicOptions,
+  );
 }
 
 /// Mock mode (`env/mock.json`): the contract's examples from bundled assets
@@ -74,4 +93,12 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
     final body = jsonDecode(await _bundle.loadString(registerAsset));
     return RegisterModel.tokens(body, now: DateTime.now());
   }
+
+  /// Answers like [createAccount]: the upgraded account is a member.
+  @override
+  Future<AuthTokens> upgradeGuest(Map<String, Object?> request) =>
+      createAccount(request);
+
+  @override
+  Future<void> logOut(String refreshToken) => Future<void>.delayed(latency);
 }

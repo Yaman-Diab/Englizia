@@ -198,9 +198,10 @@ GoRouter createAppRouter(AppSessionController session) {
             child: LevelPage(
               path: path,
               onStartFromBeginning: next,
-              onTakeTest: () => context.push(
-                AppRoutes.onboardingPlacement,
-                extra: path.copyWith(placementTest: true),
+              onTakeTest: () => _pushNextStep(
+                context,
+                OnboardingStep.level,
+                path.copyWith(placementTest: true),
               ),
               onTestLater: next,
               onBack: () => context.pop(),
@@ -235,11 +236,20 @@ GoRouter createAppRouter(AppSessionController session) {
         path: AppRoutes.signUp,
         builder: (context, state) {
           final path = _pathOf(state);
+          // A guest signing up (from «أنا») upgrades the guest account and
+          // goes straight back: the progress is already there.
+          final upgrading = session.status == SessionStatus.guest;
           return BlocProvider(
-            create: (_) => sl<SignUpCubit>(),
+            create: (_) => sl<SignUpCubit>(param1: upgrading),
             child: SignUpPage(
-              onCreated: (session, name) =>
-                  _accountCreated(context, path, session, name: name),
+              onCreated: (account, name) async {
+                if (!upgrading) {
+                  return _accountCreated(context, path, account, name: name);
+                }
+                await session.signIn(account);
+                // Pushed over home, which the guard leaves as it is.
+                if (context.mounted) context.go(AppRoutes.home);
+              },
               onSignIn: (email) => context.push(AppRoutes.signIn, extra: email),
               onBack: () => context.pop(),
             ),

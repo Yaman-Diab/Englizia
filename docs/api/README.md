@@ -75,7 +75,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/register` | POST | `RegisterRequest {email, password, displayName, deviceId, platform}` | `TokenResponse` (201); 409 when the email has an account | live, used (email sign-up) |
 | `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse` | live, not used yet |
 | `/api/v1/auth/refresh` | POST | `RefreshRequest {refreshToken}` | `TokenResponse` | live, used |
-| `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, not used yet |
+| `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, used (sign-out, never waited on) |
 | `/api/v1/app/me` | GET | — | `UserDto` | live, not used yet |
 | `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, not used yet |
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
@@ -85,13 +85,14 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team
 
 Paste-ready; each item names what the app needs and why.
 
 1. **`ios` in `DevicePlatform`.** The enum has `android` and `web` only; the app ships on iPhone too, so login and register from an iPhone cannot send a valid platform.
-2. **Guest account (ADR 10).** `POST /api/v1/auth/guest` as in [auth.md](auth.md): no token, idempotent on `installationId`, returns the same `TokenResponse` with `roles: ["guest"]`. Plus the **upgrade**: signing up while holding a guest token turns that guest into the member account and keeps its progress; agree the endpoint and what happens when the email already has an account.
+2. **Guest account (ADR 10).** `POST /api/v1/auth/guest` as in [auth.md](auth.md): no token, idempotent on `installationId`, returns the same `TokenResponse` with `roles: ["guest"]`. Plus the **upgrade**, `POST /api/v1/auth/guest/upgrade` with the guest's token and register's body: the same account becomes a member and keeps its progress; agree it and what happens when the email already has an account.
 3. **Google and Apple sign-in.** Endpoints that take the provider's ID token and return `TokenResponse` (and upgrade a guest the same way). Apple sign-in is required on iOS when Google is offered.
 4. **Onboarding answers with account creation.** `RegisterRequest` (and the guest and social endpoints) should accept the `onboarding` object from [auth.md](auth.md) (audience, track, child profile, grade, reasons, daily goal, challenge, start level, placement choice, reminder time), so the plan is ready on first sign-in (S §4.3).
 5. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/tracks`, `GET /app/tracks/{trackId}/levels`, `GET /app/levels/{levelId}/units`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the tracks, levels and settings calls must work **without a token**, because onboarding reads them before an account exists.

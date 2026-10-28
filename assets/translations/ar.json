@@ -79,7 +79,6 @@
   "onboarding_level_some": "أعرف بعض الإنجليزية",
   "onboarding_level_some_desc": "أفهم جملًا بسيطة وأريد أن أعرف مستواي",
   "onboarding_level_some_reply": "لنعرف مستواك حتى لا تعيد ما تعرفه",
-  "onboarding_level_take_test": "متابعة إلى الاختبار",
   "onboarding_level_test_later": "سأختبر لاحقًا",
   "onboarding_level_test_later_note": "ستبدأ من {level}، والاختبار متاح من ملفك الشخصي",
   "onboarding_level_start_from": "ستبدأ من {level}",
@@ -108,7 +107,7 @@
     "other": "{} مرحلة، وقد تُضاف مرحلة أخرى قصيرة"
   },
   "onboarding_level_dont_know": "يمكنك اختيار «لا أعرف»",
-  "onboarding_level_offline": "الاختبار يحتاج اتصالًا بالإنترنت",
+  "onboarding_level_offline": "دون اتصال لا يمكن اختيار الاختبار، ويمكنك البدء من الصفر الآن",
   "onboarding_level_test_unavailable": "الاختبار غير متاح الآن، وستبدأ من المستوى الأول",
   "placement_intro_title": "لنعرف مستواك",
   "common_save": "حفظ",
@@ -264,5 +263,12 @@
   },
   "preparing_goal_failed": "تعذّر ضبط هدفك اليومي",
   "preparing_start_lesson": "ابدأ أول درس",
-  "preparing_start_test": "ابدأ الاختبار"
+  "preparing_start_test": "ابدأ الاختبار",
+  "account_upgrade_subtitle": "تقدّمك يبقى معك في حسابك الجديد",
+  "account_guest_title": "أنت تستخدم التطبيق كضيف",
+  "account_guest_body": "تقدّمك محفوظ على هذا الهاتف فقط. أنشئ حسابًا لتحفظه وتدخل به من أي هاتف",
+  "account_guest_create": "أنشئ حسابًا",
+  "account_sign_out": "تسجيل الخروج",
+  "account_guest_sign_out_title": "ستفقد تقدّمك لأنه غير محفوظ في حساب",
+  "account_guest_sign_out_body": "أنشئ حسابًا لتحفظه وتدخل به من أي هاتف، أو سجّل الخروج وابدأ من جديد"
 }

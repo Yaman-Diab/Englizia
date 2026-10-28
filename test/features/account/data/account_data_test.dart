@@ -20,6 +20,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
+import '../../../helpers/fakes.dart';
 
 /// The contract's example response: the same file mock mode serves.
 final exampleBody =
@@ -54,6 +55,15 @@ class _RecordingDataSource implements AccountRemoteDataSource {
     requests.add(request);
     if (fail) throw const NetworkException('connectionError');
     return const AuthTokens(accessToken: 'a', refreshToken: 'r');
+  }
+
+  @override
+  Future<AuthTokens> upgradeGuest(Map<String, Object?> request) =>
+      createAccount(request);
+
+  @override
+  Future<void> logOut(String refreshToken) async {
+    if (fail) throw const NetworkException('connectionError');
   }
 }
 
@@ -167,6 +177,7 @@ void main() {
       final result =
           await AccountRepositoryImpl(
             source,
+            tokens: FakeTokenStorage(),
             installationId: () async => 'install-1',
             devicePlatform: 'android',
           ).createGuestAccount(
@@ -186,6 +197,7 @@ void main() {
       final result =
           await AccountRepositoryImpl(
             _RecordingDataSource(fail: true),
+            tokens: FakeTokenStorage(),
             installationId: () async => 'install-1',
             devicePlatform: 'android',
           ).createGuestAccount(
