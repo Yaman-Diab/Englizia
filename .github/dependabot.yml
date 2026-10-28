@@ -7,7 +7,8 @@ updates:
     ignore:
       # Blocked by the Flutter pin (3.41.6, see CLAUDE.md pending decisions):
       # go_router 18 needs Flutter 3.44+, google_fonts 9 needs 3.47+;
-      # permission_handler 13 needs Android Gradle Plugin 9 and compileSdk 37.
+      # permission_handler 13 needs Android Gradle Plugin 9 and compileSdk 37;
+      # volume_controller 3.6 needs Dart 3.12.
       # Remove these entries when the pin moves.
       - dependency-name: "go_router"
         update-types: ["version-update:semver-major"]
@@ -15,6 +16,9 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "permission_handler"
         update-types: ["version-update:semver-major"]
+      # volume_controller 3.6+ needs Dart 3.12 (Flutter 3.41.6 has 3.11.4).
+      - dependency-name: "volume_controller"
+        versions: [">=3.6.0"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
