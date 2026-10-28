@@ -12,6 +12,7 @@ class Pulse extends StatefulWidget {
     required this.trigger,
     required this.child,
     this.alignment = Alignment.center,
+    this.growth = defaultGrowth,
     super.key,
   });
 
@@ -20,6 +21,11 @@ class Pulse extends StatefulWidget {
 
   /// The point that stays put while it grows (a flame grows from its base).
   final Alignment alignment;
+
+  /// How much bigger at the top of the beat: [defaultGrowth] for a mark, a
+  /// few percent for a whole button.
+  final double growth;
+  static const defaultGrowth = .18;
 
   @override
   State<Pulse> createState() => _PulseState();
@@ -31,9 +37,6 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
     duration: AppMotion.medium,
     value: 1,
   );
-
-  /// How much bigger at the top of the beat.
-  static const _growth = .18;
 
   @override
   void didUpdateWidget(Pulse oldWidget) {
@@ -54,7 +57,7 @@ class _PulseState extends State<Pulse> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: _controller,
     builder: (context, child) => Transform.scale(
-      scale: 1 + _growth * math.sin(math.pi * _controller.value),
+      scale: 1 + widget.growth * math.sin(math.pi * _controller.value),
       alignment: widget.alignment,
       child: child,
     ),

@@ -21,6 +21,8 @@ import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_cubit.
 import 'package:englizia/features/onboarding/presentation/goal/pages/goal_page.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page.dart';
+import 'package:englizia/features/onboarding/presentation/kid_welcome/cubit/kid_welcome_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/kid_welcome/pages/kid_welcome_page.dart';
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
 import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/level/pages/level_page.dart';
@@ -50,10 +52,24 @@ GoRouter createAppRouter(AppSessionController session) {
     signedOutLocation: AppRoutes.welcome,
   );
 
-  // "Preparing" starts the session, and the refresh that follows drops the
-  // route's `extra`; its arguments (a session) stay here, in memory only,
-  // until the learner leaves it.
-  PreparingArgs? preparing;
+  // "Preparing" and the kids' welcome start the new account's session, and
+  // the refresh that follows drops the route's `extra`; their arguments (a
+  // session) stay here, in memory only, until the learner leaves.
+  PreparingArgs? newAccount;
+
+  PreparingArgs argsOf(GoRouterState state) =>
+      newAccount = switch (state.extra) {
+        final PreparingArgs args => args,
+        _ => newAccount!,
+      };
+  String? withoutArgs(GoRouterState state) =>
+      state.extra is PreparingArgs || newAccount != null
+      ? null
+      : AppRoutes.home;
+  void leave(BuildContext context, String location, {Object? extra}) {
+    newAccount = null;
+    context.go(location, extra: extra);
+  }
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -258,20 +274,9 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.onboardingPreparing,
-        redirect: (_, state) =>
-            state.extra is PreparingArgs || preparing != null
-            ? null
-            : AppRoutes.home,
+        redirect: (_, state) => withoutArgs(state),
         builder: (context, state) {
-          final args = preparing = switch (state.extra) {
-            final PreparingArgs args => args,
-            _ => preparing!,
-          };
-          void leave(String location, {Object? extra}) {
-            preparing = null;
-            context.go(location, extra: extra);
-          }
-
+          final args = argsOf(state);
           return BlocProvider(
             create: (_) =>
                 sl<PreparingCubit>()
@@ -279,9 +284,27 @@ GoRouter createAppRouter(AppSessionController session) {
             child: PreparingPage(
               name: args.name,
               // ASSUMPTION(design): no lesson screen yet; home stands in.
-              onStartLesson: () => leave(AppRoutes.home),
-              onStartTest: () =>
-                  leave(AppRoutes.onboardingPlacement, extra: args.path),
+              onStartLesson: () => leave(context, AppRoutes.home),
+              onStartTest: () => leave(
+                context,
+                AppRoutes.onboardingPlacement,
+                extra: args.path,
+              ),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingKidWelcome,
+        redirect: (_, state) => withoutArgs(state),
+        builder: (context, state) {
+          final args = argsOf(state);
+          return BlocProvider(
+            create: (_) => sl<KidWelcomeCubit>()..start(args.session),
+            child: KidWelcomePage(
+              childName: args.path.childName ?? '',
+              // ASSUMPTION(design): no lesson screen yet; home stands in.
+              onPlay: () => leave(context, AppRoutes.home),
             ),
           );
         },
@@ -329,24 +352,20 @@ GoRouter createAppRouter(AppSessionController session) {
   );
 }
 
-/// A new account goes on to "preparing", which starts its session; `go`
-/// leaves the sign-up screens behind for good. A child's account skips it
-/// (the kids' welcome replaces it, S §4.5) and starts at once.
+/// A new account goes on to "preparing", or on the child path to the kids'
+/// welcome that replaces it (S §4.5); either starts its session. `go`
+/// leaves the sign-up screens behind for good.
 void _accountCreated(
   BuildContext context,
   OnboardingPath path,
   AuthTokens session, {
   String name = '',
-}) {
-  if (path.audience == TrackAudience.child) {
-    sl<AppSessionController>().signIn(session);
-    return;
-  }
-  context.go(
-    AppRoutes.onboardingPreparing,
-    extra: PreparingArgs(path: path, session: session, name: name),
-  );
-}
+}) => context.go(
+  path.audience == TrackAudience.child
+      ? AppRoutes.onboardingKidWelcome
+      : AppRoutes.onboardingPreparing,
+  extra: PreparingArgs(path: path, session: session, name: name),
+);
 
 /// Opens the step after [from] on the learner's path, if there is one,
 /// handing the path on.

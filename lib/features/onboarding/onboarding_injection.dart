@@ -3,6 +3,7 @@ import 'package:englizia/features/onboarding/presentation/challenge/cubit/challe
 import 'package:englizia/features/onboarding/presentation/child_profile/cubit/child_profile_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/goal/cubit/goal_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/grade/cubit/grade_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/kid_welcome/cubit/kid_welcome_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/cubit/preparing_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
@@ -21,5 +22,6 @@ void registerOnboardingDependencies(GetIt sl) {
     ..registerFactory(() => ChallengeCubit(sl()))
     ..registerFactory(() => ReminderCubit(sl(), sl()))
     ..registerFactory(() => SaveProgressCubit(sl(), sl()))
-    ..registerFactory(() => PreparingCubit(sl(), sl(), sl(), sl()));
+    ..registerFactory(() => PreparingCubit(sl(), sl(), sl(), sl()))
+    ..registerFactory(() => KidWelcomeCubit(sl(), sl(), sl()));
 }

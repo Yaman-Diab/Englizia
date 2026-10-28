@@ -15,8 +15,9 @@ enum AppButtonVariant {
   destructive,
 }
 
-/// [large] is the main call to action of a hero screen (welcome, onboarding).
-enum AppButtonSize { regular, large }
+/// [large] is the main call to action of a hero screen (welcome, onboarding);
+/// [kids] the bigger one of kids mode (72 high, rounder, a title's text).
+enum AppButtonSize { regular, large, kids }
 
 /// The app button, built on Material buttons for semantics, focus and ripple.
 /// Disabled while [isLoading] or when [onPressed] is null.
@@ -50,33 +51,48 @@ class AppButton extends StatelessWidget {
   final FocusNode? focusNode;
 
   static const _largeHeight = 56.0;
+  static const _kidsHeight = 72.0;
+  static const _kidsIconSize = 26.0;
 
   @override
   Widget build(BuildContext context) {
     final callback = isLoading ? null : onPressed;
     final content = ButtonLoadingLabel(
       isLoading: isLoading,
-      spinnerSize: size == AppButtonSize.large
-          ? AppSpinner.buttonSize
-          : AppSpinner.compactSize,
+      spinnerSize: size == AppButtonSize.regular
+          ? AppSpinner.compactSize
+          : AppSpinner.buttonSize,
       child: Text(label),
     );
     // While loading, the button may hide its icon but not change size.
     final iconWidget = icon == null
         ? null
         : Opacity(opacity: isLoading ? 0 : 1, child: Icon(icon));
-    final sizeStyle = size == AppButtonSize.large
-        ? ButtonStyle(
-            minimumSize: const WidgetStatePropertyAll(
-              Size(AppSizes.minTapTarget, _largeHeight),
-            ),
-            shape: WidgetStatePropertyAll(
-              RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppRadius.lg),
-              ),
-            ),
-          )
-        : null;
+    final sizeStyle = switch (size) {
+      AppButtonSize.regular => null,
+      AppButtonSize.large => ButtonStyle(
+        minimumSize: const WidgetStatePropertyAll(
+          Size(AppSizes.minTapTarget, _largeHeight),
+        ),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+        ),
+      ),
+      AppButtonSize.kids => ButtonStyle(
+        minimumSize: const WidgetStatePropertyAll(
+          Size(AppSizes.kidsMinTapTarget, _kidsHeight),
+        ),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+          ),
+        ),
+        textStyle: WidgetStatePropertyAll(context.texts.title),
+        iconSize: const WidgetStatePropertyAll(_kidsIconSize),
+      ),
+    };
     final tone = variant == AppButtonVariant.destructive
         ? TextButton.styleFrom(foregroundColor: context.colors.error.text)
         : null;

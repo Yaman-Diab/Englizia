@@ -15,6 +15,7 @@ abstract final class AppRoutes {
   static const onboardingSaveProgress = '/onboarding/save-progress';
   static const onboardingPlacement = '/onboarding/placement-test';
   static const onboardingPreparing = '/onboarding/preparing';
+  static const onboardingKidWelcome = '/onboarding/kid-welcome';
   static const signIn = '/sign-in';
   static const signUp = '/sign-up';
   static const signUpWithProvider = '/sign-up/provider';
