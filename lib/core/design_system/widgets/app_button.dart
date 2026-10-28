@@ -25,6 +25,7 @@ class AppButton extends StatelessWidget {
     this.isLoading = false,
     this.expand = true,
     this.size = AppButtonSize.regular,
+    this.focusNode,
     super.key,
   });
 
@@ -35,6 +36,9 @@ class AppButton extends StatelessWidget {
   final bool isLoading;
   final bool expand;
   final AppButtonSize size;
+
+  /// To move the focus to the button, e.g. when it appears.
+  final FocusNode? focusNode;
 
   static const _largeHeight = 56.0;
 
@@ -71,27 +75,45 @@ class AppButton extends StatelessWidget {
     final button = switch (variant) {
       AppButtonVariant.primary =>
         iconWidget == null
-            ? FilledButton(onPressed: callback, style: style, child: content)
+            ? FilledButton(
+                onPressed: callback,
+                focusNode: focusNode,
+                style: style,
+                child: content,
+              )
             : FilledButton.icon(
                 onPressed: callback,
+                focusNode: focusNode,
                 style: style,
                 icon: iconWidget,
                 label: content,
               ),
       AppButtonVariant.secondary =>
         iconWidget == null
-            ? OutlinedButton(onPressed: callback, style: style, child: content)
+            ? OutlinedButton(
+                onPressed: callback,
+                focusNode: focusNode,
+                style: style,
+                child: content,
+              )
             : OutlinedButton.icon(
                 onPressed: callback,
+                focusNode: focusNode,
                 style: style,
                 icon: iconWidget,
                 label: content,
               ),
       AppButtonVariant.text =>
         iconWidget == null
-            ? TextButton(onPressed: callback, style: style, child: content)
+            ? TextButton(
+                onPressed: callback,
+                focusNode: focusNode,
+                style: style,
+                child: content,
+              )
             : TextButton.icon(
                 onPressed: callback,
+                focusNode: focusNode,
                 style: style,
                 icon: iconWidget,
                 label: content,

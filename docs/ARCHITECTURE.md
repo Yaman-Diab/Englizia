@@ -58,6 +58,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 - `route_policies.dart` maps each route pattern to `public`, `signedOutOnly` (welcome, onboarding), `withoutAccount` (sign-in, sign-up; open to guests) or `requiresSession` (the app; guests and members); unlisted routes need a session.
 - `AppRedirect`: splash until the session is known, then guests and members go home and signed-out users to the welcome screen; after that the policy decides. The router listens to the session, so creating a guest account, signing in or out re-routes automatically.
+- A new account (guest or member) is not started by the screen that creates it: its session is handed to "preparing" (`PreparingArgs` as route `extra`), which starts it as its first step. That route is `public`, so it stays open when the session starts; the router's refresh drops `extra`, so the router keeps the arguments in memory until the learner leaves preparing.
 - Tabs (Learn / Practice / Speak / Me; kids: Learn / My words / Me) will use `StatefulShellRoute` when the first tab lands.
 
 ## Design system

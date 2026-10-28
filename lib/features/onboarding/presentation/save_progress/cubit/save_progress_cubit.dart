@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:equatable/equatable.dart';
@@ -13,6 +13,7 @@ final class SaveProgressState extends Equatable {
   const SaveProgressState({
     this.online = true,
     this.creatingGuest = false,
+    this.guestSession,
     this.failure,
   });
 
@@ -22,35 +23,39 @@ final class SaveProgressState extends Equatable {
   /// The guest account is being created.
   final bool creatingGuest;
 
+  /// The new guest's session, handed to the next screen, which starts it.
+  final AuthTokens? guestSession;
+
   /// Why the last attempt failed, shown with a retry until the next one.
   final Failure? failure;
 
-  bool get busy => creatingGuest;
+  bool get busy => creatingGuest || guestSession != null;
 
   SaveProgressState copyWith({
     bool? online,
     bool? creatingGuest,
+    AuthTokens? guestSession,
     Failure? Function()? failure,
   }) => SaveProgressState(
     online: online ?? this.online,
     creatingGuest: creatingGuest ?? this.creatingGuest,
+    guestSession: guestSession ?? this.guestSession,
     failure: failure != null ? failure() : this.failure,
   );
 
   @override
-  List<Object?> get props => [online, creatingGuest, failure];
+  List<Object?> get props => [online, creatingGuest, guestSession, failure];
 }
 
 /// "Save your progress" (requirements v3.0 §4.2–4.3, ADR 10): create an
 /// account, or carry on as a guest of this phone. Continuing as a guest
-/// creates the guest account with the onboarding answers and starts its
-/// session, which takes the learner home.
+/// creates the guest account with the onboarding answers and hands its
+/// session on (`SaveProgressState.guestSession`) to be started next.
 class SaveProgressCubit extends Cubit<SaveProgressState> {
-  SaveProgressCubit(this._accounts, this._session, this._connectivity)
+  SaveProgressCubit(this._accounts, this._connectivity)
     : super(const SaveProgressState());
 
   final AccountRepository _accounts;
-  final AppSessionController _session;
   final ConnectivityService _connectivity;
   StreamSubscription<bool>? _connection;
 
@@ -78,8 +83,7 @@ class SaveProgressCubit extends Cubit<SaveProgressState> {
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
-        // The router leaves onboarding as soon as the session starts.
-        await _session.signIn(value);
+        emit(state.copyWith(guestSession: value));
       case Err(:final failure):
         emit(state.copyWith(creatingGuest: false, failure: () => failure));
     }

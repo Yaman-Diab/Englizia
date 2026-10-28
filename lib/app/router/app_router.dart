@@ -7,6 +7,7 @@ import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -23,6 +24,9 @@ import 'package:englizia/features/onboarding/presentation/grade/pages/grade_page
 import 'package:englizia/features/onboarding/presentation/language/pages/language_page.dart';
 import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/level/pages/level_page.dart';
+import 'package:englizia/features/onboarding/presentation/preparing/cubit/preparing_cubit.dart';
+import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
+import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
 import 'package:englizia/features/onboarding/presentation/reason/cubit/reason_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/reason/pages/reason_page.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminder_cubit.dart';
@@ -30,6 +34,7 @@ import 'package:englizia/features/onboarding/presentation/reminder/pages/reminde
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
+import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -44,6 +49,11 @@ GoRouter createAppRouter(AppSessionController session) {
     homeLocation: AppRoutes.home,
     signedOutLocation: AppRoutes.welcome,
   );
+
+  // "Preparing" starts the session, and the refresh that follows drops the
+  // route's `extra`; its arguments (a session) stay here, in memory only,
+  // until the learner leaves it.
+  PreparingArgs? preparing;
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -214,6 +224,8 @@ GoRouter createAppRouter(AppSessionController session) {
               ),
               onTerms: () => context.push(AppRoutes.legalTerms),
               onPrivacy: () => context.push(AppRoutes.legalPrivacy),
+              onGuestCreated: (session) =>
+                  _accountCreated(context, path, session),
               onBack: () => context.pop(),
             ),
           );
@@ -221,13 +233,48 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.signUp,
-        builder: (context, _) => BlocProvider(
-          create: (_) => sl<SignUpCubit>(),
-          child: SignUpPage(
-            onSignIn: (email) => context.push(AppRoutes.signIn, extra: email),
-            onBack: () => context.pop(),
-          ),
-        ),
+        builder: (context, state) {
+          final path = _pathOf(state);
+          return BlocProvider(
+            create: (_) => sl<SignUpCubit>(),
+            child: SignUpPage(
+              onCreated: (session, name) =>
+                  _accountCreated(context, path, session, name: name),
+              onSignIn: (email) => context.push(AppRoutes.signIn, extra: email),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingPreparing,
+        redirect: (_, state) =>
+            state.extra is PreparingArgs || preparing != null
+            ? null
+            : AppRoutes.home,
+        builder: (context, state) {
+          final args = preparing = switch (state.extra) {
+            final PreparingArgs args => args,
+            _ => preparing!,
+          };
+          void leave(String location, {Object? extra}) {
+            preparing = null;
+            context.go(location, extra: extra);
+          }
+
+          return BlocProvider(
+            create: (_) =>
+                sl<PreparingCubit>()
+                  ..start(path: args.path, account: args.session),
+            child: PreparingPage(
+              name: args.name,
+              // ASSUMPTION(design): no lesson screen yet; home stands in.
+              onStartLesson: () => leave(AppRoutes.home),
+              onStartTest: () =>
+                  leave(AppRoutes.onboardingPlacement, extra: args.path),
+            ),
+          );
+        },
       ),
       // Google and Apple sign-up are not built yet.
       GoRoute(
@@ -269,6 +316,25 @@ GoRouter createAppRouter(AppSessionController session) {
         builder: (_, _) => PendingPage(title: 'welcome_have_account'.tr()),
       ),
     ],
+  );
+}
+
+/// A new account goes on to "preparing", which starts its session; `go`
+/// leaves the sign-up screens behind for good. A child's account skips it
+/// (the kids' welcome replaces it, S §4.5) and starts at once.
+void _accountCreated(
+  BuildContext context,
+  OnboardingPath path,
+  AuthTokens session, {
+  String name = '',
+}) {
+  if (path.audience == TrackAudience.child) {
+    sl<AppSessionController>().signIn(session);
+    return;
+  }
+  context.go(
+    AppRoutes.onboardingPreparing,
+    extra: PreparingArgs(path: path, session: session, name: name),
   );
 }
 

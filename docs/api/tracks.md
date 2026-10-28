@@ -92,9 +92,42 @@ Published levels of one track, in display order, with their effective settings. 
 
 Not in this list on purpose: kids mode and feature overrides per level, and the three "you will be able to…" sentences; they arrive with the level detail when a screen needs them.
 
+## `GET /api/v1/app/levels/{levelId}/units`
+
+Published units of one level, in display order. "Preparing" (S §4.4) reads the first one right after the account is created, to name it ("جهّزنا وحدتك الأولى" with its title and topic); the home screen will read the rest. Sent with a token. Mock: `assets/mock/tracks/units_<levelId>.json` for `lvl_gen_prea1` and `lvl_emar_07`, `units_default.json` for any other level.
+
+### Response `200`
+
+```json
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": [
+    {
+      "id": "unit_gen_prea1_01",
+      "order": 1,
+      "title": "Hello!",
+      "topic": { "ar": "التحيات والتعارف", "en": "Greetings and introductions" }
+    }
+  ],
+  "error": null,
+  "traceId": "0HN7…"
+}
+```
+
+| Field | Type | Meaning | Used by the app today |
+|---|---|---|---|
+| `id` | string | Stable unit id | yes |
+| `order` | int | Display order within the level; the first unit is where the level starts | yes (the first unit) |
+| `title` | string | The unit's title as the course writes it, usually English ("Hello!", "Unit 1: Back to School"); shown left to right inside Arabic | yes |
+| `topic` | `{ar, en}` · `null` | What the unit is about, in the learner's language; books often have none | yes |
+
+A level with no published unit returns an empty list; "preparing" then says the first unit is ready without naming it.
+
 ## Questions for the backend team
 
 1. Confirm the path, the field names and the enum spellings above.
 2. Confirm the list is available without a token (onboarding runs before sign-up).
 3. Confirm "effective settings" means the track-level values here and the level-level values in the levels list.
 4. Confirm the levels list is available without a token (the grade step runs before sign-up).
+5. Agree the units path and fields above, and whether a unit's title is a single string (as the course writes it) or bilingual.

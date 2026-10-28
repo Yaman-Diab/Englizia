@@ -10,6 +10,7 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/tracks/data/datasources/track_remote_data_source.dart';
 import 'package:englizia/features/tracks/data/models/track_level_model.dart';
 import 'package:englizia/features/tracks/data/models/track_model.dart';
+import 'package:englizia/features/tracks/data/models/track_unit_model.dart';
 import 'package:englizia/features/tracks/data/repositories/track_repository_impl.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/services.dart';
@@ -36,19 +37,31 @@ class _FailingDataSource implements TrackRemoteDataSource {
   @override
   Future<List<TrackLevelModel>> getLevels(String trackId) async =>
       throw const NetworkException('connectionError');
+
+  @override
+  Future<List<TrackUnitModel>> getUnits(String levelId) async =>
+      throw const NetworkException('connectionError');
 }
 
 class _FixedDataSource implements TrackRemoteDataSource {
-  _FixedDataSource(this.models, [this.levels = const []]);
+  _FixedDataSource(
+    this.models, [
+    this.levels = const [],
+    this.units = const [],
+  ]);
 
   final List<TrackModel> models;
   final List<TrackLevelModel> levels;
+  final List<TrackUnitModel> units;
 
   @override
   Future<List<TrackModel>> getPublishedTracks() async => models;
 
   @override
   Future<List<TrackLevelModel>> getLevels(String trackId) async => levels;
+
+  @override
+  Future<List<TrackUnitModel>> getUnits(String levelId) async => units;
 }
 
 void main() {
@@ -208,6 +221,73 @@ void main() {
       expect(
         switch (result) {
           Ok(:final value) => value.map((l) => l.id),
+          Err() => null,
+        },
+        ['a', 'b'],
+      );
+    });
+  });
+
+  group('units', () {
+    final unitsBody =
+        jsonDecode(
+              File(
+                TrackFakeDataSource.unitsAsset('lvl_gen_prea1'),
+              ).readAsStringSync(),
+            )
+            as Map<String, Object?>;
+
+    test('the example units parse with title and topic', () {
+      final units = parseUnits(ApiClient.unwrap(unitsBody));
+      final first = units.first.entity;
+      expect(first.title, 'Hello!');
+      expect(first.topic?.of('ar'), 'التحيات والتعارف');
+    });
+
+    test('a unit without a topic has none', () {
+      final unit = TrackUnitModel.fromJson(const {'id': 'u1'}).entity;
+      expect(unit.topic, isNull);
+      expect(unit.title, '');
+    });
+
+    test('GET /api/v1/app/levels/{id}/units', () async {
+      final adapter = FakeHttpAdapter(
+        (_) => FakeResponse(200, body: unitsBody),
+      );
+      final client = ApiClient(
+        Dio(BaseOptions(baseUrl: 'https://api.test'))
+          ..httpClientAdapter = adapter,
+      );
+
+      final units = await TrackRemoteDataSourceImpl(
+        client,
+      ).getUnits('lvl_gen_prea1');
+
+      expect(
+        adapter.requests.single.path,
+        '/api/v1/app/levels/lvl_gen_prea1/units',
+      );
+      expect(units, hasLength(2));
+    });
+
+    test('mock mode serves a default example to other levels', () async {
+      final source = TrackFakeDataSource(_DiskBundle(), latency: Duration.zero);
+      final grade = await source.getUnits('lvl_emar_07');
+      expect(grade.first.entity.title, 'Unit 1: Back to School');
+      final other = await source.getUnits('lvl_gen_b2');
+      expect(other.first.entity.id, 'unit_01');
+    });
+
+    test('the repository returns units in display order', () async {
+      final result = await TrackRepositoryImpl(
+        _FixedDataSource(const [], const [], [
+          TrackUnitModel.fromJson(const {'id': 'b', 'order': 2}),
+          TrackUnitModel.fromJson(const {'id': 'a', 'order': 1}),
+        ]),
+      ).getUnits('l');
+      expect(
+        switch (result) {
+          Ok(:final value) => value.map((u) => u.id),
           Err() => null,
         },
         ['a', 'b'],

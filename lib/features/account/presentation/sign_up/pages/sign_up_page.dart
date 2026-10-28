@@ -9,6 +9,7 @@ import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/widgets/email_suggestions.dart';
@@ -24,7 +25,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// fields and focuses the first. An email with an account offers sign-in
 /// instead, and a failed connection keeps what was typed with a retry.
 class SignUpPage extends StatefulWidget {
-  const SignUpPage({required this.onSignIn, required this.onBack, super.key});
+  const SignUpPage({
+    required this.onCreated,
+    required this.onSignIn,
+    required this.onBack,
+    super.key,
+  });
+
+  /// The account exists: its session (not started yet) and the name given.
+  final void Function(AuthTokens session, String name) onCreated;
 
   /// Opens sign-in with the email typed so far (may be empty).
   final ValueChanged<String> onSignIn;
@@ -91,7 +100,10 @@ class _SignUpPageState extends State<SignUpPage> {
       listeners: [
         BlocListener<SignUpCubit, SignUpState>(
           listenWhen: (before, now) => now.created && !before.created,
-          listener: (_, _) => TextInput.finishAutofillContext(),
+          listener: (_, state) {
+            TextInput.finishAutofillContext();
+            widget.onCreated(state.session!, state.name.trim());
+          },
         ),
         // A refused send: the first wrong field takes the focus.
         BlocListener<SignUpCubit, SignUpState>(

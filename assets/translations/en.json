@@ -197,5 +197,30 @@
   "account_email_taken": "This email already has an account",
   "account_email_taken_sign_in": "Sign in instead",
   "field_password_show": "Show password",
-  "field_password_hide": "Hide password"
+  "field_password_hide": "Hide password",
+  "preparing_title": "Preparing your path…",
+  "preparing_ready": "All set",
+  "preparing_ready_named": "All set, {name}",
+  "preparing_level_running": "Choosing your level",
+  "preparing_level_done": "Your level: {level}",
+  "preparing_level_chosen": "Your level is chosen",
+  "preparing_level_failed": "Couldn't choose your level",
+  "preparing_grade_running": "Setting up your grade",
+  "preparing_grade_done": "Your grade: {grade}",
+  "preparing_plan_running": "Saving your plan",
+  "preparing_plan_done": "Your plan is saved",
+  "preparing_unit_running": "Preparing your first unit",
+  "preparing_unit_done": "Your first unit is ready",
+  "preparing_unit_failed": "Couldn't load your first unit",
+  "preparing_test_running": "Preparing the placement test",
+  "preparing_test_done": "The placement test is ready",
+  "preparing_test_failed": "Couldn't prepare the placement test",
+  "preparing_goal_running": "Setting your daily goal",
+  "preparing_goal_done": {
+    "one": "Your daily goal: {} minute",
+    "other": "Your daily goal: {} minutes"
+  },
+  "preparing_goal_failed": "Couldn't set your daily goal",
+  "preparing_start_lesson": "Start your first lesson",
+  "preparing_start_test": "Start the test"
 }

@@ -4,8 +4,7 @@ import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/session/app_session_controller.dart';
-import 'package:englizia/core/storage/settings_storage_service.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
@@ -14,7 +13,6 @@ import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../helpers/fake_accounts.dart';
 import '../../../../helpers/fakes.dart';
@@ -46,25 +44,22 @@ void main() {
   setUpAll(initLocalizationForTests);
 
   late FakeConnectivityService connectivity;
-  late AppSessionController session;
 
-  setUp(() async {
+  /// Guest sessions the page handed on.
+  late List<AuthTokens> handedOn;
+
+  setUp(() {
     connectivity = FakeConnectivityService();
-    SharedPreferences.setMockInitialValues({'app.has_launched': true});
-    session = AppSessionController(
-      tokens: FakeTokenStorage(),
-      settings: SettingsStorageService(await SharedPreferences.getInstance()),
-    );
-    await session.bootstrap();
+    handedOn = [];
   });
   tearDown(() => connectivity.dispose());
 
   group('SaveProgressCubit', () {
     test(
-      'continuing as a guest creates the account and starts its session',
+      'continuing as a guest creates the account and hands its session on',
       () async {
         final accounts = FakeAccountRepository();
-        final cubit = SaveProgressCubit(accounts, session, connectivity);
+        final cubit = SaveProgressCubit(accounts, connectivity);
         addTearDown(cubit.close);
 
         await cubit.continueAsGuest(
@@ -74,7 +69,8 @@ void main() {
         );
 
         expect(accounts.guestAnswers.single, _adult);
-        expect(session.status, SessionStatus.guest);
+        expect(cubit.state.guestSession, guestTokens);
+        expect(cubit.state.busy, isTrue);
       },
     );
 
@@ -83,7 +79,6 @@ void main() {
         FakeAccountRepository(
           guestResults: const [Err(NetworkFailure()), Ok(guestTokens)],
         ),
-        session,
         connectivity,
       );
       addTearDown(cubit.close);
@@ -95,22 +90,18 @@ void main() {
       );
       expect(cubit.state.failure, isA<NetworkFailure>());
       expect(cubit.state.creatingGuest, isFalse);
-      expect(session.status, SessionStatus.signedOut);
+      expect(cubit.state.guestSession, isNull);
 
       await cubit.continueAsGuest(
         answers: _adult,
         languageCode: 'ar',
         utcOffsetMinutes: 0,
       );
-      expect(session.status, SessionStatus.guest);
+      expect(cubit.state.guestSession, guestTokens);
     });
 
     test('follows the connection', () async {
-      final cubit = SaveProgressCubit(
-        FakeAccountRepository(),
-        session,
-        connectivity,
-      );
+      final cubit = SaveProgressCubit(FakeAccountRepository(), connectivity);
       addTearDown(cubit.close);
       await cubit.start();
       expect(cubit.state.online, isTrue);
@@ -132,7 +123,6 @@ void main() {
     }) async {
       final cubit = SaveProgressCubit(
         accounts ?? FakeAccountRepository(),
-        session,
         connectivity,
       );
       addTearDown(cubit.close);
@@ -144,6 +134,7 @@ void main() {
           onCreateAccount: onCreateAccount ?? (_) {},
           onTerms: () {},
           onPrivacy: () {},
+          onGuestCreated: handedOn.add,
           onBack: () {},
         ),
       );
@@ -250,11 +241,11 @@ void main() {
       await settle(tester);
       expect(find.text('onboarding_save_guest_title'.tr()), findsNothing);
       expect(accounts.guestAnswers, isEmpty);
-      expect(session.status, SessionStatus.signedOut);
+      expect(handedOn, isEmpty);
     });
 
     testWidgets(
-      'continuing as a guest sends the answers and starts the guest',
+      'continuing as a guest sends the answers and hands the guest on',
       (tester) async {
         final accounts = FakeAccountRepository();
         await pumpPage(tester, accounts: accounts);
@@ -265,7 +256,7 @@ void main() {
         await settle(tester);
 
         expect(accounts.guestAnswers.single, _adult);
-        expect(session.status, SessionStatus.guest);
+        expect(handedOn, [guestTokens]);
       },
     );
 
@@ -286,7 +277,7 @@ void main() {
       await tester.tap(find.text('common_retry'.tr()));
       await settle(tester);
       expect(accounts.guestAnswers, hasLength(2));
-      expect(session.status, SessionStatus.guest);
+      expect(handedOn, [guestTokens]);
     });
 
     testWidgets('offline, every way waits for the connection', (tester) async {

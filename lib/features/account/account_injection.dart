@@ -15,7 +15,7 @@ void registerAccountDependencies(GetIt sl) {
           ? AccountFakeDataSource(rootBundle)
           : AccountRemoteDataSourceImpl(sl()),
     )
-    ..registerFactory(() => SignUpCubit(sl(), sl()))
+    ..registerFactory(() => SignUpCubit(sl()))
     ..registerLazySingleton<AccountRepository>(
       () => AccountRepositoryImpl(
         sl(),

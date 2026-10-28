@@ -8,8 +8,7 @@ import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/session/app_session_controller.dart';
-import 'package:englizia/core/storage/settings_storage_service.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/widgets/email_suggestions.dart';
@@ -17,28 +16,20 @@ import 'package:englizia/features/account/presentation/sign_up/widgets/email_tak
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/fake_accounts.dart';
-import '../../../helpers/fakes.dart';
 import '../../../helpers/pump_app.dart';
 
 void main() {
   setUpAll(initLocalizationForTests);
 
-  late AppSessionController session;
+  /// Sessions the page handed on, with the name given.
+  late List<(AuthTokens, String)> handedOn;
 
-  setUp(() async {
-    SharedPreferences.setMockInitialValues({'app.has_launched': true});
-    session = AppSessionController(
-      tokens: FakeTokenStorage(),
-      settings: SettingsStorageService(await SharedPreferences.getInstance()),
-    );
-    await session.bootstrap();
-  });
+  setUp(() => handedOn = []);
 
   SignUpCubit cubitWith(FakeAccountRepository accounts) {
-    final cubit = SignUpCubit(accounts, session);
+    final cubit = SignUpCubit(accounts);
     addTearDown(cubit.close);
     return cubit;
   }
@@ -111,7 +102,7 @@ void main() {
       });
     });
 
-    test('creates the account and starts a member session', () async {
+    test('creates the account and hands its session on', () async {
       final accounts = FakeAccountRepository();
       final cubit = cubitWith(accounts);
       fill(cubit);
@@ -119,8 +110,7 @@ void main() {
       await cubit.submit();
 
       expect(accounts.accounts.single.email, 'user@example.com');
-      expect(cubit.state.created, isTrue);
-      expect(session.status, SessionStatus.member);
+      expect(cubit.state.session, memberTokens);
     });
 
     test('an email with an account offers sign-in, until it changes', () async {
@@ -132,7 +122,7 @@ void main() {
       await cubit.submit();
       expect(cubit.state.emailTaken, isTrue);
       expect(cubit.state.sending, isFalse);
-      expect(session.status, SessionStatus.signedOut);
+      expect(cubit.state.session, isNull);
 
       cubit.changed(SignUpField.email, 'other@example.com');
       expect(cubit.state.emailTaken, isFalse);
@@ -175,7 +165,7 @@ void main() {
 
       await cubit.submit();
       expect(cubit.state.failure, isNull);
-      expect(session.status, SessionStatus.member);
+      expect(cubit.state.session, memberTokens);
     });
 
     test('ignores edits while sending', () async {
@@ -203,7 +193,11 @@ void main() {
       await tester.pumpLocalized(
         BlocProvider.value(
           value: cubit,
-          child: SignUpPage(onSignIn: onSignIn ?? (_) {}, onBack: () {}),
+          child: SignUpPage(
+            onCreated: (session, name) => handedOn.add((session, name)),
+            onSignIn: onSignIn ?? (_) {},
+            onBack: () {},
+          ),
         ),
         locale: layout?.locale ?? const Locale('ar'),
         size: layout?.size ?? defaultViewport,
@@ -352,7 +346,7 @@ void main() {
       await tester.tap(find.text('common_retry'.tr()));
       await settle(tester);
       expect(accounts.accounts, hasLength(2));
-      expect(session.status, SessionStatus.member);
+      expect(handedOn, [(memberTokens, 'Learner')]);
     });
 
     testWidgets('picking a domain completes the email', (tester) async {

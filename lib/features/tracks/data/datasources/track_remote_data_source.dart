@@ -5,12 +5,15 @@ import 'package:englizia/core/network/api_endpoints.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/tracks/data/models/track_level_model.dart';
 import 'package:englizia/features/tracks/data/models/track_model.dart';
+import 'package:englizia/features/tracks/data/models/track_unit_model.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class TrackRemoteDataSource {
   Future<List<TrackModel>> getPublishedTracks();
 
   Future<List<TrackLevelModel>> getLevels(String trackId);
+
+  Future<List<TrackUnitModel>> getUnits(String levelId);
 }
 
 final class TrackRemoteDataSourceImpl implements TrackRemoteDataSource {
@@ -25,6 +28,10 @@ final class TrackRemoteDataSourceImpl implements TrackRemoteDataSource {
   @override
   Future<List<TrackLevelModel>> getLevels(String trackId) async =>
       parseLevels(await _client.get(ApiEndpoints.trackLevels(trackId)));
+
+  @override
+  Future<List<TrackUnitModel>> getUnits(String levelId) async =>
+      parseUnits(await _client.get(ApiEndpoints.levelUnits(levelId)));
 }
 
 /// Mock mode (`env/mock.json`): the contract's example response, read from
@@ -41,6 +48,14 @@ final class TrackFakeDataSource implements TrackRemoteDataSource {
   /// Levels per track: `levels_<trackId>.json` next to [asset].
   static String levelsAsset(String trackId) =>
       'assets/mock/tracks/levels_$trackId.json';
+
+  /// Units of the levels that have their own example; any other level
+  /// gets [defaultUnitsAsset].
+  static const levelsWithUnits = {'lvl_gen_prea1', 'lvl_emar_07'};
+  static String unitsAsset(String levelId) => levelsWithUnits.contains(levelId)
+      ? 'assets/mock/tracks/units_$levelId.json'
+      : defaultUnitsAsset;
+  static const defaultUnitsAsset = 'assets/mock/tracks/units_default.json';
 
   final AssetBundle _bundle;
 
@@ -60,6 +75,13 @@ final class TrackFakeDataSource implements TrackRemoteDataSource {
     final body = jsonDecode(await _bundle.loadString(levelsAsset(trackId)));
     return parseLevels(ApiClient.unwrap(body));
   }
+
+  @override
+  Future<List<TrackUnitModel>> getUnits(String levelId) async {
+    await Future<void>.delayed(latency);
+    final body = jsonDecode(await _bundle.loadString(unitsAsset(levelId)));
+    return parseUnits(ApiClient.unwrap(body));
+  }
 }
 
 List<TrackModel> parseTracks(Object? data) => switch (data) {
@@ -67,6 +89,13 @@ List<TrackModel> parseTracks(Object? data) => switch (data) {
     for (final item in items) TrackModel.fromJson(asJsonMap(item)),
   ],
   _ => throw FormatException('Expected a list of tracks, got $data'),
+};
+
+List<TrackUnitModel> parseUnits(Object? data) => switch (data) {
+  final List<Object?> items => [
+    for (final item in items) TrackUnitModel.fromJson(asJsonMap(item)),
+  ],
+  _ => throw FormatException('Expected a list of units, got $data'),
 };
 
 List<TrackLevelModel> parseLevels(Object? data) => switch (data) {
