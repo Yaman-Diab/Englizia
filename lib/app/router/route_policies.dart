@@ -23,6 +23,8 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.onboardingPreparing: RoutePolicy.public,
   AppRoutes.onboardingKidWelcome: RoutePolicy.public,
   AppRoutes.signIn: RoutePolicy.withoutAccount,
+  AppRoutes.signInWithProvider: RoutePolicy.withoutAccount,
+  AppRoutes.forgotPassword: RoutePolicy.withoutAccount,
   AppRoutes.signUp: RoutePolicy.withoutAccount,
   AppRoutes.signUpWithProvider: RoutePolicy.withoutAccount,
   AppRoutes.legalTerms: RoutePolicy.public,

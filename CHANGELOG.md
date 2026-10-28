@@ -23,6 +23,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Onboarding "why are you learning English?": pick any of six reasons; the guide replies to the latest one.
 - Onboarding daily goal: choose 5, 10, 15 or 20 minutes (as set in the control panel), with what it amounts to in lessons and minutes a week; the guide gets more excited with each step up.
 - Onboarding "save your progress": your plan from the answers, then Google, Apple (iPhone) or email, or «لاحقًا» to carry on as a guest of this phone after a clear warning.
+- Sign in with email: Google and Apple (iPhone) first, the guide covering its eyes while you type your password, one clear message for a wrong email or password, and a countdown after too many tries.
 - Create your account with email: name, email and password with the guide alongside, clear errors after each field, one-tap email domains, and "sign in instead" when the email already has an account.
 - "Preparing" after creating an account: the guide gets your level or grade, your first unit (or the placement test) and your daily goal ready step by step, says what it found, and retries a step that fails. Then «ابدأ أول درس» or «ابدأ الاختبار».
 - The kids' welcome: the parent hands the phone over, then the guide greets the child by name and says "Hello!" to tap and hear, before «هيا نلعب». A silent phone is noticed, and the welcome starts over when the volume comes up. Runs without sound until sounds are turned on.

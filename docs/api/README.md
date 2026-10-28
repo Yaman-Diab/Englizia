@@ -58,7 +58,7 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Contract | Used by | Data in the app |
 |---|---|---|
-| [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register and refresh (sign-in is not built) |
+| [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register, login, refresh and logout |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), later track switching | mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 | [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
@@ -73,7 +73,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | Endpoint | Method | Body | Response `data` | Status |
 |---|---|---|---|---|
 | `/api/v1/auth/register` | POST | `RegisterRequest {email, password, displayName, deviceId, platform}` | `TokenResponse` (201); 409 when the email has an account | live, used (email sign-up) |
-| `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse` | live, not used yet |
+| `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse`; 401 for wrong credentials, 429 for too many tries | live, used (sign-in) |
 | `/api/v1/auth/refresh` | POST | `RefreshRequest {refreshToken}` | `TokenResponse` | live, used |
 | `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, used (sign-out, never waited on) |
 | `/api/v1/app/me` | GET | — | `UserDto` | live, not used yet |

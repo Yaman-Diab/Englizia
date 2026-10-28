@@ -285,5 +285,27 @@
   "kid_welcome_guide": "المرشد، اضغط ليقول Hello",
   "kid_welcome_word": "Hello!",
   "kid_welcome_hello_word": "Hello، اضغط لتسمعها",
-  "kid_welcome_play": "هيا نلعب"
+  "kid_welcome_play": "هيا نلعب",
+  "sign_in_title": "أهلًا بعودتك",
+  "sign_in_subtitle": "تابع من حيث توقفت",
+  "sign_in_google": "المتابعة باستخدام Google",
+  "sign_in_apple": "المتابعة باستخدام Apple",
+  "sign_in_last_used": "آخر دخول لك",
+  "sign_in_or": "أو",
+  "sign_in_forgot": "نسيت كلمة المرور؟",
+  "sign_in_submit": "تسجيل الدخول",
+  "sign_in_no_account": "ليس لديك حساب؟",
+  "sign_in_wrong": "البريد أو كلمة المرور غير صحيحة",
+  "sign_in_wrong_hint_google": "إن أنشأت حسابك بـ Google، فادخل بالزر نفسه.",
+  "sign_in_wrong_hint_both": "إن أنشأت حسابك بـ Google أو Apple، فادخل بالزر نفسه.",
+  "sign_in_locked": "محاولات كثيرة. انتظر قليلًا أو عيّن كلمة مرور جديدة",
+  "sign_in_retry_after": "حاول بعد {time}",
+  "sign_in_locked_minutes": {
+    "zero": "يمكنك المحاولة الآن",
+    "one": "يمكنك المحاولة بعد دقيقة واحدة",
+    "two": "يمكنك المحاولة بعد دقيقتين",
+    "few": "يمكنك المحاولة بعد {} دقائق",
+    "many": "يمكنك المحاولة بعد {} دقيقة",
+    "other": "يمكنك المحاولة بعد {} دقيقة"
+  }
 }

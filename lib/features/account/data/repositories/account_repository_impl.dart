@@ -5,6 +5,7 @@ import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
+import 'package:englizia/features/account/data/models/sign_in_model.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -46,6 +47,20 @@ final class AccountRepositoryImpl implements AccountRepository {
   Future<Result<AuthTokens>> createAccount(NewAccount account) => guard(
     () => _remote.createAccount(
       RegisterModel.request(account, platform: devicePlatform),
+    ),
+  );
+
+  @override
+  Future<Result<AuthTokens>> signIn({
+    required String email,
+    required String password,
+  }) => guard(
+    () => _remote.signIn(
+      SignInModel.request(
+        email: email,
+        password: password,
+        platform: devicePlatform,
+      ),
     ),
   );
 

@@ -12,6 +12,7 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
+import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
@@ -194,6 +195,37 @@ void main() {
     expect(sl<AppSessionController>().status, SessionStatus.member);
     expect(find.byType(FoundationPage), findsOneWidget);
     expect(find.byType(PreparingPage), findsNothing);
+  });
+
+  testWidgets('signing in from welcome goes home as a member', (tester) async {
+    final accounts = FakeAccountRepository();
+    sl
+      ..unregister<AccountRepository>()
+      ..registerLazySingleton<AccountRepository>(() => accounts);
+    await tester.pumpWidget(
+      localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+    );
+    await tester.pumpUntilLocalized();
+    await sl<AppSessionController>().bootstrap();
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('welcome_have_account'.tr()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(SignInPage), findsOneWidget);
+
+    final fields = find.byType(TextField);
+    await tester.enterText(fields.at(0), 'user@example.com');
+    await tester.enterText(fields.at(1), 'password1');
+    await tester.pump();
+    await tester.tap(find.text('sign_in_submit'.tr()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(accounts.signIns.single, ('user@example.com', 'password1'));
+    expect(sl<AppSessionController>().status, SessionStatus.member);
+    expect(find.byType(FoundationPage), findsOneWidget);
   });
 
   testWidgets('preparing without its arguments goes elsewhere', (tester) async {

@@ -4,6 +4,7 @@ import 'package:englizia/features/account/data/datasources/account_remote_data_s
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
+import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +21,9 @@ void registerAccountDependencies(GetIt sl) {
       (upgradesGuest, _) => SignUpCubit(sl(), upgradesGuest: upgradesGuest),
     )
     ..registerFactory(() => AccountCubit(sl(), sl()))
+    ..registerFactoryParam<SignInCubit, String, void>(
+      (email, _) => SignInCubit(sl(), email: email),
+    )
     ..registerLazySingleton<AccountRepository>(
       () => AccountRepositoryImpl(
         sl(),

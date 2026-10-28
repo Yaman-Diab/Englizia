@@ -243,5 +243,24 @@
   "kid_welcome_guide": "The guide: tap to hear Hello",
   "kid_welcome_word": "Hello!",
   "kid_welcome_hello_word": "Hello, tap to hear it",
-  "kid_welcome_play": "Let's play"
+  "kid_welcome_play": "Let's play",
+  "sign_in_title": "Welcome back",
+  "sign_in_subtitle": "Pick up where you left off",
+  "sign_in_google": "Continue with Google",
+  "sign_in_apple": "Continue with Apple",
+  "sign_in_last_used": "Last used",
+  "sign_in_or": "or",
+  "sign_in_forgot": "Forgot password?",
+  "sign_in_submit": "Sign in",
+  "sign_in_no_account": "Don't have an account?",
+  "sign_in_wrong": "The email or password is wrong",
+  "sign_in_wrong_hint_google": "If you created your account with Google, sign in with that button.",
+  "sign_in_wrong_hint_both": "If you created your account with Google or Apple, sign in with that button.",
+  "sign_in_locked": "Too many tries. Wait a little or set a new password",
+  "sign_in_retry_after": "Try again in {time}",
+  "sign_in_locked_minutes": {
+    "zero": "You can try again now",
+    "one": "You can try again in {} minute",
+    "other": "You can try again in {} minutes"
+  }
 }

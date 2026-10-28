@@ -8,6 +8,10 @@ import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/core/storage/settings_storage_service.dart';
+import 'package:englizia/features/account/domain/entities/social_provider.dart';
+import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
+import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -346,7 +350,43 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.signIn,
-        builder: (_, _) => PendingPage(title: 'welcome_have_account'.tr()),
+        builder: (context, state) {
+          // Sign-up hands over the email it was given; welcome hands none.
+          final fromSignUp = state.extra is String;
+          final settings = sl<SettingsStorageService>();
+          return BlocProvider(
+            create: (_) => sl<SignInCubit>(
+              param1: fromSignUp ? state.extra! as String : '',
+            ),
+            child: SignInPage(
+              lastProvider: SocialProvider.values
+                  .asNameMap()[settings.lastSignInMethod],
+              onSignedIn: (account) async {
+                await session.signIn(account);
+                // Pushed over home for a guest, which the guard leaves.
+                if (context.mounted) context.go(AppRoutes.home);
+              },
+              onProvider: (_) => context.push(AppRoutes.signInWithProvider),
+              onForgotPassword: (email) =>
+                  context.push(AppRoutes.forgotPassword, extra: email),
+              // Back to sign-up when it led here; else from the start of
+              // onboarding, where accounts are made (S §4.3).
+              onCreateAccount: () => fromSignUp
+                  ? context.pop()
+                  : context.push(AppRoutes.onboardingLanguage),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
+      ),
+      // Google and Apple sign-in, and password recovery, are not built yet.
+      GoRoute(
+        path: AppRoutes.signInWithProvider,
+        builder: (_, _) => PendingPage(title: 'sign_in_title'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (_, _) => PendingPage(title: 'sign_in_forgot'.tr()),
       ),
     ],
   );
