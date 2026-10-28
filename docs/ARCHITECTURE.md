@@ -58,7 +58,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 - `route_policies.dart` maps each route pattern to `public`, `signedOutOnly` (welcome, onboarding), `withoutAccount` (sign-in, sign-up; open to guests) or `requiresSession` (the app; guests and members); unlisted routes need a session.
 - `AppRedirect`: splash until the session is known, then guests and members go home and signed-out users to the welcome screen; after that the policy decides. The router listens to the session, so creating a guest account, signing in or out re-routes automatically.
-- A new account (guest or member) is not started by the screen that creates it: its session is handed to "preparing" (`PreparingArgs` as route `extra`), which starts it as its first step. That route is `public`, so it stays open when the session starts; the router's refresh drops `extra`, so the router keeps the arguments in memory until the learner leaves preparing.
+- A new account (guest or member) is not started by the screen that creates it: its session is handed to "preparing" (or, on the child path, the kids' welcome) as `PreparingArgs` in route `extra`, which starts it. That route is `public`, so it stays open when the session starts; the router's refresh drops `extra`, so the router keeps the arguments in memory until the learner leaves preparing.
 - The guard checks the route at the bottom of the stack, not one pushed over it: a pushed screen whose session changes navigates itself (a guest's upgrade from sign-up goes home).
 - Tabs (Learn / Practice / Speak / Me; kids: Learn / My words / Me) will use `StatefulShellRoute` when the first tab lands.
 
@@ -71,7 +71,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - Forms use `AppTextField` (label above, icon, focus halo, a `FieldMessage` under it with a mark per tone, `Shake` when a send is refused). A failed action shows `showFailureSnackBar` (error band, retry), which keeps what was typed.
 - `design_system/icons/` — `AppIcon` / `AppIconView`: the designs' own line icons as SVG (via `flutter_svg`, flutter.dev, 160/160 points); Material icons stay for generic controls. An icon is added when its screen is built.
 - `core/network/connectivity_service.dart` — `ConnectivityService` (online now, changes): connectivity_plus behind an interface; tests use `FakeConnectivityService`.
-- `core/audio/` — `AppSound` and the `SoundPlayer` interface; silent for now (ADR 9).
+- `core/audio/` — `AppSound`, the `SoundPlayer` interface (silent for now, ADR 9) and `DeviceVolume` (whether the phone is muted; always audible until a way to read it is chosen, STATUS D-046).
 - `motion/` — `AppMotion` (`app_motion.dart`), page transitions, `Entrance` and the entrance choreography (ADR 7). `AppMotion`: durations, curves, distances and scales for every animation (adapted from transitions.dev, no blur). `AppMotion.resolve(context, duration)` returns zero when the platform disables animations; decorative motion checks `AppMotion.reduceMotion(context)`.
 - Page transitions come from `AppTheme.pageTransitionsTheme`: Android `AppPageTransitionsBuilder` (fade + 30px slide from the end side, 250ms, in place under reduce motion); iOS/macOS keep the native Cupertino transition with edge-swipe back. Tabs and session entry get their own transitions with those features (ADR 7).
 - `test/core/design_system/theme_test.dart` pins identity values and checks WCAG contrast in light and dark.

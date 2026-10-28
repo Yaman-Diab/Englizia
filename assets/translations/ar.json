@@ -270,5 +270,20 @@
   "account_guest_create": "أنشئ حسابًا",
   "account_sign_out": "تسجيل الخروج",
   "account_guest_sign_out_title": "ستفقد تقدّمك لأنه غير محفوظ في حساب",
-  "account_guest_sign_out_body": "أنشئ حسابًا لتحفظه وتدخل به من أي هاتف، أو سجّل الخروج وابدأ من جديد"
+  "account_guest_sign_out_body": "أنشئ حسابًا لتحفظه وتدخل به من أي هاتف، أو سجّل الخروج وابدأ من جديد",
+  "kid_welcome_ready_named": "كل شيء جاهز لـ{name}",
+  "kid_welcome_ready": "كل شيء جاهز لطفلك",
+  "kid_welcome_give_named": "أعطِ الهاتف لـ{name}. التعلّم هنا بالصوت والصور.",
+  "kid_welcome_give": "أعطِ الهاتف لطفلك. التعلّم هنا بالصوت والصور.",
+  "kid_welcome_sound_up": "ارفع صوت الهاتف قبل أن تبدأ",
+  "kid_welcome_start": "تمّ، لنبدأ",
+  "kid_welcome_hello_named": "مرحبًا {name}!",
+  "kid_welcome_hello": "مرحبًا!",
+  "kid_welcome_turn_up": "ارفع الصوت",
+  "kid_welcome_side_button": "من زرّ الصوت في جانب الهاتف",
+  "kid_welcome_replay": "أعد الاستماع",
+  "kid_welcome_guide": "المرشد، اضغط ليقول Hello",
+  "kid_welcome_word": "Hello!",
+  "kid_welcome_hello_word": "Hello، اضغط لتسمعها",
+  "kid_welcome_play": "هيا نلعب"
 }

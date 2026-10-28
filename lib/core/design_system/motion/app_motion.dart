@@ -80,6 +80,10 @@ abstract final class AppMotion {
   /// (it says the app is working), so it keeps turning under reduce motion.
   static const spinnerTurn = Duration(milliseconds: 800);
 
+  /// How long a tapped word stays highlighted, and the guide waves, after
+  /// a tap (kids designs).
+  static const highlightHold = Duration(milliseconds: 1500);
+
   /// A field that refused the input shakes this long (account designs).
   static const shake = slow;
 

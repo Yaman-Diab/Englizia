@@ -33,6 +33,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.caption,
     required this.captionStrong,
     required this.button,
+    required this.kidsGreeting,
+    required this.kidsWord,
   });
 
   factory AppTextStyles.build({required Color color, required bool isArabic}) {
@@ -41,21 +43,21 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       double lineHeight,
       FontWeight weight, {
       bool runningText = false,
+      bool kids = false,
     }) {
       var height = lineHeight / size;
       // Arabic running text needs at least 1.7 for diacritics and descenders.
       if (isArabic && runningText && height < _arabicMinHeight) {
         height = _arabicMinHeight;
       }
-      return AppFonts.primary(
-        TextStyle(
-          fontSize: size.sp,
-          height: height,
-          fontWeight: weight,
-          color: color,
-          leadingDistribution: TextLeadingDistribution.even,
-        ),
+      final base = TextStyle(
+        fontSize: size.sp,
+        height: height,
+        fontWeight: weight,
+        color: color,
+        leadingDistribution: TextLeadingDistribution.even,
       );
+      return kids ? AppFonts.kids(base) : AppFonts.primary(base);
     }
 
     return AppTextStyles(
@@ -67,6 +69,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       caption: style(13, 20, FontWeight.w400, runningText: true),
       captionStrong: style(13, 20, FontWeight.w600, runningText: true),
       button: style(16, 24, FontWeight.w600),
+      kidsGreeting: style(35, 44, FontWeight.w600),
+      kidsWord: style(50, 64, FontWeight.w700, kids: true),
     );
   }
 
@@ -91,6 +95,12 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
 
   /// Buttons. 16, 600.
   final TextStyle button;
+
+  /// Kids mode: the guide's greeting to the child. 35/44, 600.
+  final TextStyle kidsGreeting;
+
+  /// Kids mode: an English word to hear and tap, in Andika. 50/64, 700.
+  final TextStyle kidsWord;
 
   /// Maps the roles onto Material's scale so stock widgets match.
   TextTheme toTextTheme() => TextTheme(
@@ -119,6 +129,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? caption,
     TextStyle? captionStrong,
     TextStyle? button,
+    TextStyle? kidsGreeting,
+    TextStyle? kidsWord,
   }) => AppTextStyles(
     display: display ?? this.display,
     title: title ?? this.title,
@@ -128,6 +140,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     caption: caption ?? this.caption,
     captionStrong: captionStrong ?? this.captionStrong,
     button: button ?? this.button,
+    kidsGreeting: kidsGreeting ?? this.kidsGreeting,
+    kidsWord: kidsWord ?? this.kidsWord,
   );
 
   @override
@@ -142,6 +156,8 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       caption: TextStyle.lerp(caption, other.caption, t)!,
       captionStrong: TextStyle.lerp(captionStrong, other.captionStrong, t)!,
       button: TextStyle.lerp(button, other.button, t)!,
+      kidsGreeting: TextStyle.lerp(kidsGreeting, other.kidsGreeting, t)!,
+      kidsWord: TextStyle.lerp(kidsWord, other.kidsWord, t)!,
     );
   }
 }

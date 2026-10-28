@@ -228,5 +228,20 @@
   "account_guest_create": "Create an account",
   "account_sign_out": "Sign out",
   "account_guest_sign_out_title": "You'll lose your progress because it isn't saved in an account",
-  "account_guest_sign_out_body": "Create an account to keep it and sign in on any phone, or sign out and start again"
+  "account_guest_sign_out_body": "Create an account to keep it and sign in on any phone, or sign out and start again",
+  "kid_welcome_ready_named": "All set for {name}",
+  "kid_welcome_ready": "All set for your child",
+  "kid_welcome_give_named": "Hand the phone to {name}. Learning here is with sounds and pictures.",
+  "kid_welcome_give": "Hand the phone to your child. Learning here is with sounds and pictures.",
+  "kid_welcome_sound_up": "Turn the phone’s sound up before you start",
+  "kid_welcome_start": "Done, let's start",
+  "kid_welcome_hello_named": "Hi {name}!",
+  "kid_welcome_hello": "Hi!",
+  "kid_welcome_turn_up": "Turn the sound up",
+  "kid_welcome_side_button": "With the volume button on the side of the phone",
+  "kid_welcome_replay": "Listen again",
+  "kid_welcome_guide": "The guide: tap to hear Hello",
+  "kid_welcome_word": "Hello!",
+  "kid_welcome_hello_word": "Hello, tap to hear it",
+  "kid_welcome_play": "Let's play"
 }

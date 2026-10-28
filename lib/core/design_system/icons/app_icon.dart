@@ -110,6 +110,14 @@ enum AppIcon {
   ),
   check('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
   cross('<path d="M7 7l10 10M17 7L7 17"/>'),
+  volume(
+    '<path d="M11 5L6 9H3v6h3l5 4z"/>'
+    '<path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/>',
+  ),
+  volumeOff(
+    '<path d="M11 5L6 9H3v6h3l5 4z"/>'
+    '<path d="M22 9l-6 6M16 9l6 6"/>',
+  ),
   lock(
     '<rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/>'
     '<path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',

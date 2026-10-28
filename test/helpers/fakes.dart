@@ -1,5 +1,8 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/device_volume.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
@@ -103,4 +106,37 @@ class FakeNotificationPermission implements NotificationPermission {
     settingsOpened++;
     return true;
   }
+}
+
+/// A phone whose volume the test turns up and down.
+class FakeDeviceVolume implements DeviceVolume {
+  FakeDeviceVolume({bool muted = false}) : _muted = muted;
+
+  bool _muted;
+  final _changes = StreamController<bool>.broadcast();
+
+  bool get muted => _muted;
+  set muted(bool value) {
+    _muted = value;
+    _changes.add(value);
+  }
+
+  @override
+  Future<bool> isMuted() async => _muted;
+
+  @override
+  Stream<bool> get mutedChanges => _changes.stream;
+
+  Future<void> dispose() => _changes.close();
+}
+
+/// Records the sounds asked for; plays nothing.
+class FakeSoundPlayer implements SoundPlayer {
+  final played = <AppSound>[];
+
+  @override
+  Future<void> preload() async {}
+
+  @override
+  Future<void> play(AppSound sound) async => played.add(sound);
 }

@@ -19,4 +19,11 @@ enum AppSound {
 
   /// An in-app notification banner.
   notification,
+
+  /// The guide's spoken welcome in kids mode: «مرحبًا! أنا بلبل. هيا نتعلّم
+  /// الإنجليزية معًا. Hello!», recorded once, without the child's name.
+  guideWelcome,
+
+  /// The word "Hello!", spoken alone.
+  hello,
 }
