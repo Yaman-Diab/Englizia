@@ -27,6 +27,8 @@ class FakeAccountRepository implements AccountRepository {
   final List<Result<AuthTokens>> accountResults;
   final guestAnswers = <OnboardingPath>[];
   final accounts = <NewAccount>[];
+  final upgrades = <NewAccount>[];
+  var logOuts = 0;
   Completer<void>? gate;
 
   @override
@@ -45,6 +47,21 @@ class FakeAccountRepository implements AccountRepository {
     accounts.add(account);
     await gate?.future;
     return _nth(accountResults, accounts.length);
+  }
+
+  /// Answers from [accountResults], like [createAccount].
+  @override
+  Future<Result<AuthTokens>> upgradeGuest(NewAccount account) async {
+    upgrades.add(account);
+    await gate?.future;
+    return _nth(accountResults, upgrades.length);
+  }
+
+  @override
+  Future<Result<void>> logOut() async {
+    logOuts++;
+    await gate?.future;
+    return const Ok(null);
   }
 
   static Result<AuthTokens> _nth(List<Result<AuthTokens>> results, int n) =>

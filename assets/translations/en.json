@@ -221,5 +221,12 @@
   },
   "preparing_goal_failed": "Couldn't set your daily goal",
   "preparing_start_lesson": "Start your first lesson",
-  "preparing_start_test": "Start the test"
+  "preparing_start_test": "Start the test",
+  "account_upgrade_subtitle": "Your progress stays with you in your new account",
+  "account_guest_title": "You're using the app as a guest",
+  "account_guest_body": "Your progress is saved on this phone only. Create an account to keep it and sign in on any phone",
+  "account_guest_create": "Create an account",
+  "account_sign_out": "Sign out",
+  "account_guest_sign_out_title": "You'll lose your progress because it isn't saved in an account",
+  "account_guest_sign_out_body": "Create an account to keep it and sign in on any phone, or sign out and start again"
 }

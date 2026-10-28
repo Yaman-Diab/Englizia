@@ -3,6 +3,7 @@ import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
+import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -15,10 +16,14 @@ void registerAccountDependencies(GetIt sl) {
           ? AccountFakeDataSource(rootBundle)
           : AccountRemoteDataSourceImpl(sl()),
     )
-    ..registerFactory(() => SignUpCubit(sl()))
+    ..registerFactoryParam<SignUpCubit, bool, void>(
+      (upgradesGuest, _) => SignUpCubit(sl(), upgradesGuest: upgradesGuest),
+    )
+    ..registerFactory(() => AccountCubit(sl(), sl()))
     ..registerLazySingleton<AccountRepository>(
       () => AccountRepositoryImpl(
         sl(),
+        tokens: sl(),
         installationId: sl<SettingsStorageService>().installationId,
         devicePlatform: _devicePlatform(),
       ),

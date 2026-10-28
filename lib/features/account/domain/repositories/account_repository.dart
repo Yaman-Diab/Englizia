@@ -17,4 +17,13 @@ abstract interface class AccountRepository {
   /// `ConflictFailure`; a value the server refuses, with `ValidationFailure`
   /// naming the field (`displayName`, `email`, `password`).
   Future<Result<AuthTokens>> createAccount(NewAccount account);
+
+  /// Turns this phone's guest account into a member account with [account]'s
+  /// email and password, keeping its progress (ADR 10). Fails like
+  /// [createAccount].
+  Future<Result<AuthTokens>> upgradeGuest(NewAccount account);
+
+  /// Ends this phone's session on the server. Signing out never waits on
+  /// it: a failure only means the server forgets the session later.
+  Future<Result<void>> logOut();
 }

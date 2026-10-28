@@ -184,6 +184,9 @@ class _SignUpPageState extends State<SignUpPage> {
                         child: _Header(
                           expression: expression,
                           waving: expression == MascotExpression.welcome,
+                          subtitle: cubit.upgradesGuest
+                              ? 'account_upgrade_subtitle'.tr()
+                              : 'account_create_subtitle'.tr(),
                         ),
                       ),
                       AnimatedSize(
@@ -325,10 +328,15 @@ class _TopBar extends StatelessWidget {
 }
 
 class _Header extends StatelessWidget {
-  const _Header({required this.expression, required this.waving});
+  const _Header({
+    required this.expression,
+    required this.waving,
+    required this.subtitle,
+  });
 
   final MascotExpression expression;
   final bool waving;
+  final String subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -350,7 +358,7 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'account_create_subtitle'.tr(),
+                subtitle,
                 style: texts.body.copyWith(color: colors.textSecondary),
               ),
             ],

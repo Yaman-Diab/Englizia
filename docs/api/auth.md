@@ -81,9 +81,31 @@ The tokens work like a member's (same refresh endpoint, same headers); the app s
 
 The common errors (`docs/api/README.md`). Creating a guest needs a connection; the app says so and offers to retry.
 
+## `POST /api/v1/auth/guest/upgrade`
+
+Turns the guest account of this phone into a member account **in place**: same account id, same progress, points and streak. Sent with the guest's own access token (the normal `Authorization` header), from "create an account" in «أنا» (for now the temporary home). The body is register's `RegisterRequest`:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "…",
+  "displayName": "Learner",
+  "deviceId": null,
+  "platform": "android"
+}
+```
+
+The response is register's: `TokenResponse` (201) for the member account, whose tokens replace the guest's. Errors as register: `409` when the email already has an account (the app shows "this email already has an account" with "sign in instead"), `400 validation.failed` with field `details`, and `401` when the token is not a guest's.
+
+Status: **proposed**, mock (the mock answers like register). The app never upgrades by calling register: a new account would leave the guest's progress behind.
+
+## `POST /api/v1/auth/logout`
+
+Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. The app calls it on sign-out and never waits on it: signing out works offline, and a failure only means the server forgets the session later. Signing out as a guest loses the account; the app warns first («ستفقد تقدّمك لأنه غير محفوظ في حساب»).
+
 ## Questions for the backend team
 
 1. Agree the guest account type: what it may do (everything a learner does?) and how long an unused guest is kept.
-2. Agree the upgrade: signing up (email, Google, Apple) while holding a guest token turns that guest into the member account, keeping progress. Which endpoint, and what if the email already has an account (merge, or ask)?
+2. Agree the upgrade above: the path, that it keeps the same account and progress, the same for Google and Apple sign-up, and what happens when the email already has an account (the app now says so and offers sign-in, which would leave the guest behind; merge instead?).
 3. Time zone: the app sends the offset now. For reminders at the learner's time across daylight-saving changes, an IANA name (`Asia/Damascus`) is better; the app can send it once a package is chosen (STATUS D-043).
 4. Should onboarding answers go with every account creation (email, Google) in this same `onboarding` shape?

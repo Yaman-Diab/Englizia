@@ -4,8 +4,12 @@ abstract final class ApiEndpoints {
   static const refreshToken = '/api/v1/auth/refresh';
   // Confirmed in docs/api/openapi.json.
   static const register = '/api/v1/auth/register';
+  // Confirmed in docs/api/openapi.json.
+  static const logout = '/api/v1/auth/logout';
   // ASSUMPTION(api): docs/api/auth.md.
   static const guestAccount = '/api/v1/auth/guest';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const upgradeGuest = '/api/v1/auth/guest/upgrade';
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static const tracks = '/api/v1/app/tracks';

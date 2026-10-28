@@ -26,12 +26,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Create your account with email: name, email and password with the guide alongside, clear errors after each field, one-tap email domains, and "sign in instead" when the email already has an account.
 - "Preparing" after creating an account: the guide gets your level or grade, your first unit (or the placement test) and your daily goal ready step by step, says what it found, and retries a step that fails. Then «ابدأ أول درس» or «ابدأ الاختبار».
 - Guest mode: a guest account on the server, tied to this phone, so you can learn now and create an account later.
+- Create an account as a guest and keep everything: the guest account becomes your account. Signing out as a guest warns that the progress would be lost.
 - Onboarding streak challenge: 7, 14, 30 or 40 days, shown on a calendar in the streak color with a flame that beats when you change your mind.
 - Onboarding reminder time: morning, noon, evening or a time of your own, with a preview of the reminder. Notifications are asked for only after you choose; if you refuse, you can open the phone settings or go on without a reminder.
 - Onboarding "how much English do you know?": start from the first level, or take the placement test now or later. Shows the test's duration and stages from the server, and waits for a connection before the test.
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Changed
+- "I know some English" no longer starts the placement test at once: onboarding goes on, and the test starts after your account is ready. Offline it can't be chosen, and the screen says why.
 - Every button and screen waits the same way: one spinner, and a busy button keeps its size and color instead of fading.
 - The app talks to the dev server (`api-dev.engleazia.com`): it reads the server's response and error format, and renews the sign-in shortly before it expires instead of waiting for a request to fail.
 - The guide moves with more life: each expression idles its own way, and changing expression overshoots slightly and swaps the face behind a blink.

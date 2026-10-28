@@ -263,5 +263,12 @@
   },
   "preparing_goal_failed": "تعذّر ضبط هدفك اليومي",
   "preparing_start_lesson": "ابدأ أول درس",
-  "preparing_start_test": "ابدأ الاختبار"
+  "preparing_start_test": "ابدأ الاختبار",
+  "account_upgrade_subtitle": "تقدّمك يبقى معك في حسابك الجديد",
+  "account_guest_title": "أنت تستخدم التطبيق كضيف",
+  "account_guest_body": "تقدّمك محفوظ على هذا الهاتف فقط. أنشئ حسابًا لتحفظه وتدخل به من أي هاتف",
+  "account_guest_create": "أنشئ حسابًا",
+  "account_sign_out": "تسجيل الخروج",
+  "account_guest_sign_out_title": "ستفقد تقدّمك لأنه غير محفوظ في حساب",
+  "account_guest_sign_out_body": "أنشئ حسابًا لتحفظه وتدخل به من أي هاتف، أو سجّل الخروج وابدأ من جديد"
 }

@@ -10,9 +10,14 @@ export 'sign_up_state.dart';
 /// each field when it is left or sent and creates the account. Its session
 /// is handed on (`SignUpState.session`), not started here.
 class SignUpCubit extends Cubit<SignUpState> {
-  SignUpCubit(this._accounts) : super(const SignUpState());
+  SignUpCubit(this._accounts, {this.upgradesGuest = false})
+    : super(const SignUpState());
 
   final AccountRepository _accounts;
+
+  /// A guest is signing up: the guest account itself becomes the member
+  /// account, so its progress stays (ADR 10).
+  final bool upgradesGuest;
 
   /// Server field names (`RegisterRequest`) to the form's.
   static const _serverFields = {
@@ -53,7 +58,9 @@ class SignUpCubit extends Cubit<SignUpState> {
       return;
     }
     emit(checkedAll.copyWith(sending: true, emailTaken: false));
-    final result = await _accounts.createAccount(state.account);
+    final result = upgradesGuest
+        ? await _accounts.upgradeGuest(state.account)
+        : await _accounts.createAccount(state.account);
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
