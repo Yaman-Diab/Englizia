@@ -1,0 +1,17 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": [
+    {
+      "id": "unit_01",
+      "order": 1,
+      "title": "Unit 1",
+      "topic": {
+        "ar": "الوحدة الأولى",
+        "en": "The first unit"
+      }
+    }
+  ],
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

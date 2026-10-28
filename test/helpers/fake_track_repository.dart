@@ -2,6 +2,7 @@ import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
+import 'package:englizia/features/tracks/domain/entities/track_unit.dart';
 import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
 
 LearningTrack fakeTrack(
@@ -30,10 +31,13 @@ class FakeTrackRepository implements TrackRepository {
   FakeTrackRepository({
     this.tracks = const [Ok(<LearningTrack>[])],
     this.levels = const [Ok(<TrackLevel>[])],
+    this.units = const [Ok(<TrackUnit>[])],
   });
 
   final List<Result<List<LearningTrack>>> tracks;
   final List<Result<List<TrackLevel>>> levels;
+  final List<Result<List<TrackUnit>>> units;
+  final unitRequests = <String>[];
   var trackCalls = 0;
   final levelRequests = <String>[];
 
@@ -45,5 +49,11 @@ class FakeTrackRepository implements TrackRepository {
   Future<Result<List<TrackLevel>>> getLevels(String trackId) async {
     levelRequests.add(trackId);
     return levels[(levelRequests.length - 1).clamp(0, levels.length - 1)];
+  }
+
+  @override
+  Future<Result<List<TrackUnit>>> getUnits(String levelId) async {
+    unitRequests.add(levelId);
+    return units[(unitRequests.length - 1).clamp(0, units.length - 1)];
   }
 }

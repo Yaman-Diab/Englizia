@@ -14,6 +14,10 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
 
+  // ASSUMPTION(api): docs/api/tracks.md.
+  static String levelUnits(String levelId) =>
+      '/api/v1/app/levels/$levelId/units';
+
   static String trackLevels(String trackId) =>
       '/api/v1/app/tracks/$trackId/levels';
 }

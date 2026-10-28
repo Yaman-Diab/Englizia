@@ -1,0 +1,26 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": [
+    {
+      "id": "unit_gen_prea1_01",
+      "order": 1,
+      "title": "Hello!",
+      "topic": {
+        "ar": "التحيات والتعارف",
+        "en": "Greetings and introductions"
+      }
+    },
+    {
+      "id": "unit_gen_prea1_02",
+      "order": 2,
+      "title": "My Family",
+      "topic": {
+        "ar": "العائلة",
+        "en": "Family"
+      }
+    }
+  ],
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}
