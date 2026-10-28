@@ -17,7 +17,10 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.onboardingLevel: RoutePolicy.signedOutOnly,
   AppRoutes.onboardingReminder: RoutePolicy.signedOutOnly,
   AppRoutes.onboardingSaveProgress: RoutePolicy.signedOutOnly,
-  AppRoutes.onboardingPlacement: RoutePolicy.signedOutOnly,
+  // Before the account (the level step) and after it (from preparing).
+  AppRoutes.onboardingPlacement: RoutePolicy.public,
+  // Starts the session itself, so it must stay open when the session does.
+  AppRoutes.onboardingPreparing: RoutePolicy.public,
   AppRoutes.signIn: RoutePolicy.withoutAccount,
   AppRoutes.signUp: RoutePolicy.withoutAccount,
   AppRoutes.signUpWithProvider: RoutePolicy.withoutAccount,

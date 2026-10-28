@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/icons/brand_mark.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/widgets/account_button.dart';
@@ -32,6 +33,7 @@ class SaveProgressPage extends StatelessWidget {
     required this.onCreateAccount,
     required this.onTerms,
     required this.onPrivacy,
+    required this.onGuestCreated,
     required this.onBack,
     super.key,
   });
@@ -42,6 +44,9 @@ class SaveProgressPage extends StatelessWidget {
   final VoidCallback onTerms;
   final VoidCallback onPrivacy;
   final VoidCallback onBack;
+
+  /// The guest account exists; its session is not started yet.
+  final ValueChanged<AuthTokens> onGuestCreated;
 
   Future<void> _later(BuildContext context) async {
     final cubit = context.read<SaveProgressCubit>();
@@ -65,16 +70,19 @@ class SaveProgressPage extends StatelessWidget {
     final childName = path.childName;
     return BlocConsumer<SaveProgressCubit, SaveProgressState>(
       listenWhen: (before, now) =>
-          now.failure != null && before.failure != now.failure,
-      listener: (context, state) => showFailureSnackBar(
-        context,
-        state.failure!,
-        onRetry: () => context.read<SaveProgressCubit>().continueAsGuest(
-          answers: path,
-          languageCode: context.locale.languageCode,
-          utcOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
-        ),
-      ),
+          now.failure != null && before.failure != now.failure ||
+          now.guestSession != null && before.guestSession == null,
+      listener: (context, state) => state.guestSession != null
+          ? onGuestCreated(state.guestSession!)
+          : showFailureSnackBar(
+              context,
+              state.failure!,
+              onRetry: () => context.read<SaveProgressCubit>().continueAsGuest(
+                answers: path,
+                languageCode: context.locale.languageCode,
+                utcOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
+              ),
+            ),
       builder: (context, state) {
         final enabled = state.online && !state.busy;
         VoidCallback? create(AccountProvider provider) =>

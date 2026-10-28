@@ -1,19 +1,30 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/app/app.dart';
 import 'package:englizia/app/di.dart';
+import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
+import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
+import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
+import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
+import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
+import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
+import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
 import '../helpers/fake_http_adapter.dart';
+import '../helpers/fake_settings_repository.dart';
+import '../helpers/fake_track_repository.dart';
 import '../helpers/platform_mocks.dart';
 import '../helpers/pump_app.dart';
 
@@ -102,6 +113,61 @@ void main() {
     expect(sl<AppSessionController>().status, SessionStatus.guest);
     expect(find.byType(WelcomePage), findsNothing);
     expect(find.byType(FoundationPage), findsOneWidget);
+  });
+
+  testWidgets(
+    'a new account goes through preparing, which starts its session',
+    (tester) async {
+      sl
+        ..unregister<TrackRepository>()
+        ..registerLazySingleton<TrackRepository>(FakeTrackRepository.new)
+        ..unregister<SettingsRepository>()
+        ..registerLazySingleton<SettingsRepository>(FakeSettingsRepository.new);
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      GoRouter.of(tester.element(find.byType(WelcomePage))).go(
+        AppRoutes.onboardingPreparing,
+        extra: const PreparingArgs(
+          path: OnboardingPath(audience: TrackAudience.self),
+          session: tokens,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      // The session started, and preparing stayed open.
+      expect(sl<AppSessionController>().status, SessionStatus.member);
+      expect(find.byType(PreparingPage), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.tap(find.byType(AppButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(FoundationPage), findsOneWidget);
+    },
+  );
+
+  testWidgets('preparing without its arguments goes elsewhere', (tester) async {
+    await tester.pumpWidget(
+      localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+    );
+    await tester.pumpUntilLocalized();
+    await sl<AppSessionController>().bootstrap();
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+
+    GoRouter.of(
+      tester.element(find.byType(WelcomePage)),
+    ).go(AppRoutes.onboardingPreparing);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(PreparingPage), findsNothing);
+    expect(find.byType(WelcomePage), findsOneWidget);
   });
 
   testWidgets('switching the language updates Accept-Language', (tester) async {

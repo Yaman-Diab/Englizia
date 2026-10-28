@@ -109,6 +109,7 @@ enum AppIcon {
     '<path d="M11 18h2"/>',
   ),
   check('<path d="M5 12.5l4.5 4.5L19 7.5"/>'),
+  cross('<path d="M7 7l10 10M17 7L7 17"/>'),
   lock(
     '<rect x="4.5" y="10.5" width="15" height="10.5" rx="2.5"/>'
     '<path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/>',

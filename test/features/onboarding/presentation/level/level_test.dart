@@ -12,41 +12,24 @@ import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.da
 import 'package:englizia/features/onboarding/presentation/level/cubit/level_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/level/pages/level_page.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
-import 'package:englizia/features/placement/domain/repositories/placement_repository.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart' show Unicode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../../helpers/fake_placement_repository.dart';
 import '../../../../helpers/fake_track_repository.dart';
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/pump_app.dart';
 
-const _summary = PlacementSummary(
-  minMinutes: 12,
-  maxMinutes: 15,
-  stages: 2,
-  mayAddStage: true,
-);
+const _summary = testPlacementSummary;
 
 const _firstLevel = TrackLevel(
   id: 'lvl_prea1',
   order: 1,
   name: LocalizedText(ar: 'Pre-A1 · البداية', en: 'Pre-A1 · Starter'),
 );
-
-/// Serves queued results in order, repeating the last one.
-class _FakePlacementRepository implements PlacementRepository {
-  _FakePlacementRepository([this.results = const [Ok(_summary)]]);
-
-  final List<Result<PlacementSummary>> results;
-  var calls = 0;
-
-  @override
-  Future<Result<PlacementSummary>> getSummary() async =>
-      results[(calls++).clamp(0, results.length - 1)];
-}
 
 void main() {
   setUpAll(initLocalizationForTests);
@@ -60,7 +43,7 @@ void main() {
     List<Result<PlacementSummary>> summaries = const [Ok(_summary)],
     FakeTrackRepository? tracks,
   }) => LevelCubit(
-    _FakePlacementRepository(summaries),
+    FakePlacementRepository(summaries),
     tracks ??
         FakeTrackRepository(
           levels: const [

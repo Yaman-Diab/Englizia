@@ -1,6 +1,5 @@
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,13 +7,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 export 'sign_up_state.dart';
 
 /// Email sign-up (requirements v3.0 §4.3, design "Create Account"): checks
-/// each field when it is left or sent, creates the account, and starts its
-/// session, which takes the learner out of onboarding.
+/// each field when it is left or sent and creates the account. Its session
+/// is handed on (`SignUpState.session`), not started here.
 class SignUpCubit extends Cubit<SignUpState> {
-  SignUpCubit(this._accounts, this._session) : super(const SignUpState());
+  SignUpCubit(this._accounts) : super(const SignUpState());
 
   final AccountRepository _accounts;
-  final AppSessionController _session;
 
   /// Server field names (`RegisterRequest`) to the form's.
   static const _serverFields = {
@@ -59,9 +57,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
-        emit(state.copyWith(created: true));
-        // The router leaves onboarding as soon as the session starts.
-        await _session.signIn(value);
+        emit(state.copyWith(session: value));
       case Err(failure: ConflictFailure()):
         emit(state.copyWith(sending: false, emailTaken: true));
       case Err(failure: final ValidationFailure failure)

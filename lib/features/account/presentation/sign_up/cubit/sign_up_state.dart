@@ -1,4 +1,5 @@
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:equatable/equatable.dart';
 
@@ -14,7 +15,7 @@ final class SignUpState extends Equatable {
     this.refused = const {},
     this.shakes = const {},
     this.sending = false,
-    this.created = false,
+    this.session,
     this.emailTaken = false,
     this.failure,
   });
@@ -35,8 +36,11 @@ final class SignUpState extends Equatable {
 
   final bool sending;
 
-  /// The account exists and its session is starting.
-  final bool created;
+  /// The new account's session, handed to the next screen, which starts it
+  /// (onboarding's "preparing"). Null until the account exists.
+  final AuthTokens? session;
+
+  bool get created => session != null;
 
   /// The email already has an account: offer to sign in instead.
   final bool emailTaken;
@@ -84,7 +88,7 @@ final class SignUpState extends Equatable {
     Set<SignUpField>? refused,
     Map<SignUpField, int>? shakes,
     bool? sending,
-    bool? created,
+    AuthTokens? session,
     bool? emailTaken,
     Failure? Function()? failure,
   }) => SignUpState(
@@ -95,7 +99,7 @@ final class SignUpState extends Equatable {
     refused: refused ?? this.refused,
     shakes: shakes ?? this.shakes,
     sending: sending ?? this.sending,
-    created: created ?? this.created,
+    session: session ?? this.session,
     emailTaken: emailTaken ?? this.emailTaken,
     failure: failure != null ? failure() : this.failure,
   );
@@ -109,7 +113,7 @@ final class SignUpState extends Equatable {
     refused,
     shakes,
     sending,
-    created,
+    session,
     emailTaken,
     failure,
   ];

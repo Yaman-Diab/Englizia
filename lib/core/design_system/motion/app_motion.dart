@@ -100,6 +100,9 @@ abstract final class AppMotion {
   static const scaleSmall = 0.98;
   static const scaleTiny = 0.99;
 
+  /// A status mark (a check, a cross) grows in from this (designs).
+  static const scaleMark = 0.8;
+
   /// Whether the platform asks for animations to be removed or reduced
   /// (for example Android's "Remove animations").
   static bool reduceMotion(BuildContext context) =>
