@@ -21,8 +21,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Onboarding "how much English do you know?" (requirements v3.0 §4.2, in
 /// v0.2 per §27) for tracks entered by placement test. A beginner starts
-/// from the track's first level; anyone else takes the test now or later.
-/// The test needs a connection; starting without it never does.
+/// from the track's first level. "I know some English" records the choice
+/// and onboarding goes on; the test itself starts from "preparing", after
+/// the account. "Test later" starts from the first level. Offline, the test
+/// cannot be chosen, and a line says why.
 class LevelPage extends StatelessWidget {
   const LevelPage({
     required this.path,
@@ -38,6 +40,8 @@ class LevelPage extends StatelessWidget {
 
   /// The track's first level, where the learner starts; null when unknown.
   final ValueChanged<TrackLevel?> onStartFromBeginning;
+
+  /// The learner will take the placement test after the account.
   final VoidCallback onTakeTest;
 
   /// Starts from the first level too, the test left for later.
@@ -74,7 +78,7 @@ class LevelPage extends StatelessWidget {
           continueLabel: switch (state.choice) {
             null => 'common_continue'.tr(),
             EnglishLevelChoice.beginner => 'onboarding_level_beginner_cta'.tr(),
-            EnglishLevelChoice.some => 'onboarding_level_take_test'.tr(),
+            EnglishLevelChoice.some => 'common_continue'.tr(),
           },
           onContinue: switch (state.choice) {
             null => null,
@@ -106,7 +110,9 @@ class LevelPage extends StatelessWidget {
               description: 'onboarding_level_some_desc'.tr(),
               selected: some,
               large: true,
-              onTap: () => cubit.choose(EnglishLevelChoice.some),
+              onTap: state.online
+                  ? () => cubit.choose(EnglishLevelChoice.some)
+                  : null,
             ),
           ],
           details: Swap(
@@ -121,6 +127,28 @@ class LevelPage extends StatelessWidget {
   }
 
   static Widget _details(
+    LevelState state,
+    String levelName,
+    VoidCallback onRetry,
+  ) {
+    final details = _choiceDetails(state, levelName, onRetry);
+    if (state.online || state.testUnavailable) return details;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        OnboardingNotice(
+          icon: AppIcon.wifiOff,
+          text: 'onboarding_level_offline'.tr(),
+        ),
+        if (state.choice != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          details,
+        ],
+      ],
+    );
+  }
+
+  static Widget _choiceDetails(
     LevelState state,
     String levelName,
     VoidCallback onRetry,
@@ -141,25 +169,12 @@ class LevelPage extends StatelessWidget {
         text: 'onboarding_level_test_unavailable'.tr(),
       );
     }
-    final summary = state.summary;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (!state.online) ...[
-          OnboardingNotice(
-            icon: AppIcon.wifiOff,
-            text: 'onboarding_level_offline'.tr(),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        if (summary != null)
-          PlacementFacts(summary: summary)
-        else
-          AppStateView.error(
-            message: state.failure!.localizedMessage,
-            onRetry: onRetry,
-          ),
-      ],
-    );
+    return switch (state.summary) {
+      final summary? => PlacementFacts(summary: summary),
+      null => AppStateView.error(
+        message: state.failure!.localizedMessage,
+        onRetry: onRetry,
+      ),
+    };
   }
 }

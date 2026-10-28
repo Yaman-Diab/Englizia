@@ -79,7 +79,6 @@
   "onboarding_level_some": "I know some English",
   "onboarding_level_some_desc": "I understand simple sentences and want to know my level",
   "onboarding_level_some_reply": "Let's find your level so you don't repeat what you know",
-  "onboarding_level_take_test": "Continue to the test",
   "onboarding_level_test_later": "I'll take the test later",
   "onboarding_level_test_later_note": "You'll start from {level}; the test stays available in your profile",
   "onboarding_level_start_from": "You'll start from {level}",
@@ -98,7 +97,7 @@
     "other": "{} stages, maybe a short extra one"
   },
   "onboarding_level_dont_know": "You can choose “I don't know”",
-  "onboarding_level_offline": "The test needs an internet connection",
+  "onboarding_level_offline": "You can't choose the test offline; you can start from the beginning now",
   "onboarding_level_test_unavailable": "The test isn't available now; you'll start from the first level",
   "placement_intro_title": "Let's find your level",
   "common_save": "Save",

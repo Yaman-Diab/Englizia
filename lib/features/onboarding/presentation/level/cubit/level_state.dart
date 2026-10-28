@@ -27,7 +27,8 @@ final class LevelState extends Equatable {
   final TrackLevel? firstLevel;
   final Failure? failure;
 
-  /// The test needs a connection; starting from the beginning does not.
+  /// The test can only be chosen online; starting from the beginning
+  /// never needs a connection.
   final bool online;
 
   /// No published test version: the test is hidden, the first level stays.

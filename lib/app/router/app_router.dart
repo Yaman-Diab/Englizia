@@ -198,9 +198,10 @@ GoRouter createAppRouter(AppSessionController session) {
             child: LevelPage(
               path: path,
               onStartFromBeginning: next,
-              onTakeTest: () => context.push(
-                AppRoutes.onboardingPlacement,
-                extra: path.copyWith(placementTest: true),
+              onTakeTest: () => _pushNextStep(
+                context,
+                OnboardingStep.level,
+                path.copyWith(placementTest: true),
               ),
               onTestLater: next,
               onBack: () => context.pop(),

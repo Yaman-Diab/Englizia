@@ -79,7 +79,6 @@
   "onboarding_level_some": "أعرف بعض الإنجليزية",
   "onboarding_level_some_desc": "أفهم جملًا بسيطة وأريد أن أعرف مستواي",
   "onboarding_level_some_reply": "لنعرف مستواك حتى لا تعيد ما تعرفه",
-  "onboarding_level_take_test": "متابعة إلى الاختبار",
   "onboarding_level_test_later": "سأختبر لاحقًا",
   "onboarding_level_test_later_note": "ستبدأ من {level}، والاختبار متاح من ملفك الشخصي",
   "onboarding_level_start_from": "ستبدأ من {level}",
@@ -108,7 +107,7 @@
     "other": "{} مرحلة، وقد تُضاف مرحلة أخرى قصيرة"
   },
   "onboarding_level_dont_know": "يمكنك اختيار «لا أعرف»",
-  "onboarding_level_offline": "الاختبار يحتاج اتصالًا بالإنترنت",
+  "onboarding_level_offline": "دون اتصال لا يمكن اختيار الاختبار، ويمكنك البدء من الصفر الآن",
   "onboarding_level_test_unavailable": "الاختبار غير متاح الآن، وستبدأ من المستوى الأول",
   "placement_intro_title": "لنعرف مستواك",
   "common_save": "حفظ",

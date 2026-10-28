@@ -11,8 +11,8 @@ import 'package:englizia/features/tracks/domain/repositories/track_repository.da
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// "How much English do you know?": loads what the placement test takes and
-/// where a beginner starts, and follows the connection, since the test can
-/// only start online.
+/// where a beginner starts, and follows the connection: the test can only be
+/// chosen online, and losing the connection takes the choice back.
 class LevelCubit extends Cubit<LevelState> {
   LevelCubit(this._placement, this._tracks, this._connectivity)
     : super(const LevelState());
@@ -27,12 +27,10 @@ class LevelCubit extends Cubit<LevelState> {
   /// the connection.
   Future<void> start(String? trackId) async {
     _trackId = trackId;
-    _connection ??= _connectivity.onlineChanges.listen(
-      (online) => emit(state.copyWith(online: online)),
-    );
+    _connection ??= _connectivity.onlineChanges.listen(_setOnline);
     final online = await _connectivity.isOnline();
     if (isClosed) return;
-    emit(state.copyWith(online: online));
+    _setOnline(online);
     await load();
   }
 
@@ -67,8 +65,19 @@ class LevelCubit extends Cubit<LevelState> {
     );
   }
 
-  void choose(EnglishLevelChoice choice) =>
-      emit(state.copyWith(choice: () => choice));
+  void choose(EnglishLevelChoice choice) {
+    if (choice == EnglishLevelChoice.some && !state.online) return;
+    emit(state.copyWith(choice: () => choice));
+  }
+
+  void _setOnline(bool online) => emit(
+    state.copyWith(
+      online: online,
+      choice: !online && state.choice == EnglishLevelChoice.some
+          ? () => null
+          : null,
+    ),
+  );
 
   @override
   Future<void> close() async {

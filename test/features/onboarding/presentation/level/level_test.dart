@@ -94,13 +94,20 @@ void main() {
       cubit.choose(EnglishLevelChoice.some);
       expect(cubit.state.canTakeTest, isTrue);
 
+      // Losing the connection takes the test choice back; it cannot be
+      // chosen again until the connection returns.
       connectivity.online = false;
       await pumpEventQueue();
       expect(cubit.state.online, isFalse);
-      expect(cubit.state.canTakeTest, isFalse);
+      expect(cubit.state.choice, isNull);
+      cubit.choose(EnglishLevelChoice.some);
+      expect(cubit.state.choice, isNull);
+      cubit.choose(EnglishLevelChoice.beginner);
+      expect(cubit.state.choice, EnglishLevelChoice.beginner);
 
       connectivity.online = true;
       await pumpEventQueue();
+      cubit.choose(EnglishLevelChoice.some);
       expect(cubit.state.canTakeTest, isTrue);
     });
 
@@ -251,34 +258,41 @@ void main() {
         findsOneWidget,
       );
 
-      await tester.tap(find.text('onboarding_level_take_test'.tr()));
+      await tester.tap(find.text('common_continue'.tr()));
       await tester.tap(find.text('onboarding_level_test_later'.tr()));
       expect((tested, later), (true, true));
     });
 
-    testWidgets('offline, the test waits for the connection; later does not', (
+    testWidgets('offline, the test cannot be chosen and a line says why', (
       tester,
     ) async {
       final handle = tester.ensureSemantics();
-      var later = false;
-      final cubit = await pumpPage(tester, onTestLater: (_) => later = true);
+      final cubit = await pumpPage(tester);
       cubit.choose(EnglishLevelChoice.some);
       connectivity.online = false;
       await settle(tester);
 
+      expect(cubit.state.choice, isNull);
       expect(find.text('onboarding_level_offline'.tr()), findsOneWidget);
       expect(
         tester.getSemantics(find.text('onboarding_level_offline'.tr())),
         isSemantics(isLiveRegion: true),
       );
-      expect(continueButton(tester).onPressed, isNull);
-      await tester.tap(find.text('onboarding_level_test_later'.tr()));
-      expect(later, isTrue);
+      await tester.tap(find.text('onboarding_level_some'.tr()));
+      await settle(tester);
+      expect(cubit.state.choice, isNull);
+
+      // Starting from the beginning never needs a connection.
+      await tester.tap(find.text('onboarding_level_beginner'.tr()));
+      await settle(tester);
+      expect(continueButton(tester).onPressed, isNotNull);
 
       connectivity.online = true;
       await settle(tester);
       expect(find.text('onboarding_level_offline'.tr()), findsNothing);
-      expect(continueButton(tester).onPressed, isNotNull);
+      await tester.tap(find.text('onboarding_level_some'.tr()));
+      await settle(tester);
+      expect(cubit.state.choice, EnglishLevelChoice.some);
       handle.dispose();
     });
 
