@@ -67,7 +67,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     )
     // Silent until sounds are turned on (ADR 9).
     ..registerLazySingleton<SoundPlayer>(() => const SilentSoundPlayer())
-    ..registerLazySingleton<DeviceVolume>(() => const UnknownDeviceVolume())
+    ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
     ..registerFactory(() => SettingsCubit(sl()));
 }
 
