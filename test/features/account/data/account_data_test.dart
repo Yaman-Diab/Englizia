@@ -66,6 +66,9 @@ class _RecordingDataSource implements AccountRemoteDataSource {
       createAccount(request);
 
   @override
+  Future<void> requestPasswordReset(String email) async {}
+
+  @override
   Future<void> logOut(String refreshToken) async {
     if (fail) throw const NetworkException('connectionError');
   }

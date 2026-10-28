@@ -64,6 +64,10 @@ final class AccountRepositoryImpl implements AccountRepository {
     ),
   );
 
+  @override
+  Future<Result<void>> requestPasswordReset(String email) =>
+      guard(() => _remote.requestPasswordReset(email.trim()));
+
   // ASSUMPTION(api): the upgrade takes register's fields (docs/api/auth.md).
   @override
   Future<Result<AuthTokens>> upgradeGuest(NewAccount account) => guard(

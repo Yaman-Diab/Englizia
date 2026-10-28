@@ -25,6 +25,7 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.signIn: RoutePolicy.withoutAccount,
   AppRoutes.signInWithProvider: RoutePolicy.withoutAccount,
   AppRoutes.forgotPassword: RoutePolicy.withoutAccount,
+  AppRoutes.forgotPasswordSent: RoutePolicy.withoutAccount,
   AppRoutes.signUp: RoutePolicy.withoutAccount,
   AppRoutes.signUpWithProvider: RoutePolicy.withoutAccount,
   AppRoutes.legalTerms: RoutePolicy.public,
