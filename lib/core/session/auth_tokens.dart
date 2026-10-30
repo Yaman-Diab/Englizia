@@ -11,6 +11,7 @@ final class AuthTokens extends Equatable {
     this.kind = AccountKind.member,
     this.accessExpiresAt,
     this.refreshExpiresAt,
+    this.deviceId,
   });
 
   final String accessToken;
@@ -23,6 +24,10 @@ final class AuthTokens extends Equatable {
 
   /// When the refresh token stops working (UTC); null when unknown.
   final DateTime? refreshExpiresAt;
+
+  /// The id the server gave this phone, when the response had one. It outlives
+  /// these tokens, so it is kept in settings, not with them.
+  final String? deviceId;
 
   /// Whether the access token expires within [margin] of [now].
   bool expiresSoon(DateTime now, {required Duration margin}) =>
@@ -44,6 +49,7 @@ final class AuthTokens extends Equatable {
     kind: kind,
     accessExpiresAt: accessExpiresAt,
     refreshExpiresAt: refreshExpiresAt ?? this.refreshExpiresAt,
+    deviceId: deviceId,
   );
 
   @override
@@ -53,6 +59,7 @@ final class AuthTokens extends Equatable {
     kind,
     accessExpiresAt,
     refreshExpiresAt,
+    deviceId,
   ];
 
   // Tokens must never reach logs through string interpolation.

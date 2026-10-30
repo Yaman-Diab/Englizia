@@ -17,7 +17,7 @@ Backend: **.NET** (ASP.NET Core) REST API, separate team. Per `docs/product/dash
 | Errors | `error: {code, details}`, `details: [{field, code, message}]` or null. The app keys its behavior on `error.code` and shows its own Arabic text; `message` is only logged. Field names are normalized by the app (`$.Email` / `request.Email` / `Email` → `email`). ProblemDetails (RFC 9457) is still parsed as a fallback | confirmed |
 | Error codes | Dotted lower-case: `validation.failed` (400, with `details` codes such as `not_empty`), `auth.unauthenticated` (401, no or bad access token), `auth.refresh_token_invalid` (401 from refresh). Constants in `lib/core/network/api_error_codes.dart` | confirmed (these three); the full list is requested |
 | Auth | JWT Bearer access token with `expiresIn` seconds, plus a refresh token with `refreshTokenExpiresAt`, both in `TokenResponse`. The app refreshes 30 s before the access token expires and once more on a 401, sharing one refresh call; a 400/401/403 from refresh signs the user out | confirmed |
-| Devices | Login and register take `deviceId` (null on the first login; the server returns one in `TokenResponse`) and `platform` (`DevicePlatform`: `android`, `web`) | confirmed; `ios` is missing |
+| Devices | Login and register take `deviceId` (null on the first login; the server returns one in `TokenResponse`, which the app keeps on the phone, through sign-outs, and sends back) and `platform` (`DevicePlatform`: `android`, `web`) | confirmed; `ios` is missing |
 | User | `UserDto {id (uuid), userName, email?, displayName, emailVerified, roles[], timeZone, uiLanguage (ar\|en)}`, changed through `PUT /api/v1/app/me` | confirmed |
 | Rate limiting | Register and login document `429`; the app treats it as "wait and retry" and reads `Retry-After` in seconds when present | 429 confirmed, wait time not |
 | Localization | The app sends `Accept-Language` (`ar` / `en`); whether `message` is localized is unknown, and it is not shown anyway | to confirm |
@@ -83,9 +83,12 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
+| `/api/v1/app/placement/status` | GET | — | `{state, stage?, question?, lastLevel?, daysSinceResult?, daysUntilRetake?}` ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/password/forgot` | POST | `{email}` | none; the same answer whether or not the email has an account ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/password/reset/verify` | POST | `{token}` | none; `410` for a link expired, used or unknown ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/password/reset` | POST | `{token, password, deviceId, platform}` | `TokenResponse`; `410` as above, `400` for a refused password ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team
@@ -101,7 +104,7 @@ Paste-ready; each item names what the app needs and why.
 7. **The password policy and the full list of `error.code` values** per endpoint, kept in the OpenAPI document: the minimum password length (the app checks 8, S §4.3) and any name length limit as `minLength`/`maxLength`, and the codes for at least email taken (409 on register), wrong credentials (401 on login), account locked or disabled (403 on login), rate limited (429), and the `details` codes beyond `not_empty`. The app shows its own text per code.
 8. **`Retry-After` on 429** (seconds), so the app can tell the learner how long to wait after too many failed logins (§19.8).
 9. **Refresh semantics.** Confirm that 400/401/403 from refresh always mean the session is over (the app signs out on them) and anything else is transient; whether the refresh token rotates on every call (the app stores the new one when it comes back); and whether refresh should accept the expired access token header or ignore it.
-10. **Password recovery** as in [auth.md](auth.md): `POST /api/v1/auth/password/forgot` answering the same for any email, the one-hour single-use link (opening the app), and setting the new password; plus the Apple relay domain registered so the link reaches hidden Apple emails (S §5.1).
+10. **Password recovery** as in [auth.md](auth.md): `POST /api/v1/auth/password/forgot` answering the same for any email, the one-hour single-use link (`https://engleazia.com/reset-password?token=…&email=…`, opening the app, with `assetlinks.json` and apple-app-site-association on that host), checking it and setting the new password; plus the Apple relay domain registered so the link reaches hidden Apple emails (S §5.1).
 11. **App gate.** An endpoint for the minimum and recommended app version per platform (§19.2), e.g. `GET /api/v1/app/config`.
 12. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
 13. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).

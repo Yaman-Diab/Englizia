@@ -110,7 +110,8 @@ class PreparingCubit extends Cubit<PreparingState> {
           PreparingStepKind.grade ||
           PreparingStepKind.plan:
         // Router: "preparing" stays open when the session starts.
-        await _session.signIn(_account);
+        // Not saved, the learner would be signed out at the next open.
+        if (!await _session.signIn(_account)) return const StorageFailure();
         if (kind == PreparingStepKind.level) return _settleLevel();
         return null;
       case PreparingStepKind.unit:

@@ -23,6 +23,8 @@ class FakeAccountRepository implements AccountRepository {
     this.accountResults = const [Ok(memberTokens)],
     this.signInResults = const [Ok(memberTokens)],
     this.resetResults = const [Ok(null)],
+    this.linkResults = const [Ok(null)],
+    this.newPasswordResults = const [Ok(memberTokens)],
   });
 
   final List<Result<AuthTokens>> guestResults;
@@ -31,6 +33,10 @@ class FakeAccountRepository implements AccountRepository {
   final signIns = <(String, String)>[];
   final List<Result<void>> resetResults;
   final resetRequests = <String>[];
+  final List<Result<void>> linkResults;
+  final linkChecks = <String>[];
+  final List<Result<AuthTokens?>> newPasswordResults;
+  final newPasswords = <(String, String)>[];
   final guestAnswers = <OnboardingPath>[];
   final accounts = <NewAccount>[];
   final upgrades = <NewAccount>[];
@@ -72,6 +78,29 @@ class FakeAccountRepository implements AccountRepository {
     return resetResults[(resetRequests.length - 1).clamp(
       0,
       resetResults.length - 1,
+    )];
+  }
+
+  @override
+  Future<Result<void>> verifyPasswordLink(String token) async {
+    linkChecks.add(token);
+    await gate?.future;
+    return linkResults[(linkChecks.length - 1).clamp(
+      0,
+      linkResults.length - 1,
+    )];
+  }
+
+  @override
+  Future<Result<AuthTokens?>> resetPassword({
+    required String token,
+    required String password,
+  }) async {
+    newPasswords.add((token, password));
+    await gate?.future;
+    return newPasswordResults[(newPasswords.length - 1).clamp(
+      0,
+      newPasswordResults.length - 1,
     )];
   }
 

@@ -68,6 +68,9 @@ abstract final class AppMotion {
   /// The fastest bounce, for the most thrilled expression.
   static const characterFloatQuick = Duration(milliseconds: 800);
 
+  /// One nod of the guide while it listens.
+  static const characterNod = Duration(milliseconds: 900);
+
   /// One cycle of the small loops inside an expression: the talking dots,
   /// the drifting "z", sparkles twinkling.
   static const characterPulse = Duration(milliseconds: 1200);

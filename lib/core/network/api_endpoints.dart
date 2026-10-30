@@ -14,11 +14,17 @@ abstract final class ApiEndpoints {
   static const upgradeGuest = '/api/v1/auth/guest/upgrade';
   // ASSUMPTION(api): docs/api/auth.md.
   static const forgotPassword = '/api/v1/auth/password/forgot';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const verifyPasswordLink = '/api/v1/auth/password/reset/verify';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const resetPassword = '/api/v1/auth/password/reset';
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static const tracks = '/api/v1/app/tracks';
   // ASSUMPTION(api): docs/api/placement.md.
   static const placementSummary = '/api/v1/app/placement/summary';
+  // ASSUMPTION(api): docs/api/placement.md.
+  static const placementStatus = '/api/v1/app/placement/status';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
 

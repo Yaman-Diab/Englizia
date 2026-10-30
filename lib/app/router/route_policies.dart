@@ -17,15 +17,16 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.onboardingLevel: RoutePolicy.signedOutOnly,
   AppRoutes.onboardingReminder: RoutePolicy.signedOutOnly,
   AppRoutes.onboardingSaveProgress: RoutePolicy.signedOutOnly,
-  // Before the account (the level step) and after it (from preparing).
-  AppRoutes.onboardingPlacement: RoutePolicy.public,
   // Starts the session itself, so it must stay open when the session does.
   AppRoutes.onboardingPreparing: RoutePolicy.public,
   AppRoutes.onboardingKidWelcome: RoutePolicy.public,
   AppRoutes.signIn: RoutePolicy.withoutAccount,
   AppRoutes.signInWithProvider: RoutePolicy.withoutAccount,
-  AppRoutes.forgotPassword: RoutePolicy.withoutAccount,
-  AppRoutes.forgotPasswordSent: RoutePolicy.withoutAccount,
+  // A recovery link can open these on a phone that is signed in.
+  AppRoutes.forgotPassword: RoutePolicy.public,
+  AppRoutes.forgotPasswordSent: RoutePolicy.public,
+  AppRoutes.newPassword: RoutePolicy.public,
+  AppRoutes.passwordChanged: RoutePolicy.public,
   AppRoutes.signUp: RoutePolicy.withoutAccount,
   AppRoutes.signUpWithProvider: RoutePolicy.withoutAccount,
   AppRoutes.legalTerms: RoutePolicy.public,

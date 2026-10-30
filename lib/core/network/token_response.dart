@@ -49,6 +49,7 @@ abstract final class TokenResponse {
       kind: kind,
       accessExpiresAt: accessExpiresAt,
       refreshExpiresAt: refreshExpiresAt,
+      deviceId: json.readString('deviceId'),
     );
   }
 }

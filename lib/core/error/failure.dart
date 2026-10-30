@@ -23,6 +23,11 @@ final class NetworkFailure extends Failure {
   const NetworkFailure();
 }
 
+/// The phone could not save something it must keep (the session).
+final class StorageFailure extends Failure {
+  const StorageFailure();
+}
+
 final class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure({super.code, super.serverMessage});
 }
@@ -37,6 +42,11 @@ final class NotFoundFailure extends Failure {
 
 final class ConflictFailure extends Failure {
   const ConflictFailure({super.code, super.serverMessage});
+}
+
+/// A link from an email that is out of date or was used already.
+final class LinkExpiredFailure extends Failure {
+  const LinkExpiredFailure({super.code, super.serverMessage});
 }
 
 final class ValidationFailure extends Failure {

@@ -79,6 +79,32 @@ void main() {
     });
   });
 
+  test(
+    'a new account sends the saved device id and saves the server\'s',
+    () async {
+      final adapter = FakeHttpAdapter(
+        (_) => FakeResponse(201, body: exampleBody),
+      );
+      String? saved = 'device-1';
+      await AccountRepositoryImpl(
+        AccountRemoteDataSourceImpl(
+          ApiClient(
+            Dio(BaseOptions(baseUrl: 'https://api.test'))
+              ..httpClientAdapter = adapter,
+          ),
+        ),
+        tokens: FakeTokenStorage(),
+        installationId: () async => 'install-1',
+        savedDeviceId: () => saved,
+        saveDeviceId: (id) async => saved = id,
+        devicePlatform: 'android',
+      ).createAccount(account);
+
+      expect((adapter.requests.single.data! as Map)['deviceId'], 'device-1');
+      expect(saved, '00000000-0000-4000-8000-000000000000');
+    },
+  );
+
   group('AccountRemoteDataSourceImpl.createAccount', () {
     test('POST /api/v1/auth/register without the session token', () async {
       final adapter = FakeHttpAdapter(
@@ -128,6 +154,8 @@ void main() {
         AccountRemoteDataSourceImpl(client),
         tokens: FakeTokenStorage(),
         installationId: () async => 'install-1',
+        savedDeviceId: () => null,
+        saveDeviceId: (_) async {},
         devicePlatform: null,
       ).createAccount(account);
       expect((result as Err).failure, isA<ConflictFailure>());
@@ -151,6 +179,8 @@ void main() {
             source(),
             tokens: FakeTokenStorage(),
             installationId: () async => 'install-1',
+            savedDeviceId: () => null,
+            saveDeviceId: (_) async {},
             devicePlatform: 'android',
           ).createAccount(
             const NewAccount(

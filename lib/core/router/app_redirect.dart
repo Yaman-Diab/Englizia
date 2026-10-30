@@ -3,7 +3,8 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
-/// Route guard: splash until the session is known, then the policy of the
+/// Route guard: splash until the session is known (a public route needs no
+/// session, and a link that opened one would be lost), then the policy of the
 /// matched route decides. Policies come from `app/router/route_policies.dart`.
 /// Guests and members land on [homeLocation]; signed-out users on
 /// [signedOutLocation], the entry to onboarding and sign-in.
@@ -32,7 +33,9 @@ final class AppRedirect {
     final status = _status();
     final atSplash = location == splashLocation;
     if (status == SessionStatus.unknown) {
-      return atSplash ? null : splashLocation;
+      return atSplash || _policyFor(routePattern) == RoutePolicy.public
+          ? null
+          : splashLocation;
     }
     final hasSession = status != SessionStatus.signedOut;
     if (atSplash) return hasSession ? homeLocation : signedOutLocation;

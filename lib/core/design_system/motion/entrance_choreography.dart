@@ -43,6 +43,25 @@ abstract final class FormEntrance {
   static Duration field(int index) => firstField + fieldStagger * index;
 }
 
+/// "Password changed" (design), one moment under a second and a half after
+/// the page fades in: the badge grows, its check draws, the guide hops once,
+/// then the action fades in.
+abstract final class PasswordChangedEntrance {
+  static const badge = Duration(milliseconds: 250);
+  static const badgeGrow = AppMotion.fast;
+  static const check = Duration(milliseconds: 500);
+  static const checkDraw = Duration(milliseconds: 300);
+  static const hop = Duration(milliseconds: 800);
+  static const hopUp = Duration(milliseconds: 120);
+  static const hopDown = Duration(milliseconds: 180);
+  static const hopHeight = 10.0;
+  static const action = Duration(milliseconds: 1100);
+  static const actionFade = Duration(milliseconds: 200);
+
+  /// When the last element has arrived.
+  static Duration get settled => action + actionFade;
+}
+
 /// The mail scene (design "Check Email"): the envelope lands at once, then
 /// the letter slides up, then the guide peeks out.
 abstract final class MailSceneEntrance {

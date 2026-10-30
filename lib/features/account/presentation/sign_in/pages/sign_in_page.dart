@@ -9,12 +9,12 @@ import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
+import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/widgets/social_sign_in.dart';
-import 'package:englizia/features/account/presentation/widgets/account_notice.dart';
 import 'package:englizia/features/account/presentation/widgets/auth_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -217,7 +217,7 @@ class _SignInPageState extends State<SignInPage> {
               child: switch (state) {
                 SignInState(locked: true) => Padding(
                   padding: const EdgeInsetsDirectional.only(top: AppSpacing.lg),
-                  child: AccountNotice(
+                  child: NoticeCard(
                     icon: AppIcon.clock,
                     title: 'sign_in_locked'.tr(),
                     announcement: 'sign_in_locked_minutes'.plural(
@@ -227,7 +227,7 @@ class _SignInPageState extends State<SignInPage> {
                 ),
                 SignInState(wrongCredentials: true) => Padding(
                   padding: const EdgeInsetsDirectional.only(top: AppSpacing.lg),
-                  child: AccountNotice(
+                  child: NoticeCard(
                     icon: AppIcon.errorCircle,
                     error: true,
                     title: 'sign_in_wrong'.tr(),

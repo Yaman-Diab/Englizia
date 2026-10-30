@@ -60,9 +60,12 @@ class AppSessionController extends ChangeNotifier {
   }
 
   /// Starts a session with [tokens]: a guest's or a member's, as they say.
-  Future<void> signIn(AuthTokens tokens) async {
-    await _tokens.write(tokens);
+  /// False when the phone could not save them: the session still works, but
+  /// only until the app closes.
+  Future<bool> signIn(AuthTokens tokens) async {
+    final saved = await _tokens.write(tokens);
     _setStatus(_statusOf(tokens));
+    return saved;
   }
 
   /// Local sign-out. The auth feature calls the server logout first

@@ -11,7 +11,7 @@ lib/
 │   ├── app.dart       MaterialApp.router inside ScreenUtilInit; theme, locale, text-scale clamp, env banner
 │   ├── di.dart        configureDependencies(): core + every feature (main and the DI test call it)
 │   ├── router/        AppRoutes, route_policies (route → policy), createAppRouter
-│   └── shell/         SplashPage; FoundationPage (temporary home until the Learn tab exists)
+│   └── shell/         SplashPage; FoundationPage (temporary home until the Learn tab exists); PendingPage (placeholder routes, STATUS D-031)
 ├── core/              shared kernel — imports nothing from app/ or features/
 │   ├── config/        AppConfig (APP_ENV, BASE_URL from --dart-define-from-file)
 │   ├── result/        Result<T> (Ok/Err) · guard()
@@ -21,12 +21,12 @@ lib/
 │   ├── logging/       AppLogger · Redactor · CrashReporter (no-op until a provider is chosen)
 │   ├── network/       ApiClient · ApiException (server envelope) · NetworkException · TokenResponse · interceptors · DioFactory · JsonReader
 │   ├── session/       AuthTokens · AppSessionController (GoRouter refreshListenable)
-│   ├── storage/       TokenStorage (secure) · SettingsStorageService (SharedPreferences, non-sensitive)
+│   ├── storage/       TokenStorage (secure; says whether a write reached the phone) · SettingsStorageService (SharedPreferences, non-sensitive)
 │   ├── router/        RoutePolicy · AppRedirect
 │   ├── settings/      SettingsCubit (theme mode)
 │   ├── design_system/ palette · semantic colors · text styles · spacing · theme · widgets
 │   └── di/            sl · setupCoreDependencies
-└── features/<feature>/ domain · data · presentation (none yet)
+└── features/<feature>/ domain · data · presentation
 ```
 
 Dependency direction inside a feature: `presentation → domain ← data`. Rules are enforced by `test/core/architecture_test.dart`.
@@ -57,7 +57,8 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 ## Routing
 
 - `route_policies.dart` maps each route pattern to `public`, `signedOutOnly` (welcome, onboarding), `withoutAccount` (sign-in, sign-up; open to guests) or `requiresSession` (the app; guests and members); unlisted routes need a session.
-- `AppRedirect`: splash until the session is known, then guests and members go home and signed-out users to the welcome screen; after that the policy decides. The router listens to the session, so creating a guest account, signing in or out re-routes automatically.
+- `AppRedirect`: splash until the session is known (a public route does not wait, so a link that opened it is kept), then guests and members go home and signed-out users to the welcome screen; after that the policy decides. The router listens to the session, so creating a guest account, signing in or out re-routes automatically.
+- Links from outside arrive through Flutter's own deep linking, with no package: `AndroidManifest.xml` declares them and go_router takes the URL. The recovery link is the one route that reads its arguments from the URL (`token`, `email`), because the email is the only way in; every other sensitive argument goes in `extra`. Saving there starts the session the server returned, then goes to "password changed", which replaces the recovery screens on the stack.
 - A new account (guest or member) is not started by the screen that creates it: its session is handed to "preparing" (or, on the child path, the kids' welcome) as `PreparingArgs` in route `extra`, which starts it. That route is `public`, so it stays open when the session starts; the router's refresh drops `extra`, so the router keeps the arguments in memory until the learner leaves preparing.
 - The guard checks the route at the bottom of the stack, not one pushed over it: a pushed screen whose session changes navigates itself (a guest's upgrade from sign-up goes home).
 - Tabs (Learn / Practice / Speak / Me; kids: Learn / My words / Me) will use `StatefulShellRoute` when the first tab lands.
@@ -68,6 +69,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - `context.texts` (`AppTextStyles`): display 28/34, title 22/30, reading 20/36, body 16/26, caption 13/20 (+ `captionStrong`), button 16; weights 400/600; Arabic running text ≥ 1.7 line height. Sizes use `.sp` (design size 375×812).
 - `context.scheme` for Material widgets; component themes are set in `AppTheme` so widgets don't repeat overrides.
 - **Waiting looks the same everywhere:** `AppSpinner` (a faint ring with a turning quarter arc, from the account designs) is the only progress mark. A busy button is `AppButton(isLoading: true)`: it keeps its size and full color, takes no taps, and its label crossfades into the spinner in the label's color; a button built another way wraps its label in `ButtonLoadingLabel`. Pages and sections wait with `AppStateView.loading()`. No `CircularProgressIndicator`, no "loading…" text in buttons.
+- `NoticeCard` is the one card for something to know (information, error or primary tone), read out as soon as it appears.
 - Forms use `AppTextField` (label above, icon, focus halo, a `FieldMessage` under it with a mark per tone, `Shake` when a send is refused). A failed action shows `showFailureSnackBar` (error band, retry), which keeps what was typed.
 - `design_system/icons/` — `AppIcon` / `AppIconView`: the designs' own line icons as SVG (via `flutter_svg`, flutter.dev, 160/160 points); Material icons stay for generic controls. An icon is added when its screen is built.
 - `core/network/connectivity_service.dart` — `ConnectivityService` (online now, changes): connectivity_plus behind an interface; tests use `FakeConnectivityService`.
@@ -81,7 +83,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 ## Localization
 
 - easy_localization, `assets/translations/{ar,en}.json`, flat snake_case keys prefixed by feature.
-- Device language decides at first launch; Arabic is the fallback. The onboarding language step will set it explicitly.
+- Device language decides at first launch; Arabic is the fallback. The onboarding language step sets it explicitly.
 - Latin digits everywhere (scores, XP, CEFR codes stay consistent across both languages).
 - Directional layout only: `EdgeInsetsDirectional`, `AlignmentDirectional`, `PositionedDirectional`, `BorderRadiusDirectional`, `TextAlign.start/end`; icons that point somewhere use `matchTextDirection`. `architecture_test` rejects the physical left/right APIs anywhere in `lib/`. English content inside the Arabic UI (the reader) may still set `TextDirection.ltr`.
 - `Accept-Language` follows the UI language via `CurrentLanguage`; `test/app/app_test.dart` switches the language on screen and checks the header the app's Dio sends.

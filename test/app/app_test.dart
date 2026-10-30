@@ -7,11 +7,16 @@ import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/di/service_locator.dart';
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
+import 'package:englizia/features/account/presentation/forgot_password/pages/forgot_password_page.dart';
+import 'package:englizia/features/account/presentation/new_password/pages/new_password_page.dart';
+import 'package:englizia/features/account/presentation/password_changed/pages/password_changed_page.dart';
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -22,6 +27,7 @@ import 'package:englizia/features/settings/domain/repositories/settings_reposito
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -76,6 +82,241 @@ void main() {
   }
 
   const tokens = AuthTokens(accessToken: 'a', refreshToken: 'r');
+
+  group('the link in a recovery email', () {
+    late FakeAccountRepository accounts;
+
+    setUp(() {
+      accounts = FakeAccountRepository();
+      sl
+        ..unregister<AccountRepository>()
+        ..registerLazySingleton<AccountRepository>(() => accounts);
+    });
+
+    testWidgets('opens the app on its screen, through the session check', (
+      tester,
+    ) async {
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1&email=user@example.com';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      expect(find.byType(SplashPage), findsNothing);
+      expect(find.byType(NewPasswordPage), findsOneWidget);
+
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(NewPasswordPage), findsOneWidget);
+      expect(find.byType(WelcomePage), findsNothing);
+      expect(find.text('user@example.com'), findsOneWidget);
+      expect(accounts.linkChecks, ['t-1']);
+    });
+
+    testWidgets('reaches the app when it is already open', (tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.navigation.name,
+        SystemChannels.navigation.codec.encodeMethodCall(
+          const MethodCall('pushRouteInformation', {
+            'location': 'https://engleazia.com/reset-password?token=t-2',
+            'state': null,
+          }),
+        ),
+        (_) {},
+      );
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(NewPasswordPage), findsOneWidget);
+      expect(accounts.linkChecks, ['t-2']);
+    });
+
+    testWidgets('closing goes where the session belongs', (tester) async {
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.tap(find.byTooltip('common_close'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(WelcomePage), findsOneWidget);
+    });
+
+    testWidgets('expired: a new link starts from its email, and Google is '
+        'on sign-in', (tester) async {
+      accounts = FakeAccountRepository(
+        linkResults: const [Err(LinkExpiredFailure())],
+      );
+      tester.view.physicalSize = const Size(1080, 2400);
+      addTearDown(tester.view.resetPhysicalSize);
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1&email=user@example.com';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.tap(find.text('new_password_new_link'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(ForgotPasswordPage), findsOneWidget);
+      expect(find.text('user@example.com'), findsOneWidget);
+
+      await tester.tap(find.text('forgot_google'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(SignInPage), findsOneWidget);
+    });
+
+    testWidgets('saving goes on to the next step', (tester) async {
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.enterText(find.byType(TextField), 'password1');
+      await tester.pump();
+      await tester.tap(find.text('new_password_submit'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(NewPasswordPage), findsNothing);
+      expect(find.byType(PasswordChangedPage), findsOneWidget);
+      expect(find.text('password_changed_signed_in'.tr()), findsOneWidget);
+      expect(sl<AppSessionController>().status, SessionStatus.member);
+
+      await tester.tap(find.text('password_changed_continue'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(FoundationPage), findsOneWidget);
+    });
+
+    testWidgets('no session: sign in by hand, with the email there', (
+      tester,
+    ) async {
+      accounts = FakeAccountRepository(newPasswordResults: const [Ok(null)]);
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1&email=user@example.com';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.enterText(find.byType(TextField), 'password1');
+      await tester.pump();
+      await tester.tap(find.text('new_password_submit'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.byType(PasswordChangedPage), findsOneWidget);
+      expect(find.text('password_changed_sign_in'.tr()), findsOneWidget);
+      expect(sl<AppSessionController>().status, SessionStatus.signedOut);
+
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(SignInPage), findsOneWidget);
+      expect(find.text('user@example.com'), findsOneWidget);
+    });
+
+    testWidgets('no session ends this phone\'s member session', (tester) async {
+      accounts = FakeAccountRepository(newPasswordResults: const [Ok(null)]);
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await sl<AppSessionController>().signIn(tokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.enterText(find.byType(TextField), 'password1');
+      await tester.pump();
+      await tester.tap(find.text('new_password_submit'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.byType(PasswordChangedPage), findsOneWidget);
+      expect(sl<AppSessionController>().status, SessionStatus.signedOut);
+    });
+
+    testWidgets('the system\'s back leaves for home, not the password', (
+      tester,
+    ) async {
+      tester.binding.platformDispatcher.defaultRouteNameTestValue =
+          '/reset-password?token=t-1';
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.enterText(find.byType(TextField), 'password1');
+      await tester.pump();
+      await tester.tap(find.text('new_password_submit'.tr()));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+
+      await tester.binding.handlePopRoute();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(PasswordChangedPage), findsNothing);
+      expect(find.byType(NewPasswordPage), findsNothing);
+      expect(find.byType(FoundationPage), findsOneWidget);
+    });
+  });
 
   testWidgets('signing in leaves welcome for home', (tester) async {
     await tester.pumpWidget(

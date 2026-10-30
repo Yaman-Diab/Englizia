@@ -1,0 +1,10 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "state": "retakeLocked",
+    "daysUntilRetake": 12
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

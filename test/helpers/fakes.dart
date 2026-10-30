@@ -14,6 +14,9 @@ class FakeTokenStorage implements TokenStorage {
 
   AuthTokens? tokens;
   bool throwOnRead = false;
+
+  /// Whether the phone manages to save what is written.
+  bool savesWrites = true;
   int writeCount = 0;
   int clearCount = 0;
 
@@ -24,9 +27,10 @@ class FakeTokenStorage implements TokenStorage {
   }
 
   @override
-  Future<void> write(AuthTokens tokens) async {
+  Future<bool> write(AuthTokens tokens) async {
     this.tokens = tokens;
     writeCount++;
+    return savesWrites;
   }
 
   @override

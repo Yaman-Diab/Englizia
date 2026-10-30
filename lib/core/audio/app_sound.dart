@@ -26,4 +26,8 @@ enum AppSound {
 
   /// The word "Hello!", spoken alone.
   hello,
+
+  /// The sentence that tries the sound before the placement test: «Hello!
+  /// Can you hear this sentence clearly?», bundled, as it must play offline.
+  placementTrial,
 }

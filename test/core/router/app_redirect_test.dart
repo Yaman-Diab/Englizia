@@ -26,6 +26,11 @@ void main() {
     expect(resolve(SessionStatus.unknown, '/'), '/splash');
   });
 
+  test('a public route does not wait, so a link that opened it is kept', () {
+    expect(resolve(SessionStatus.unknown, '/about'), isNull);
+    expect(resolve(SessionStatus.signedOut, '/about'), isNull);
+  });
+
   test('leaves the splash for home with an account, else welcome', () {
     expect(resolve(SessionStatus.member, '/splash'), '/');
     expect(resolve(SessionStatus.guest, '/splash'), '/');

@@ -14,12 +14,17 @@ abstract final class AppRoutes {
   static const onboardingReminder = '/onboarding/reminder';
   static const onboardingSaveProgress = '/onboarding/save-progress';
   static const onboardingPlacement = '/onboarding/placement-test';
+  static const placementQuestions = '/onboarding/placement-test/questions';
   static const onboardingPreparing = '/onboarding/preparing';
   static const onboardingKidWelcome = '/onboarding/kid-welcome';
   static const signIn = '/sign-in';
   static const signInWithProvider = '/sign-in/provider';
   static const forgotPassword = '/forgot-password';
   static const forgotPasswordSent = '/forgot-password/sent';
+
+  /// The path of the link in a recovery email (docs/api/auth.md).
+  static const newPassword = '/reset-password';
+  static const passwordChanged = '/reset-password/done';
   static const signUp = '/sign-up';
   static const signUpWithProvider = '/sign-up/provider';
   static const legalTerms = '/legal/terms';

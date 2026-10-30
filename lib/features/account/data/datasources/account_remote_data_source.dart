@@ -4,9 +4,11 @@ import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/api_status_codes.dart';
+import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
+import 'package:englizia/features/account/data/models/reset_password_model.dart';
 import 'package:englizia/features/account/data/models/sign_in_model.dart';
 import 'package:flutter/services.dart';
 
@@ -21,6 +23,11 @@ abstract interface class AccountRemoteDataSource {
   Future<AuthTokens> signIn(Map<String, Object?> request);
 
   Future<void> requestPasswordReset(String email);
+
+  Future<void> verifyPasswordLink(String token);
+
+  /// [request] is [ResetPasswordModel.request].
+  Future<AuthTokens?> resetPassword(Map<String, Object?> request);
 
   /// Sent with the guest's own token; [request] is [RegisterModel.request].
   Future<AuthTokens> upgradeGuest(Map<String, Object?> request);
@@ -70,6 +77,24 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   );
 
   @override
+  Future<void> verifyPasswordLink(String token) => _client.post(
+    ApiEndpoints.verifyPasswordLink,
+    data: {'token': token},
+    options: ApiClient.publicOptions,
+  );
+
+  @override
+  Future<AuthTokens?> resetPassword(Map<String, Object?> request) async =>
+      ResetPasswordModel.tokens(
+        await _client.post(
+          ApiEndpoints.resetPassword,
+          data: request,
+          options: ApiClient.publicOptions,
+        ),
+        now: DateTime.now(),
+      );
+
+  @override
   Future<AuthTokens> upgradeGuest(Map<String, Object?> request) async =>
       RegisterModel.tokens(
         await _client.post(ApiEndpoints.upgradeGuest, data: request),
@@ -104,6 +129,13 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   static const signInPassword = 'password1';
   static const lockedEmail = 'locked@example.com';
   static const lockedFor = Duration(minutes: 5);
+
+  /// A recovery link with this token is out of date; with
+  /// [unreachableResetToken] it opens, and saving finds no connection; with
+  /// [noSessionResetToken] the password changes but no session starts.
+  static const expiredResetToken = 'expired';
+  static const unreachableResetToken = 'offline';
+  static const noSessionResetToken = 'no-session';
 
   final AssetBundle _bundle;
   final Duration latency;
@@ -146,6 +178,25 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   @override
   Future<void> requestPasswordReset(String email) =>
       Future<void>.delayed(latency);
+
+  @override
+  Future<void> verifyPasswordLink(String token) async {
+    await Future<void>.delayed(latency);
+    if (token == expiredResetToken) {
+      throw const ApiException(statusCode: ApiStatusCodes.gone);
+    }
+  }
+
+  @override
+  Future<AuthTokens?> resetPassword(Map<String, Object?> request) async {
+    await Future<void>.delayed(latency);
+    if (request['token'] == unreachableResetToken) {
+      throw const NetworkException('connectionError');
+    }
+    if (request['token'] == noSessionResetToken) return null;
+    final body = jsonDecode(await _bundle.loadString(registerAsset));
+    return ResetPasswordModel.tokens(body, now: DateTime.now());
+  }
 
   /// Answers like [createAccount]: the upgraded account is a member.
   @override
