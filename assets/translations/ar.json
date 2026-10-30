@@ -378,5 +378,68 @@
   "placement_sound_try": "في الاختبار أسئلة استماع. جرّب الصوت الآن",
   "placement_sound_hear": "هل تسمع الجملة بوضوح؟",
   "placement_sound_play": "تشغيل جملة تجربة الصوت",
-  "placement_sound_stop": "إيقاف الصوت"
+  "placement_sound_stop": "إيقاف الصوت",
+  "placement_stage_1": "المرحلة الأولى",
+  "placement_stage_2": "المرحلة الثانية",
+  "placement_stage_3": "المرحلة الثالثة",
+  "placement_question_of": "السؤال {n} من {total}، {instruction}",
+  "placement_q_vocabulary": "اختر الكلمة المناسبة",
+  "placement_q_grammar": "اختر ما يكمل الجملة",
+  "placement_q_reading": "اقرأ النص ثم أجب",
+  "placement_q_listening": "استمع ثم أجب",
+  "placement_blank": "فراغ",
+  "placement_passage": "نص القراءة",
+  "placement_dont_know": "لا أعرف",
+  "placement_next": "التالي",
+  "placement_go_on": "تابع",
+  "placement_stop": "إيقاف الاختبار",
+  "placement_stop_title": "تريد التوقف الآن؟",
+  "placement_stop_body": "إجاباتك محفوظة، وتتابع لاحقًا من السؤال نفسه.",
+  "placement_stop_now": "توقف الآن",
+  "placement_play": "تشغيل المقطع",
+  "placement_play_stop": "إيقاف",
+  "placement_plays_left": {
+    "zero": "لا استماع متبقٍ",
+    "one": "بقي استماع واحد",
+    "two": "يمكنك الاستماع مرتين",
+    "few": "يمكنك الاستماع {} مرات",
+    "many": "يمكنك الاستماع {} مرة",
+    "other": "يمكنك الاستماع {} مرة"
+  },
+  "placement_plays_done": {
+    "one": "استمعت مرة واحدة",
+    "two": "استمعت مرتين",
+    "few": "استمعت {} مرات",
+    "many": "استمعت {} مرة",
+    "other": "استمعت {} مرة"
+  },
+  "placement_audio_failed": "تعذّر تشغيل الصوت",
+  "placement_finished_stage_1": "أنهيت المرحلة الأولى",
+  "placement_finished_stage_2": "أنهيت المرحلة الثانية",
+  "placement_next_stage": "{stage}: {questions}، منها {listening}.",
+  "placement_next_stage_plain": "{stage}: {questions}.",
+  "placement_question_count": {
+    "one": "سؤال واحد",
+    "two": "سؤالان",
+    "few": "{} أسئلة",
+    "many": "{} سؤالًا",
+    "other": "{} سؤال"
+  },
+  "placement_listening_count": {
+    "one": "سؤال استماع واحد",
+    "two": "سؤالا استماع",
+    "few": "{} أسئلة استماع",
+    "many": "{} سؤال استماع",
+    "other": "{} سؤال استماع"
+  },
+  "placement_deciding_title": "بقيت أسئلة قليلة",
+  "placement_deciding_body": {
+    "one": "سؤال قصير لنحدد مستواك بدقة.",
+    "two": "سؤالان قصيران لنحدد مستواك بدقة.",
+    "few": "{} أسئلة قصيرة لنحدد مستواك بدقة.",
+    "many": "{} سؤالًا قصيرًا لنحدد مستواك بدقة.",
+    "other": "{} سؤال قصير لنحدد مستواك بدقة."
+  },
+  "placement_offline_title": "أنهيت المرحلة",
+  "placement_offline_next": "نحتاج الاتصال لننتقل إلى المرحلة التالية"
 }

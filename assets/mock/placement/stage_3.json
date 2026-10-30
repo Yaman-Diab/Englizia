@@ -1,0 +1,59 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "stage": 3,
+    "questions": [
+      {
+        "id": "q9",
+        "type": "vocabulary",
+        "before": "I usually",
+        "after": "breakfast at seven.",
+        "options": [
+          {
+            "id": "o1",
+            "text": "have"
+          },
+          {
+            "id": "o2",
+            "text": "make"
+          },
+          {
+            "id": "o3",
+            "text": "take"
+          },
+          {
+            "id": "o4",
+            "text": "do"
+          }
+        ]
+      },
+      {
+        "id": "q10",
+        "type": "grammar",
+        "before": "I",
+        "after": "to London twice.",
+        "options": [
+          {
+            "id": "o1",
+            "text": "have been"
+          },
+          {
+            "id": "o2",
+            "text": "went"
+          },
+          {
+            "id": "o3",
+            "text": "am going"
+          },
+          {
+            "id": "o4",
+            "text": "was"
+          }
+        ]
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

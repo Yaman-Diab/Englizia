@@ -11,6 +11,7 @@ import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
 import 'package:englizia/features/placement/data/models/placement_status_model.dart';
 import 'package:englizia/features/placement/data/models/placement_summary_model.dart';
+import 'package:englizia/features/placement/data/models/placement_test_models.dart';
 import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
 import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
@@ -44,6 +45,21 @@ class _FailingDataSource implements PlacementRemoteDataSource {
 
   @override
   Future<void> deferTest(String enrollmentId) => throw UnimplementedError();
+
+  @override
+  Future<PlacementAttemptModel> startAttempt() => throw UnimplementedError();
+
+  @override
+  Future<PlacementStageModel> getStage(String attemptId, int stage) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> sendAnswer(String attemptId, Map<String, Object?> answer) =>
+      throw UnimplementedError();
+
+  @override
+  Future<PlacementNextModel> completeStage(String attemptId, int stage) =>
+      throw UnimplementedError();
 }
 
 void main() {

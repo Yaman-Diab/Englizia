@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
@@ -8,12 +9,14 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
 import 'package:englizia/features/placement/data/models/placement_status_model.dart';
+import 'package:englizia/features/placement/data/models/placement_test_models.dart';
 import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
+import 'package:englizia/features/placement/domain/entities/placement_test.dart';
 import 'package:englizia/features/placement/domain/repositories/placement_repository.dart';
 
 final class PlacementRepositoryImpl implements PlacementRepository {
-  const PlacementRepositoryImpl(
+  PlacementRepositoryImpl(
     this._remote, {
     required SettingsStorageService settings,
     DateTime Function() now = DateTime.now,
@@ -23,6 +26,9 @@ final class PlacementRepositoryImpl implements PlacementRepository {
   final PlacementRemoteDataSource _remote;
   final SettingsStorageService _settings;
   final DateTime Function() _now;
+
+  /// The answers on their way, so they go one at a time and in order.
+  Future<void>? _sending;
 
   @override
   Future<Result<PlacementSummary>> getSummary() =>
@@ -44,9 +50,96 @@ final class PlacementRepositoryImpl implements PlacementRepository {
   @override
   Future<Result<void>> restartTest() => guard(() async {
     await _remote.restartTest();
-    // The saved status still names the question left behind.
+    // What is saved still names the question left behind.
     await _settings.clearPlacementStatus();
+    await _settings.clearPlacementProgress();
   });
+
+  @override
+  Future<Result<PlacementAttempt>> startAttempt() =>
+      guard(() async => (await _remote.startAttempt()).entity);
+
+  @override
+  Future<Result<List<PlacementQuestion>>> getStage(
+    String attemptId,
+    int stage,
+  ) => guard(() async => (await _remote.getStage(attemptId, stage)).questions);
+
+  @override
+  Future<void> saveAnswer(PlacementAnswer answer) async {
+    final progress = _progress(answer.attemptId);
+    progress.unsent.add({
+      'answerId': SettingsStorageService.randomId(),
+      'stage': answer.stage,
+      'questionId': answer.questionId,
+      'optionId': answer.optionId,
+      'dontKnow': answer.optionId == null,
+      'plays': answer.plays,
+    });
+    await _keep(progress);
+    unawaited(guard(() => _sendAll(answer.attemptId)));
+  }
+
+  @override
+  Future<Result<PlacementNextStage?>> completeStage(
+    String attemptId,
+    int stage,
+  ) => guard(() async {
+    await _sendAll(attemptId);
+    // One may have joined while the last ones were on their way.
+    await _sendAll(attemptId);
+    return (await _remote.completeStage(attemptId, stage)).entity;
+  });
+
+  @override
+  int unsentAnswers(String attemptId, int stage) => _progress(
+    attemptId,
+  ).unsent.where((answer) => answer['stage'] == stage).length;
+
+  @override
+  int playsUsed(String attemptId, String questionId) =>
+      _progress(attemptId).plays[questionId] ?? 0;
+
+  @override
+  Future<void> savePlays(String attemptId, String questionId, int plays) async {
+    final progress = _progress(attemptId);
+    progress.plays[questionId] = plays;
+    await _keep(progress);
+  }
+
+  /// What is kept for [attemptId]; anything kept for another one is over.
+  PlacementProgressModel _progress(String attemptId) {
+    final saved = PlacementProgressModel.decode(_settings.placementProgress);
+    return saved?.attemptId == attemptId
+        ? saved!
+        : PlacementProgressModel(attemptId);
+  }
+
+  Future<void> _keep(PlacementProgressModel progress) async {
+    try {
+      await _settings.setPlacementProgress(progress.encode());
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Saving placement answers failed');
+    }
+  }
+
+  Future<void> _sendAll(String attemptId) =>
+      _sending ??= _sendInOrder(attemptId).whenComplete(() => _sending = null);
+
+  Future<void> _sendInOrder(String attemptId) async {
+    while (true) {
+      final unsent = _progress(attemptId).unsent;
+      if (unsent.isEmpty) return;
+      final first = unsent.first;
+      await _remote.sendAnswer(attemptId, {
+        for (final entry in first.entries)
+          if (entry.key != 'stage') entry.key: entry.value,
+      });
+      final progress = _progress(attemptId);
+      progress.unsent.removeWhere((a) => a['answerId'] == first['answerId']);
+      await _keep(progress);
+    }
+  }
 
   @override
   Future<Result<void>> deferTest() => guard(() async {

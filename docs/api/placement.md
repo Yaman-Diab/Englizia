@@ -56,9 +56,53 @@ Status: **proposed**, mock (`assets/mock/placement/status_*.json`).
 
 ## `POST /api/v1/app/placement/attempts`
 
-«ابدأ من جديد»: `{ "restart": true }` throws away the unfinished test, and the questions then begin a new one. The app ignores the response for now; the questions screen will define what it needs from it.
+Opening the questions sends `{}`: the attempt to carry on with, the unfinished one or a new one. «ابدأ من جديد» first sends `{ "restart": true }`, which throws away the unfinished test.
 
-Status: given by the owner from the backend guide, **unconfirmed** by the backend developer, mock.
+```json
+{ "attemptId": "att_1", "stageSizes": [12, 15], "stage": 1, "answered": 8 }
+```
+
+`stageSizes` holds the stages known so far, `stage` the one to carry on with (from 1), and `answered` how many of its questions the server has. The server picks the form (A or B) and pins the published version here.
+
+Status: `restart` given by the owner from the backend guide, **unconfirmed**; the rest **proposed**, mock.
+
+## `GET /api/v1/app/placement/attempts/{id}/stages/{n}`
+
+All the questions of a stage at once, so it can't stop halfway for lack of a connection. **No answer keys, ever** (S §12.1). Options come in the order to show them, already shuffled for this learner.
+
+```json
+{
+  "stage": 1,
+  "questions": [
+    { "id": "q1", "type": "vocabulary", "before": "I usually", "after": "breakfast at seven.",
+      "options": [{ "id": "o1", "text": "have" }] },
+    { "id": "q3", "type": "reading", "passage": "…", "ask": "Why did Omar leave work early?", "options": [] },
+    { "id": "q4", "type": "listening", "audioUrl": "https://…", "maxPlays": 2, "ask": "What time does the train leave?", "options": [] }
+  ]
+}
+```
+
+`type` is `vocabulary`, `grammar`, `reading` or `listening`; the app writes each one's instruction itself. `maxPlays` comes from the test's version. A type the app doesn't know fails the whole stage.
+
+Status: **proposed**, mock (`assets/mock/placement/stage_*.json`).
+
+## `POST /api/v1/app/placement/attempts/{id}/answers`
+
+One answer, sent when given, and again until it arrives: `{ "answerId", "questionId", "optionId", "dontKnow", "plays" }`. `answerId` is made on the phone and stays the same, **so a repeat must not count twice**. `optionId` is null with `dontKnow: true`. `plays` is how often the clip was played.
+
+Status: **proposed**, mock.
+
+## `POST /api/v1/app/placement/attempts/{id}/stages/{n}/complete`
+
+Sent when a stage's answers have all arrived. The server marks it and answers with what follows, with no score:
+
+```json
+{ "next": { "stage": 2, "questionCount": 15, "listeningCount": 4, "deciding": false } }
+```
+
+`deciding: true` is the short stage on the edge of two levels. `"next": null` means the test is over and its result is ready. It must be safe to repeat, as the response can be lost.
+
+Status: **proposed**, mock.
 
 ## `PATCH /api/v1/app/enrollments/{id}`
 
@@ -70,4 +114,5 @@ Status: given by the owner from the backend guide, **unconfirmed** by the backen
 
 1. Confirm the path and field names, and that it is available without a token.
 2. Confirm `stages` counts the mandatory stages only, and the error for "no published version".
-3. Confirm the two actions above, with these details the app assumed: the `/api/v1/app/` prefix on both paths; where `enrollmentId` comes from (assumed: the status response); and `placement_state`, which is snake_case where every other field in the API is camelCase.
+3. Confirm the attempt's endpoints above, and that the status's `question` and the attempt's `answered` agree: the app continues from `answered` plus what it hasn't sent yet.
+4. Confirm the two actions above, with these details the app assumed: the `/api/v1/app/` prefix on both paths; where `enrollmentId` comes from (assumed: the status response); and `placement_state`, which is snake_case where every other field in the API is camelCase.

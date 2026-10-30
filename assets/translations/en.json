@@ -324,5 +324,53 @@
   "placement_sound_try": "The test has listening questions. Try the sound now",
   "placement_sound_hear": "Can you hear the sentence clearly?",
   "placement_sound_play": "Play the sentence that tries the sound",
-  "placement_sound_stop": "Stop the sound"
+  "placement_sound_stop": "Stop the sound",
+  "placement_stage_1": "First stage",
+  "placement_stage_2": "Second stage",
+  "placement_stage_3": "Third stage",
+  "placement_question_of": "Question {n} of {total}: {instruction}",
+  "placement_q_vocabulary": "Choose the right word",
+  "placement_q_grammar": "Choose what completes the sentence",
+  "placement_q_reading": "Read the text, then answer",
+  "placement_q_listening": "Listen, then answer",
+  "placement_blank": "blank",
+  "placement_passage": "Reading text",
+  "placement_dont_know": "I don't know",
+  "placement_next": "Next",
+  "placement_go_on": "Continue",
+  "placement_stop": "Stop the test",
+  "placement_stop_title": "Stop for now?",
+  "placement_stop_body": "Your answers are saved, and you can carry on later from the same question.",
+  "placement_stop_now": "Stop now",
+  "placement_play": "Play the clip",
+  "placement_play_stop": "Stop",
+  "placement_plays_left": {
+    "one": "One listen left",
+    "other": "You can listen {} times"
+  },
+  "placement_plays_done": {
+    "one": "You listened once",
+    "two": "You listened twice",
+    "other": "You listened {} times"
+  },
+  "placement_audio_failed": "Couldn't play the sound",
+  "placement_finished_stage_1": "You finished the first stage",
+  "placement_finished_stage_2": "You finished the second stage",
+  "placement_next_stage": "{stage}: {questions}, {listening} of them.",
+  "placement_next_stage_plain": "{stage}: {questions}.",
+  "placement_question_count": {
+    "one": "1 question",
+    "other": "{} questions"
+  },
+  "placement_listening_count": {
+    "one": "1 listening",
+    "other": "{} listening"
+  },
+  "placement_deciding_title": "Just a few questions left",
+  "placement_deciding_body": {
+    "one": "A short question to find your level exactly.",
+    "other": "{} short questions to find your level exactly."
+  },
+  "placement_offline_title": "You finished the stage",
+  "placement_offline_next": "We need a connection to move on to the next stage"
 }

@@ -84,7 +84,10 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/placement/status` | GET | — | `{state, stage?, question?, lastLevel?, daysSinceResult?, daysUntilRetake?}` ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/attempts` | POST | `{restart: true}` | ignored for now ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
+| `/api/v1/app/placement/attempts` | POST | `{}` or `{restart: true}` | `{attemptId, stageSizes, stage, answered}` ([placement.md](placement.md)) | `restart` from the backend guide, the rest proposed; mock |
+| `/api/v1/app/placement/attempts/{id}/stages/{n}` | GET | — | `{stage, questions}`, no answer keys ([placement.md](placement.md)) | proposed, mock |
+| `/api/v1/app/placement/attempts/{id}/answers` | POST | `{answerId, questionId, optionId, dontKnow, plays}` | none; safe to repeat ([placement.md](placement.md)) | proposed, mock |
+| `/api/v1/app/placement/attempts/{id}/stages/{n}/complete` | POST | — | `{next}`, null at the end ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |

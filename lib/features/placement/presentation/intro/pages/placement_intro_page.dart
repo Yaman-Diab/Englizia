@@ -17,6 +17,8 @@ import 'package:englizia/features/placement/domain/entities/placement_status.dar
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
 import 'package:englizia/features/placement/presentation/intro/widgets/listening_motion.dart';
+import 'package:englizia/features/placement/presentation/widgets/guide_circle.dart';
+import 'package:englizia/features/placement/presentation/widgets/scroll_edge_column.dart';
 import 'package:flutter/foundation.dart' show Unicode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,20 +54,13 @@ class PlacementIntroPage extends StatefulWidget {
 
 class _PlacementIntroPageState extends State<PlacementIntroPage> {
   static const _topBarHeight = 56.0;
-  static const _circle = 136.0;
-  static const _guide = 120.0;
-
-  /// The design stands the guide a little above the circle's middle.
-  static const _guideLift = 8.0;
   static const _subtitleMaxWidth = 300.0;
 
-  /// The thin line over the buttons shows while content is under them.
-  bool _moreBelow = false;
-
-  bool _follow(ScrollMetrics metrics) {
-    final more = metrics.extentAfter > 2;
-    if (more != _moreBelow) setState(() => _moreBelow = more);
-    return false;
+  /// Opens the questions; what they changed shows on the way back.
+  Future<void> _start() async {
+    final cubit = context.read<PlacementIntroCubit>();
+    await widget.onStart();
+    if (mounted) await cubit.load();
   }
 
   Future<void> _onDone(PlacementAction action) async {
@@ -137,10 +132,12 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
                     message: state.failure!.localizedMessage,
                     onRetry: cubit.load,
                   ),
-                  _ => _body(context, state),
+                  _ => ScrollEdgeColumn(
+                    body: _body(context, state),
+                    footer: _footer(context, state),
+                  ),
                 },
               ),
-              if (state.load == LoadStatus.ready) _footer(context, state),
             ],
           ),
         ),
@@ -184,104 +181,88 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
       ),
       _ => null,
     };
-    return NotificationListener<ScrollMetricsNotification>(
-      onNotification: (n) => _follow(n.metrics),
-      child: NotificationListener<ScrollUpdateNotification>(
-        onNotification: (n) => _follow(n.metrics),
-        child: SingleChildScrollView(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.xl,
-            0,
-            AppSpacing.xl,
-            AppSpacing.lg,
+    return SingleChildScrollView(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        0,
+        AppSpacing.xl,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        children: [
+          Entrance(
+            motion: EntranceMotion.pop,
+            delay: FormEntrance.header,
+            child: GuideCircle(
+              child: ListeningNod(
+                active: state.trying,
+                child: const Mascot(
+                  expression: MascotExpression.listen,
+                  prop: MascotProp.headphones,
+                  size: GuideCircle.guideSize,
+                ),
+              ),
+            ),
           ),
-          child: Column(
-            children: [
-              Entrance(
-                motion: EntranceMotion.pop,
-                delay: FormEntrance.header,
-                child: Container(
-                  width: _circle,
-                  height: _circle,
-                  padding: const EdgeInsetsDirectional.only(bottom: _guideLift),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: colors.primary.surface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: ListeningNod(
-                    active: state.trying,
-                    child: const Mascot(
-                      expression: MascotExpression.listen,
-                      prop: MascotProp.headphones,
-                      size: _guide,
-                    ),
+          const SizedBox(height: AppSpacing.md),
+          Entrance(
+            motion: EntranceMotion.up,
+            delay: FormEntrance.header,
+            child: Column(
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'placement_intro_title'.tr(),
+                    textAlign: TextAlign.center,
+                    style: texts.title.copyWith(color: colors.textPrimary),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Entrance(
-                motion: EntranceMotion.up,
-                delay: FormEntrance.header,
-                child: Column(
-                  children: [
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        'placement_intro_title'.tr(),
-                        textAlign: TextAlign.center,
-                        style: texts.title.copyWith(color: colors.textPrimary),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: _subtitleMaxWidth,
-                      ),
-                      child: Text(
-                        again
-                            ? 'placement_intro_subtitle_again'.tr()
-                            : 'placement_intro_subtitle'.tr(),
-                        textAlign: TextAlign.center,
-                        style: texts.body.copyWith(color: colors.textSecondary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (notice != null) ...[
-                const SizedBox(height: AppSpacing.lg),
-                Entrance(
-                  motion: EntranceMotion.up,
-                  delay: FormEntrance.field(0),
-                  child: notice,
+                const SizedBox(height: AppSpacing.sm),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _subtitleMaxWidth,
+                  ),
+                  child: Text(
+                    again
+                        ? 'placement_intro_subtitle_again'.tr()
+                        : 'placement_intro_subtitle'.tr(),
+                    textAlign: TextAlign.center,
+                    style: texts.body.copyWith(color: colors.textSecondary),
+                  ),
                 ),
               ],
-              const SizedBox(height: AppSpacing.lg),
-              for (final (i, (icon, text)) in facts.indexed) ...[
-                if (i > 0)
-                  const SizedBox(height: AppSpacing.lg - AppSpacing.xxs),
-                Entrance(
-                  motion: EntranceMotion.up,
-                  delay: FormEntrance.field(i),
-                  child: _Fact(icon: icon, text: text),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              Entrance(
-                motion: EntranceMotion.up,
-                delay: FormEntrance.action,
-                child: _SoundCheck(trying: state.trying),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (notice != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            Entrance(
+              motion: EntranceMotion.up,
+              delay: FormEntrance.field(0),
+              child: notice,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          for (final (i, (icon, text)) in facts.indexed) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.lg - AppSpacing.xxs),
+            Entrance(
+              motion: EntranceMotion.up,
+              delay: FormEntrance.field(i),
+              child: _Fact(icon: icon, text: text),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          Entrance(
+            motion: EntranceMotion.up,
+            delay: FormEntrance.action,
+            child: _SoundCheck(trying: state.trying),
+          ),
+        ],
       ),
     );
   }
 
   Widget _footer(BuildContext context, PlacementIntroState state) {
-    final colors = context.colors;
     final status = state.status;
     final levelName = state.firstLevel?.name.of(context.locale.languageCode);
     final start = switch (status) {
@@ -316,15 +297,7 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
         : state.testUnavailable
         ? 'onboarding_level_test_unavailable'.tr()
         : null;
-    return AnimatedContainer(
-      duration: AppMotion.resolve(context, AppMotion.quick),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: _moreBelow ? colors.border : Colors.transparent,
-          ),
-        ),
-      ),
+    return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.xl,
         AppSpacing.sm,
@@ -346,7 +319,7 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
             AppButton(
               label: start,
               size: AppButtonSize.large,
-              onPressed: state.canStart ? widget.onStart : null,
+              onPressed: state.canStart ? _start : null,
             ),
             if (other != null) ...[
               const SizedBox(height: AppSpacing.xxs),

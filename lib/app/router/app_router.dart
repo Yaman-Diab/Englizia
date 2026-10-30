@@ -51,6 +51,8 @@ import 'package:englizia/features/onboarding/presentation/save_progress/pages/sa
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
 import 'package:englizia/features/placement/presentation/intro/pages/placement_intro_page.dart';
+import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
+import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
@@ -376,9 +378,19 @@ GoRouter createAppRouter(AppSessionController session) {
           );
         },
       ),
-      // The test's questions are not built yet.
       GoRoute(
         path: AppRoutes.placementQuestions,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<PlacementTestCubit>()..start(),
+          child: PlacementTestPage(
+            onStop: () => context.pop(),
+            onFinished: () => context.go(AppRoutes.placementResult),
+          ),
+        ),
+      ),
+      // The test's result is not built yet.
+      GoRoute(
+        path: AppRoutes.placementResult,
         builder: (_, _) => PendingPage(title: 'placement_intro_title'.tr()),
       ),
       GoRoute(

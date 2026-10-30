@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/device_volume.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
@@ -135,6 +136,33 @@ class FakeDeviceVolume implements DeviceVolume {
 }
 
 /// Records the sounds asked for; plays nothing.
+/// Loads in a given [length], or fails while [fails] holds it.
+class FakeClipPlayer implements ClipPlayer {
+  FakeClipPlayer({this.length = const Duration(seconds: 4), this.fails = 0});
+
+  final Duration length;
+  int fails;
+  final loaded = <String>[];
+  var played = 0;
+  var stopped = 0;
+
+  @override
+  Future<Duration?> load(String url) async {
+    loaded.add(url);
+    if (fails > 0) {
+      fails--;
+      return null;
+    }
+    return length;
+  }
+
+  @override
+  Future<void> play() async => played++;
+
+  @override
+  Future<void> stop() async => stopped++;
+}
+
 class FakeSoundPlayer implements SoundPlayer {
   final played = <AppSound>[];
 

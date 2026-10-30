@@ -68,6 +68,17 @@ abstract final class AppMotion {
   /// The fastest bounce, for the most thrilled expression.
   static const characterFloatQuick = Duration(milliseconds: 800);
 
+  /// A step of a flow leaving, then the next one arriving ([SlideSwap]).
+  static const stepOut = Duration(milliseconds: 110);
+  static const stepOutReduced = Duration(milliseconds: 100);
+
+  /// A new part joining a progress bar.
+  static const barGrow = Duration(milliseconds: 450);
+
+  /// A bottom sheet coming up, and going down a little faster.
+  static const sheetIn = Duration(milliseconds: 300);
+  static const sheetOut = Duration(milliseconds: 220);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 
