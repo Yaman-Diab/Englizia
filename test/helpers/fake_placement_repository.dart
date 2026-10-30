@@ -1,4 +1,6 @@
+import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/features/placement/domain/entities/placement_result.dart';
 import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
@@ -49,6 +51,39 @@ const testListening = PlacementQuestion(
   options: testOptions,
 );
 
+const testLevels = [
+  PlacementLevel(
+    id: 'pre',
+    code: 'Pre-A1',
+    name: LocalizedText(ar: 'البداية', en: 'Beginning'),
+    canDo: [LocalizedText(ar: 'تعرّف بنفسك', en: 'Introduce yourself')],
+  ),
+  PlacementLevel(
+    id: 'a1',
+    code: 'A1',
+    name: LocalizedText(ar: 'مبتدئ', en: 'Beginner'),
+    canDo: [LocalizedText(ar: 'تسأل أسئلة بسيطة', en: 'Ask simple questions')],
+  ),
+  PlacementLevel(
+    id: 'a2',
+    code: 'A2',
+    name: LocalizedText(ar: 'أساسي', en: 'Elementary'),
+    canDo: [LocalizedText(ar: 'تتحدث عن يومك', en: 'Talk about your day')],
+  ),
+];
+
+const testSkills = [
+  PlacementSkill(kind: PlacementSkillKind.vocabulary, score: 1),
+  PlacementSkill(kind: PlacementSkillKind.grammar, score: .75),
+  PlacementSkill(kind: PlacementSkillKind.reading, score: .5),
+];
+
+const testResult = PlacementResult(
+  levels: testLevels,
+  levelIndex: 2,
+  skills: testSkills,
+);
+
 const testPlacementSummary = PlacementSummary(
   minMinutes: 12,
   maxMinutes: 15,
@@ -67,6 +102,8 @@ class FakePlacementRepository implements PlacementRepository {
       Ok([testVocabulary, testGrammar]),
     ],
     this.completions = const [Ok(null)],
+    this.placementResults = const [Ok(testResult)],
+    this.accepts = const [Ok(null)],
   ]);
 
   final List<Result<PlacementSummary>> results;
@@ -90,6 +127,10 @@ class FakePlacementRepository implements PlacementRepository {
   final answers = <PlacementAnswer>[];
   final plays = <String, int>{};
   var unsent = 0;
+  final List<Result<PlacementResult>> placementResults;
+  final List<Result<void>> accepts;
+  var resultCalls = 0;
+  final accepted = <String>[];
 
   @override
   Future<Result<PlacementSummary>> getSummary() async =>
@@ -148,6 +189,16 @@ class FakePlacementRepository implements PlacementRepository {
     String questionId,
     int plays,
   ) async => this.plays[questionId] = plays;
+
+  @override
+  Future<Result<PlacementResult>> getResult(String attemptId) async =>
+      placementResults[(resultCalls++).clamp(0, placementResults.length - 1)];
+
+  @override
+  Future<Result<void>> acceptLevel(String attemptId, String levelId) async {
+    accepted.add(levelId);
+    return accepts[(accepted.length - 1).clamp(0, accepts.length - 1)];
+  }
 
   Result<void> _action() =>
       actions[(restarts + defers - 1).clamp(0, actions.length - 1)];

@@ -9,6 +9,7 @@ import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
+import 'package:englizia/features/placement/data/models/placement_result_model.dart';
 import 'package:englizia/features/placement/data/models/placement_status_model.dart';
 import 'package:englizia/features/placement/data/models/placement_summary_model.dart';
 import 'package:englizia/features/placement/data/models/placement_test_models.dart';
@@ -59,6 +60,14 @@ class _FailingDataSource implements PlacementRemoteDataSource {
 
   @override
   Future<PlacementNextModel> completeStage(String attemptId, int stage) =>
+      throw UnimplementedError();
+
+  @override
+  Future<PlacementResultModel> getResult(String attemptId) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> acceptLevel(String attemptId, String levelId) =>
       throw UnimplementedError();
 }
 

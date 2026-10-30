@@ -1,4 +1,5 @@
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/features/placement/domain/entities/placement_result.dart';
 import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
@@ -42,6 +43,12 @@ abstract interface class PlacementRepository {
   int playsUsed(String attemptId, String questionId);
 
   Future<void> savePlays(String attemptId, String questionId, int plays);
+
+  /// The result of a finished attempt, marked by the server.
+  Future<Result<PlacementResult>> getResult(String attemptId);
+
+  /// Starts the learner from [levelId]: the one measured or the one below.
+  Future<Result<void>> acceptLevel(String attemptId, String levelId);
 
   /// Puts the test off: the learner starts from the track's first level, and
   /// the test stays available.

@@ -1,0 +1,139 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "levelId": "lvl_b2",
+    "levels": [
+      {
+        "id": "lvl_pre_a1",
+        "code": "Pre-A1",
+        "name": {
+          "ar": "البداية",
+          "en": "Beginning"
+        },
+        "canDo": [
+          {
+            "ar": "تعرّف بنفسك وتقول اسمك وبلدك",
+            "en": "Introduce yourself and say your name and country"
+          },
+          {
+            "ar": "تقرأ الحروف الإنجليزية وتنطق كلمات يومية",
+            "en": "Read English letters and say everyday words"
+          },
+          {
+            "ar": "تفهم التحيات والأرقام البسيطة",
+            "en": "Understand greetings and simple numbers"
+          }
+        ]
+      },
+      {
+        "id": "lvl_a1",
+        "code": "A1",
+        "name": {
+          "ar": "مبتدئ",
+          "en": "Beginner"
+        },
+        "canDo": [
+          {
+            "ar": "تعرّف بنفسك وتسأل أسئلة بسيطة",
+            "en": "Introduce yourself and ask simple questions"
+          },
+          {
+            "ar": "تفهم كلمات وجملًا مألوفة عن حياتك",
+            "en": "Understand familiar words and sentences about your life"
+          },
+          {
+            "ar": "تملأ نموذجًا باسمك وعنوانك",
+            "en": "Fill in a form with your name and address"
+          }
+        ]
+      },
+      {
+        "id": "lvl_a2",
+        "code": "A2",
+        "name": {
+          "ar": "أساسي",
+          "en": "Elementary"
+        },
+        "canDo": [
+          {
+            "ar": "تتحدث عن يومك وعائلتك بجمل بسيطة",
+            "en": "Talk about your day and family in simple sentences"
+          },
+          {
+            "ar": "تفهم الإعلانات والرسائل القصيرة",
+            "en": "Understand notices and short messages"
+          },
+          {
+            "ar": "تسأل عن الطريق وتفهم الإجابة",
+            "en": "Ask for directions and understand the answer"
+          }
+        ]
+      },
+      {
+        "id": "lvl_b1",
+        "code": "B1",
+        "name": {
+          "ar": "متوسط",
+          "en": "Intermediate"
+        },
+        "canDo": [
+          {
+            "ar": "تحكي تجربة مررت بها وتشرح رأيك باختصار",
+            "en": "Tell about an experience and briefly explain your opinion"
+          },
+          {
+            "ar": "تفهم الفكرة الرئيسية في حديث واضح",
+            "en": "Understand the main idea of clear speech"
+          },
+          {
+            "ar": "تتعامل مع أغلب مواقف السفر",
+            "en": "Handle most travel situations"
+          }
+        ]
+      },
+      {
+        "id": "lvl_b2",
+        "code": "B2",
+        "name": {
+          "ar": "فوق المتوسط",
+          "en": "Upper intermediate"
+        },
+        "canDo": [
+          {
+            "ar": "تناقش موضوعًا مألوفًا وتدافع عن رأيك",
+            "en": "Discuss a familiar topic and defend your opinion"
+          },
+          {
+            "ar": "تفهم مقالات وتقارير عن قضايا معاصرة",
+            "en": "Understand articles and reports on current issues"
+          },
+          {
+            "ar": "تتحدث بطلاقة دون أن تبحث كثيرًا عن الكلمات",
+            "en": "Speak fluently without searching much for words"
+          }
+        ]
+      }
+    ],
+    "skills": [
+      {
+        "skill": "vocabulary",
+        "score": 0.9
+      },
+      {
+        "skill": "grammar",
+        "score": 0.8
+      },
+      {
+        "skill": "reading",
+        "score": 1
+      },
+      {
+        "skill": "listening",
+        "score": 0.7
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

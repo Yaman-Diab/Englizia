@@ -36,6 +36,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - Onboarding "how much English do you know?": start from the first level, or take the placement test now or later. Shows the test's duration and stages from the server, and waits for a connection before the test.
 - The placement test's intro: what the test takes, and whether it's your first, one left unfinished, or a retake that's open or not yet. Offline it shows your last known state, with the button coming back by itself. Starting over and starting with no test tell the server first. The sound check doesn't play a sound yet.
 - The placement test's questions: vocabulary, grammar, reading and listening, one at a time, with no feedback and no score. Answers are kept on the phone, so a stage that ends offline only waits. Stop whenever you like and carry on from the same question. Listening doesn't play a sound yet.
+- The placement test's result: the guide climbs a ladder up to your estimated level, then what you can do and how your skills compare, with no numbers. You can start one level lower. Offline, your answers are safe and the result waits.
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Changed

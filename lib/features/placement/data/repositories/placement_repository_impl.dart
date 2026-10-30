@@ -10,6 +10,7 @@ import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
 import 'package:englizia/features/placement/data/models/placement_status_model.dart';
 import 'package:englizia/features/placement/data/models/placement_test_models.dart';
+import 'package:englizia/features/placement/domain/entities/placement_result.dart';
 import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
@@ -106,6 +107,20 @@ final class PlacementRepositoryImpl implements PlacementRepository {
     progress.plays[questionId] = plays;
     await _keep(progress);
   }
+
+  @override
+  Future<Result<PlacementResult>> getResult(String attemptId) =>
+      guard(() async {
+        final result = await _remote.getResult(attemptId);
+        // The attempt is over: nothing is left to send or to remember.
+        await _settings.clearPlacementProgress();
+        await _settings.clearPlacementStatus();
+        return result.entity;
+      });
+
+  @override
+  Future<Result<void>> acceptLevel(String attemptId, String levelId) =>
+      guard(() => _remote.acceptLevel(attemptId, levelId));
 
   /// What is kept for [attemptId]; anything kept for another one is over.
   PlacementProgressModel _progress(String attemptId) {

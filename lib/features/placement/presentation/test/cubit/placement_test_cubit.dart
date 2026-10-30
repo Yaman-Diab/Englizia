@@ -164,6 +164,9 @@ class PlacementTestCubit extends Cubit<PlacementTestState> {
   final PlacementRepository _placement;
   final ClipPlayer _player;
   String _attemptId = '';
+
+  /// The attempt in progress, whose result follows it.
+  String get attemptId => _attemptId;
   Timer? _clipEnd;
 
   /// The question whose answer is already kept, when closing its stage failed

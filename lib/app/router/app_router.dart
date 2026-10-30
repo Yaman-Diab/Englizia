@@ -51,6 +51,8 @@ import 'package:englizia/features/onboarding/presentation/save_progress/pages/sa
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
 import 'package:englizia/features/placement/presentation/intro/pages/placement_intro_page.dart';
+import 'package:englizia/features/placement/presentation/result/cubit/placement_result_cubit.dart';
+import 'package:englizia/features/placement/presentation/result/pages/placement_result_page.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
 import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
@@ -384,14 +386,23 @@ GoRouter createAppRouter(AppSessionController session) {
           create: (_) => sl<PlacementTestCubit>()..start(),
           child: PlacementTestPage(
             onStop: () => context.pop(),
-            onFinished: () => context.go(AppRoutes.placementResult),
+            // `go` leaves the test behind: back never returns to it.
+            onFinished: (attemptId) =>
+                context.go(AppRoutes.placementResult, extra: attemptId),
           ),
         ),
       ),
-      // The test's result is not built yet.
       GoRoute(
         path: AppRoutes.placementResult,
-        builder: (_, _) => PendingPage(title: 'placement_intro_title'.tr()),
+        redirect: (_, state) => state.extra is String ? null : AppRoutes.home,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              sl<PlacementResultCubit>(param1: state.extra! as String)..load(),
+          child: PlacementResultPage(
+            onStart: () => context.go(AppRoutes.home),
+            onLeave: () => context.go(AppRoutes.home),
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.signIn,

@@ -104,6 +104,31 @@ Sent when a stage's answers have all arrived. The server marks it and answers wi
 
 Status: **proposed**, mock.
 
+## `GET /api/v1/app/placement/attempts/{id}/result`
+
+The result of a finished attempt. An estimate; the app shows no numbers, so `score` only compares the skills with one another, on any scale.
+
+```json
+{
+  "levelId": "lvl_a2",
+  "levels": [
+    { "id": "lvl_a2", "code": "A2", "name": { "ar": "أساسي", "en": "Elementary" },
+      "canDo": [{ "ar": "تتحدث عن يومك…", "en": "Talk about your day…" }] }
+  ],
+  "skills": [{ "skill": "vocabulary", "score": 1.0 }]
+}
+```
+
+`levels` are all the track's levels from the first, as the ladder shows them and any can become the start. `canDo` comes from the panel: for the first level it says what the first week teaches. `skill` is `vocabulary`, `grammar`, `reading` or `listening`; one the app doesn't know is left out. A `levelId` not in `levels` is an error. The server should have the result ready when the last stage closes; the app waits on this one request, with no polling.
+
+Status: **proposed**, mock (`assets/mock/placement/result_*.json`).
+
+## `POST /api/v1/app/placement/attempts/{id}/accept`
+
+«ابدأ من …»: `{ "levelId": "lvl_a2" }`, the level measured or the one below, which is where the learner starts. Leaving the screen another way sends nothing, so **the server should start the learner at the measured level until told otherwise**. It should also keep the result for "Me" (S §12.2).
+
+Status: **proposed**, mock.
+
 ## `PATCH /api/v1/app/enrollments/{id}`
 
 «ابدأ من البداية دون اختبار»: `{ "placement_state": "deferred" }` starts the learner from the track's first level, with the test still available from "Me". The app then goes home. `{id}` is `enrollmentId` from the status above.

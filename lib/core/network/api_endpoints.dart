@@ -43,6 +43,14 @@ abstract final class ApiEndpoints {
       '/api/v1/app/placement/attempts/$attemptId/stages/$stage/complete';
 
   // ASSUMPTION(api): docs/api/placement.md.
+  static String placementResult(String attemptId) =>
+      '/api/v1/app/placement/attempts/$attemptId/result';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String placementAccept(String attemptId) =>
+      '/api/v1/app/placement/attempts/$attemptId/accept';
+
+  // ASSUMPTION(api): docs/api/placement.md.
   static String enrollment(String enrollmentId) =>
       '/api/v1/app/enrollments/$enrollmentId';
 

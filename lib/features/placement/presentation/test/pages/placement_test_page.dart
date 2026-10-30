@@ -33,8 +33,8 @@ class PlacementTestPage extends StatelessWidget {
   /// The learner stopped for now; the answers are kept.
   final VoidCallback onStop;
 
-  /// The last stage closed: the result follows.
-  final VoidCallback onFinished;
+  /// The last stage of this attempt closed: its result follows.
+  final ValueChanged<String> onFinished;
 
   static const _topBarHeight = 56.0;
 
@@ -59,7 +59,8 @@ class PlacementTestPage extends StatelessWidget {
     listeners: [
       BlocListener<PlacementTestCubit, PlacementTestState>(
         listenWhen: (before, now) => now.finished && !before.finished,
-        listener: (_, _) => onFinished(),
+        listener: (context, _) =>
+            onFinished(context.read<PlacementTestCubit>().attemptId),
       ),
       BlocListener<PlacementTestCubit, PlacementTestState>(
         listenWhen: (before, now) =>

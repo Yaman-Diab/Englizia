@@ -608,7 +608,7 @@ void main() {
           value: cubit,
           child: PlacementTestPage(
             onStop: () => stops++,
-            onFinished: () => finishes++,
+            onFinished: (_) => finishes++,
           ),
         ),
         locale: layout?.locale ?? const Locale('ar'),
@@ -728,7 +728,7 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: BlocProvider.value(
             value: cubit,
-            child: PlacementTestPage(onStop: () {}, onFinished: () {}),
+            child: PlacementTestPage(onStop: () {}, onFinished: (_) {}),
           ),
         ),
       );
@@ -842,7 +842,7 @@ void main() {
         await tester.pumpLocalized(
           BlocProvider.value(
             value: cubit,
-            child: PlacementTestPage(onStop: () {}, onFinished: () {}),
+            child: PlacementTestPage(onStop: () {}, onFinished: (_) {}),
           ),
         );
         await tester.pump(const Duration(seconds: 1));

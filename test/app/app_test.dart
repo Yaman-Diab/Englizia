@@ -26,6 +26,8 @@ import 'package:englizia/features/onboarding/presentation/preparing/preparing_ar
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/placement/domain/repositories/placement_repository.dart';
 import 'package:englizia/features/placement/presentation/intro/pages/placement_intro_page.dart';
+import 'package:englizia/features/placement/presentation/result/pages/placement_result_page.dart';
+import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
@@ -482,6 +484,57 @@ void main() {
       await tester.tap(find.text('placement_skip_plain'.tr()));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(FoundationPage), findsOneWidget);
+    });
+
+    testWidgets('a whole test: questions, then the result, then home', (
+      tester,
+    ) async {
+      await boot(tester);
+      await sl<AppSessionController>().signIn(guestTokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      GoRouter.of(
+        tester.element(find.byType(FoundationPage)),
+      ).go(AppRoutes.placementQuestions);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(PlacementTestPage), findsOneWidget);
+
+      for (var i = 0; i < 2; i++) {
+        await tester.tap(find.text('placement_dont_know'.tr()));
+        await tester.pump();
+        await tester.tap(find.text('placement_next'.tr()));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
+      }
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+      // The test is gone from the stack.
+      expect(find.byType(PlacementTestPage), findsNothing);
+      expect(find.byType(PlacementResultPage), findsOneWidget);
+
+      await tester.tap(find.byType(AppButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump();
+      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(PlacementResultPage), findsNothing);
+    });
+
+    testWidgets('the result with no attempt to show goes home', (tester) async {
+      await boot(tester);
+      await sl<AppSessionController>().signIn(guestTokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      GoRouter.of(
+        tester.element(find.byType(FoundationPage)),
+      ).go(AppRoutes.placementResult);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(PlacementResultPage), findsNothing);
       expect(find.byType(FoundationPage), findsOneWidget);
     });
 
