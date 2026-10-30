@@ -336,5 +336,8 @@
   "new_password_expired_title": "انتهت صلاحية الرابط",
   "new_password_expired_body": "الرابط صالح لساعة واحدة ولمرة واحدة. اطلب رابطًا جديدًا.",
   "new_password_new_link": "أرسل رابطًا جديدًا",
-  "new_password_changed_title": "تم تغيير كلمة المرور"
+  "password_changed_title": "تم تغيير كلمة المرور",
+  "password_changed_signed_in": "دخلت بكلمة المرور الجديدة، ويمكنك المتابعة من حيث توقفت.",
+  "password_changed_sign_in": "ادخل الآن بكلمة المرور الجديدة.",
+  "password_changed_continue": "تابع التعلّم"
 }

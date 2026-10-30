@@ -121,7 +121,7 @@ Status: **proposed**, mock (any token but `expired` is good).
 
 `{ "token", "password", "deviceId", "platform" }`, sent without a session token. The token works once. Success ends the account's other sessions and answers with a `TokenResponse`, the session that signs the learner in on this phone; a `200` with no tokens means the password changed but no session started, and the learner signs in by hand. `410` as above, `400` (`validation.failed`, naming `password`) for a password the server refuses.
 
-Status: **proposed**, mock (answers like register; the token `offline` fails with no connection).
+Status: **proposed**, mock (answers like register; the token `offline` fails with no connection, and `no-session` answers with no tokens).
 
 ## `POST /api/v1/auth/logout`
 

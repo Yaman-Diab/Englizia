@@ -17,6 +17,8 @@ import 'package:englizia/features/account/presentation/forgot_password/cubit/for
 import 'package:englizia/features/account/presentation/forgot_password/pages/forgot_password_page.dart';
 import 'package:englizia/features/account/presentation/new_password/cubit/new_password_cubit.dart';
 import 'package:englizia/features/account/presentation/new_password/pages/new_password_page.dart';
+import 'package:englizia/features/account/presentation/password_changed/pages/password_changed_page.dart';
+import 'package:englizia/features/account/presentation/password_changed/password_changed_args.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
@@ -358,12 +360,17 @@ GoRouter createAppRouter(AppSessionController session) {
       GoRoute(
         path: AppRoutes.signIn,
         builder: (context, state) {
-          // Sign-up hands over the email it was given; welcome hands none.
+          // Sign-up hands over the email it was given, and so does "password
+          // changed"; welcome hands none.
           final fromSignUp = state.extra is String;
           final settings = sl<SettingsStorageService>();
           return BlocProvider(
             create: (_) => sl<SignInCubit>(
-              param1: fromSignUp ? state.extra! as String : '',
+              param1: switch (state.extra) {
+                final String email => email,
+                final PasswordChangedArgs args => args.email,
+                _ => '',
+              },
             ),
             child: SignInPage(
               lastProvider: SocialProvider.values
@@ -442,16 +449,42 @@ GoRouter createAppRouter(AppSessionController session) {
               onClose: () => context.go(AppRoutes.home),
               onNewLink: () =>
                   context.push(AppRoutes.forgotPassword, extra: link),
-              onSaved: (_) => context.go(AppRoutes.passwordChanged),
+              onSaved: (account) async {
+                if (account != null) {
+                  await session.signIn(account);
+                } else if (session.status == SessionStatus.member) {
+                  // The server closed this phone's session with the others;
+                  // a guest's is another account, and stays.
+                  await session.signOut();
+                }
+                if (context.mounted) {
+                  context.go(
+                    AppRoutes.passwordChanged,
+                    extra: PasswordChangedArgs(
+                      email: link.email,
+                      signedIn: account != null,
+                    ),
+                  );
+                }
+              },
             ),
           );
         },
       ),
-      // "Password changed" is not built yet.
       GoRoute(
         path: AppRoutes.passwordChanged,
-        builder: (_, _) =>
-            PendingPage(title: 'new_password_changed_title'.tr()),
+        redirect: (_, state) =>
+            state.extra is PasswordChangedArgs ? null : AppRoutes.home,
+        builder: (context, state) {
+          final args = state.extra! as PasswordChangedArgs;
+          return PasswordChangedPage(
+            signedIn: args.signedIn,
+            onContinue: () => args.signedIn
+                ? context.go(AppRoutes.home)
+                : context.push(AppRoutes.signIn, extra: args),
+            onLeave: () => context.go(AppRoutes.home),
+          );
+        },
       ),
     ],
   );

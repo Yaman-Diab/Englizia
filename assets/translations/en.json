@@ -291,5 +291,8 @@
   "new_password_expired_title": "This link has expired",
   "new_password_expired_body": "A link works once, for one hour. Ask for a new one.",
   "new_password_new_link": "Send a new link",
-  "new_password_changed_title": "Password changed"
+  "password_changed_title": "Password changed",
+  "password_changed_signed_in": "You're signed in with your new password, and can carry on where you left off.",
+  "password_changed_sign_in": "Sign in now with your new password.",
+  "password_changed_continue": "Keep learning"
 }

@@ -30,6 +30,7 @@ class Mascot extends StatefulWidget {
     this.animate = true,
     this.waving = false,
     this.silhouette = false,
+    this.sparkles = true,
     this.semanticLabel,
     super.key,
   });
@@ -45,6 +46,9 @@ class Mascot extends StatefulWidget {
 
   /// One flat color, no face or effects (the design's "الخيال").
   final bool silhouette;
+
+  /// False leaves out the expression's sparkles: glad, without a celebration.
+  final bool sparkles;
 
   /// Defaults to the guide's name.
   final String? semanticLabel;
@@ -168,7 +172,9 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
         builder: (context, _) => CustomPaint(
           size: Size.square(widget.size),
           painter: MascotPainter(
-            pose: _shownPose,
+            pose: widget.sparkles
+                ? _shownPose
+                : _shownPose.copyWith(sparkles: false),
             palette: palette,
             prop: widget.prop,
             framing: widget.framing,

@@ -131,9 +131,11 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   static const lockedFor = Duration(minutes: 5);
 
   /// A recovery link with this token is out of date; with
-  /// [unreachableResetToken] it opens, and saving finds no connection.
+  /// [unreachableResetToken] it opens, and saving finds no connection; with
+  /// [noSessionResetToken] the password changes but no session starts.
   static const expiredResetToken = 'expired';
   static const unreachableResetToken = 'offline';
+  static const noSessionResetToken = 'no-session';
 
   final AssetBundle _bundle;
   final Duration latency;
@@ -191,6 +193,7 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
     if (request['token'] == unreachableResetToken) {
       throw const NetworkException('connectionError');
     }
+    if (request['token'] == noSessionResetToken) return null;
     final body = jsonDecode(await _bundle.loadString(registerAsset));
     return ResetPasswordModel.tokens(body, now: DateTime.now());
   }
