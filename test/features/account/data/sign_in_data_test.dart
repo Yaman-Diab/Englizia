@@ -28,8 +28,14 @@ class _DiskBundle extends CachingAssetBundle {
 
 void main() {
   late FakeHttpAdapter adapter;
+  String? savedDevice;
 
-  AccountRepositoryImpl repository(FakeResponse Function() answer) {
+  setUp(() => savedDevice = null);
+
+  AccountRepositoryImpl repository(
+    FakeResponse Function() answer, {
+    Future<void> Function(String id)? saveDevice,
+  }) {
     adapter = FakeHttpAdapter((_) => answer());
     final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
       ..httpClientAdapter = adapter;
@@ -52,6 +58,8 @@ void main() {
       AccountRemoteDataSourceImpl(ApiClient(dio)),
       tokens: FakeTokenStorage(),
       installationId: () async => 'install-1',
+      savedDeviceId: () => savedDevice,
+      saveDeviceId: saveDevice ?? (id) async => savedDevice = id,
       devicePlatform: 'android',
     );
   }
@@ -81,6 +89,42 @@ void main() {
     expect(request.path, '/api/v1/auth/login');
     expect(request.headers.containsKey('Authorization'), isFalse);
     expect((result as Ok<AuthTokens>).value.kind, AccountKind.member);
+  });
+
+  group('the device id', () {
+    Object? sentId() => (adapter.requests.single.data! as Map)['deviceId'];
+    const serverId = '00000000-0000-4000-8000-000000000000';
+
+    test('the first sign-in sends none and saves the server\'s', () async {
+      await repository(
+        () => FakeResponse(200, body: _memberBody),
+      ).signIn(email: 'user@example.com', password: 'password1');
+      expect(sentId(), isNull);
+      expect(savedDevice, serverId);
+    });
+
+    test('the next sign-in sends the saved one', () async {
+      savedDevice = 'device-1';
+      await repository(
+        () => FakeResponse(200, body: _memberBody),
+      ).signIn(email: 'user@example.com', password: 'password1');
+      expect(sentId(), 'device-1');
+    });
+
+    test('a refused sign-in saves nothing', () async {
+      await repository(
+        () => const FakeResponse(401),
+      ).signIn(email: 'user@example.com', password: 'wrong');
+      expect(savedDevice, isNull);
+    });
+
+    test('failing to save it does not fail the sign-in', () async {
+      final result = await repository(
+        () => FakeResponse(200, body: _memberBody),
+        saveDevice: (_) async => throw StateError('no storage'),
+      ).signIn(email: 'user@example.com', password: 'password1');
+      expect(result, isA<Ok<AuthTokens>>());
+    });
   });
 
   test('a refused try is unauthorized, with no refresh attempt', () async {
@@ -121,6 +165,8 @@ void main() {
         source(),
         tokens: FakeTokenStorage(),
         installationId: () async => 'i',
+        savedDeviceId: () => null,
+        saveDeviceId: (_) async {},
         devicePlatform: null,
       );
       final wrong = await repo.signIn(

@@ -33,6 +33,7 @@ void main() {
 
   late FakeTokenStorage storage;
   late FakeHttpAdapter adapter;
+  String? savedDevice;
 
   /// The app's own setup: the auth interceptor adds the stored token.
   AccountRepositoryImpl repository(FakeResponse Function() answer) {
@@ -51,11 +52,16 @@ void main() {
       AccountRemoteDataSourceImpl(ApiClient(dio)),
       tokens: storage,
       installationId: () async => 'install-1',
+      savedDeviceId: () => savedDevice,
+      saveDeviceId: (id) async => savedDevice = id,
       devicePlatform: 'android',
     );
   }
 
-  setUp(() => storage = FakeTokenStorage(guest));
+  setUp(() {
+    storage = FakeTokenStorage(guest);
+    savedDevice = null;
+  });
 
   group('upgradeGuest', () {
     test(
@@ -72,6 +78,16 @@ void main() {
         expect((result as Ok<AuthTokens>).value.kind, AccountKind.member);
       },
     );
+
+    test('sends the saved device id and saves the server\'s', () async {
+      savedDevice = 'device-1';
+      await repository(
+        () => FakeResponse(200, body: _memberBody),
+      ).upgradeGuest(account);
+
+      expect((adapter.requests.single.data! as Map)['deviceId'], 'device-1');
+      expect(savedDevice, '00000000-0000-4000-8000-000000000000');
+    });
 
     test('an email with an account is a conflict', () async {
       final result = await repository(

@@ -22,12 +22,14 @@ void main() {
         'tokenType': 'Bearer',
         'refreshToken': 'r',
         'refreshTokenExpiresAt': '2026-11-27T12:00:00Z',
+        'deviceId': 'device-1',
       }),
       now: now,
       kind: AccountKind.guest,
     );
 
     expect(tokens.kind, AccountKind.guest);
+    expect(tokens.deviceId, 'device-1');
     expect(tokens.accessExpiresAt, now.add(const Duration(minutes: 15)));
     expect(tokens.refreshExpiresAt, DateTime.utc(2026, 11, 27, 12));
   });
@@ -45,6 +47,7 @@ void main() {
       refreshToken: 'r1',
       kind: AccountKind.guest,
       refreshExpiresAt: DateTime.utc(2026, 11, 1),
+      deviceId: 'device-1',
     );
 
     final tokens = TokenResponse.parse(
@@ -56,6 +59,7 @@ void main() {
     expect(tokens.refreshToken, 'r1');
     expect(tokens.kind, AccountKind.guest);
     expect(tokens.refreshExpiresAt, DateTime.utc(2026, 11, 1));
+    expect(tokens.deviceId, 'device-1');
     expect(tokens.accessExpiresAt, isNull);
   });
 

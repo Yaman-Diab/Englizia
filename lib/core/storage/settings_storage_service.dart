@@ -11,6 +11,7 @@ final class SettingsStorageService {
   static const _hasLaunchedKey = 'app.has_launched';
   static const _installationIdKey = 'app.installation_id';
   static const _lastSignInKey = 'account.last_sign_in';
+  static const _deviceIdKey = 'account.device_id';
 
   final SharedPreferences _prefs;
 
@@ -34,6 +35,14 @@ final class SettingsStorageService {
 
   Future<void> setLastSignInMethod(String method) async {
     await _prefs.setString(_lastSignInKey, method);
+  }
+
+  /// The id the server gave this phone. Sent back so that signing in again
+  /// is not a new device; a sign-out keeps it.
+  String? get deviceId => _prefs.getString(_deviceIdKey);
+
+  Future<void> setDeviceId(String id) async {
+    await _prefs.setString(_deviceIdKey, id);
   }
 
   /// A random id for this install, made on first use. Not personal: the

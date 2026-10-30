@@ -37,6 +37,8 @@ void registerAccountDependencies(GetIt sl) {
         sl(),
         tokens: sl(),
         installationId: sl<SettingsStorageService>().installationId,
+        savedDeviceId: () => sl<SettingsStorageService>().deviceId,
+        saveDeviceId: sl<SettingsStorageService>().setDeviceId,
         devicePlatform: _devicePlatform(),
       ),
     );

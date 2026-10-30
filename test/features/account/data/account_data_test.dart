@@ -47,6 +47,7 @@ class _RecordingDataSource implements AccountRemoteDataSource {
       accessToken: 'a',
       refreshToken: 'r',
       kind: AccountKind.guest,
+      deviceId: 'device-1',
     );
   }
 
@@ -179,6 +180,23 @@ void main() {
   });
 
   group('AccountRepositoryImpl', () {
+    test('keeps the device id a new guest gets', () async {
+      String? saved;
+      await AccountRepositoryImpl(
+        _RecordingDataSource(),
+        tokens: FakeTokenStorage(),
+        installationId: () async => 'install-1',
+        savedDeviceId: () => saved,
+        saveDeviceId: (id) async => saved = id,
+        devicePlatform: 'android',
+      ).createGuestAccount(
+        answers: adult,
+        languageCode: 'en',
+        utcOffsetMinutes: -300,
+      );
+      expect(saved, 'device-1');
+    });
+
     test('ties the guest to this install', () async {
       final source = _RecordingDataSource();
       final result =
@@ -186,6 +204,8 @@ void main() {
             source,
             tokens: FakeTokenStorage(),
             installationId: () async => 'install-1',
+            savedDeviceId: () => null,
+            saveDeviceId: (_) async {},
             devicePlatform: 'android',
           ).createGuestAccount(
             answers: adult,
@@ -206,6 +226,8 @@ void main() {
             _RecordingDataSource(fail: true),
             tokens: FakeTokenStorage(),
             installationId: () async => 'install-1',
+            savedDeviceId: () => null,
+            saveDeviceId: (_) async {},
             devicePlatform: 'android',
           ).createGuestAccount(
             answers: adult,
