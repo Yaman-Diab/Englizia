@@ -11,7 +11,7 @@ lib/
 │   ├── app.dart       MaterialApp.router inside ScreenUtilInit; theme, locale, text-scale clamp, env banner
 │   ├── di.dart        configureDependencies(): core + every feature (main and the DI test call it)
 │   ├── router/        AppRoutes, route_policies (route → policy), createAppRouter
-│   └── shell/         SplashPage; FoundationPage (temporary home until the Learn tab exists)
+│   └── shell/         SplashPage; FoundationPage (temporary home until the Learn tab exists); PendingPage (placeholder routes, STATUS D-031)
 ├── core/              shared kernel — imports nothing from app/ or features/
 │   ├── config/        AppConfig (APP_ENV, BASE_URL from --dart-define-from-file)
 │   ├── result/        Result<T> (Ok/Err) · guard()
@@ -21,12 +21,12 @@ lib/
 │   ├── logging/       AppLogger · Redactor · CrashReporter (no-op until a provider is chosen)
 │   ├── network/       ApiClient · ApiException (server envelope) · NetworkException · TokenResponse · interceptors · DioFactory · JsonReader
 │   ├── session/       AuthTokens · AppSessionController (GoRouter refreshListenable)
-│   ├── storage/       TokenStorage (secure) · SettingsStorageService (SharedPreferences, non-sensitive)
+│   ├── storage/       TokenStorage (secure; says whether a write reached the phone) · SettingsStorageService (SharedPreferences, non-sensitive)
 │   ├── router/        RoutePolicy · AppRedirect
 │   ├── settings/      SettingsCubit (theme mode)
 │   ├── design_system/ palette · semantic colors · text styles · spacing · theme · widgets
 │   └── di/            sl · setupCoreDependencies
-└── features/<feature>/ domain · data · presentation (none yet)
+└── features/<feature>/ domain · data · presentation
 ```
 
 Dependency direction inside a feature: `presentation → domain ← data`. Rules are enforced by `test/core/architecture_test.dart`.
@@ -81,7 +81,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 ## Localization
 
 - easy_localization, `assets/translations/{ar,en}.json`, flat snake_case keys prefixed by feature.
-- Device language decides at first launch; Arabic is the fallback. The onboarding language step will set it explicitly.
+- Device language decides at first launch; Arabic is the fallback. The onboarding language step sets it explicitly.
 - Latin digits everywhere (scores, XP, CEFR codes stay consistent across both languages).
 - Directional layout only: `EdgeInsetsDirectional`, `AlignmentDirectional`, `PositionedDirectional`, `BorderRadiusDirectional`, `TextAlign.start/end`; icons that point somewhere use `matchTextDirection`. `architecture_test` rejects the physical left/right APIs anywhere in `lib/`. English content inside the Arabic UI (the reader) may still set `TextDirection.ltr`.
 - `Accept-Language` follows the UI language via `CurrentLanguage`; `test/app/app_test.dart` switches the language on screen and checks the header the app's Dio sends.

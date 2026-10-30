@@ -46,4 +46,4 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The app is named Engleazia (Arabic name unchanged).
 - Dark mode uses the colors of the approved designs, including the soft blue and green bands.
 - Arabic plurals use their real forms (e.g. «مراحل» for 3–10, «مرحلة» from 11).
-- Signing in is required to reach home; guests land on the welcome screen.
+- Home needs a session, a guest's or a member's; anyone without one lands on the welcome screen.

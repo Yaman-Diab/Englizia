@@ -1,7 +1,7 @@
 # Engleazia — Agent Guide
 
 **What it is:** student app for learning English, Arabic-first (kids, general English A1–B2, and the Emar school curriculum), one engine for every track.
-**Backend:** .NET REST API + control panel, built by a separate team. Contract notes in `docs/api/` (not shared yet — most fields are assumptions).
+**Backend:** .NET REST API + control panel, built by a separate team. Contract notes in `docs/api/`; the dev server's OpenAPI (`docs/api/openapi.json`) covers the account endpoints, and every other field is an assumption.
 **Platforms:** Android + iOS. Languages: Arabic (default, RTL) + English.
 
 > Loaded into every AI session — keep it under ~150 lines. Details are read **only when needed**:
