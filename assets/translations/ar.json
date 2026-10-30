@@ -323,5 +323,7 @@
   "check_email_resend": "أعد الإرسال",
   "check_email_resend_after": "أعد الإرسال بعد {time}",
   "check_email_resent": "أرسلنا رابطًا جديدًا",
-  "check_email_no_mail_app": "لم نجد تطبيق بريد. افتح بريدك من المتصفح."
+  "check_email_no_mail_app": "لم نجد تطبيق بريد. افتح بريدك من المتصفح.",
+  "error_storage": "تعذّر الحفظ على هذا الهاتف. حاول مرة أخرى.",
+  "preparing_save_failed": "تعذّر حفظ حسابك على هذا الهاتف"
 }

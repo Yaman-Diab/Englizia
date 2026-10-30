@@ -278,5 +278,7 @@
   "check_email_resend": "Send again",
   "check_email_resend_after": "Send again in {time}",
   "check_email_resent": "We sent a new link",
-  "check_email_no_mail_app": "We couldn't find a mail app. Open your email in the browser."
+  "check_email_no_mail_app": "We couldn't find a mail app. Open your email in the browser.",
+  "error_storage": "Couldn't save on this phone. Try again.",
+  "preparing_save_failed": "Couldn't save your account on this phone"
 }

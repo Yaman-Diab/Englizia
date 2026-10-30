@@ -4,6 +4,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/cubit/preparing_cubit.dart';
 import 'package:flutter/foundation.dart' show Unicode;
@@ -93,6 +94,9 @@ class PreparingStepRow extends StatelessWidget {
     final done = step.status == PreparingStepStatus.done;
     final failed = step.status == PreparingStepStatus.failed;
     final level = state.level?.name.of(language);
+    if (failed && state.failure is StorageFailure) {
+      return 'preparing_save_failed'.tr();
+    }
     return switch (step.kind) {
       PreparingStepKind.level when failed => 'preparing_level_failed'.tr(),
       PreparingStepKind.level when done && level != null =>

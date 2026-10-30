@@ -23,6 +23,11 @@ final class NetworkFailure extends Failure {
   const NetworkFailure();
 }
 
+/// The phone could not save something it must keep (the session).
+final class StorageFailure extends Failure {
+  const StorageFailure();
+}
+
 final class UnauthorizedFailure extends Failure {
   const UnauthorizedFailure({super.code, super.serverMessage});
 }

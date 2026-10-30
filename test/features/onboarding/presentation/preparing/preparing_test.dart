@@ -183,6 +183,26 @@ void main() {
       expect(tracks.unitRequests, isEmpty);
     });
 
+    test('a session the phone could not save waits for a retry', () async {
+      final tokens = FakeTokenStorage()..savesWrites = false;
+      session = AppSessionController(
+        tokens: tokens,
+        settings: SettingsStorageService(await SharedPreferences.getInstance()),
+      );
+      await session.bootstrap();
+      final preparing = cubit();
+      await preparing.start(path: _fromZero, account: memberTokens);
+
+      expect(preparing.state.failure, isA<StorageFailure>());
+      expect(statuses(preparing).first, PreparingStepStatus.failed);
+      expect(tracks.unitRequests, isEmpty);
+
+      tokens.savesWrites = true;
+      await preparing.retry();
+      expect(preparing.state.ready, isTrue);
+      expect(tokens.writeCount, 2);
+    });
+
     test('a failed step waits, and the retry resumes from it', () async {
       tracks = FakeTrackRepository(
         units: const [
