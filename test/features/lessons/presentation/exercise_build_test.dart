@@ -27,6 +27,7 @@ void main() {
       lessons,
       FakeClipPlayer(),
       FakeConnectivityService(),
+      FakeSoundPlayer(),
       lessonId: 'les',
     );
   }
@@ -49,7 +50,11 @@ void main() {
         data: MediaQueryData(size: size, disableAnimations: reduce),
         child: BlocProvider.value(
           value: subject,
-          child: ExercisePage(onExit: () {}, onFinished: () {}),
+          child: ExercisePage(
+            onExit: () {},
+            onFinished: () {},
+            onExplain: () {},
+          ),
         ),
       ),
       locale: locale,
@@ -410,7 +415,11 @@ void main() {
       await tester.pumpLocalized(
         BlocProvider.value(
           value: subject,
-          child: ExercisePage(onExit: () {}, onFinished: () {}),
+          child: ExercisePage(
+            onExit: () {},
+            onFinished: () {},
+            onExplain: () {},
+          ),
         ),
         locale: layout.locale,
         size: layout.size,

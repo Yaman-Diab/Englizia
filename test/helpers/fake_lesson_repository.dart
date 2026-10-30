@@ -35,6 +35,16 @@ class FakeLessonRepository implements LessonRepository {
   List<Exercise> exercises;
   Failure? failure;
   final attempts = <ExerciseAttempt>[];
+  final reviews = <String>[];
+  final reports = <ExerciseReport>[];
+
+  /// What the server says of an order it judges.
+  Result<bool> review = const Ok(true);
+
+  /// When set, a review waits for it.
+  Future<void>? reviewGate;
+  int? xpPerAnswer;
+  bool explainEnabled = false;
   final saved = <String, ExerciseProgress>{};
   var sends = 0;
   var cleared = 0;
@@ -43,13 +53,36 @@ class FakeLessonRepository implements LessonRepository {
   Future<Result<Lesson>> getLesson(String lessonId) async {
     final failure = this.failure;
     return failure == null
-        ? Ok(Lesson(id: lessonId, version: version, exercises: exercises))
+        ? Ok(
+            Lesson(
+              id: lessonId,
+              version: version,
+              exercises: exercises,
+              xpPerAnswer: xpPerAnswer,
+              explainEnabled: explainEnabled,
+            ),
+          )
         : Err(failure);
   }
 
   @override
-  Future<void> saveAttempt(ExerciseAttempt attempt) async =>
-      attempts.add(attempt);
+  Future<String> saveAttempt(ExerciseAttempt attempt) async {
+    attempts.add(attempt);
+    return 'attempt-${attempts.length}';
+  }
+
+  @override
+  Future<Result<bool>> reviewAttempt(
+    ExerciseAttempt attempt,
+    String attemptId,
+  ) async {
+    reviews.add(attemptId);
+    await reviewGate;
+    return review;
+  }
+
+  @override
+  Future<void> saveReport(ExerciseReport report) async => reports.add(report);
 
   @override
   Future<void> sendSaved() async => sends++;

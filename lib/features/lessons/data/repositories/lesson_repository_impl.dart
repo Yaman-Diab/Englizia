@@ -29,7 +29,10 @@ final class LessonRepositoryImpl implements LessonRepository {
   /// ASSUMPTION(api): docs/api/lessons.md.
   static const _rejected = {400, 404, 409, 410, 422};
 
-  /// The answers on their way, so they go one at a time and in order.
+  static const _answerKind = 'answer';
+  static const _reportKind = 'report';
+
+  /// What is on its way, so it goes one at a time and in order.
   Future<void>? _sending;
 
   @override
@@ -93,11 +96,46 @@ final class LessonRepositoryImpl implements LessonRepository {
   }
 
   @override
-  Future<void> saveAttempt(ExerciseAttempt attempt) async {
+  Future<String> saveAttempt(ExerciseAttempt attempt) async {
+    final id = SettingsStorageService.randomId();
+    await _enqueue(
+      _answerKind,
+      attempt.lessonId,
+      id,
+      attemptToJson(attempt, id),
+    );
+    return id;
+  }
+
+  @override
+  Future<Result<bool>> reviewAttempt(
+    ExerciseAttempt attempt,
+    String attemptId,
+  ) => guard(
+    () => _remote.reviewAnswer(
+      attempt.lessonId,
+      attemptToJson(attempt, attemptId),
+    ),
+  );
+
+  @override
+  Future<void> saveReport(ExerciseReport report) async {
+    final id = SettingsStorageService.randomId();
+    await _enqueue(_reportKind, report.lessonId, id, reportToJson(report, id));
+  }
+
+  Future<void> _enqueue(
+    String kind,
+    String lessonId,
+    String id,
+    Map<String, Object?> request,
+  ) async {
     final store = _store();
     store.unsent.add({
-      'lessonId': attempt.lessonId,
-      'request': attemptToJson(attempt, SettingsStorageService.randomId()),
+      'id': id,
+      'kind': kind,
+      'lessonId': lessonId,
+      'request': request,
     });
     await _keep(store);
     unawaited(sendSaved());
@@ -116,17 +154,22 @@ final class LessonRepositoryImpl implements LessonRepository {
       final unsent = _store().unsent;
       if (unsent.isEmpty) return;
       final first = unsent.first;
+      final lessonId = first['lessonId']! as String;
       final request = asJsonMap(first['request']);
       try {
-        await _remote.sendAnswer(first['lessonId']! as String, request);
+        await (first['kind'] == _reportKind
+            ? _remote.sendReport(lessonId, request)
+            : _remote.sendAnswer(lessonId, request));
       } on ApiException catch (error, stackTrace) {
         if (!_rejected.contains(error.statusCode)) rethrow;
-        AppLogger.error(error, stackTrace, 'An answer refused, and dropped');
+        AppLogger.error(
+          error,
+          stackTrace,
+          'Something sent refused, and dropped',
+        );
       }
       final store = _store();
-      store.unsent.removeWhere(
-        (a) => asJsonMap(a['request'])['attemptId'] == request['attemptId'],
-      );
+      store.unsent.removeWhere((entry) => entry['id'] == first['id']);
       await _keep(store);
     }
   }

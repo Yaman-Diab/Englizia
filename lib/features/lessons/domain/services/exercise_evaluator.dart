@@ -30,6 +30,9 @@ SequenceEvaluation _order(WordOrderExercise exercise, SequenceDraft draft) {
   final expected = [for (final word in exercise.answerWords) plainWords(word)];
   return SequenceEvaluation(
     correct: right,
+    needsReview:
+        !right &&
+        exercise.reviewable.any((sentence) => plainWords(sentence) == built),
     words: [
       for (final (i, chip) in draft.chips.indexed)
         right || (i < expected.length && plainWords(chip.text) == expected[i]),

@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
@@ -18,6 +20,8 @@ final class ExerciseState extends Equatable {
     this.load = LoadStatus.loading,
     this.failure,
     this.lessonVersion = 0,
+    this.xpPerAnswer,
+    this.explainEnabled = false,
     this.questions = const [],
     this.index = 0,
     this.draft,
@@ -36,6 +40,8 @@ final class ExerciseState extends Equatable {
   final LoadStatus load;
   final Failure? failure;
   final int lessonVersion;
+  final int? xpPerAnswer;
+  final bool explainEnabled;
   final List<Exercise> questions;
   final int index;
 
@@ -83,6 +89,8 @@ final class ExerciseState extends Equatable {
     LoadStatus? load,
     Failure? Function()? failure,
     int? lessonVersion,
+    int? xpPerAnswer,
+    bool? explainEnabled,
     List<Exercise>? questions,
     int? index,
     ExerciseDraft? Function()? draft,
@@ -100,6 +108,8 @@ final class ExerciseState extends Equatable {
     load: load ?? this.load,
     failure: failure != null ? failure() : this.failure,
     lessonVersion: lessonVersion ?? this.lessonVersion,
+    xpPerAnswer: xpPerAnswer ?? this.xpPerAnswer,
+    explainEnabled: explainEnabled ?? this.explainEnabled,
     questions: questions ?? this.questions,
     index: index ?? this.index,
     draft: draft != null ? draft() : this.draft,
@@ -120,6 +130,8 @@ final class ExerciseState extends Equatable {
     load,
     failure,
     lessonVersion,
+    xpPerAnswer,
+    explainEnabled,
     questions,
     index,
     draft,
@@ -145,7 +157,8 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   ExerciseCubit(
     this._lessons,
     ClipPlayer player,
-    this._connectivity, {
+    this._connectivity,
+    this._sounds, {
     required this.lessonId,
   }) : _clip = ClipPlayback(player),
        super(const ExerciseState());
@@ -156,6 +169,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   final LessonRepository _lessons;
   final ClipPlayback _clip;
   final ConnectivityService _connectivity;
+  final SoundPlayer _sounds;
   final String lessonId;
   StreamSubscription<bool>? _connection;
 
@@ -179,6 +193,8 @@ class ExerciseCubit extends Cubit<ExerciseState> {
           state.copyWith(
             load: LoadStatus.ready,
             lessonVersion: lesson.version,
+            xpPerAnswer: lesson.xpPerAnswer,
+            explainEnabled: lesson.explainEnabled,
             questions: lesson.exercises,
             hinted: progress.hinted,
             done: progress.done,
@@ -235,26 +251,63 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   }
 
   /// «تحقق»: marks the answer, and keeps it. Leaving now returns to the next
-  /// question, as this one has been answered.
+  /// question, as this one has been answered. An order only the server can
+  /// judge waits for it; without it, it stays to judge later, and isn't wrong.
   Future<void> check() async {
     final question = state.question;
     final draft = state.draft;
     if (question == null || draft == null || !state.canCheck) return;
     await stopAudio();
+    final found = evaluate(question, draft);
+    final review = found is SequenceEvaluation && found.needsReview;
     emit(
       state.copyWith(
-        evaluation: () => evaluate(question, draft),
+        evaluation: () => review ? const ReviewPending() : found,
         done: {...state.done, question.id},
       ),
     );
+    if (!review) _sayVerdict(found);
     await _saveProgress();
-    await _lessons.saveAttempt(
-      ExerciseAttempt(
+    final attempt = ExerciseAttempt(
+      lessonId: lessonId,
+      lessonVersion: state.lessonVersion,
+      questionId: question.id,
+      draft: draft,
+      hinted: state.hintUsed,
+    );
+    final attemptId = await _lessons.saveAttempt(attempt);
+    if (!review) return;
+    final result = await _lessons.reviewAttempt(attempt, attemptId);
+    if (isClosed) return;
+    final Evaluation judged = switch (result) {
+      Ok(value: true) => SequenceEvaluation(
+        words: [for (final _ in found.words) true],
+        correct: true,
+      ),
+      Ok() => SequenceEvaluation(words: found.words, correct: false),
+      Err() => const ReviewLater(),
+    };
+    emit(state.copyWith(evaluation: () => judged));
+    if (judged is! ReviewLater) _sayVerdict(judged);
+  }
+
+  void _sayVerdict(Evaluation evaluation) {
+    unawaited(
+      _sounds.play(evaluation.correct ? AppSound.correct : AppSound.incorrect),
+    );
+  }
+
+  /// Sends a problem with this question, with the answer given (S §18).
+  Future<void> report(ProblemReason reason) async {
+    final question = state.question;
+    if (question == null) return;
+    await _lessons.saveReport(
+      ExerciseReport(
         lessonId: lessonId,
         lessonVersion: state.lessonVersion,
         questionId: question.id,
-        draft: draft,
-        hinted: state.hintUsed,
+        reason: reason,
+        draft: state.draft,
       ),
     );
   }
@@ -287,13 +340,22 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     await _play(slow: true);
   }
 
-  Future<void> _play({required bool slow}) async {
+  /// The feedback's button: says the right sentence, or stops.
+  Future<void> toggleAnswerClip() async {
+    if (state.audio == ClipStatus.playing) {
+      await stopAudio();
+    } else if (state.audio != ClipStatus.loading) {
+      await _play(slow: false, url: state.question?.answerClipUrl);
+    }
+  }
+
+  Future<void> _play({required bool slow, String? url}) async {
     final question = state.question;
-    final url = question?.clipUrl;
-    if (question == null || url == null) return;
+    final clip = url ?? question?.clipUrl;
+    if (question == null || clip == null) return;
     emit(state.copyWith(audio: ClipStatus.loading, slow: slow));
     final outcome = await _clip.start(
-      url,
+      clip,
       speed: slow ? slowSpeed : 1,
       onEnd: () {
         if (!isClosed) {

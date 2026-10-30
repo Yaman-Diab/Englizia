@@ -35,7 +35,13 @@ final class LessonModel {
     if (exercises.isEmpty && broken > 0) {
       throw const FormatException('Lesson: no question could be read');
     }
-    return Lesson(id: id, version: version, exercises: exercises);
+    return Lesson(
+      id: id,
+      version: version,
+      exercises: exercises,
+      xpPerAnswer: json.readInt('xpPerAnswer'),
+      explainEnabled: json.readBool('explainEnabled') ?? false,
+    );
   }
 }
 
@@ -54,6 +60,8 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
   final prompt = json.readMap('prompt') ?? const <String, Object?>{};
   final hint = json.readMap('hint')?.readString('ar');
   final bookReference = _bookReference(json.readMap('bookRef'));
+  final explanation = json.readMap('explanation')?.readString('ar');
+  final audio = prompt.readString('audio');
   final key = '$seed:$id';
   return switch (template) {
     'fillChoices' => _fillChoices(
@@ -64,6 +72,8 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
       key: key,
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
+      audio: audio,
     ),
     'wordOrder' => _wordOrder(
       json,
@@ -72,6 +82,8 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
       key: key,
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
+      audio: audio,
     ),
     'matching' => _matching(
       json,
@@ -80,6 +92,7 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
       key: key,
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
     ),
     _ => _choice(
       template,
@@ -90,6 +103,7 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
       key: key,
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
     ),
   };
 }
@@ -112,6 +126,7 @@ ChoiceExercise _choice(
   required String key,
   required String? hint,
   required BookReference? bookReference,
+  required String? explanation,
 }) {
   final answer = json.readString('answer');
   final options = [
@@ -130,6 +145,8 @@ ChoiceExercise _choice(
       answer: answer!,
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
+      audio: prompt.readString('audio'),
       sentence: prompt.readString('en'),
     ),
     'imageChoice' => ImageChoiceExercise(
@@ -141,6 +158,7 @@ ChoiceExercise _choice(
       audioUrl: prompt.readString('audio'),
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
     ),
     _ => ListenChooseExercise(
       id: id,
@@ -148,8 +166,10 @@ ChoiceExercise _choice(
       options: shown,
       answerId: answer!,
       audioUrl: _required(prompt.readString('audio')),
+      transcript: prompt.readString('transcript'),
       hint: hint,
       bookReference: bookReference,
+      explanation: explanation,
     ),
   };
 }
@@ -162,6 +182,8 @@ FillChoicesExercise _fillChoices(
   required String key,
   required String? hint,
   required BookReference? bookReference,
+  required String? explanation,
+  required String? audio,
 }) {
   final segments = [
     for (final part in _required(prompt.readString('en')).split(_blank))
@@ -185,6 +207,8 @@ FillChoicesExercise _fillChoices(
     ], key),
     hint: hint,
     bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: audio,
   );
 }
 
@@ -200,6 +224,8 @@ WordOrderExercise _wordOrder(
   required String key,
   required String? hint,
   required BookReference? bookReference,
+  required String? explanation,
+  required String? audio,
 }) {
   final answer = _required(json.readString('answer'));
   final chips = _strings(json.readList('chips'));
@@ -211,9 +237,12 @@ WordOrderExercise _wordOrder(
     answer: answer,
     answerWords: words,
     alternatives: _strings(json.readList('alternatives')),
+    reviewable: _strings(json.readList('reviewOrders')),
     bank: _bank([...words, ..._distractors(json)], key),
     hint: hint,
     bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: audio,
   );
 }
 
@@ -224,6 +253,7 @@ MatchingExercise _matching(
   required String key,
   required String? hint,
   required BookReference? bookReference,
+  required String? explanation,
 }) {
   final pictures = json.readString('kind') == 'image';
   final pairs = [
@@ -242,6 +272,7 @@ MatchingExercise _matching(
     pictures: pictures,
     hint: hint,
     bookReference: bookReference,
+    explanation: explanation,
   );
 }
 
@@ -278,6 +309,8 @@ MultipleChoiceExercise _multipleChoice({
   required String answer,
   required String? hint,
   required BookReference? bookReference,
+  required String? explanation,
+  required String? audio,
   required String? sentence,
 }) {
   final parts = _required(sentence).split(_blank);
@@ -293,6 +326,8 @@ MultipleChoiceExercise _multipleChoice({
     after: parts.last.trim(),
     hint: hint,
     bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: audio,
   );
 }
 
@@ -326,19 +361,33 @@ Map<String, Object?> attemptToJson(ExerciseAttempt attempt, String attemptId) =>
       'attemptId': attemptId,
       'lessonVersion': attempt.lessonVersion,
       'questionId': attempt.questionId,
-      'answer': switch (attempt.draft) {
-        ChoiceDraft(:final optionId) => {'optionId': optionId},
-        SlotsDraft(:final chips) => {
-          'words': [for (final chip in chips) chip?.text],
-        },
-        SequenceDraft(:final chips) => {
-          'words': [for (final chip in chips) chip.text],
-        },
-        PairsDraft(:final mistakes) => {'mistakes': mistakes.toList()},
-      },
-
+      'answer': _answerJson(attempt.draft),
       'hinted': attempt.hinted,
     };
+
+/// A report as it is kept and sent, with its stable [reportId].
+Map<String, Object?> reportToJson(ExerciseReport report, String reportId) => {
+  'reportId': reportId,
+  'lessonVersion': report.lessonVersion,
+  'questionId': report.questionId,
+  'reason': report.reason.name,
+  if (report.draft case final draft?) 'answer': _answerJson(draft),
+};
+
+Map<String, Object?> _answerJson(ExerciseDraft draft) => switch (draft) {
+  ChoiceDraft(:final optionId) => {'optionId': optionId},
+  SlotsDraft(:final chips) => {
+    'words': [for (final chip in chips) chip?.text],
+  },
+  SequenceDraft(:final chips) => {
+    'words': [for (final chip in chips) chip.text],
+  },
+  PairsDraft(:final mistakes) => {'mistakes': mistakes.toList()},
+};
+
+/// Whether the server found a reviewed answer right.
+bool reviewFromJson(Map<String, Object?> json) =>
+    json.readBool('correct') ?? false;
 
 /// What is kept on the phone: each lesson's progress, and the answers not on
 /// the server yet.
@@ -364,7 +413,7 @@ final class LessonStoreModel {
 
   final Map<String, Map<String, Object?>> lessons;
 
-  /// `{lessonId, request}`, in the order to send them.
+  /// `{id, kind, lessonId, request}`, in the order to send them.
   final List<Map<String, Object?>> unsent;
 
   ExerciseProgress progress(String lessonId) {

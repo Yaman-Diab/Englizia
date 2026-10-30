@@ -4,13 +4,16 @@
   "data": {
     "id": "les_mock",
     "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": true,
     "exercises": [
       {
         "id": "q1",
         "template": "multipleChoice",
         "instructionAr": "اختر الكلمة المناسبة",
         "prompt": {
-          "en": "She ___ to school every day."
+          "en": "She ___ to school every day.",
+          "audio": "https://example.com/mock/lessons/she_goes.mp3"
         },
         "options": [
           {
@@ -74,7 +77,10 @@
           }
         ],
         "answer": "o1",
-        "reviewOnly": false
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "barn مبنى في المزرعة تعيش فيه الحيوانات."
+        }
       },
       {
         "id": "q3",
@@ -106,14 +112,18 @@
         "hint": {
           "ar": "انتبه إلى الكلمة الأخيرة وإلى the"
         },
-        "reviewOnly": false
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "market تعني «السوق». وwent للماضي، وgarden تعني «الحديقة»."
+        }
       },
       {
         "id": "q4",
         "template": "multipleChoice",
         "instructionAr": "اختر ما يكمل الجملة",
         "prompt": {
-          "en": "Excuse me, ___ ?"
+          "en": "Excuse me, ___ ?",
+          "audio": "https://example.com/mock/lessons/post_office.mp3"
         },
         "options": [
           {
@@ -138,7 +148,10 @@
           "page": 34,
           "exercise": 2
         },
-        "reviewOnly": false
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "هذا سؤال غير مباشر: نبدأ بعبارة مهذبة مثل could you tell me، ثم نكمل بترتيب الجملة العادية: الفاعل ثم الفعل.\nلذلك نقول where the nearest post office is، ولا نقول where is the nearest post office كما في السؤال المباشر.\nالخيارات الأخرى تحذف الفعل is أو تخلط الترتيب، فلا تكوّن جملة صحيحة.\nنستخدم السؤال غير المباشر حين نسأل شخصًا لا نعرفه، لأنه ألطف من السؤال المباشر، ويكثر في المحلات والمطارات ومحطات القطار."
+        }
       },
       {
         "id": "q5",
@@ -208,7 +221,10 @@
         "explanation": {
           "ar": "الفاعل Sara ثم الفعل feeds ثم المفعول به the chickens، ووقت الفعل before school في آخر الجملة."
         },
-        "reviewOnly": false
+        "reviewOnly": false,
+        "reviewOrders": [
+          "The chickens Sara feeds before school."
+        ]
       },
       {
         "id": "q7",

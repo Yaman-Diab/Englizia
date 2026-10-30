@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
@@ -10,23 +11,26 @@ import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/exercise_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/session/exercise_top_bar.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/session/feedback_sheet.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/session/session_notes.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// The container of a lesson's exercises (requirements v3.0 §7.1, design
 /// "Exercise"): the top bar, the instruction, the hint and «تحقق» belong here;
-/// each template brings only its question and answers (`exerciseBody`). No
-/// hearts, timer or points. The right and wrong marks are the feedback sheet's
-/// forerunner.
+/// each template brings only its question and answers (`exerciseBody`), and the
+/// feedback takes «تحقق»'s place. No hearts, timer or points on the screen.
 class ExercisePage extends StatelessWidget {
   const ExercisePage({
     required this.onExit,
     required this.onFinished,
+    required this.onExplain,
     super.key,
   });
 
@@ -35,8 +39,23 @@ class ExercisePage extends StatelessWidget {
   /// The last question is done.
   final VoidCallback onFinished;
 
+  /// «اشرح لي».
+  final VoidCallback onExplain;
+
   static const _topBarHeight = 56.0;
   static const _sheetGuide = 96.0;
+
+  /// A light touch for right, a stronger one for wrong (S §7.2).
+  void _feel(Evaluation? evaluation) {
+    switch (evaluation) {
+      case null || ReviewPending() || ReviewLater():
+        return;
+      case _ when evaluation.correct:
+        HapticFeedback.lightImpact();
+      default:
+        HapticFeedback.mediumImpact();
+    }
+  }
 
   Future<void> _askToLeave(BuildContext context) async {
     final cubit = context.read<ExerciseCubit>();
@@ -58,49 +77,59 @@ class ExercisePage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) =>
+  Widget build(BuildContext context) => MultiBlocListener(
+    listeners: [
       BlocListener<ExerciseCubit, ExerciseState>(
         listenWhen: (before, now) => now.finished && !before.finished,
         listener: (_, _) => onFinished(),
-        child: BlocBuilder<ExerciseCubit, ExerciseState>(
-          builder: (context, state) => PopScope(
-            canPop: false,
-            onPopInvokedWithResult: (didPop, _) {
-              if (!didPop) _askToLeave(context);
-            },
-            child: Scaffold(
-              body: SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    SizedBox(
-                      height: _topBarHeight,
-                      child: ExerciseTopBar(
-                        position: state.position,
-                        total: state.questions.length,
-                        hasHint: state.question?.hint != null,
-                        hintOpen: state.hintOpen,
-                        hintUsed: state.hintUsed,
-                        onExit: () => _askToLeave(context),
-                        onHint: context.read<ExerciseCubit>().toggleHint,
-                      ),
-                    ),
-                    AnimatedSize(
-                      duration: AppMotion.resolve(context, AppMotion.fast),
-                      curve: AppMotion.out,
-                      alignment: AlignmentDirectional.topStart,
-                      child: state.online
-                          ? const SizedBox(width: double.infinity)
-                          : const OfflineBand(),
-                    ),
-                    Expanded(child: _body(context, state)),
-                  ],
+      ),
+      BlocListener<ExerciseCubit, ExerciseState>(
+        listenWhen: (before, now) => before.evaluation != now.evaluation,
+        listener: (_, state) => _feel(state.evaluation),
+      ),
+    ],
+    child: BlocBuilder<ExerciseCubit, ExerciseState>(
+      builder: (context, state) => PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, _) {
+          if (!didPop) _askToLeave(context);
+        },
+        child: Scaffold(
+          body: SafeArea(
+            // The sheet's color reaches the phone's edge; each footer
+            // keeps its own distance from it.
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                SizedBox(
+                  height: _topBarHeight,
+                  child: ExerciseTopBar(
+                    position: state.position,
+                    total: state.questions.length,
+                    hasHint: state.question?.hint != null,
+                    hintOpen: state.hintOpen,
+                    hintUsed: state.hintUsed,
+                    onExit: () => _askToLeave(context),
+                    onHint: context.read<ExerciseCubit>().toggleHint,
+                  ),
                 ),
-              ),
+                AnimatedSize(
+                  duration: AppMotion.resolve(context, AppMotion.fast),
+                  curve: AppMotion.out,
+                  alignment: AlignmentDirectional.topStart,
+                  child: state.online
+                      ? const SizedBox(width: double.infinity)
+                      : const OfflineBand(),
+                ),
+                Expanded(child: _body(context, state)),
+              ],
             ),
           ),
         ),
-      );
+      ),
+    ),
+  );
 
   Widget _body(BuildContext context, ExerciseState state) {
     final cubit = context.read<ExerciseCubit>();
@@ -123,28 +152,84 @@ class ExercisePage extends StatelessWidget {
               ),
             ),
           ),
-          // Matching checks itself, so there is nothing to press until it ends.
-          if (!question.checksItself || state.checked)
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(
-                AppSpacing.xl,
-                AppSpacing.md,
-                AppSpacing.xl,
-                AppSpacing.md,
-              ),
-              child: AppButton(
-                label: state.checked ? 'lesson_next'.tr() : 'lesson_check'.tr(),
-                size: AppButtonSize.large,
-                onPressed: state.checked
-                    ? cubit.next
-                    : state.canCheck
-                    ? cubit.check
-                    : null,
-              ),
-            ),
+          _Footer(state: state, question: question, onExplain: onExplain),
         ],
       ),
     };
+  }
+}
+
+/// «تحقق», and then the feedback in its place: the button fades as the sheet
+/// comes up. Matching checks itself, so it has nothing here until it ends.
+class _Footer extends StatelessWidget {
+  const _Footer({
+    required this.state,
+    required this.question,
+    required this.onExplain,
+  });
+
+  final ExerciseState state;
+  final Exercise question;
+  final VoidCallback onExplain;
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<ExerciseCubit>();
+    final inset = MediaQuery.viewPaddingOf(context).bottom;
+    final evaluation = state.evaluation;
+    final Widget child;
+    if (evaluation != null) {
+      child = FeedbackSheet(
+        key: ValueKey('feedback:${question.id}'),
+        exercise: question,
+        evaluation: evaluation,
+        draft: state.draft,
+        hinted: state.hintUsed,
+        xp: state.xpPerAnswer,
+        explainEnabled: state.explainEnabled,
+        clip: FeedbackClip(
+          playing: state.audio == ClipStatus.playing,
+          onToggle: cubit.toggleAnswerClip,
+        ),
+        onNext: cubit.next,
+        onExplain: onExplain,
+        onReport: cubit.report,
+      );
+    } else if (question.checksItself) {
+      child = SizedBox(key: const ValueKey('none'), height: inset);
+    } else {
+      child = Padding(
+        key: const ValueKey('check'),
+        padding: EdgeInsetsDirectional.fromSTEB(
+          AppSpacing.xl,
+          AppSpacing.md,
+          AppSpacing.xl,
+          AppSpacing.md + inset,
+        ),
+        child: AppButton(
+          label: 'lesson_check'.tr(),
+          size: AppButtonSize.large,
+          onPressed: state.canCheck ? cubit.check : null,
+        ),
+      );
+    }
+    return AnimatedSwitcher(
+      duration: AppMotion.resolve(context, AppMotion.quick),
+      switchInCurve: AppMotion.out,
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
+      // Sized by what is arriving: what leaves only fades over it.
+      layoutBuilder: (current, previous) => Stack(
+        clipBehavior: Clip.none,
+        alignment: AlignmentDirectional.bottomCenter,
+        children: [
+          for (final leaving in previous)
+            PositionedDirectional(start: 0, end: 0, bottom: 0, child: leaving),
+          ?current,
+        ],
+      ),
+      child: child,
+    );
   }
 }
 

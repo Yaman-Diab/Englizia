@@ -25,7 +25,10 @@ import '../../../helpers/fakes.dart';
 
 class _Remote implements LessonRemoteDataSource {
   final sent = <Map<String, Object?>>[];
+  final reviewed = <Map<String, Object?>>[];
+  final reports = <Map<String, Object?>>[];
   final lessons = <String>[];
+  var reviewSays = true;
   var offline = false;
   ApiException? failWith;
   ApiException? refuseOnce;
@@ -36,6 +39,22 @@ class _Remote implements LessonRemoteDataSource {
     if (offline) throw const NetworkException('connectionError');
     if (failWith case final error?) throw error;
     return LessonModel(lesson);
+  }
+
+  @override
+  Future<bool> reviewAnswer(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    if (offline) throw const NetworkException('connectionError');
+    reviewed.add(request);
+    return reviewSays;
+  }
+
+  @override
+  Future<void> sendReport(String lessonId, Map<String, Object?> request) async {
+    if (offline) throw const NetworkException('connectionError');
+    reports.add(request);
   }
 
   @override
@@ -158,6 +177,28 @@ void main() {
       expect(pictures.pictures, isTrue);
       expect(pictures.pairs.first.image, endsWith('.svg'));
       expect(pictures.pairs.first.alt, isNotEmpty);
+    });
+
+    test('carries what the feedback needs', () {
+      final first = lesson.exercises.first;
+      expect(first.explanation, isNotEmpty);
+      expect(first.answerClipUrl, contains('she_goes'));
+      expect(lesson.exercises[2].answerClipUrl, contains('market'));
+      expect(
+        (lesson.exercises[2] as ListenChooseExercise).transcript,
+        isNotEmpty,
+      );
+      expect(lesson.xpPerAnswer, 10);
+      expect(lesson.explainEnabled, isTrue);
+      final order = lesson.exercises[5] as WordOrderExercise;
+      expect(order.reviewable, hasLength(1));
+      expect(order.answerClipUrl, contains('sara'));
+    });
+
+    test('with no XP or AI from the server, there are none', () {
+      final plain = _parse([_question({})]);
+      expect(plain.xpPerAnswer, isNull);
+      expect(plain.explainEnabled, isFalse);
     });
 
     test('a listening question plays by itself, and reports a failure', () {
@@ -467,6 +508,23 @@ void main() {
         true,
         true,
       ]);
+    });
+
+    test('an order the server judges asks for it', () {
+      final result = evaluate(
+        order,
+        sequence(['the', 'chickens', 'Sara', 'feeds', 'before', 'school']),
+      );
+      expect((result as SequenceEvaluation).needsReview, isTrue);
+      expect(result.correct, isFalse);
+    });
+
+    test('a plain wrong order does not', () {
+      final result = evaluate(
+        order,
+        sequence(['Sara', 'feeds', 'chickens', 'the', 'before', 'school']),
+      );
+      expect((result as SequenceEvaluation).needsReview, isFalse);
     });
 
     test('an extra word is wrong', () {
@@ -789,6 +847,68 @@ void main() {
         await settings.clearAccountData();
 
         expect(settings.lessonCache, isNull);
+      });
+    });
+
+    group('judging and reporting', () {
+      const report = ExerciseReport(
+        lessonId: 'les',
+        lessonVersion: 3,
+        questionId: 'q1',
+        reason: ProblemReason.alsoRight,
+        draft: ChoiceDraft('o2'),
+      );
+
+      test('a review goes with the attempt\'s own id', () async {
+        remote.offline = true;
+        final id = await repository.saveAttempt(_attempt);
+        remote.offline = false;
+
+        final result = await repository.reviewAttempt(_attempt, id);
+
+        expect((result as Ok<bool>).value, isTrue);
+        expect(remote.reviewed.single['attemptId'], id);
+      });
+
+      test('the server may say it is wrong', () async {
+        remote.reviewSays = false;
+
+        final result = await repository.reviewAttempt(_attempt, 'a');
+
+        expect((result as Ok<bool>).value, isFalse);
+      });
+
+      test('no connection for a review is a failure', () async {
+        remote.offline = true;
+
+        expect(await repository.reviewAttempt(_attempt, 'a'), isA<Err<bool>>());
+      });
+
+      test('a report goes with its context', () async {
+        await repository.saveReport(report);
+        await repository.sendSaved();
+
+        expect(remote.reports.single, containsPair('reason', 'alsoRight'));
+        expect(remote.reports.single, containsPair('lessonVersion', 3));
+        expect(remote.reports.single, containsPair('questionId', 'q1'));
+        expect(remote.reports.single['answer'], {'optionId': 'o2'});
+        expect(remote.reports.single['reportId'], isNotEmpty);
+        expect(remote.sent, isEmpty);
+      });
+
+      test('offline it waits, in order with the answers', () async {
+        remote.offline = true;
+        await repository.saveAttempt(_attempt);
+        await repository.saveReport(report);
+        await settle();
+        expect(unsent(), hasLength(2));
+
+        remote.offline = false;
+        await repository.sendSaved();
+
+        expect(remote.sent, hasLength(1));
+        expect(remote.reports, hasLength(1));
+        expect(unsent(), isEmpty);
       });
     });
 

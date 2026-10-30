@@ -171,3 +171,46 @@ class ChoiceCheck extends StatelessWidget {
     );
   }
 }
+
+/// The mark of one choice among several: a ring, with a dot when [selected].
+class ChoiceRadio extends StatelessWidget {
+  const ChoiceRadio({required this.selected, super.key});
+
+  final bool selected;
+
+  static const _size = 20.0;
+  static const _dot = 10.0;
+  static const _stroke = 2.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final duration = AppMotion.resolve(context, AppMotion.quick);
+    return AnimatedContainer(
+      duration: duration,
+      width: _size,
+      height: _size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? colors.selection : colors.border,
+          width: _stroke,
+        ),
+      ),
+      child: AnimatedScale(
+        scale: selected ? 1 : 0,
+        duration: duration,
+        curve: AppMotion.bounce,
+        child: Container(
+          width: _dot,
+          height: _dot,
+          decoration: BoxDecoration(
+            color: colors.selection,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    );
+  }
+}

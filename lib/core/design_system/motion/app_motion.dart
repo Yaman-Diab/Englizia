@@ -71,6 +71,9 @@ abstract final class AppMotion {
   /// A step of a flow leaving, then the next one arriving ([SlideSwap]).
   static const stepOut = Duration(milliseconds: 110);
 
+  /// A thank-you stays on the screen this long.
+  static const toastHold = Duration(seconds: 3);
+
   /// What follows a word taken out closes up.
   static const closeUp = Duration(milliseconds: 200);
 

@@ -199,12 +199,15 @@ class _MatchingBodyState extends State<MatchingBody> {
             ),
             const SizedBox(width: AppSpacing.md),
             Expanded(
-              child: _Column(
-                label: 'lesson_english_words'.tr(),
-                children: [
-                  for (final pair in exercise.wordsShown)
-                    _card(_Side.word, pair),
-                ],
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: _Column(
+                  label: 'lesson_english_words'.tr(),
+                  children: [
+                    for (final pair in exercise.wordsShown)
+                      _card(_Side.word, pair),
+                  ],
+                ),
               ),
             ),
           ],

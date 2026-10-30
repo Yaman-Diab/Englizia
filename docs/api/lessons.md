@@ -45,13 +45,15 @@ The example is `assets/mock/lessons/lesson.json`.
 |---|---|---|---|
 | `id` | string | The lesson | yes |
 | `version` | int | The published version; an attempt counts for the version it was answered on (server doc §19.2) | yes, sent with each answer |
+| `xpPerAnswer` | int? | What a right answer earns, from the panel's table (v1.0). None before then: the feedback shows no badge. Proposed: the package has no such field | yes |
+| `explainEnabled` | bool | «اشرح لي» is on, by the track's settings and the day's limit (S §16). Proposed | yes |
 | `exercises[].id` | string | Stable question id | yes |
 | `exercises[].template` | string | `multipleChoice`, `imageChoice`, `listenChoose`, `fillChoices`, `wordOrder`, `matching`; the rest of §20.6 as they are built. One the app doesn't know is left out | yes |
 | `exercises[].instructionAr` | string | The line over the question | yes |
 | `exercises[].instructionArAudio` | string? | Required for kids | not yet |
 | `exercises[].prompt.en` | string | `multipleChoice`: the sentence with one `___`. `fillChoices`: with one `___` per blank. `imageChoice`: the word | yes |
-| `exercises[].prompt.audio` | string | `imageChoice`: the word said (optional). `listenChoose`: the clip. "Slower" plays this file at 0.75 | yes |
-| `exercises[].prompt.transcript` | string | `listenChoose`: what the clip says, for the feedback | not yet |
+| `exercises[].prompt.audio` | string | `imageChoice`: the word said (optional). `listenChoose`: the clip, which "Slower" plays at 0.75. The other templates: the right sentence said, for the feedback (optional; none hides its button) | yes |
+| `exercises[].prompt.transcript` | string | `listenChoose`: what the clip says, for the feedback | yes |
 | `exercises[].options[].id` | string | Stable option id | yes |
 | `exercises[].options[].text` | string | English text of a text option | yes |
 | `exercises[].options[].image` / `.alt` | string | A picture and its Arabic name for screen readers. WebP (S §22) | yes |
@@ -65,7 +67,8 @@ The example is `assets/mock/lessons/lesson.json`.
 | `exercises[].kind` | string | `matching`: `text` or `image` | yes |
 | `exercises[].pairs[]` | `{left, right}` or `{left, rightImage, rightAlt}` | `matching`, 3 to 5 pairs. `left` is the English word, unique in its question, and the pair's id. `rightAlt` is the picture's Arabic name for screen readers (server doc §20.6 has no such field: proposed) | yes |
 | `exercises[].hint.ar` | string? | The hint. None hides the button. English words in it are shown strong | yes |
-| `exercises[].explanation.ar` | string? | For the feedback | not yet |
+| `exercises[].explanation.ar` | string? | Why, for the feedback after a wrong answer; a paragraph per line | yes |
+| `exercises[].reviewOrders` | string[] | `wordOrder`: orders that are neither known right nor plainly wrong, which go to the server to judge (design `Exercise Feedback`). Proposed, and open: see below | yes |
 | `exercises[].concepts` | string[] | For the mistakes bank (v0.5) | not yet |
 | `exercises[].bookRef` | `{page, exercise}`? | Imaar lessons tied to a book exercise | yes |
 | `exercises[].reviewOnly` | bool | For the mistakes bank only: left out of the lesson | yes |
@@ -73,6 +76,7 @@ The example is `assets/mock/lessons/lesson.json`.
 A question the app can't read is skipped and logged, so it can't leave the learner stuck on the lesson; a lesson with no readable question is a failure with a retry.
 
 **Open with the backend team:**
+- Judging word orders with AI. The design sends some orders to AI, but S §16 and server doc §19.5 list no such use: they accept saved alternatives only (S §7.3). The app does what the design shows; with no `reviewOrders` nothing is ever sent.
 - Whether a question the app skipped still counts towards completing the lesson (it must not).
 - English instructions and hints: the package has only Arabic, so both app languages show Arabic (S §7.1 says "Arabic instructions"), read right to left.
 - The order of options is shuffled on the phone, per installation and question (S §7.1), so the server must send them in any order and needs nothing for this.
@@ -80,6 +84,26 @@ A question the app can't read is skipped and logged, so it can't leave the learn
 ### Errors
 
 The common errors (`README.md`). With an unknown lesson, `404`.
+
+## `POST /api/v1/app/lessons/{lessonId}/reports`
+
+"A problem with this question" (S §18), kept on the phone and sent like an answer. The app's version and platform go in every request's headers.
+
+```json
+{
+  "reportId": "6f1c8f60-0000-4000-8000-000000000001",
+  "lessonVersion": 1,
+  "questionId": "q1",
+  "reason": "audio",
+  "answer": { "optionId": "o2" }
+}
+```
+
+`reason` is `alsoRight`, `audio`, `question`, `translation` or `other`. `reportId` makes it safe to repeat. Proposed.
+
+## `POST /api/v1/app/lessons/{lessonId}/answers/review`
+
+Asks the server to judge an order in `reviewOrders`, with the same body as an answer, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
 
 ## `POST /api/v1/app/lessons/{lessonId}/answers`
 

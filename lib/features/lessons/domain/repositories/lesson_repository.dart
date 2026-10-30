@@ -7,8 +7,14 @@ abstract interface class LessonRepository {
   Future<Result<Lesson>> getLesson(String lessonId);
 
   /// Keeps the answer on the phone and sends it when it can, under a stable
-  /// attempt id, so the server ignores a repeat. Never fails.
-  Future<void> saveAttempt(ExerciseAttempt attempt);
+  /// attempt id, so the server ignores a repeat. Never fails. Returns that id.
+  Future<String> saveAttempt(ExerciseAttempt attempt);
+
+  /// Asks the server to judge what the phone can't: true when it is right.
+  Future<Result<bool>> reviewAttempt(ExerciseAttempt attempt, String attemptId);
+
+  /// Keeps the report on the phone and sends it when it can. Never fails.
+  Future<void> saveReport(ExerciseReport report);
 
   /// Sends what the phone kept, as when the connection is back.
   Future<void> sendSaved();

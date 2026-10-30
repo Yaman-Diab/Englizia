@@ -7,14 +7,28 @@ final class Lesson extends Equatable {
     required this.id,
     required this.version,
     required this.exercises,
+    this.xpPerAnswer,
+    this.explainEnabled = false,
   });
 
   final String id;
   final int version;
   final List<Exercise> exercises;
 
+  /// What a right answer earns, from the panel (v1.0). With none, no badge.
+  final int? xpPerAnswer;
+
+  /// «اشرح لي» is on: by the track's settings and the day's limit.
+  final bool explainEnabled;
+
   @override
-  List<Object?> get props => [id, version, exercises];
+  List<Object?> get props => [
+    id,
+    version,
+    exercises,
+    xpPerAnswer,
+    explainEnabled,
+  ];
 }
 
 /// Where a question sits in the student's book, on Imaar lessons.
@@ -37,6 +51,8 @@ sealed class Exercise extends Equatable {
     required this.instruction,
     this.hint,
     this.bookReference,
+    this.explanation,
+    this.answerAudioUrl,
   });
 
   final String id;
@@ -48,8 +64,17 @@ sealed class Exercise extends Equatable {
   final String? hint;
   final BookReference? bookReference;
 
+  /// Why, shown after a wrong answer: Arabic, a paragraph per line.
+  final String? explanation;
+
+  /// The right sentence said, for the feedback.
+  final String? answerAudioUrl;
+
   /// The clip to load, when the question has one.
   String? get clipUrl => null;
+
+  /// The clip the feedback plays.
+  String? get answerClipUrl => answerAudioUrl ?? clipUrl;
 
   /// Plays once by itself on opening (S §7.3).
   bool get autoplays => false;
@@ -62,7 +87,14 @@ sealed class Exercise extends Equatable {
   bool get reportsClipFailure => false;
 
   @override
-  List<Object?> get props => [id, instruction, hint, bookReference];
+  List<Object?> get props => [
+    id,
+    instruction,
+    hint,
+    bookReference,
+    explanation,
+    answerAudioUrl,
+  ];
 }
 
 final class ExerciseOption extends Equatable {
@@ -95,6 +127,8 @@ sealed class ChoiceExercise extends Exercise {
     required this.answerId,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final List<ExerciseOption> options;
@@ -115,6 +149,8 @@ final class MultipleChoiceExercise extends ChoiceExercise {
     required this.after,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String before;
@@ -135,6 +171,8 @@ final class ImageChoiceExercise extends ChoiceExercise {
     this.audioUrl,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String word;
@@ -155,11 +193,17 @@ final class ListenChooseExercise extends ChoiceExercise {
     required super.options,
     required super.answerId,
     required this.audioUrl,
+    this.transcript,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String audioUrl;
+
+  /// What the clip says, shown after a wrong answer.
+  final String? transcript;
 
   @override
   String? get clipUrl => audioUrl;
@@ -171,7 +215,7 @@ final class ListenChooseExercise extends ChoiceExercise {
   bool get reportsClipFailure => true;
 
   @override
-  List<Object?> get props => [...super.props, audioUrl];
+  List<Object?> get props => [...super.props, audioUrl, transcript];
 }
 
 /// A word card of a bank. Its [id] tells apart two cards with the same word.
@@ -207,6 +251,8 @@ final class FillChoicesExercise extends Exercise {
     required this.bank,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   /// The sentence around the blanks: one more than [blanks].
@@ -230,8 +276,11 @@ final class WordOrderExercise extends Exercise {
     required this.answerWords,
     required this.bank,
     this.alternatives = const [],
+    this.reviewable = const [],
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String meaning;
@@ -243,6 +292,9 @@ final class WordOrderExercise extends Exercise {
   /// Other orders that are right too.
   final List<String> alternatives;
 
+  /// Orders not known to be right or wrong: the server judges them.
+  final List<String> reviewable;
+
   /// In the order to show them.
   final List<WordChip> bank;
 
@@ -253,6 +305,7 @@ final class WordOrderExercise extends Exercise {
     answer,
     answerWords,
     alternatives,
+    reviewable,
     bank,
   ];
 }
@@ -287,6 +340,8 @@ final class MatchingExercise extends Exercise {
     required this.pictures,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final List<MatchPair> pairs;

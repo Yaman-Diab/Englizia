@@ -29,10 +29,13 @@ abstract final class AppRoutes {
 
   static const lessonExercises = '/lessons/:lessonId/exercises';
   static const lessonComplete = '/lessons/:lessonId/complete';
+  static const lessonExplain = '/lessons/:lessonId/explain';
 
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
 
   static String completeOf(String lessonId) => '/lessons/$lessonId/complete';
+
+  static String explainOf(String lessonId) => '/lessons/$lessonId/explain';
 
   /// The path of the link that confirms an email (docs/api/auth.md).
   static const verifyEmail = '/verify-email';

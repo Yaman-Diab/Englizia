@@ -109,15 +109,46 @@ final class SlotsEvaluation extends Evaluation {
 /// Each placed word's verdict, in order. Right as a whole may also mean another
 /// accepted order, whose words all count as right.
 final class SequenceEvaluation extends Evaluation {
-  const SequenceEvaluation({required this.words, required this.correct});
+  const SequenceEvaluation({
+    required this.words,
+    required this.correct,
+    this.needsReview = false,
+  });
 
   final List<bool> words;
 
   @override
   final bool correct;
 
+  /// Not right as far as the phone knows, but for the server to judge.
+  final bool needsReview;
+
   @override
-  List<Object?> get props => [words, correct];
+  List<Object?> get props => [words, correct, needsReview];
+}
+
+/// An order the phone can't judge: the server is looking at it, so no verdict
+/// yet, and no «التالي» either.
+final class ReviewPending extends Evaluation {
+  const ReviewPending();
+
+  @override
+  bool get correct => false;
+
+  @override
+  List<Object?> get props => const [];
+}
+
+/// The server couldn't judge it now. It will later, and it won't count as wrong
+/// (S §16.3).
+final class ReviewLater extends Evaluation {
+  const ReviewLater();
+
+  @override
+  bool get correct => false;
+
+  @override
+  List<Object?> get props => const [];
 }
 
 /// All the pairs found: each was checked in its own time.
@@ -157,6 +188,36 @@ final class ExerciseAttempt extends Equatable {
     questionId,
     draft,
     hinted,
+  ];
+}
+
+/// What a learner can report about a question (S §18).
+enum ProblemReason { alsoRight, audio, question, translation, other }
+
+/// A learner's report, sent with its context: the question, its version and the
+/// answer. The app's version and platform go in every request's headers.
+final class ExerciseReport extends Equatable {
+  const ExerciseReport({
+    required this.lessonId,
+    required this.lessonVersion,
+    required this.questionId,
+    required this.reason,
+    this.draft,
+  });
+
+  final String lessonId;
+  final int lessonVersion;
+  final String questionId;
+  final ProblemReason reason;
+  final ExerciseDraft? draft;
+
+  @override
+  List<Object?> get props => [
+    lessonId,
+    lessonVersion,
+    questionId,
+    reason,
+    draft,
   ];
 }
 
