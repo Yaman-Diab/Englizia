@@ -96,6 +96,9 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/password/forgot` | POST | `{email}` | none; the same answer whether or not the email has an account ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/password/reset/verify` | POST | `{token}` | none; `410` for a link expired, used or unknown ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/password/reset` | POST | `{token, password, deviceId, platform}` | `TokenResponse`; `410` as above, `400` for a refused password ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/email/verify` | POST | `{token}` | none; `410` for a link expired, used or unknown ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/email/resend` | POST | — | none; `429` counts as sent ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/email` | PUT | `{email}` | none; `409` when it has an account ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team

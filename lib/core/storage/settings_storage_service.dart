@@ -15,6 +15,7 @@ final class SettingsStorageService {
   static const _deviceIdKey = 'account.device_id';
   static const _placementStatusKey = 'account.placement_status';
   static const _placementProgressKey = 'account.placement_progress';
+  static const _emailReminderKey = 'account.email_reminder_hidden_until';
 
   final SharedPreferences _prefs;
 
@@ -72,12 +73,21 @@ final class SettingsStorageService {
     await _prefs.remove(_placementProgressKey);
   }
 
+  /// Until when the reminder to confirm the email stays hidden.
+  DateTime? get emailReminderHiddenUntil =>
+      DateTime.tryParse(_prefs.getString(_emailReminderKey) ?? '');
+
+  Future<void> setEmailReminderHiddenUntil(DateTime until) async {
+    await _prefs.setString(_emailReminderKey, until.toUtc().toIso8601String());
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
     try {
       await clearPlacementStatus();
       await clearPlacementProgress();
+      await _prefs.remove(_emailReminderKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

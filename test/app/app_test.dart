@@ -20,6 +20,7 @@ import 'package:englizia/features/account/presentation/new_password/pages/new_pa
 import 'package:englizia/features/account/presentation/password_changed/pages/password_changed_page.dart';
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
+import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
@@ -547,6 +548,116 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(PlacementIntroPage), findsNothing);
       expect(find.byType(WelcomePage), findsOneWidget);
+    });
+  });
+
+  group('the link that confirms an email', () {
+    late FakeAccountRepository accounts;
+
+    setUp(() {
+      accounts = FakeAccountRepository();
+      sl
+        ..unregister<AccountRepository>()
+        ..registerLazySingleton<AccountRepository>(() => accounts);
+    });
+
+    Future<void> open(WidgetTester tester, String location) async {
+      tester.binding.platformDispatcher.defaultRouteNameTestValue = location;
+      addTearDown(
+        tester.binding.platformDispatcher.clearDefaultRouteNameTestValue,
+      );
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('confirms, and goes on where the session belongs', (
+      tester,
+    ) async {
+      await open(tester, '/verify-email?token=t-1');
+      expect(accounts.verifiedTokens, ['t-1']);
+      expect(find.text('verify_done'.tr()), findsOneWidget);
+
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(WelcomePage), findsOneWidget);
+    });
+
+    testWidgets('expired with no session: a new link needs signing in', (
+      tester,
+    ) async {
+      accounts = FakeAccountRepository(
+        verifyResults: const [Err(LinkExpiredFailure())],
+      );
+      await open(tester, '/verify-email?token=t-1');
+      expect(find.text('verify_expired'.tr()), findsOneWidget);
+
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(SignInPage), findsOneWidget);
+    });
+
+    testWidgets('expired for a member: home opens the sheet and sends', (
+      tester,
+    ) async {
+      accounts = FakeAccountRepository(
+        verifyResults: const [Err(LinkExpiredFailure())],
+      );
+      await open(tester, '/verify-email?token=t-1');
+      await sl<AppSessionController>().signIn(tokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      await tester.tap(find.byType(AppButton));
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pump();
+
+      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(VerifyEmailSheet), findsOneWidget);
+      expect(accounts.linkResends, 1);
+      // Ends what the sent link started.
+      await tester.pump(const Duration(seconds: 6));
+    });
+
+    testWidgets('home shows a member the reminder and the row', (tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await sl<AppSessionController>().signIn(tokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('verify_reminder'.tr()), findsOneWidget);
+      // The row sits low on the temporary home.
+      await tester.scrollUntilVisible(
+        find.text('account_email_unverified'.tr()),
+        200,
+      );
+      expect(find.text('account_email_unverified'.tr()), findsOneWidget);
+    });
+
+    testWidgets('home shows a guest neither', (tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await sl<AppSessionController>().signIn(guestTokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.text('verify_reminder'.tr()), findsNothing);
+      expect(accounts.emailReads, 0);
     });
   });
 

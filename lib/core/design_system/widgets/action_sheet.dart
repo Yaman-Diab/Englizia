@@ -13,6 +13,16 @@ enum SheetAction { primary, secondary }
 /// progress stays on this phone"), [warning] for one that loses something.
 enum SheetTone { info, warning }
 
+/// How every bottom sheet comes up and goes down.
+AnimationStyle sheetAnimation(BuildContext context) =>
+    AppMotion.reduceMotion(context)
+    ? AnimationStyle.noAnimation
+    : const AnimationStyle(
+        duration: AppMotion.sheetIn,
+        reverseDuration: AppMotion.sheetOut,
+        curve: AppMotion.smoothOut,
+      );
+
 /// Asks before a step with consequences: an icon, a title, what it means,
 /// the recommended [primaryLabel] action and the [secondaryLabel] one. Null
 /// when dismissed. A [destructiveSecondary] action is drawn in the error
@@ -31,13 +41,7 @@ Future<SheetAction?> showActionSheet(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
-  sheetAnimationStyle: AppMotion.reduceMotion(context)
-      ? AnimationStyle.noAnimation
-      : const AnimationStyle(
-          duration: AppMotion.sheetIn,
-          reverseDuration: AppMotion.sheetOut,
-          curve: AppMotion.smoothOut,
-        ),
+  sheetAnimationStyle: sheetAnimation(context),
   builder: (_) => ActionSheet(
     icon: icon,
     title: title,

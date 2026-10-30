@@ -11,6 +11,7 @@ import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
+import 'package:englizia/features/account/domain/entities/account_email.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
@@ -68,6 +69,18 @@ class _RecordingDataSource implements AccountRemoteDataSource {
 
   @override
   Future<void> requestPasswordReset(String email) async {}
+
+  @override
+  Future<AccountEmail> getEmail() => throw UnimplementedError();
+
+  @override
+  Future<void> resendEmailLink() async {}
+
+  @override
+  Future<void> changeEmail(String email) async {}
+
+  @override
+  Future<void> verifyEmail(String token) async {}
 
   @override
   Future<void> verifyPasswordLink(String token) async {}

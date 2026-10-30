@@ -37,6 +37,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The placement test's intro: what the test takes, and whether it's your first, one left unfinished, or a retake that's open or not yet. Offline it shows your last known state, with the button coming back by itself. Starting over and starting with no test tell the server first. The sound check doesn't play a sound yet.
 - The placement test's questions: vocabulary, grammar, reading and listening, one at a time, with no feedback and no score. Answers are kept on the phone, so a stage that ends offline only waits. Stop whenever you like and carry on from the same question. Listening doesn't play a sound yet.
 - The placement test's result: the guide climbs a ladder up to your estimated level, then what you can do and how your skills compare, with no numbers. You can start one level lower. Offline, your answers are safe and the result waits.
+- Confirm your email: a quiet reminder that never stops you learning, a sheet to open your mail app, send the link again or correct the address, and a badge with your email. The link confirms it, or says it ran out and offers a new one.
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Changed

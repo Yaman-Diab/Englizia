@@ -48,18 +48,28 @@ abstract final class FormEntrance {
 /// then the action fades in.
 abstract final class PasswordChangedEntrance {
   static const badge = Duration(milliseconds: 250);
-  static const badgeGrow = AppMotion.fast;
   static const check = Duration(milliseconds: 500);
-  static const checkDraw = Duration(milliseconds: 300);
   static const hop = Duration(milliseconds: 800);
-  static const hopUp = Duration(milliseconds: 120);
-  static const hopDown = Duration(milliseconds: 180);
-  static const hopHeight = 10.0;
   static const action = Duration(milliseconds: 1100);
   static const actionFade = Duration(milliseconds: 200);
 
   /// When the last element has arrived.
   static Duration get settled => action + actionFade;
+}
+
+/// "Your email is confirmed" (design "Verify Email"): the card, then its badge
+/// and check, then the guide hops once.
+abstract final class EmailConfirmedEntrance {
+  static const card = Duration(milliseconds: 200);
+  static const badge = Duration(milliseconds: 120);
+  static const check = Duration(milliseconds: 370);
+  static const hop = Duration(milliseconds: 680);
+}
+
+/// The reminder to confirm the email comes a moment after home has loaded, not
+/// with it (design "Verify Email").
+abstract final class EmailReminderEntrance {
+  static const delay = Duration(milliseconds: 700);
 }
 
 /// The placement result (design): the ladder's steps rise one by one, the

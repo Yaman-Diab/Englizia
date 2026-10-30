@@ -26,6 +26,9 @@ abstract final class AppRoutes {
   /// The path of the link in a recovery email (docs/api/auth.md).
   static const newPassword = '/reset-password';
   static const passwordChanged = '/reset-password/done';
+
+  /// The path of the link that confirms an email (docs/api/auth.md).
+  static const verifyEmail = '/verify-email';
   static const signUp = '/sign-up';
   static const signUpWithProvider = '/sign-up/provider';
   static const legalTerms = '/legal/terms';

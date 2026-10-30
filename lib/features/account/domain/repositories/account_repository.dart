@@ -1,5 +1,6 @@
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/features/account/domain/entities/account_email.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
@@ -43,6 +44,22 @@ abstract interface class AccountRepository {
     required String token,
     required String password,
   });
+
+  /// The account's email and whether it is confirmed.
+  Future<Result<AccountEmail>> getEmail();
+
+  /// Sends the link that confirms the email again. Too many requests fail with
+  /// `RateLimitFailure`.
+  Future<Result<void>> resendEmailLink();
+
+  /// Corrects the email, which sends a link to the new one. One that has an
+  /// account fails with `ConflictFailure`, one the server refuses with
+  /// `ValidationFailure`.
+  Future<Result<void>> changeEmail(String email);
+
+  /// Confirms the email from the link in the message. One out of date or used
+  /// already fails with `LinkExpiredFailure`.
+  Future<Result<void>> verifyEmail(String token);
 
   /// Turns this phone's guest account into a member account with [account]'s
   /// email and password, keeping its progress (ADR 10). Fails like

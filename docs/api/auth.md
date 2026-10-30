@@ -123,6 +123,18 @@ Status: **proposed**, mock (any token but `expired` is good).
 
 Status: **proposed**, mock (answers like register; the token `offline` fails with no connection, and `no-session` answers with no tokens).
 
+## Confirming the email
+
+The first link goes out by itself when an account is made with an email (S §5.3). The app reads the state from `GET /api/v1/app/me` (live: `email`, `emailVerified`), when home opens and on coming back to the app, so confirming on another device is noticed. It shows nothing with no `email` or with `emailVerified: true`, so **accounts from Google and Apple must arrive with `emailVerified: true`**, as nothing else tells the app how an account was made.
+
+The link is `https://engleazia.com/verify-email?token=<token>`, valid and opening the app like the recovery link (STATUS D-024). All three below are **proposed**, mock:
+
+- `POST /api/v1/auth/email/verify`: `{ "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `410` for a link expired, used or unknown.
+- `POST /api/v1/auth/email/resend`: with the session, no body. Sends the link again. The app waits 1, 2, then 5 minutes between tries, so the server's limit should allow that; `429` counts as sent.
+- `PUT /api/v1/auth/email`: `{ "email": "..." }`, with the session. Corrects the address and sends a link there. `409` when it has an account, `400` (`validation.failed`) when refused.
+
+Questions for the backend team: whether correcting the email will ask for the password again after some time (it would need a step the design doesn't draw, STATUS D-052), and whether the 3 days a hidden reminder stays hidden should be a setting of the panel.
+
 ## `POST /api/v1/auth/logout`
 
 Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. The app calls it on sign-out and never waits on it: signing out works offline, and a failure only means the server forgets the session later. Signing out as a guest loses the account; the app warns first («ستفقد تقدّمك لأنه غير محفوظ في حساب»).
