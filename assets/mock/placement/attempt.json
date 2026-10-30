@@ -1,0 +1,15 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "attemptId": "att_mock",
+    "stageSizes": [
+      4,
+      4
+    ],
+    "stage": 1,
+    "answered": 0
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

@@ -7,14 +7,18 @@ import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
+import 'package:englizia/features/placement/data/models/placement_result_model.dart';
 import 'package:englizia/features/placement/data/models/placement_status_model.dart';
 import 'package:englizia/features/placement/data/models/placement_summary_model.dart';
+import 'package:englizia/features/placement/data/models/placement_test_models.dart';
 import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
 import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
 
@@ -36,6 +40,35 @@ class _FailingDataSource implements PlacementRemoteDataSource {
 
   @override
   Future<PlacementStatusModel> getStatus() => throw UnimplementedError();
+
+  @override
+  Future<void> restartTest() => throw UnimplementedError();
+
+  @override
+  Future<void> deferTest(String enrollmentId) => throw UnimplementedError();
+
+  @override
+  Future<PlacementAttemptModel> startAttempt() => throw UnimplementedError();
+
+  @override
+  Future<PlacementStageModel> getStage(String attemptId, int stage) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> sendAnswer(String attemptId, Map<String, Object?> answer) =>
+      throw UnimplementedError();
+
+  @override
+  Future<PlacementNextModel> completeStage(String attemptId, int stage) =>
+      throw UnimplementedError();
+
+  @override
+  Future<PlacementResultModel> getResult(String attemptId) =>
+      throw UnimplementedError();
+
+  @override
+  Future<void> acceptLevel(String attemptId, String levelId) =>
+      throw UnimplementedError();
 }
 
 void main() {
@@ -128,10 +161,186 @@ void main() {
     });
   });
 
-  test('the repository maps errors through the error funnel', () async {
-    final result = await PlacementRepositoryImpl(
-      _FailingDataSource(),
-    ).getSummary();
-    expect((result as Err).failure, isA<NetworkFailure>());
+  group('the repository', () {
+    late SettingsStorageService settings;
+    late FakeHttpAdapter adapter;
+    late DateTime now;
+    late FakeResponse Function(RequestOptions) answer;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      settings = SettingsStorageService(await SharedPreferences.getInstance());
+      now = DateTime.utc(2026, 11);
+      answer = (_) => const FakeResponse(200);
+      adapter = FakeHttpAdapter((options) => answer(options));
+    });
+
+    PlacementRepositoryImpl repository() => PlacementRepositoryImpl(
+      PlacementRemoteDataSourceImpl(
+        ApiClient(
+          Dio(BaseOptions(baseUrl: 'https://api.test'))
+            ..httpClientAdapter = adapter,
+        ),
+      ),
+      settings: settings,
+      now: () => now,
+    );
+
+    FakeResponse status(Map<String, Object?> data) =>
+        FakeResponse(200, body: {'statusCode': 200, 'data': data});
+
+    void goOffline() => answer = (options) =>
+        throw DioException.connectionError(
+          requestOptions: options,
+          reason: 'offline',
+        );
+
+    test('maps errors through the error funnel', () async {
+      final result = await PlacementRepositoryImpl(
+        _FailingDataSource(),
+        settings: settings,
+      ).getSummary();
+      expect((result as Err).failure, isA<NetworkFailure>());
+    });
+
+    test('asks for the status with the session\'s token', () async {
+      answer = (_) => status(const {'state': 'none'});
+      final result = await repository().getStatus();
+      expect(result, const Ok<PlacementStatus>(PlacementNotTaken()));
+      expect(adapter.requests.single.path, '/api/v1/app/placement/status');
+    });
+
+    test('offline with nothing saved: the failure', () async {
+      goOffline();
+      final result = await repository().getStatus();
+      expect((result as Err).failure, isA<NetworkFailure>());
+    });
+
+    test('offline: the saved status, its days brought up to date', () async {
+      answer = (_) => status(const {
+        'state': 'retakeAvailable',
+        'lastLevel': 'A2',
+        'daysSinceResult': 34,
+      });
+      await repository().getStatus();
+
+      goOffline();
+      now = now.add(const Duration(days: 3));
+      expect(
+        await repository().getStatus(),
+        const Ok<PlacementStatus>(
+          PlacementRetakeOpen(level: 'A2', daysAgo: 37),
+        ),
+      );
+    });
+
+    test('offline: an unfinished test is as it was', () async {
+      answer = (_) =>
+          status(const {'state': 'inProgress', 'stage': 2, 'question': 4});
+      await repository().getStatus();
+
+      goOffline();
+      expect(
+        await repository().getStatus(),
+        const Ok<PlacementStatus>(PlacementInProgress(stage: 2, question: 4)),
+      );
+    });
+
+    test('offline: a wait counts down, and never says it ran out', () async {
+      answer = (_) =>
+          status(const {'state': 'retakeLocked', 'daysUntilRetake': 12});
+      await repository().getStatus();
+
+      goOffline();
+      now = now.add(const Duration(days: 2));
+      expect(
+        await repository().getStatus(),
+        const Ok<PlacementStatus>(PlacementRetakeLocked(daysLeft: 10)),
+      );
+
+      now = now.add(const Duration(days: 30));
+      expect(
+        await repository().getStatus(),
+        const Ok<PlacementStatus>(PlacementRetakeLocked(daysLeft: 1)),
+      );
+    });
+
+    test('a server failure is not hidden by what was saved', () async {
+      answer = (_) => status(const {'state': 'none'});
+      await repository().getStatus();
+
+      answer = (_) => const FakeResponse(500);
+      final result = await repository().getStatus();
+      expect((result as Err).failure, isA<ServerFailure>());
+    });
+
+    test('a broken saved status counts as none', () async {
+      await settings.setPlacementStatus('not json');
+      goOffline();
+      final result = await repository().getStatus();
+      expect((result as Err).failure, isA<NetworkFailure>());
+    });
+
+    test('starting over: POST attempts with restart, and forgets', () async {
+      answer = (_) =>
+          status(const {'state': 'inProgress', 'stage': 1, 'question': 9});
+      await repository().getStatus();
+      adapter.requests.clear();
+
+      answer = (_) => const FakeResponse(201);
+      expect(await repository().restartTest(), isA<Ok<void>>());
+      final request = adapter.requests.single;
+      expect(request.method, 'POST');
+      expect(request.path, '/api/v1/app/placement/attempts');
+      expect(request.data, {'restart': true});
+      expect(settings.placementStatus, isNull);
+    });
+
+    test('a failed restart keeps what was saved', () async {
+      answer = (_) =>
+          status(const {'state': 'inProgress', 'stage': 1, 'question': 9});
+      await repository().getStatus();
+
+      goOffline();
+      expect(await repository().restartTest(), isA<Err<void>>());
+      expect(settings.placementStatus, isNotNull);
+    });
+
+    test('putting off: PATCH the saved enrollment as deferred', () async {
+      answer = (_) => status(const {'state': 'none', 'enrollmentId': 'enr-1'});
+      await repository().getStatus();
+      adapter.requests.clear();
+
+      answer = (_) => const FakeResponse(200);
+      expect(await repository().deferTest(), isA<Ok<void>>());
+      final request = adapter.requests.single;
+      expect(request.method, 'PATCH');
+      expect(request.path, '/api/v1/app/enrollments/enr-1');
+      expect(request.data, {'placement_state': 'deferred'});
+    });
+
+    test('putting off with nothing saved asks for the enrollment', () async {
+      answer = (options) => options.method == 'GET'
+          ? status(const {'state': 'none', 'enrollmentId': 'enr-2'})
+          : const FakeResponse(200);
+      expect(await repository().deferTest(), isA<Ok<void>>());
+      expect(adapter.requests.last.path, '/api/v1/app/enrollments/enr-2');
+    });
+
+    test('with no enrollment to change, putting off fails', () async {
+      answer = (_) => status(const {'state': 'none'});
+      final result = await repository().deferTest();
+      expect((result as Err).failure, isA<UnknownFailure>());
+    });
+
+    test('mock mode answers the two actions', () async {
+      final fake = PlacementFakeDataSource(
+        _DiskBundle(),
+        latency: Duration.zero,
+      );
+      await fake.restartTest();
+      await fake.deferTest('enr');
+      expect((await fake.getStatus()).enrollmentId, 'enr_general');
+    });
   });
 }

@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/device_volume.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/config/app_config.dart';
@@ -68,6 +69,14 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     )
     // Silent until sounds are turned on (ADR 9).
     ..registerLazySingleton<SoundPlayer>(() => const SilentSoundPlayer())
+    ..registerLazySingleton<ClipPlayer>(
+      () => SilentClipPlayer(
+        failsFirstLoad: AppConfig.isMock,
+        latency: AppConfig.isMock
+            ? const Duration(milliseconds: 500)
+            : Duration.zero,
+      ),
+    )
     ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
     ..registerLazySingleton<MailApp>(() => const PlatformMailApp())
     ..registerFactory(() => SettingsCubit(sl()));

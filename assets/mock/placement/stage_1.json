@@ -1,0 +1,108 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "stage": 1,
+    "questions": [
+      {
+        "id": "q1",
+        "type": "vocabulary",
+        "before": "I usually",
+        "after": "breakfast at seven.",
+        "options": [
+          {
+            "id": "o1",
+            "text": "have"
+          },
+          {
+            "id": "o2",
+            "text": "make"
+          },
+          {
+            "id": "o3",
+            "text": "take"
+          },
+          {
+            "id": "o4",
+            "text": "do"
+          }
+        ]
+      },
+      {
+        "id": "q2",
+        "type": "grammar",
+        "before": "If it",
+        "after": "tomorrow, we will stay at home.",
+        "options": [
+          {
+            "id": "o1",
+            "text": "rains"
+          },
+          {
+            "id": "o2",
+            "text": "will rain"
+          },
+          {
+            "id": "o3",
+            "text": "rained"
+          },
+          {
+            "id": "o4",
+            "text": "is raining"
+          }
+        ]
+      },
+      {
+        "id": "q3",
+        "type": "reading",
+        "passage": "Omar works at a bank in the city centre. On Tuesday, he started work at eight, as usual. At eleven, his son's school called because the boy had a high temperature. Omar told his manager, left the office early and took his son to the doctor. The doctor said the boy needed rest and plenty of water, so Omar stayed at home with him for the rest of the week. On Monday, the boy went back to school and Omar went back to work.",
+        "ask": "Why did Omar leave work early?",
+        "options": [
+          {
+            "id": "o1",
+            "text": "He felt sick."
+          },
+          {
+            "id": "o2",
+            "text": "His son was ill."
+          },
+          {
+            "id": "o3",
+            "text": "He had a meeting."
+          },
+          {
+            "id": "o4",
+            "text": "The bank closed early."
+          }
+        ]
+      },
+      {
+        "id": "q4",
+        "type": "listening",
+        "audioUrl": "https://example.com/mock/placement/train.mp3",
+        "maxPlays": 2,
+        "ask": "What time does the train leave?",
+        "options": [
+          {
+            "id": "o1",
+            "text": "7:15"
+          },
+          {
+            "id": "o2",
+            "text": "7:45"
+          },
+          {
+            "id": "o3",
+            "text": "8:15"
+          },
+          {
+            "id": "o4",
+            "text": "8:45"
+          }
+        ]
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

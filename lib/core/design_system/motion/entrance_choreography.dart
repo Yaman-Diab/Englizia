@@ -62,6 +62,52 @@ abstract final class PasswordChangedEntrance {
   static Duration get settled => action + actionFade;
 }
 
+/// The placement result (design): the ladder's steps rise one by one, the
+/// guide appears on the first and hops up to the level, sparks and the level
+/// land together, then the rest and the skill bars. Under two seconds.
+final class PlacementResultEntrance {
+  const PlacementResultEntrance(this.level);
+
+  /// The steps to climb from the first.
+  final int level;
+
+  static const stepStagger = Duration(milliseconds: 50);
+  static const stepRise = Duration(milliseconds: 200);
+  static const guide = Duration(milliseconds: 300);
+  static const guideFade = AppMotion.quick;
+
+  /// A hop takes [hopAir], then it rests until the next one.
+  static const hop = Duration(milliseconds: 200);
+  static const hopAir = Duration(milliseconds: 180);
+  static const trailFade = Duration(milliseconds: 160);
+  static const trailDelay = AppMotion.quick;
+  static const sparkPop = Duration(milliseconds: 320);
+  static const sparkStagger = Duration(milliseconds: 70);
+  static const levelPop = AppMotion.fast;
+  static const restDelay = Duration(milliseconds: 220);
+  static const restFade = Duration(milliseconds: 260);
+  static const barFill = AppMotion.slow;
+
+  /// When the guide starts climbing.
+  static Duration get climb => guide + guideFade;
+
+  /// When the guide reaches [level].
+  Duration get land => climb + hop * level;
+
+  /// When the content under the ladder starts.
+  Duration get rest => land + restDelay;
+
+  /// When everything has arrived.
+  Duration get settled => rest + barFill;
+}
+
+/// Lowering the level, once the sheet has closed: one hop down, then the level.
+abstract final class PlacementLowerEntrance {
+  static const hop = Duration(milliseconds: 260);
+  static const level = Duration(milliseconds: 440);
+  static const settled = Duration(milliseconds: 690);
+}
+
 /// The mail scene (design "Check Email"): the envelope lands at once, then
 /// the letter slides up, then the guide peeks out.
 abstract final class MailSceneEntrance {

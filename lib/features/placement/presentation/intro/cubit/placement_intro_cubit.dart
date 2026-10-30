@@ -14,6 +14,9 @@ import 'package:englizia/features/tracks/domain/repositories/track_repository.da
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// What the screen asks the server before moving on.
+enum PlacementAction { restart, skip }
+
 final class PlacementIntroState extends Equatable {
   const PlacementIntroState({
     this.load = LoadStatus.loading,
@@ -23,6 +26,9 @@ final class PlacementIntroState extends Equatable {
     this.failure,
     this.online = true,
     this.trying = false,
+    this.running,
+    this.done,
+    this.actionFailure,
   });
 
   final LoadStatus load;
@@ -30,7 +36,8 @@ final class PlacementIntroState extends Equatable {
   /// The published test's duration and stages; null when not known yet.
   final PlacementSummary? summary;
 
-  /// Null when not known yet: offline, the screen reads as a first test.
+  /// Null when not known: offline, with nothing saved from before. The screen
+  /// then promises nothing, as the learner may well have a result.
   final PlacementStatus? status;
 
   /// Where a learner who skips the test starts; null when the track or its
@@ -44,10 +51,22 @@ final class PlacementIntroState extends Equatable {
   /// The sound check is playing.
   final bool trying;
 
+  /// The action on its way, and the one that just succeeded: the screen moves
+  /// on, and says [PlacementIntroCubit.reopened] if it comes back.
+  final PlacementAction? running;
+  final PlacementAction? done;
+
+  /// Why the action failed, with a retry. Kept apart from [failure], which
+  /// decides what the screen can show.
+  final Failure? actionFailure;
+
+  bool get busy => running != null || done != null;
+
   /// No published test version: the first level stays.
   bool get testUnavailable => failure is NotFoundFailure;
 
-  bool get _testReachable => online && summary != null && status != null;
+  bool get _testReachable =>
+      online && summary != null && status != null && !busy;
 
   /// «ابدأ من جديد» needs the same as starting.
   bool get canRestart => _testReachable;
@@ -62,6 +81,9 @@ final class PlacementIntroState extends Equatable {
     Failure? Function()? failure,
     bool? online,
     bool? trying,
+    PlacementAction? Function()? running,
+    PlacementAction? Function()? done,
+    Failure? Function()? actionFailure,
   }) => PlacementIntroState(
     load: load ?? this.load,
     summary: summary ?? this.summary,
@@ -70,6 +92,9 @@ final class PlacementIntroState extends Equatable {
     failure: failure != null ? failure() : this.failure,
     online: online ?? this.online,
     trying: trying ?? this.trying,
+    running: running != null ? running() : this.running,
+    done: done != null ? done() : this.done,
+    actionFailure: actionFailure != null ? actionFailure() : this.actionFailure,
   );
 
   @override
@@ -81,6 +106,9 @@ final class PlacementIntroState extends Equatable {
     failure,
     online,
     trying,
+    running,
+    done,
+    actionFailure,
   ];
 }
 
@@ -108,9 +136,14 @@ class PlacementIntroCubit extends Cubit<PlacementIntroState> {
   StreamSubscription<bool>? _connection;
   Timer? _trial;
   String? _trackId;
+  bool _newAccount = false;
+  PlacementAction? _lastAction;
 
-  Future<void> start(String? trackId) async {
+  /// [newAccount] is one that came through onboarding, which can only be on
+  /// its first test, connection or not.
+  Future<void> start(String? trackId, {bool newAccount = false}) async {
     _trackId = trackId;
+    _newAccount = newAccount;
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
     final online = await _connectivity.isOnline();
     if (isClosed) return;
@@ -149,7 +182,7 @@ class PlacementIntroCubit extends Cubit<PlacementIntroState> {
         },
         status: switch (status) {
           Ok(:final value) => value,
-          Err() => null,
+          Err() => _newAccount ? const PlacementNotTaken() : null,
         },
         firstLevel: switch (levels) {
           Ok(:final value) when value.isNotEmpty => value.first,
@@ -158,6 +191,39 @@ class PlacementIntroCubit extends Cubit<PlacementIntroState> {
         failure: () => failure,
       ),
     );
+  }
+
+  /// «ابدأ من جديد»: throws away the unfinished test, then the questions open.
+  Future<void> restart() => _act(PlacementAction.restart);
+
+  /// «ابدأ من البداية دون اختبار»: tells the server, then the lessons open.
+  Future<void> skip() => _act(PlacementAction.skip);
+
+  Future<void> retryAction() async {
+    if (_lastAction case final action?) await _act(action);
+  }
+
+  Future<void> _act(PlacementAction action) async {
+    if (state.busy) return;
+    _lastAction = action;
+    emit(state.copyWith(running: () => action, actionFailure: () => null));
+    final result = await switch (action) {
+      PlacementAction.restart => _placement.restartTest(),
+      PlacementAction.skip => _placement.deferTest(),
+    };
+    if (isClosed) return;
+    switch (result) {
+      case Ok():
+        emit(state.copyWith(running: () => null, done: () => action));
+      case Err(:final failure):
+        emit(state.copyWith(running: () => null, actionFailure: () => failure));
+    }
+  }
+
+  /// Back from where the action led: the status may have changed.
+  Future<void> reopened() {
+    emit(state.copyWith(done: () => null));
+    return load();
   }
 
   /// Plays the sentence that tries the sound, or stops it.

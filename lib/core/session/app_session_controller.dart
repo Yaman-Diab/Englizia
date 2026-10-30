@@ -64,6 +64,7 @@ class AppSessionController extends ChangeNotifier {
   /// only until the app closes.
   Future<bool> signIn(AuthTokens tokens) async {
     final saved = await _tokens.write(tokens);
+    await _settings.clearAccountData();
     _setStatus(_statusOf(tokens));
     return saved;
   }
@@ -72,6 +73,7 @@ class AppSessionController extends ChangeNotifier {
   /// (best effort), then this. A guest who signs out loses the account.
   Future<void> signOut() async {
     await _tokens.clear();
+    await _settings.clearAccountData();
     _setStatus(SessionStatus.signedOut);
   }
 

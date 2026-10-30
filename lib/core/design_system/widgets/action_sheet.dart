@@ -2,6 +2,7 @@ import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:flutter/material.dart';
 
@@ -18,17 +19,25 @@ enum SheetTone { info, warning }
 /// color.
 Future<SheetAction?> showActionSheet(
   BuildContext context, {
-  required AppIcon icon,
   required String title,
   required String body,
   required String primaryLabel,
   required String secondaryLabel,
+  AppIcon? icon,
   SheetTone tone = SheetTone.info,
   bool destructiveSecondary = false,
+  bool outlinedSecondary = false,
 }) => showModalBottomSheet<SheetAction>(
   context: context,
   isScrollControlled: true,
   useSafeArea: true,
+  sheetAnimationStyle: AppMotion.reduceMotion(context)
+      ? AnimationStyle.noAnimation
+      : const AnimationStyle(
+          duration: AppMotion.sheetIn,
+          reverseDuration: AppMotion.sheetOut,
+          curve: AppMotion.smoothOut,
+        ),
   builder: (_) => ActionSheet(
     icon: icon,
     title: title,
@@ -37,22 +46,25 @@ Future<SheetAction?> showActionSheet(
     secondaryLabel: secondaryLabel,
     tone: tone,
     destructiveSecondary: destructiveSecondary,
+    outlinedSecondary: outlinedSecondary,
   ),
 );
 
 class ActionSheet extends StatelessWidget {
   const ActionSheet({
-    required this.icon,
     required this.title,
     required this.body,
     required this.primaryLabel,
     required this.secondaryLabel,
+    this.icon,
     this.tone = SheetTone.info,
     this.destructiveSecondary = false,
+    this.outlinedSecondary = false,
     super.key,
   });
 
-  final AppIcon icon;
+  /// In a badge over the title; none is a sheet of text alone.
+  final AppIcon? icon;
   final String title;
   final String body;
   final String primaryLabel;
@@ -60,12 +72,16 @@ class ActionSheet extends StatelessWidget {
   final SheetTone tone;
   final bool destructiveSecondary;
 
+  /// As big as the primary button, for when both ways are real choices.
+  final bool outlinedSecondary;
+
   static const _badgeSize = 48.0;
   static const _iconSize = 22.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final icon = this.icon;
     final ToneColors badge = switch (tone) {
       SheetTone.info => colors.info,
       SheetTone.warning => colors.error,
@@ -81,19 +97,21 @@ class ActionSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Center(
-            child: Container(
-              width: _badgeSize,
-              height: _badgeSize,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: badge.surface,
-                shape: BoxShape.circle,
+          if (icon != null) ...[
+            Center(
+              child: Container(
+                width: _badgeSize,
+                height: _badgeSize,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: badge.surface,
+                  shape: BoxShape.circle,
+                ),
+                child: AppIconView(icon, size: _iconSize, color: badge.text),
               ),
-              child: AppIconView(icon, size: _iconSize, color: badge.text),
             ),
-          ),
-          const SizedBox(height: AppSpacing.md + AppSpacing.xxs),
+            const SizedBox(height: AppSpacing.md + AppSpacing.xxs),
+          ],
           Semantics(
             header: true,
             child: Text(
@@ -114,11 +132,16 @@ class ActionSheet extends StatelessWidget {
             size: AppButtonSize.large,
             onPressed: () => Navigator.of(context).pop(SheetAction.primary),
           ),
-          const SizedBox(height: AppSpacing.xs),
+          SizedBox(height: outlinedSecondary ? AppSpacing.md : AppSpacing.xs),
           AppButton(
             label: secondaryLabel,
+            size: outlinedSecondary
+                ? AppButtonSize.large
+                : AppButtonSize.regular,
             variant: destructiveSecondary
                 ? AppButtonVariant.destructive
+                : outlinedSecondary
+                ? AppButtonVariant.secondary
                 : AppButtonVariant.text,
             onPressed: () => Navigator.of(context).pop(SheetAction.secondary),
           ),

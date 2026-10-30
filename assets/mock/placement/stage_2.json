@@ -1,0 +1,108 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "stage": 2,
+    "questions": [
+      {
+        "id": "q5",
+        "type": "vocabulary",
+        "before": "She is very",
+        "after": "about her new job.",
+        "options": [
+          {
+            "id": "o1",
+            "text": "excited"
+          },
+          {
+            "id": "o2",
+            "text": "exciting"
+          },
+          {
+            "id": "o3",
+            "text": "excite"
+          },
+          {
+            "id": "o4",
+            "text": "excitement"
+          }
+        ]
+      },
+      {
+        "id": "q6",
+        "type": "grammar",
+        "before": "I",
+        "after": "to London twice.",
+        "options": [
+          {
+            "id": "o1",
+            "text": "have been"
+          },
+          {
+            "id": "o2",
+            "text": "went"
+          },
+          {
+            "id": "o3",
+            "text": "am going"
+          },
+          {
+            "id": "o4",
+            "text": "was"
+          }
+        ]
+      },
+      {
+        "id": "q7",
+        "type": "reading",
+        "passage": "Omar works at a bank in the city centre. On Tuesday, he started work at eight, as usual. At eleven, his son's school called because the boy had a high temperature. Omar told his manager, left the office early and took his son to the doctor. The doctor said the boy needed rest and plenty of water, so Omar stayed at home with him for the rest of the week. On Monday, the boy went back to school and Omar went back to work.",
+        "ask": "Why did Omar leave work early?",
+        "options": [
+          {
+            "id": "o1",
+            "text": "He felt sick."
+          },
+          {
+            "id": "o2",
+            "text": "His son was ill."
+          },
+          {
+            "id": "o3",
+            "text": "He had a meeting."
+          },
+          {
+            "id": "o4",
+            "text": "The bank closed early."
+          }
+        ]
+      },
+      {
+        "id": "q8",
+        "type": "listening",
+        "audioUrl": "https://example.com/mock/placement/train.mp3",
+        "maxPlays": 2,
+        "ask": "What time does the train leave?",
+        "options": [
+          {
+            "id": "o1",
+            "text": "7:15"
+          },
+          {
+            "id": "o2",
+            "text": "7:45"
+          },
+          {
+            "id": "o3",
+            "text": "8:15"
+          },
+          {
+            "id": "o4",
+            "text": "8:45"
+          }
+        ]
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

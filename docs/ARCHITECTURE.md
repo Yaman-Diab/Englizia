@@ -49,6 +49,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 ## Session and auth
 
+- Starting or ending a session clears what belongs to the account in `SettingsStorageService` (`clearAccountData`, today the saved placement status), as the next account may be another's.
 - `AppSessionController` status: `unknown → signedOut | guest | member` (ADR 10). Tokens carry their `AccountKind`, kept through refresh and secure storage. `bootstrap()` never throws; on first launch after install it clears the keystore (iOS keeps Keychain items after uninstall).
 - `AuthInterceptor` attaches the bearer token, shares **one** refresh among concurrent 401s, retries each request once, and expires the session only when the server rejects the refresh token (offline keeps the session).
 - `TokenRefreshService` uses a separate Dio without the auth interceptor and sets `Authorization` itself.
@@ -69,13 +70,13 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - `context.texts` (`AppTextStyles`): display 28/34, title 22/30, reading 20/36, body 16/26, caption 13/20 (+ `captionStrong`), button 16; weights 400/600; Arabic running text ≥ 1.7 line height. Sizes use `.sp` (design size 375×812).
 - `context.scheme` for Material widgets; component themes are set in `AppTheme` so widgets don't repeat overrides.
 - **Waiting looks the same everywhere:** `AppSpinner` (a faint ring with a turning quarter arc, from the account designs) is the only progress mark. A busy button is `AppButton(isLoading: true)`: it keeps its size and full color, takes no taps, and its label crossfades into the spinner in the label's color; a button built another way wraps its label in `ButtonLoadingLabel`. Pages and sections wait with `AppStateView.loading()`. No `CircularProgressIndicator`, no "loading…" text in buttons.
-- `NoticeCard` is the one card for something to know (information, error or primary tone), read out as soon as it appears.
+- `NoticeCard` is the one card for something to know (information, error or primary tone), read out as soon as it appears; `emphasis` stresses a part of its title.
 - Forms use `AppTextField` (label above, icon, focus halo, a `FieldMessage` under it with a mark per tone, `Shake` when a send is refused). A failed action shows `showFailureSnackBar` (error band, retry), which keeps what was typed.
 - `design_system/icons/` — `AppIcon` / `AppIconView`: the designs' own line icons as SVG (via `flutter_svg`, flutter.dev, 160/160 points); Material icons stay for generic controls. An icon is added when its screen is built.
 - `core/network/connectivity_service.dart` — `ConnectivityService` (online now, changes): connectivity_plus behind an interface; tests use `FakeConnectivityService`.
 - `core/mail/` — `MailApp`: opens the phone's mail app through a small native channel (`MainActivity.kt`, `AppDelegate.swift`).
-- `core/audio/` — `AppSound`, the `SoundPlayer` interface (silent for now, ADR 9) and `DeviceVolume` (whether the phone is muted: `PlatformDeviceVolume` on `volume_controller`, never failing its caller; STATUS D-046).
-- `motion/` — `AppMotion` (`app_motion.dart`), page transitions, `Entrance` and the entrance choreography (ADR 7). `AppMotion`: durations, curves, distances and scales for every animation (adapted from transitions.dev, no blur). `AppMotion.resolve(context, duration)` returns zero when the platform disables animations; decorative motion checks `AppMotion.reduceMotion(context)`.
+- `core/audio/` — `ClipPlayer`, which plays a clip from the server and reports a failure (silent for now, STATUS D-050); `AppSound`, the `SoundPlayer` interface (silent for now, ADR 9) and `DeviceVolume` (whether the phone is muted: `PlatformDeviceVolume` on `volume_controller`, never failing its caller; STATUS D-046).
+- `motion/` — `AppMotion` (`app_motion.dart`), page transitions, `Entrance` and the entrance choreography (ADR 7), and `SlideSwap`, which moves between the steps of a flow on one screen. `AppMotion`: durations, curves, distances and scales for every animation (adapted from transitions.dev, no blur). `AppMotion.resolve(context, duration)` returns zero when the platform disables animations; decorative motion checks `AppMotion.reduceMotion(context)`.
 - Page transitions come from `AppTheme.pageTransitionsTheme`: Android `AppPageTransitionsBuilder` (fade + 30px slide from the end side, 250ms, in place under reduce motion); iOS/macOS keep the native Cupertino transition with edge-swipe back. Tabs and session entry get their own transitions with those features (ADR 7).
 - `test/core/design_system/theme_test.dart` pins identity values and checks WCAG contrast in light and dark.
 - Fonts: Readex Pro (UI, Arabic + Latin) and Andika (kids) through `google_fonts`, loaded from bundled files in `assets/fonts/` (runtime fetching off). Each weight is its own family, so weights come from roles (`bodyStrong`, `captionStrong`), never `copyWith(fontWeight:)`.

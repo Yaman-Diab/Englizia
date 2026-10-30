@@ -51,6 +51,10 @@ import 'package:englizia/features/onboarding/presentation/save_progress/pages/sa
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
 import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
 import 'package:englizia/features/placement/presentation/intro/pages/placement_intro_page.dart';
+import 'package:englizia/features/placement/presentation/result/cubit/placement_result_cubit.dart';
+import 'package:englizia/features/placement/presentation/result/pages/placement_result_page.dart';
+import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
+import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
@@ -362,23 +366,43 @@ GoRouter createAppRouter(AppSessionController session) {
               ? state.extra! as OnboardingPath
               : null;
           return BlocProvider(
-            create: (_) => sl<PlacementIntroCubit>()..start(path?.trackId),
+            create: (_) =>
+                sl<PlacementIntroCubit>()
+                  ..start(path?.trackId, newAccount: path != null),
             child: PlacementIntroPage(
               // Preparing leaves nothing under this screen.
               onBack: () =>
                   context.canPop() ? context.pop() : context.go(AppRoutes.home),
-              onStart: (restart) =>
-                  context.push(AppRoutes.placementQuestions, extra: restart),
+              onStart: () => context.push(AppRoutes.placementQuestions),
               onSkip: () => context.go(AppRoutes.home),
               onLessons: () => context.go(AppRoutes.home),
             ),
           );
         },
       ),
-      // The test's questions are not built yet.
       GoRoute(
         path: AppRoutes.placementQuestions,
-        builder: (_, _) => PendingPage(title: 'placement_intro_title'.tr()),
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<PlacementTestCubit>()..start(),
+          child: PlacementTestPage(
+            onStop: () => context.pop(),
+            // `go` leaves the test behind: back never returns to it.
+            onFinished: (attemptId) =>
+                context.go(AppRoutes.placementResult, extra: attemptId),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.placementResult,
+        redirect: (_, state) => state.extra is String ? null : AppRoutes.home,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              sl<PlacementResultCubit>(param1: state.extra! as String)..load(),
+          child: PlacementResultPage(
+            onStart: () => context.go(AppRoutes.home),
+            onLeave: () => context.go(AppRoutes.home),
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.signIn,

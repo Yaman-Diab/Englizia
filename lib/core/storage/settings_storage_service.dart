@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:englizia/core/logging/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +13,8 @@ final class SettingsStorageService {
   static const _installationIdKey = 'app.installation_id';
   static const _lastSignInKey = 'account.last_sign_in';
   static const _deviceIdKey = 'account.device_id';
+  static const _placementStatusKey = 'account.placement_status';
+  static const _placementProgressKey = 'account.placement_progress';
 
   final SharedPreferences _prefs;
 
@@ -45,17 +48,52 @@ final class SettingsStorageService {
     await _prefs.setString(_deviceIdKey, id);
   }
 
+  /// The last placement status the server sent, as JSON, for the test's
+  /// intro while offline. A level and some counts: nothing that names anyone.
+  String? get placementStatus => _prefs.getString(_placementStatusKey);
+
+  Future<void> setPlacementStatus(String json) async {
+    await _prefs.setString(_placementStatusKey, json);
+  }
+
+  Future<void> clearPlacementStatus() async {
+    await _prefs.remove(_placementStatusKey);
+  }
+
+  /// The answers of the placement test not on the server yet and how often
+  /// each clip was played, as JSON, so an answer given is never lost.
+  String? get placementProgress => _prefs.getString(_placementProgressKey);
+
+  Future<void> setPlacementProgress(String json) async {
+    await _prefs.setString(_placementProgressKey, json);
+  }
+
+  Future<void> clearPlacementProgress() async {
+    await _prefs.remove(_placementProgressKey);
+  }
+
+  /// Forgets what belongs to the account in use, when another may follow.
+  /// Never fails its caller: starting or ending a session must go on.
+  Future<void> clearAccountData() async {
+    try {
+      await clearPlacementStatus();
+      await clearPlacementProgress();
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Clearing account data failed');
+    }
+  }
+
   /// A random id for this install, made on first use. Not personal: the
   /// guest account is tied to it, and a retried request reuses it (ADR 10).
   Future<String> installationId() async {
     if (_prefs.getString(_installationIdKey) case final saved?) return saved;
-    final id = _randomId();
+    final id = randomId();
     await _prefs.setString(_installationIdKey, id);
     return id;
   }
 
   /// 128 random bits as a version-4 UUID.
-  static String _randomId() {
+  static String randomId() {
     final random = Random.secure();
     final bytes = [for (var i = 0; i < 16; i++) random.nextInt(256)];
     bytes[6] = (bytes[6] & 0x0f) | 0x40;

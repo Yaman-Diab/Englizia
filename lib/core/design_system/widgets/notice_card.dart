@@ -1,3 +1,4 @@
+import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
@@ -14,6 +15,7 @@ class NoticeCard extends StatelessWidget {
     this.detail,
     this.error = false,
     this.primary = false,
+    this.emphasis,
     this.announcement,
     super.key,
   });
@@ -23,6 +25,10 @@ class NoticeCard extends StatelessWidget {
   final String? detail;
   final bool error;
   final bool primary;
+
+  /// The part of [title] that matters most (a level): the rest of the title
+  /// turns lighter so that it stands out.
+  final String? emphasis;
   final String? announcement;
 
   static const _iconSize = 20.0;
@@ -59,12 +65,7 @@ class NoticeCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: texts.bodyStrong.copyWith(
-                        color: primary ? colors.textPrimary : tone.text,
-                      ),
-                    ),
+                    _title(context, tone),
                     if (detail case final detail?)
                       Text(
                         detail,
@@ -78,6 +79,24 @@ class NoticeCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _title(BuildContext context, ToneColors tone) {
+    final texts = context.texts;
+    final color = primary ? context.colors.textPrimary : tone.text;
+    final strong = texts.bodyStrong.copyWith(color: color);
+    final parts = emphasis == null ? [title] : title.split(emphasis!);
+    if (parts.length != 2) return Text(title, style: strong);
+    return Text.rich(
+      TextSpan(
+        style: texts.body.copyWith(color: color),
+        children: [
+          TextSpan(text: parts.first),
+          TextSpan(text: emphasis, style: strong),
+          TextSpan(text: parts.last),
+        ],
       ),
     );
   }

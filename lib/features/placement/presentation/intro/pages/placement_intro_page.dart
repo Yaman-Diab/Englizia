@@ -7,7 +7,9 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
+import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
@@ -15,6 +17,8 @@ import 'package:englizia/features/placement/domain/entities/placement_status.dar
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
 import 'package:englizia/features/placement/presentation/intro/widgets/listening_motion.dart';
+import 'package:englizia/features/placement/presentation/widgets/guide_circle.dart';
+import 'package:englizia/features/placement/presentation/widgets/scroll_edge_column.dart';
 import 'package:flutter/foundation.dart' show Unicode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,10 +39,10 @@ class PlacementIntroPage extends StatefulWidget {
 
   final VoidCallback onBack;
 
-  /// Opens the questions; true throws away the unfinished test first.
-  final ValueChanged<bool> onStart;
+  /// Opens the questions, and completes when the learner comes back.
+  final Future<void> Function() onStart;
 
-  /// Starts from the first level with no test.
+  /// The test was put off: on to the lessons, from the first level.
   final VoidCallback onSkip;
 
   /// A learner with a result already goes back to the lessons.
@@ -50,32 +54,56 @@ class PlacementIntroPage extends StatefulWidget {
 
 class _PlacementIntroPageState extends State<PlacementIntroPage> {
   static const _topBarHeight = 56.0;
-  static const _circle = 136.0;
-  static const _guide = 120.0;
-
-  /// The design stands the guide a little above the circle's middle.
-  static const _guideLift = 8.0;
   static const _subtitleMaxWidth = 300.0;
 
-  /// The thin line over the buttons shows while content is under them.
-  bool _moreBelow = false;
+  /// Opens the questions; what they changed shows on the way back.
+  Future<void> _start() async {
+    final cubit = context.read<PlacementIntroCubit>();
+    await widget.onStart();
+    if (mounted) await cubit.load();
+  }
 
-  bool _follow(ScrollMetrics metrics) {
-    final more = metrics.extentAfter > 2;
-    if (more != _moreBelow) setState(() => _moreBelow = more);
-    return false;
+  Future<void> _onDone(PlacementAction action) async {
+    switch (action) {
+      case PlacementAction.skip:
+        widget.onSkip();
+      case PlacementAction.restart:
+        final cubit = context.read<PlacementIntroCubit>();
+        await widget.onStart();
+        if (mounted) await cubit.reopened();
+    }
   }
 
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<PlacementIntroCubit, PlacementIntroState>(builder: _build);
+  Widget build(BuildContext context) => MultiBlocListener(
+    listeners: [
+      BlocListener<PlacementIntroCubit, PlacementIntroState>(
+        listenWhen: (before, now) =>
+            now.done != null && now.done != before.done,
+        listener: (_, state) => _onDone(state.done!),
+      ),
+      BlocListener<PlacementIntroCubit, PlacementIntroState>(
+        listenWhen: (before, now) =>
+            now.actionFailure != null &&
+            now.actionFailure != before.actionFailure,
+        listener: (context, state) => showFailureSnackBar(
+          context,
+          state.actionFailure!,
+          onRetry: context.read<PlacementIntroCubit>().retryAction,
+        ),
+      ),
+    ],
+    child: BlocBuilder<PlacementIntroCubit, PlacementIntroState>(
+      builder: _build,
+    ),
+  );
 
   Widget _build(BuildContext context, PlacementIntroState state) {
     final cubit = context.read<PlacementIntroCubit>();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) widget.onBack();
+        if (!didPop && !state.busy) widget.onBack();
       },
       child: Scaffold(
         body: SafeArea(
@@ -90,7 +118,7 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
                   child: Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: IconButton(
-                      onPressed: widget.onBack,
+                      onPressed: state.busy ? null : widget.onBack,
                       tooltip: 'common_back'.tr(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
@@ -104,10 +132,12 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
                     message: state.failure!.localizedMessage,
                     onRetry: cubit.load,
                   ),
-                  _ => _body(context, state),
+                  _ => ScrollEdgeColumn(
+                    body: _body(context, state),
+                    footer: _footer(context, state),
+                  ),
                 },
               ),
-              if (state.load == LoadStatus.ready) _footer(context, state),
             ],
           ),
         ),
@@ -139,6 +169,7 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
       PlacementRetakeOpen(:final level, :final daysAgo) => NoticeCard(
         icon: AppIcon.steps,
         primary: true,
+        emphasis: '${Unicode.LRI}$level${Unicode.PDI}',
         title: 'placement_last_result'.plural(
           daysAgo,
           namedArgs: {'level': '${Unicode.LRI}$level${Unicode.PDI}'},
@@ -150,104 +181,88 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
       ),
       _ => null,
     };
-    return NotificationListener<ScrollMetricsNotification>(
-      onNotification: (n) => _follow(n.metrics),
-      child: NotificationListener<ScrollUpdateNotification>(
-        onNotification: (n) => _follow(n.metrics),
-        child: SingleChildScrollView(
-          padding: const EdgeInsetsDirectional.fromSTEB(
-            AppSpacing.xl,
-            0,
-            AppSpacing.xl,
-            AppSpacing.lg,
+    return SingleChildScrollView(
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.xl,
+        0,
+        AppSpacing.xl,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        children: [
+          Entrance(
+            motion: EntranceMotion.pop,
+            delay: FormEntrance.header,
+            child: GuideCircle(
+              child: ListeningNod(
+                active: state.trying,
+                child: const Mascot(
+                  expression: MascotExpression.listen,
+                  prop: MascotProp.headphones,
+                  size: GuideCircle.guideSize,
+                ),
+              ),
+            ),
           ),
-          child: Column(
-            children: [
-              Entrance(
-                motion: EntranceMotion.pop,
-                delay: FormEntrance.header,
-                child: Container(
-                  width: _circle,
-                  height: _circle,
-                  padding: const EdgeInsetsDirectional.only(bottom: _guideLift),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: colors.primary.surface,
-                    shape: BoxShape.circle,
-                  ),
-                  child: ListeningNod(
-                    active: state.trying,
-                    child: const Mascot(
-                      expression: MascotExpression.listen,
-                      prop: MascotProp.headphones,
-                      size: _guide,
-                    ),
+          const SizedBox(height: AppSpacing.md),
+          Entrance(
+            motion: EntranceMotion.up,
+            delay: FormEntrance.header,
+            child: Column(
+              children: [
+                Semantics(
+                  header: true,
+                  child: Text(
+                    'placement_intro_title'.tr(),
+                    textAlign: TextAlign.center,
+                    style: texts.title.copyWith(color: colors.textPrimary),
                   ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              Entrance(
-                motion: EntranceMotion.up,
-                delay: FormEntrance.header,
-                child: Column(
-                  children: [
-                    Semantics(
-                      header: true,
-                      child: Text(
-                        'placement_intro_title'.tr(),
-                        textAlign: TextAlign.center,
-                        style: texts.title.copyWith(color: colors.textPrimary),
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: _subtitleMaxWidth,
-                      ),
-                      child: Text(
-                        again
-                            ? 'placement_intro_subtitle_again'.tr()
-                            : 'placement_intro_subtitle'.tr(),
-                        textAlign: TextAlign.center,
-                        style: texts.body.copyWith(color: colors.textSecondary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (notice != null) ...[
-                const SizedBox(height: AppSpacing.lg),
-                Entrance(
-                  motion: EntranceMotion.up,
-                  delay: FormEntrance.field(0),
-                  child: notice,
+                const SizedBox(height: AppSpacing.sm),
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: _subtitleMaxWidth,
+                  ),
+                  child: Text(
+                    again
+                        ? 'placement_intro_subtitle_again'.tr()
+                        : 'placement_intro_subtitle'.tr(),
+                    textAlign: TextAlign.center,
+                    style: texts.body.copyWith(color: colors.textSecondary),
+                  ),
                 ),
               ],
-              const SizedBox(height: AppSpacing.lg),
-              for (final (i, (icon, text)) in facts.indexed) ...[
-                if (i > 0)
-                  const SizedBox(height: AppSpacing.lg - AppSpacing.xxs),
-                Entrance(
-                  motion: EntranceMotion.up,
-                  delay: FormEntrance.field(i),
-                  child: _Fact(icon: icon, text: text),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              Entrance(
-                motion: EntranceMotion.up,
-                delay: FormEntrance.action,
-                child: _SoundCheck(trying: state.trying),
-              ),
-            ],
+            ),
           ),
-        ),
+          if (notice != null) ...[
+            const SizedBox(height: AppSpacing.lg),
+            Entrance(
+              motion: EntranceMotion.up,
+              delay: FormEntrance.field(0),
+              child: notice,
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          for (final (i, (icon, text)) in facts.indexed) ...[
+            if (i > 0) const SizedBox(height: AppSpacing.lg - AppSpacing.xxs),
+            Entrance(
+              motion: EntranceMotion.up,
+              delay: FormEntrance.field(i),
+              child: _Fact(icon: icon, text: text),
+            ),
+          ],
+          const SizedBox(height: AppSpacing.lg),
+          Entrance(
+            motion: EntranceMotion.up,
+            delay: FormEntrance.action,
+            child: _SoundCheck(trying: state.trying),
+          ),
+        ],
       ),
     );
   }
 
   Widget _footer(BuildContext context, PlacementIntroState state) {
-    final colors = context.colors;
     final status = state.status;
     final levelName = state.firstLevel?.name.of(context.locale.languageCode);
     final start = switch (status) {
@@ -256,38 +271,33 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
       PlacementRetakeLocked() => 'placement_retake'.tr(),
       _ => 'preparing_start_test'.tr(),
     };
+    final cubit = context.read<PlacementIntroCubit>();
     final (other, onOther) = switch (status) {
       PlacementInProgress() => (
         'placement_restart'.tr(),
-        state.canRestart ? () => widget.onStart(true) : null,
+        state.canRestart ? cubit.restart : null,
       ),
       PlacementRetakeOpen() || PlacementRetakeLocked() => (
         'placement_back_to_lessons'.tr(),
-        widget.onLessons,
+        state.busy ? null : widget.onLessons,
       ),
-      _ => (
+      PlacementNotTaken() => (
         levelName == null
             ? 'placement_skip_plain'.tr()
             : 'placement_skip'.tr(
                 namedArgs: {'level': '${Unicode.LRI}$levelName${Unicode.PDI}'},
               ),
-        widget.onSkip,
+        state.busy ? null : cubit.skip,
       ),
+      // Nothing to offer a learner who may already have a result.
+      null => (null, null),
     };
     final band = !state.online
         ? 'placement_offline'.tr()
         : state.testUnavailable
         ? 'onboarding_level_test_unavailable'.tr()
         : null;
-    return AnimatedContainer(
-      duration: AppMotion.resolve(context, AppMotion.quick),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(
-            color: _moreBelow ? colors.border : Colors.transparent,
-          ),
-        ),
-      ),
+    return Padding(
       padding: const EdgeInsetsDirectional.fromSTEB(
         AppSpacing.xl,
         AppSpacing.sm,
@@ -309,10 +319,19 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
             AppButton(
               label: start,
               size: AppButtonSize.large,
-              onPressed: state.canStart ? () => widget.onStart(false) : null,
+              onPressed: state.canStart ? _start : null,
             ),
-            const SizedBox(height: AppSpacing.xxs),
-            TextButton(onPressed: onOther, child: Text(other)),
+            if (other != null) ...[
+              const SizedBox(height: AppSpacing.xxs),
+              TextButton(
+                onPressed: onOther,
+                child: ButtonLoadingLabel(
+                  isLoading: state.running != null,
+                  spinnerSize: AppSpinner.compactSize,
+                  child: Text(other),
+                ),
+              ),
+            ],
           ],
         ),
       ),

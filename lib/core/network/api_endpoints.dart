@@ -25,8 +25,34 @@ abstract final class ApiEndpoints {
   static const placementSummary = '/api/v1/app/placement/summary';
   // ASSUMPTION(api): docs/api/placement.md.
   static const placementStatus = '/api/v1/app/placement/status';
+  // ASSUMPTION(api): docs/api/placement.md.
+  static const placementAttempts = '/api/v1/app/placement/attempts';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String placementStage(String attemptId, int stage) =>
+      '/api/v1/app/placement/attempts/$attemptId/stages/$stage';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String placementAnswers(String attemptId) =>
+      '/api/v1/app/placement/attempts/$attemptId/answers';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String placementStageComplete(String attemptId, int stage) =>
+      '/api/v1/app/placement/attempts/$attemptId/stages/$stage/complete';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String placementResult(String attemptId) =>
+      '/api/v1/app/placement/attempts/$attemptId/result';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String placementAccept(String attemptId) =>
+      '/api/v1/app/placement/attempts/$attemptId/accept';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String enrollment(String enrollmentId) =>
+      '/api/v1/app/enrollments/$enrollmentId';
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static String levelUnits(String levelId) =>
