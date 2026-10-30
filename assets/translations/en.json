@@ -411,5 +411,22 @@
   "verify_done": "Your email is confirmed",
   "verify_expired": "This confirmation link has expired",
   "account_email_unverified": "Not confirmed",
-  "account_email_verified": "Confirmed"
+  "account_email_verified": "Confirmed",
+  "foundation_try_exercises": "Try the exercises",
+  "lesson_exit": "Leave the lesson",
+  "lesson_progress": "Lesson progress",
+  "lesson_hint_show": "Show the hint",
+  "lesson_hint_hide": "Hide the hint",
+  "lesson_offline": "No connection. Your answers are saved and sent automatically",
+  "lesson_listen": "Listen",
+  "lesson_listen_slow": "Listen slowly",
+  "lesson_slower": "Slower",
+  "lesson_stop_audio": "Stop",
+  "lesson_check": "Check",
+  "lesson_next": "Next",
+  "lesson_exit_title": "Leave the lesson?",
+  "lesson_exit_body": "Your progress is saved, and you carry on from the same question.",
+  "lesson_exit_stay": "Continue the lesson",
+  "lesson_exit_leave": "Leave",
+  "lesson_complete_title": "Lesson complete"
 }

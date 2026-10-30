@@ -1,0 +1,172 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "lessonId": "les_mock",
+    "questions": [
+      {
+        "id": "q1",
+        "type": "multipleChoice",
+        "instruction": {
+          "ar": "اختر الكلمة المناسبة",
+          "en": "Choose the right word"
+        },
+        "before": "She",
+        "after": "to school every day.",
+        "hint": {
+          "text": {
+            "ar": "انتبه إلى الفاعل ",
+            "en": "Look at the subject "
+          },
+          "term": "she"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "go",
+            "correct": false
+          },
+          {
+            "id": "o2",
+            "text": "goes",
+            "correct": true
+          },
+          {
+            "id": "o3",
+            "text": "going",
+            "correct": false
+          },
+          {
+            "id": "o4",
+            "text": "gone",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "q2",
+        "type": "imageChoice",
+        "instruction": {
+          "ar": "اختر الصورة المناسبة",
+          "en": "Choose the right picture"
+        },
+        "word": "barn",
+        "audioUrl": "https://example.com/mock/lessons/barn.mp3",
+        "options": [
+          {
+            "id": "o1",
+            "imageUrl": "assets/mock/lessons/barn.svg",
+            "imageAlt": {
+              "ar": "حظيرة",
+              "en": "A barn"
+            },
+            "correct": true
+          },
+          {
+            "id": "o2",
+            "imageUrl": "assets/mock/lessons/house.svg",
+            "imageAlt": {
+              "ar": "بيت",
+              "en": "A house"
+            },
+            "correct": false
+          },
+          {
+            "id": "o3",
+            "imageUrl": "assets/mock/lessons/school.svg",
+            "imageAlt": {
+              "ar": "مدرسة",
+              "en": "A school"
+            },
+            "correct": false
+          },
+          {
+            "id": "o4",
+            "imageUrl": "assets/mock/lessons/shop.svg",
+            "imageAlt": {
+              "ar": "متجر",
+              "en": "A shop"
+            },
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "q3",
+        "type": "listeningChoice",
+        "instruction": {
+          "ar": "استمع واختر ما سمعته",
+          "en": "Listen and choose what you heard"
+        },
+        "audioUrl": "https://example.com/mock/lessons/market.mp3",
+        "hint": {
+          "text": {
+            "ar": "انتبه إلى الكلمة الأخيرة وإلى ",
+            "en": "Listen to the last word, and to "
+          },
+          "term": "the"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "I'm going to the market.",
+            "correct": true
+          },
+          {
+            "id": "o2",
+            "text": "I'm going to the garden.",
+            "correct": false
+          },
+          {
+            "id": "o3",
+            "text": "I went to the market.",
+            "correct": false
+          },
+          {
+            "id": "o4",
+            "text": "I'm going to market it.",
+            "correct": false
+          }
+        ]
+      },
+      {
+        "id": "q4",
+        "type": "multipleChoice",
+        "instruction": {
+          "ar": "اختر ما يكمل الجملة",
+          "en": "Choose what completes the sentence"
+        },
+        "before": "Excuse me,",
+        "after": "?",
+        "bookReference": {
+          "ar": "كتاب الطالب، صفحة 34، تمرين 2",
+          "en": "Student's book, page 34, exercise 2"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "could you tell me where the nearest post office is",
+            "correct": true
+          },
+          {
+            "id": "o2",
+            "text": "where post office",
+            "correct": false
+          },
+          {
+            "id": "o3",
+            "text": "post office is where",
+            "correct": false
+          },
+          {
+            "id": "o4",
+            "text": "you know the post office",
+            "correct": false
+          }
+        ]
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

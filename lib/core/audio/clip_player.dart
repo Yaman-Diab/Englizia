@@ -5,7 +5,8 @@ abstract interface class ClipPlayer {
   /// be played.
   Future<Duration?> load(String url);
 
-  Future<void> play();
+  /// Plays the clip just loaded; [speed] 0.75 is the same file, slower.
+  Future<void> play({double speed = 1});
 
   Future<void> stop();
 }
@@ -32,7 +33,7 @@ final class SilentClipPlayer implements ClipPlayer {
   }
 
   @override
-  Future<void> play() async {}
+  Future<void> play({double speed = 1}) async {}
 
   @override
   Future<void> stop() async {}

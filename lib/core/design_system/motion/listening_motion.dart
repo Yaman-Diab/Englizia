@@ -84,16 +84,32 @@ class ListeningNod extends StatelessWidget {
   );
 }
 
-/// Three rings leaving a button of [size] while [active].
+/// Waves leaving a button of [size] while [active]: rings by default, or
+/// [filled] discs for a stronger pulse. [count] of them, evenly apart.
 class ListeningWaves extends StatelessWidget {
-  const ListeningWaves({required this.active, required this.size, super.key});
+  const ListeningWaves({
+    required this.active,
+    required this.size,
+    this.count = 3,
+    this.growth = .9,
+    this.opacity = .55,
+    this.filled = false,
+    this.duration = AppMotion.characterPulse,
+    super.key,
+  });
 
   final bool active;
   final double size;
+  final int count;
 
-  static const _count = 3;
-  static const _growth = .9;
-  static const _opacity = .55;
+  /// How much bigger a wave ends, 0.9 being 90%.
+  final double growth;
+
+  /// How strong a wave starts.
+  final double opacity;
+  final bool filled;
+  final Duration duration;
+
   static const _stroke = 2.0;
 
   @override
@@ -105,28 +121,29 @@ class ListeningWaves extends StatelessWidget {
     return IgnorePointer(
       child: _Loop(
         active: active,
-        duration: AppMotion.characterPulse,
+        duration: duration,
         builder: (_, progress) => Stack(
           clipBehavior: Clip.none,
           children: [
-            for (var i = 0; i < _count; i++)
-              _ring((progress + i / _count) % 1, color),
+            for (var i = 0; i < count; i++)
+              _wave((progress + i / count) % 1, color),
           ],
         ),
       ),
     );
   }
 
-  Widget _ring(double phase, Color color) => Transform.scale(
-    scale: 1 + _growth * AppMotion.smoothOut.transform(phase),
+  Widget _wave(double phase, Color color) => Transform.scale(
+    scale: 1 + growth * AppMotion.smoothOut.transform(phase),
     child: Opacity(
-      opacity: _opacity * (1 - phase),
+      opacity: opacity * (1 - phase),
       child: Container(
         width: size,
         height: size,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: color, width: _stroke),
+          color: filled ? color : null,
+          border: filled ? null : Border.all(color: color, width: _stroke),
         ),
       ),
     ),

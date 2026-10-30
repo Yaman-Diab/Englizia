@@ -26,6 +26,8 @@ import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_pag
 import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
+import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
+import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -524,6 +526,26 @@ GoRouter createAppRouter(AppSessionController session) {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.lessonExercises,
+        builder: (context, state) {
+          final lessonId = state.pathParameters['lessonId']!;
+          return BlocProvider(
+            create: (_) => sl<ExerciseCubit>(param1: lessonId)..start(),
+            child: ExercisePage(
+              onExit: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
+              onFinished: () =>
+                  context.pushReplacement(AppRoutes.completeOf(lessonId)),
+            ),
+          );
+        },
+      ),
+      // "Lesson complete" is not built yet.
+      GoRoute(
+        path: AppRoutes.lessonComplete,
+        builder: (_, _) => PendingPage(title: 'lesson_complete_title'.tr()),
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,

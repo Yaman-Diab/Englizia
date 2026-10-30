@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/app/app.dart';
@@ -21,6 +23,8 @@ import 'package:englizia/features/account/presentation/password_changed/pages/pa
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
+import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
@@ -40,6 +44,7 @@ import 'package:go_router/go_router.dart';
 
 import '../helpers/fake_accounts.dart';
 import '../helpers/fake_http_adapter.dart';
+import '../helpers/fake_lesson_repository.dart';
 import '../helpers/fake_placement_repository.dart';
 import '../helpers/fake_settings_repository.dart';
 import '../helpers/fake_track_repository.dart';
@@ -405,6 +410,96 @@ void main() {
       expect(find.byType(FoundationPage), findsOneWidget);
     },
   );
+
+  group('a lesson\'s exercises', () {
+    setUp(() {
+      sl
+        ..unregister<TrackRepository>()
+        ..registerLazySingleton<TrackRepository>(FakeTrackRepository.new)
+        ..unregister<SettingsRepository>()
+        ..registerLazySingleton<SettingsRepository>(FakeSettingsRepository.new)
+        ..unregister<LessonRepository>()
+        ..registerLazySingleton<LessonRepository>(FakeLessonRepository.new)
+        ..unregister<ConnectivityService>()
+        ..registerLazySingleton<ConnectivityService>(
+          FakeConnectivityService.new,
+        );
+    });
+
+    Future<void> boot(WidgetTester tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    Future<void> open(WidgetTester tester) async {
+      await sl<AppSessionController>().signIn(guestTokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      unawaited(
+        GoRouter.of(
+          tester.element(find.byType(FoundationPage)),
+        ).push<void>(AppRoutes.exercisesOf('les')),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('leaving asks, then returns home', (tester) async {
+      await boot(tester);
+      await open(tester);
+      expect(find.byType(ExercisePage), findsOneWidget);
+
+      await tester.tap(find.byTooltip('lesson_exit'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.text('lesson_exit_leave'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(ExercisePage), findsNothing);
+      expect(find.byType(FoundationPage), findsOneWidget);
+    });
+
+    testWidgets('the last answer replaces the lesson with its end', (
+      tester,
+    ) async {
+      (sl<LessonRepository>() as FakeLessonRepository).exercises = [
+        sampleExercises().first,
+      ];
+      await boot(tester);
+      await open(tester);
+
+      await tester.tap(find.text('goes'));
+      await tester.pump();
+      await tester.tap(find.byType(AppButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.byType(AppButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(ExercisePage), findsNothing);
+      expect(find.text('lesson_complete_title'.tr()), findsWidgets);
+    });
+
+    testWidgets('with no session, it sends to welcome', (tester) async {
+      await boot(tester);
+      GoRouter.of(
+        tester.element(find.byType(WelcomePage)),
+      ).go(AppRoutes.exercisesOf('les'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(ExercisePage), findsNothing);
+      expect(find.byType(WelcomePage), findsOneWidget);
+    });
+  });
 
   group('the placement test\'s intro', () {
     setUp(() {
