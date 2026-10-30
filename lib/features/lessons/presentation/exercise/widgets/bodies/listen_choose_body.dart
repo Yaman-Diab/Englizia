@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
@@ -9,85 +10,42 @@ import 'package:englizia/core/design_system/motion/listening_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/clip_failed_view.dart';
 import 'package:englizia/core/design_system/widgets/clip_progress_ring.dart';
-import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-const _english = Locale('en');
-
-/// The word of an image choice, with the button that says it.
-class SpokenWord extends StatelessWidget {
-  const SpokenWord({
-    required this.word,
-    required this.playing,
-    required this.onTap,
+/// A clip that plays once by itself and repeats at will, and the sentences it
+/// might have said.
+class ListenChooseBody extends StatelessWidget {
+  const ListenChooseBody({
+    required this.exercise,
+    required this.answer,
+    required this.clip,
     super.key,
   });
 
-  final String word;
-  final bool playing;
-  final VoidCallback onTap;
-
-  static const _circle = 40.0;
-  static const _iconSize = 20.0;
-  static const _ring = 4.0;
+  final ListenChooseExercise exercise;
+  final BodyAnswer answer;
+  final BodyClip clip;
 
   @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onTap,
-            tooltip: 'lesson_listen'.tr(),
-            style: IconButton.styleFrom(
-              padding: EdgeInsetsDirectional.zero,
-              fixedSize: const Size.square(AppSizes.minTapTarget),
-            ),
-            icon: AnimatedContainer(
-              duration: AppMotion.resolve(context, AppMotion.quick),
-              width: _circle,
-              height: _circle,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: colors.info.fill,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: playing ? colors.info.surface : Colors.transparent,
-                    spreadRadius: _ring,
-                  ),
-                ],
-              ),
-              child: AppIconView(
-                AppIcon.volume,
-                size: _iconSize,
-                color: colors.surface,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.xs),
-          Expanded(
-            child: Text(
-              word,
-              locale: _english,
-              style: context.texts.title.copyWith(color: colors.textPrimary),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      _Player(clip: clip),
+      const SizedBox(height: AppSpacing.xl),
+      TextAnswers(options: exercise.options, answer: answer),
+    ],
+  );
 }
 
 /// A listening question's player: the big button with its ring and waves, and
 /// «أبطأ» beside it. A failure offers a retry, and never stops the answer.
-class ListeningPlayer extends StatelessWidget {
-  const ListeningPlayer({required this.state, super.key});
+class _Player extends StatelessWidget {
+  const _Player({required this.clip});
 
-  final ExerciseState state;
+  final BodyClip clip;
 
   static const _height = 128.0;
   static const _ring = 112.0;
@@ -100,16 +58,15 @@ class ListeningPlayer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final cubit = context.read<ExerciseCubit>();
-    if (state.audio == ExerciseAudio.failed) {
+    if (clip.status == ClipStatus.failed) {
       return ClipFailedView(
         circle: _failed,
         iconSize: _failedIcon,
         gap: AppSpacing.sm,
-        onRetry: cubit.togglePlay,
+        onRetry: clip.onToggle,
       );
     }
-    final playing = state.audio == ExerciseAudio.playing;
+    final playing = clip.status == ClipStatus.playing;
     return SizedBox(
       height: _height,
       child: CustomMultiChildLayout(
@@ -134,14 +91,14 @@ class ListeningPlayer extends StatelessWidget {
                   ),
                   if (playing)
                     ClipProgressRing(
-                      key: ValueKey(state.playCount),
-                      length: state.clipLength,
+                      key: ValueKey(clip.playCount),
+                      length: clip.length,
                       size: _ring,
                     ),
                   IconButton(
-                    onPressed: state.audio == ExerciseAudio.loading
+                    onPressed: clip.status == ClipStatus.loading
                         ? null
-                        : cubit.togglePlay,
+                        : clip.onToggle,
                     tooltip: playing
                         ? 'lesson_stop_audio'.tr()
                         : 'lesson_listen'.tr(),
@@ -153,7 +110,7 @@ class ListeningPlayer extends StatelessWidget {
                       fixedSize: const Size.square(_button),
                     ),
                     iconSize: _playIcon,
-                    icon: state.audio == ExerciseAudio.loading
+                    icon: clip.status == ClipStatus.loading
                         ? AppSpinner(size: _spinner, color: colors.surface)
                         : Icon(
                             playing
@@ -167,10 +124,7 @@ class ListeningPlayer extends StatelessWidget {
           ),
           LayoutId(
             id: _PlayerSlot.slow,
-            child: _SlowButton(
-              on: playing && state.slow,
-              onTap: cubit.playSlow,
-            ),
+            child: _SlowButton(on: playing && clip.slow, onTap: clip.onSlow),
           ),
         ],
       ),

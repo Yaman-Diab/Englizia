@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:englizia/core/audio/clip_player.dart';
 
+/// Where a question's clip stands, as a screen shows it.
+enum ClipStatus { idle, loading, playing, failed }
+
 /// What became of a clip that was asked for.
 sealed class ClipOutcome {
   const ClipOutcome();

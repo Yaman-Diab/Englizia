@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:englizia/core/logging/app_logger.dart';
+import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 final class LessonRepositoryImpl implements LessonRepository {
@@ -21,18 +23,17 @@ final class LessonRepositoryImpl implements LessonRepository {
   Future<void>? _sending;
 
   @override
-  Future<Result<List<Exercise>>> getExercises(String lessonId) =>
-      guard(() => _remote.getExercises(lessonId));
+  Future<Result<Lesson>> getLesson(String lessonId) => guard(() async {
+    final model = await _remote.getLesson(lessonId);
+    return model.toEntity(await _settings.installationId());
+  });
 
   @override
-  Future<void> saveAnswer(ExerciseAnswer answer) async {
+  Future<void> saveAttempt(ExerciseAttempt attempt) async {
     final store = _store();
     store.unsent.add({
-      'lessonId': answer.lessonId,
-      'attemptId': SettingsStorageService.randomId(),
-      'questionId': answer.questionId,
-      'optionId': answer.optionId,
-      'hinted': answer.hinted,
+      'lessonId': attempt.lessonId,
+      'request': attemptToJson(attempt, SettingsStorageService.randomId()),
     });
     await _keep(store);
     unawaited(sendSaved());
@@ -51,12 +52,12 @@ final class LessonRepositoryImpl implements LessonRepository {
       final unsent = _store().unsent;
       if (unsent.isEmpty) return;
       final first = unsent.first;
-      await _remote.sendAnswer(first['lessonId']! as String, {
-        for (final entry in first.entries)
-          if (entry.key != 'lessonId') entry.key: entry.value,
-      });
+      final request = asJsonMap(first['request']);
+      await _remote.sendAnswer(first['lessonId']! as String, request);
       final store = _store();
-      store.unsent.removeWhere((a) => a['attemptId'] == first['attemptId']);
+      store.unsent.removeWhere(
+        (a) => asJsonMap(a['request'])['attemptId'] == request['attemptId'],
+      );
       await _keep(store);
     }
   }
@@ -81,15 +82,12 @@ final class LessonRepositoryImpl implements LessonRepository {
     final saved = _settings.lessonProgress;
     if (saved == null) return LessonStoreModel();
     try {
-      return LessonStoreModel.fromJson(asMap(jsonDecode(saved)));
+      return LessonStoreModel.fromJson(asJsonMap(jsonDecode(saved)));
     } on Object catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Saved lesson progress unreadable');
       return LessonStoreModel();
     }
   }
-
-  static Map<String, Object?> asMap(Object? value) =>
-      (value! as Map).cast<String, Object?>();
 
   /// Not kept costs only that: the session goes on.
   Future<void> _keep(LessonStoreModel store) async {

@@ -497,5 +497,6 @@
   "lesson_exit_body": "تقدّمك محفوظ، وتكمل من السؤال نفسه.",
   "lesson_exit_stay": "أكمل الدرس",
   "lesson_exit_leave": "اخرج",
-  "lesson_complete_title": "أكملت الدرس"
+  "lesson_complete_title": "أكملت الدرس",
+  "lesson_book_ref": "كتاب الطالب، صفحة {page}، تمرين {exercise}"
 }

@@ -1,0 +1,147 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_mock",
+    "version": 1,
+    "exercises": [
+      {
+        "id": "q1",
+        "template": "multipleChoice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "prompt": {
+          "en": "She ___ to school every day."
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "go"
+          },
+          {
+            "id": "o2",
+            "text": "goes"
+          },
+          {
+            "id": "o3",
+            "text": "going"
+          },
+          {
+            "id": "o4",
+            "text": "gone"
+          }
+        ],
+        "answer": "o2",
+        "hint": {
+          "ar": "انتبه إلى الفاعل she"
+        },
+        "explanation": {
+          "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط."
+        },
+        "concepts": [
+          "c_present_s"
+        ],
+        "bookRef": null,
+        "reviewOnly": false
+      },
+      {
+        "id": "q2",
+        "template": "imageChoice",
+        "instructionAr": "اختر الصورة المناسبة",
+        "prompt": {
+          "en": "barn",
+          "audio": "https://example.com/mock/lessons/barn.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "image": "assets/mock/lessons/barn.svg",
+            "alt": "حظيرة"
+          },
+          {
+            "id": "o2",
+            "image": "assets/mock/lessons/house.svg",
+            "alt": "بيت"
+          },
+          {
+            "id": "o3",
+            "image": "assets/mock/lessons/school.svg",
+            "alt": "مدرسة"
+          },
+          {
+            "id": "o4",
+            "image": "assets/mock/lessons/shop.svg",
+            "alt": "متجر"
+          }
+        ],
+        "answer": "o1",
+        "reviewOnly": false
+      },
+      {
+        "id": "q3",
+        "template": "listenChoose",
+        "instructionAr": "استمع واختر ما سمعته",
+        "prompt": {
+          "audio": "https://example.com/mock/lessons/market.mp3",
+          "transcript": "I'm going to the market."
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "I'm going to the market."
+          },
+          {
+            "id": "o2",
+            "text": "I'm going to the garden."
+          },
+          {
+            "id": "o3",
+            "text": "I went to the market."
+          },
+          {
+            "id": "o4",
+            "text": "I'm going to market it."
+          }
+        ],
+        "answer": "o1",
+        "hint": {
+          "ar": "انتبه إلى الكلمة الأخيرة وإلى the"
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q4",
+        "template": "multipleChoice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "prompt": {
+          "en": "Excuse me, ___ ?"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "could you tell me where the nearest post office is"
+          },
+          {
+            "id": "o2",
+            "text": "where post office"
+          },
+          {
+            "id": "o3",
+            "text": "post office is where"
+          },
+          {
+            "id": "o4",
+            "text": "you know the post office"
+          }
+        ],
+        "answer": "o1",
+        "bookRef": {
+          "page": 34,
+          "exercise": 2
+        },
+        "reviewOnly": false
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

@@ -3,6 +3,8 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:flutter/material.dart';
 
 /// Where an answer stands: chosen or not, then marked after checking.
@@ -147,5 +149,28 @@ class TextAnswer extends StatelessWidget {
         ),
       ),
     ),
+  );
+}
+
+/// The options of a choice, one under the other.
+class TextAnswers extends StatelessWidget {
+  const TextAnswers({required this.options, required this.answer, super.key});
+
+  final List<ExerciseOption> options;
+  final BodyAnswer answer;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      for (final (i, option) in options.indexed) ...[
+        if (i > 0) const SizedBox(height: AppSpacing.md),
+        TextAnswer(
+          text: option.text,
+          look: answer.lookOf(option.id),
+          onTap: answer.chooser(option.id),
+        ),
+      ],
+    ],
   );
 }

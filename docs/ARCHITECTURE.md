@@ -84,6 +84,10 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 Pieces shared by the placement test and the exercises live in core: `ClipPlayback` (one clip at a time, on `ClipPlayer`), `BlankSentence`, `ClipFailedView`, `ClipProgressRing`, `ListeningWaves`, and `ChoiceSurface`/`ChoiceCheck`, which also carry the marks of a checked answer (`ChoiceMark`).
 
+## Exercises
+
+ADR 11. `ExerciseCubit` runs a lesson's session and knows no template's details: a body reports an `ExerciseDraft`, `evaluate` (pure, in domain) gives an `Evaluation`, and an `ExerciseAttempt` is kept on the phone and sent. `exerciseBody` is one exhaustive `switch` on the sealed `Exercise`; bodies take `BodyAnswer` and `BodyClip` and don't read the cubit. What only draws a question stays in its body. To add a template: a subclass in `domain/entities/exercise.dart`, a case in `LessonModel`, a body and its case in `exerciseBody`, and a draft and evaluation if it answers in a new way.
+
 ## Localization
 
 - easy_localization, `assets/translations/{ar,en}.json`, flat snake_case keys prefixed by feature.

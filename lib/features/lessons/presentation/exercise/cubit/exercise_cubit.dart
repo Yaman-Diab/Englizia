@@ -7,23 +7,25 @@ import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-enum ExerciseAudio { idle, loading, playing, failed }
 
 final class ExerciseState extends Equatable {
   const ExerciseState({
     this.load = LoadStatus.loading,
     this.failure,
+    this.lessonVersion = 0,
     this.questions = const [],
     this.index = 0,
-    this.selectedId,
-    this.checked = false,
+    this.draft,
+    this.evaluation,
     this.hintOpen = false,
     this.hinted = const {},
-    this.audio = ExerciseAudio.idle,
+    this.done = const {},
+    this.audio = ClipStatus.idle,
     this.slow = false,
     this.clipLength = Duration.zero,
     this.playCount = 0,
@@ -33,17 +35,24 @@ final class ExerciseState extends Equatable {
 
   final LoadStatus load;
   final Failure? failure;
+  final int lessonVersion;
   final List<Exercise> questions;
   final int index;
-  final String? selectedId;
 
-  /// The answer is in: the options are locked and marked.
-  final bool checked;
+  /// The answer so far. What only draws a question stays in its widget; what
+  /// the button, the marks or the attempt need comes here.
+  final ExerciseDraft? draft;
+
+  /// What checking found: the answers are locked and marked.
+  final Evaluation? evaluation;
   final bool hintOpen;
 
   /// Questions whose hint was opened: the button stays "used".
   final Set<String> hinted;
-  final ExerciseAudio audio;
+
+  /// Questions checked.
+  final Set<String> done;
+  final ClipStatus audio;
 
   /// Playing at the slower speed.
   final bool slow;
@@ -62,29 +71,26 @@ final class ExerciseState extends Equatable {
 
   bool get hintUsed => hinted.contains(question?.id);
 
-  ExerciseOption? get selected {
-    for (final option in question?.options ?? const <ExerciseOption>[]) {
-      if (option.id == selectedId) return option;
-    }
-    return null;
-  }
+  bool get checked => evaluation != null;
 
-  bool get canCheck => selectedId != null && !checked;
+  bool get canCheck => (draft?.isComplete ?? false) && !checked;
 
-  /// Questions done, for the bar: this one counts once it is checked and moved
-  /// past, not when it is merely answered.
-  int get done => finished ? questions.length : index;
+  /// How far along the bar: this question counts once moved past, not when it
+  /// is merely answered.
+  int get position => finished ? questions.length : index;
 
   ExerciseState copyWith({
     LoadStatus? load,
     Failure? Function()? failure,
+    int? lessonVersion,
     List<Exercise>? questions,
     int? index,
-    String? Function()? selectedId,
-    bool? checked,
+    ExerciseDraft? Function()? draft,
+    Evaluation? Function()? evaluation,
     bool? hintOpen,
     Set<String>? hinted,
-    ExerciseAudio? audio,
+    Set<String>? done,
+    ClipStatus? audio,
     bool? slow,
     Duration? clipLength,
     int? playCount,
@@ -93,12 +99,14 @@ final class ExerciseState extends Equatable {
   }) => ExerciseState(
     load: load ?? this.load,
     failure: failure != null ? failure() : this.failure,
+    lessonVersion: lessonVersion ?? this.lessonVersion,
     questions: questions ?? this.questions,
     index: index ?? this.index,
-    selectedId: selectedId != null ? selectedId() : this.selectedId,
-    checked: checked ?? this.checked,
+    draft: draft != null ? draft() : this.draft,
+    evaluation: evaluation != null ? evaluation() : this.evaluation,
     hintOpen: hintOpen ?? this.hintOpen,
     hinted: hinted ?? this.hinted,
+    done: done ?? this.done,
     audio: audio ?? this.audio,
     slow: slow ?? this.slow,
     clipLength: clipLength ?? this.clipLength,
@@ -111,12 +119,14 @@ final class ExerciseState extends Equatable {
   List<Object?> get props => [
     load,
     failure,
+    lessonVersion,
     questions,
     index,
-    selectedId,
-    checked,
+    draft,
+    evaluation,
     hintOpen,
     hinted,
+    done,
     audio,
     slow,
     clipLength,
@@ -127,9 +137,10 @@ final class ExerciseState extends Equatable {
 }
 
 /// A lesson's exercises (requirements v3.0 §7.1, design "Exercise"): one
-/// question at a time, with no hearts, timer or points. Answers are marked here,
-/// as the keys come with the lesson, and kept on the phone under a stable id, so
-/// the connection never stops the learner.
+/// question at a time, with no hearts, timer or points. It runs the session and
+/// knows no template's details: a draft comes in, `evaluate` marks it, and the
+/// attempt stays on the phone under a stable id, so the connection never stops
+/// the learner.
 class ExerciseCubit extends Cubit<ExerciseState> {
   ExerciseCubit(
     this._lessons,
@@ -160,48 +171,54 @@ class ExerciseCubit extends Cubit<ExerciseState> {
         failure: () => null,
       ),
     );
-    final result = await _lessons.getExercises(lessonId);
+    final result = await _lessons.getLesson(lessonId);
     if (isClosed) return;
     switch (result) {
-      case Ok(:final value):
+      case Ok(value: final lesson):
         final progress = _lessons.progress(lessonId);
         emit(
           state.copyWith(
             load: LoadStatus.ready,
-            questions: value,
+            lessonVersion: lesson.version,
+            questions: lesson.exercises,
             hinted: progress.hinted,
+            done: progress.done,
           ),
         );
-        if (value.isEmpty || progress.position >= value.length) {
-          await _finish();
-        } else {
-          _show(progress.position);
-        }
+        await _showFrom(0);
       case Err(:final failure):
         emit(state.copyWith(load: LoadStatus.failure, failure: () => failure));
     }
   }
 
-  void _show(int index) {
-    emit(
-      state.copyWith(
-        index: index,
-        selectedId: () => null,
-        checked: false,
-        hintOpen: false,
-        audio: ExerciseAudio.idle,
-        slow: false,
-      ),
-    );
-    // A listening question plays once by itself (S §7.3).
-    if (state.question?.kind == ExerciseKind.listeningChoice) {
-      unawaited(_play(slow: false));
+  /// The first question from [from] not done yet, or the lesson's end.
+  Future<void> _showFrom(int from) async {
+    for (var i = from; i < state.questions.length; i++) {
+      if (!state.done.contains(state.questions[i].id)) {
+        emit(
+          state.copyWith(
+            index: i,
+            draft: () => null,
+            evaluation: () => null,
+            hintOpen: false,
+            audio: ClipStatus.idle,
+            slow: false,
+          ),
+        );
+        if (state.question?.autoplays ?? false) {
+          unawaited(_play(slow: false));
+        }
+        return;
+      }
     }
+    await _lessons.clearProgress(lessonId);
+    if (!isClosed) emit(state.copyWith(finished: true));
   }
 
-  void select(String optionId) {
+  /// The answer changed. Locked once checked.
+  void updateDraft(ExerciseDraft draft) {
     if (state.checked) return;
-    emit(state.copyWith(selectedId: () => optionId));
+    emit(state.copyWith(draft: () => draft));
   }
 
   /// Opens or closes the hint; opening it once marks the question as helped.
@@ -218,19 +235,26 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     if (opening) await _saveProgress();
   }
 
-  /// «تحقق»: locks the options, and keeps the answer.
+  /// «تحقق»: marks the answer, and keeps it. Leaving now returns to the next
+  /// question, as this one has been answered.
   Future<void> check() async {
     final question = state.question;
-    final selectedId = state.selectedId;
-    if (question == null || selectedId == null || state.checked) return;
+    final draft = state.draft;
+    if (question == null || draft == null || !state.canCheck) return;
     await stopAudio();
-    emit(state.copyWith(checked: true));
+    emit(
+      state.copyWith(
+        evaluation: () => evaluate(question, draft),
+        done: {...state.done, question.id},
+      ),
+    );
     await _saveProgress();
-    await _lessons.saveAnswer(
-      ExerciseAnswer(
+    await _lessons.saveAttempt(
+      ExerciseAttempt(
         lessonId: lessonId,
+        lessonVersion: state.lessonVersion,
         questionId: question.id,
-        optionId: selectedId,
+        draft: draft,
         hinted: state.hintUsed,
       ),
     );
@@ -240,55 +264,41 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   Future<void> next() async {
     if (!state.checked) return;
     await stopAudio();
-    final next = state.index + 1;
-    if (next >= state.questions.length) {
-      await _finish();
-      return;
-    }
-    _show(next);
+    await _showFrom(state.index + 1);
   }
 
-  Future<void> _finish() async {
-    await _lessons.clearProgress(lessonId);
-    if (!isClosed) emit(state.copyWith(finished: true));
-  }
-
-  /// A checked question counts as done, so leaving after it can't answer it
-  /// twice.
   Future<void> _saveProgress() => _lessons.saveProgress(
     lessonId,
-    ExerciseProgress(
-      position: state.checked ? state.index + 1 : state.index,
-      hinted: state.hinted,
-    ),
+    ExerciseProgress(done: state.done, hinted: state.hinted),
   );
 
   /// The big button: plays the clip, or stops it.
   Future<void> togglePlay() async {
-    if (state.audio == ExerciseAudio.playing) {
+    if (state.audio == ClipStatus.playing) {
       await stopAudio();
-    } else if (state.audio != ExerciseAudio.loading) {
+    } else if (state.audio != ClipStatus.loading) {
       await _play(slow: false);
     }
   }
 
   /// «أبطأ»: the same file, slower, from its start.
   Future<void> playSlow() async {
-    if (state.audio == ExerciseAudio.loading) return;
+    if (state.audio == ClipStatus.loading) return;
     await stopAudio();
     await _play(slow: true);
   }
 
   Future<void> _play({required bool slow}) async {
     final question = state.question;
-    if (question == null || question.audioUrl.isEmpty) return;
-    emit(state.copyWith(audio: ExerciseAudio.loading, slow: slow));
+    final url = question?.clipUrl;
+    if (question == null || url == null) return;
+    emit(state.copyWith(audio: ClipStatus.loading, slow: slow));
     final outcome = await _clip.start(
-      question.audioUrl,
+      url,
       speed: slow ? slowSpeed : 1,
       onEnd: () {
         if (!isClosed) {
-          emit(state.copyWith(audio: ExerciseAudio.idle, slow: false));
+          emit(state.copyWith(audio: ClipStatus.idle, slow: false));
         }
       },
     );
@@ -297,20 +307,19 @@ class ExerciseCubit extends Cubit<ExerciseState> {
       case ClipCancelled():
         return;
       case ClipUnavailable():
-        // Never stops the answer: the options stay open (S §7.1). An image
-        // choice has only its word's button, which simply goes quiet.
+        // Never stops the answer: the options stay open (S §7.1).
         emit(
           state.copyWith(
-            audio: question.kind == ExerciseKind.listeningChoice
-                ? ExerciseAudio.failed
-                : ExerciseAudio.idle,
+            audio: question.reportsClipFailure
+                ? ClipStatus.failed
+                : ClipStatus.idle,
             slow: false,
           ),
         );
       case ClipPlaying(:final length):
         emit(
           state.copyWith(
-            audio: ExerciseAudio.playing,
+            audio: ClipStatus.playing,
             clipLength: length,
             playCount: state.playCount + 1,
           ),
@@ -321,9 +330,9 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   /// Stops any clip, as the exit sheet does on opening.
   Future<void> stopAudio() async {
     _clip.stop();
-    if (state.audio == ExerciseAudio.playing ||
-        state.audio == ExerciseAudio.loading) {
-      emit(state.copyWith(audio: ExerciseAudio.idle, slow: false));
+    if (state.audio == ClipStatus.playing ||
+        state.audio == ClipStatus.loading) {
+      emit(state.copyWith(audio: ClipStatus.idle, slow: false));
     }
   }
 

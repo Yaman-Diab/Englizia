@@ -428,5 +428,6 @@
   "lesson_exit_body": "Your progress is saved, and you carry on from the same question.",
   "lesson_exit_stay": "Continue the lesson",
   "lesson_exit_leave": "Leave",
-  "lesson_complete_title": "Lesson complete"
+  "lesson_complete_title": "Lesson complete",
+  "lesson_book_ref": "Student's book, page {page}, exercise {exercise}"
 }

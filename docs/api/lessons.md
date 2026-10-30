@@ -1,31 +1,38 @@
 # Lessons
 
 Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/lessons/`); nothing is confirmed by the backend team yet.
-Requirements: student doc §7.1 (the exercise container), §7.3 (templates), §2 principle 6.
+Requirements: student doc §7.1 (the exercise container), §7.3 (templates), §2 principle 6; server doc §19.2, §19.3 and §20.6.
 
-## `GET /api/v1/app/lessons/{lessonId}/exercises`
+The exercise fields are those of the content package (server doc §20.6), under the API's rules (`README.md`): camelCase, lower-camel enum values, absolute media URLs. So `instruction_ar` is `instructionAr`, `book_ref` is `bookRef`, `multiple_choice` is `multipleChoice`.
 
-A lesson's questions, in the order to show them, with their keys: "check" has to work offline (S §7.1), and the server marks each answer again when it arrives. Needs a session, a guest's or a member's.
+## `GET /api/v1/app/lessons/{lessonId}`
+
+The published lesson, whole, with its exercises and their keys: "check" has to work offline (S §7.1), and the server marks each answer again when it arrives. Needs a session, a guest's or a member's. The server leaves out questions whose template this app version can't show (server doc §19.2).
 
 ### Response `200`
 
-The example is `assets/mock/lessons/exercises.json`.
+The example is `assets/mock/lessons/lesson.json`.
 
 ```json
 {
   "statusCode": 200,
   "message": "Data retrieved successfully",
   "data": {
-    "lessonId": "les_mock",
-    "questions": [
+    "id": "les_mock",
+    "version": 1,
+    "exercises": [
       {
         "id": "q1",
-        "type": "multipleChoice",
-        "instruction": { "ar": "اختر الكلمة المناسبة", "en": "Choose the right word" },
-        "before": "She",
-        "after": "to school every day.",
-        "hint": { "text": { "ar": "انتبه إلى الفاعل ", "en": "Look at the subject " }, "term": "she" },
-        "options": [{ "id": "o1", "text": "go", "correct": false }]
+        "template": "multipleChoice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "prompt": { "en": "She ___ to school every day." },
+        "options": [{ "id": "o1", "text": "go" }, { "id": "o2", "text": "goes" }],
+        "answer": "o2",
+        "hint": { "ar": "انتبه إلى الفاعل she" },
+        "explanation": { "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط." },
+        "concepts": ["c_present_s"],
+        "bookRef": null,
+        "reviewOnly": false
       }
     ]
   },
@@ -36,27 +43,36 @@ The example is `assets/mock/lessons/exercises.json`.
 
 | Field | Type | Meaning | Used by the app today |
 |---|---|---|---|
-| `questions[].id` | string | Stable question id | yes |
-| `questions[].type` | string | `multipleChoice`, `imageChoice`, `listeningChoice`; the app leaves out a type it doesn't know | yes |
-| `questions[].instruction` | `{ar, en}` | The line over the question | yes |
-| `questions[].before` / `.after` | string | Multiple choice: the sentence around its blank | yes |
-| `questions[].word` | string | Image choice: the word the pictures are about | yes |
-| `questions[].audioUrl` | string | Image choice: the word said. Listening: the clip. "Slower" plays this file at 0.75 | yes |
-| `questions[].hint` | object? | `text` in both languages, then `term`, the English word it points at. None hides the button | yes |
-| `questions[].bookReference` | `{ar, en}`? | Imaar lessons tied to a book exercise: "student's book, page 34, exercise 2" | yes |
-| `questions[].options[].id` | string | Stable option id | yes |
-| `questions[].options[].correct` | bool | The key | yes |
-| `questions[].options[].text` | string | English text of a text option | yes |
-| `questions[].options[].imageUrl` / `.imageAlt` | string, `{ar, en}` | A picture and its name for screen readers | yes |
+| `id` | string | The lesson | yes |
+| `version` | int | The published version; an attempt counts for the version it was answered on (server doc §19.2) | yes, sent with each answer |
+| `exercises[].id` | string | Stable question id | yes |
+| `exercises[].template` | string | `multipleChoice`, `imageChoice`, `listenChoose`; the rest of §20.6 as they are built. One the app doesn't know is left out | yes |
+| `exercises[].instructionAr` | string | The line over the question | yes |
+| `exercises[].instructionArAudio` | string? | Required for kids | not yet |
+| `exercises[].prompt.en` | string | `multipleChoice`: the sentence with one `___`. `imageChoice`: the word | yes |
+| `exercises[].prompt.audio` | string | `imageChoice`: the word said (optional). `listenChoose`: the clip. "Slower" plays this file at 0.75 | yes |
+| `exercises[].prompt.transcript` | string | `listenChoose`: what the clip says, for the feedback | not yet |
+| `exercises[].options[].id` | string | Stable option id | yes |
+| `exercises[].options[].text` | string | English text of a text option | yes |
+| `exercises[].options[].image` / `.alt` | string | A picture and its Arabic name for screen readers. WebP (S §22) | yes |
+| `exercises[].options[].misconception` | string? | The concept a wrong option points to | not yet |
+| `exercises[].answer` | string | The right option's id | yes |
+| `exercises[].hint.ar` | string? | The hint. None hides the button. English words in it are shown strong | yes |
+| `exercises[].explanation.ar` | string? | For the feedback | not yet |
+| `exercises[].concepts` | string[] | For the mistakes bank (v0.5) | not yet |
+| `exercises[].bookRef` | `{page, exercise}`? | Imaar lessons tied to a book exercise | yes |
+| `exercises[].reviewOnly` | bool | For the mistakes bank only: left out of the lesson | yes |
+
+A question the app can't read is skipped and logged, so it can't leave the learner stuck on the lesson; a lesson with no readable question is a failure with a retry.
 
 **Open with the backend team:**
-- Shuffling. The design wants options shuffled per learner with a fixed seed per learner and question. The app shows them in the order they come, so it assumes the server does this.
-- Whether a lesson's keys may be sent like this at all, and whether a guest gets them.
-- Picture format and sizes; the app takes SVG and any format `Image.network` reads.
+- Whether a question the app skipped still counts towards completing the lesson (it must not).
+- English instructions and hints: the package has only Arabic, so both app languages show Arabic (S §7.1 says "Arabic instructions"), read right to left.
+- The order of options is shuffled on the phone, per installation and question (S §7.1), so the server must send them in any order and needs nothing for this.
 
 ### Errors
 
-The common errors (`docs/api/README.md`). With an unknown lesson, `404`.
+The common errors (`README.md`). With an unknown lesson, `404`.
 
 ## `POST /api/v1/app/lessons/{lessonId}/answers`
 
@@ -67,8 +83,9 @@ One checked answer. Safe to repeat: the server ignores an `attemptId` it has see
 ```json
 {
   "attemptId": "6f1c8f60-0000-4000-8000-000000000000",
+  "lessonVersion": 1,
   "questionId": "q1",
-  "optionId": "o2",
+  "answer": { "optionId": "o2" },
   "hinted": true
 }
 ```
@@ -76,9 +93,11 @@ One checked answer. Safe to repeat: the server ignores an `attemptId` it has see
 | Field | Type | Meaning |
 |---|---|---|
 | `attemptId` | string | A UUID made on the phone when the answer is checked, the same on every resend |
-| `questionId`, `optionId` | string | The answer |
+| `lessonVersion` | int | The version the learner answered |
+| `questionId` | string | The question |
+| `answer` | object | By way of answering. Choice templates: `{optionId}` |
 | `hinted` | bool | The hint was opened on this question: a right answer is an assisted success (S §7.1) |
 
 ### Response
 
-`200` or `204`; the app reads nothing from it. Marks and XP stay on the server. The app's own marking only drives what the learner sees.
+`200` or `204`; the app reads nothing from it. Marks and XP stay on the server. The app's own marking only drives what the learner sees; if the two differ, the screen doesn't change, and completion and points follow the server (ADR 11).
