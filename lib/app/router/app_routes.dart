@@ -27,6 +27,13 @@ abstract final class AppRoutes {
   static const newPassword = '/reset-password';
   static const passwordChanged = '/reset-password/done';
 
+  static const lessonExercises = '/lessons/:lessonId/exercises';
+  static const lessonComplete = '/lessons/:lessonId/complete';
+
+  static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
+
+  static String completeOf(String lessonId) => '/lessons/$lessonId/complete';
+
   /// The path of the link that confirms an email (docs/api/auth.md).
   static const verifyEmail = '/verify-email';
   static const signUp = '/sign-up';

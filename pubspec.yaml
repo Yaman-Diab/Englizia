@@ -46,6 +46,7 @@ flutter:
     - assets/mock/tracks/
     - assets/mock/account/
     - assets/mock/placement/
+    - assets/mock/lessons/
     - assets/mock/settings/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.

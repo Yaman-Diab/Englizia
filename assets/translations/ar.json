@@ -480,5 +480,22 @@
   "verify_done": "تم تأكيد بريدك",
   "verify_expired": "انتهت صلاحية رابط التأكيد",
   "account_email_unverified": "غير مؤكّد",
-  "account_email_verified": "مؤكّد"
+  "account_email_verified": "مؤكّد",
+  "foundation_try_exercises": "جرّب التمارين",
+  "lesson_exit": "الخروج من الدرس",
+  "lesson_progress": "تقدّم الدرس",
+  "lesson_hint_show": "إظهار التلميح",
+  "lesson_hint_hide": "إخفاء التلميح",
+  "lesson_offline": "لا يوجد اتصال. إجاباتك محفوظة وتُرسل تلقائيًا",
+  "lesson_listen": "استمع",
+  "lesson_listen_slow": "استمع ببطء",
+  "lesson_slower": "أبطأ",
+  "lesson_stop_audio": "إيقاف",
+  "lesson_check": "تحقق",
+  "lesson_next": "التالي",
+  "lesson_exit_title": "تخرج من الدرس؟",
+  "lesson_exit_body": "تقدّمك محفوظ، وتكمل من السؤال نفسه.",
+  "lesson_exit_stay": "أكمل الدرس",
+  "lesson_exit_leave": "اخرج",
+  "lesson_complete_title": "أكملت الدرس"
 }

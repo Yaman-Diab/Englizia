@@ -34,6 +34,7 @@ Future<SheetAction?> showActionSheet(
   required String primaryLabel,
   required String secondaryLabel,
   AppIcon? icon,
+  Widget? illustration,
   SheetTone tone = SheetTone.info,
   bool destructiveSecondary = false,
   bool outlinedSecondary = false,
@@ -44,6 +45,7 @@ Future<SheetAction?> showActionSheet(
   sheetAnimationStyle: sheetAnimation(context),
   builder: (_) => ActionSheet(
     icon: icon,
+    illustration: illustration,
     title: title,
     body: body,
     primaryLabel: primaryLabel,
@@ -61,6 +63,7 @@ class ActionSheet extends StatelessWidget {
     required this.primaryLabel,
     required this.secondaryLabel,
     this.icon,
+    this.illustration,
     this.tone = SheetTone.info,
     this.destructiveSecondary = false,
     this.outlinedSecondary = false,
@@ -69,6 +72,9 @@ class ActionSheet extends StatelessWidget {
 
   /// In a badge over the title; none is a sheet of text alone.
   final AppIcon? icon;
+
+  /// Over the title, in place of the [icon]: the guide, say.
+  final Widget? illustration;
   final String title;
   final String body;
   final String primaryLabel;
@@ -101,7 +107,10 @@ class ActionSheet extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (icon != null) ...[
+          if (illustration case final illustration?) ...[
+            Center(child: illustration),
+            const SizedBox(height: AppSpacing.md),
+          ] else if (icon != null) ...[
             Center(
               child: Container(
                 width: _badgeSize,

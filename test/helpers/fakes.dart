@@ -145,6 +145,7 @@ class FakeClipPlayer implements ClipPlayer {
   final loaded = <String>[];
   var played = 0;
   var stopped = 0;
+  double? lastSpeed;
 
   @override
   Future<Duration?> load(String url) async {
@@ -157,7 +158,10 @@ class FakeClipPlayer implements ClipPlayer {
   }
 
   @override
-  Future<void> play() async => played++;
+  Future<void> play({double speed = 1}) async {
+    played++;
+    lastSpeed = speed;
+  }
 
   @override
   Future<void> stop() async => stopped++;

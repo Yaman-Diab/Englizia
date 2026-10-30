@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
+import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
@@ -120,6 +121,15 @@ class FoundationPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xl),
+              // Until the unit screen opens lessons, a way to try the exercises.
+              if (AppConfig.isMock) ...[
+                OutlinedButton(
+                  onPressed: () =>
+                      context.push(AppRoutes.exercisesOf('les_mock')),
+                  child: Text('foundation_try_exercises'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
               // Here until «أنا» has its account section.
               const VerifyEmailRow(),
               BlocProvider(

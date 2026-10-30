@@ -61,6 +61,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register, login, refresh and logout |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), later track switching | mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
+| [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
 | [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
@@ -82,6 +83,8 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/tracks` | GET | — | track list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}/exercises` | GET | — | `{lessonId, questions}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}/answers` | POST | `{attemptId, questionId, optionId, hinted}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/placement/status` | GET | — | `{state, stage?, question?, lastLevel?, daysSinceResult?, daysUntilRetake?}` ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/placement/attempts` | POST | `{}` or `{restart: true}` | `{attemptId, stageSizes, stage, answered}` ([placement.md](placement.md)) | `restart` from the backend guide, the rest proposed; mock |

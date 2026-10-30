@@ -153,6 +153,17 @@ enum AppIcon {
     '<path d="M12 11v5.5M12 7.6v.2"/>',
   ),
   bookmark('<path d="M6 3.5h12v17l-6-4-6 4z"/>'),
+  book(
+    '<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/>'
+    '<path d="M12 6.5v13"/>',
+  ),
+  stopwatch(
+    '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l-2.5 2"/><path d="M10 2h4"/>',
+  ),
+  lightbulb(
+    '<path d="M9 18h6M10 21h4"/>'
+    '<path d="M12 3a6 6 0 0 0-3.6 10.8c.7.5 1.1 1.3 1.1 2.2h5c0-.9.4-1.7 1.1-2.2A6 6 0 0 0 12 3z"/>',
+  ),
   calendar(
     '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/>'
     '<path d="M3.5 10h17M8 3v4M16 3v4"/>',

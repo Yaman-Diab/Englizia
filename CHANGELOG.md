@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Lesson exercises: one container for multiple choice, picture choice and listening, with progress, hints, a book reference, slower audio, leaving and carrying on from the same question, and answers that wait on the phone when offline. Runs on mock data, and silently, for now.
 - Project foundation: Clean Architecture skeleton, DI, router with route policies, session bootstrap.
 - Networking for the .NET backend: `ApiClient`, ProblemDetails parsing, typed failures, auth interceptor with a shared token refresh.
 - Design system from visual identity v2: semantic color tokens (light + dark), type scale, component themes.

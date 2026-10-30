@@ -49,7 +49,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 ## Session and auth
 
-- Starting or ending a session clears what belongs to the account in `SettingsStorageService` (`clearAccountData`, today the saved placement status), as the next account may be another's.
+- Starting or ending a session clears what belongs to the account in `SettingsStorageService` (`clearAccountData`, today the saved placement status and lesson progress), as the next account may be another's.
 - `AppSessionController` status: `unknown → signedOut | guest | member` (ADR 10). Tokens carry their `AccountKind`, kept through refresh and secure storage. `bootstrap()` never throws; on first launch after install it clears the keystore (iOS keeps Keychain items after uninstall).
 - `AuthInterceptor` attaches the bearer token, shares **one** refresh among concurrent 401s, retries each request once, and expires the session only when the server rejects the refresh token (offline keeps the session).
 - `TokenRefreshService` uses a separate Dio without the auth interceptor and sets `Authorization` itself.
