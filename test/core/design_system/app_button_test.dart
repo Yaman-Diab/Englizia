@@ -81,4 +81,28 @@ void main() {
     expect(await pumpButton(tester, loading: false), 1);
     expect(find.byType(AppSpinner), findsNothing);
   });
+
+  testWidgets('done shows a check the same way, and takes no taps', (
+    tester,
+  ) async {
+    var taps = 0;
+    await tester.pumpLocalized(
+      Scaffold(
+        body: Center(
+          child: AppButton(
+            label: 'أرسل الرابط',
+            size: AppButtonSize.large,
+            expand: false,
+            isDone: true,
+            onPressed: () => taps++,
+          ),
+        ),
+      ),
+    );
+    await tester.pump(AppMotion.quick);
+    await tester.tap(find.byType(AppButton), warnIfMissed: false);
+    expect(taps, 0);
+    expect(find.bySemanticsLabel('common_done'.tr()), findsOneWidget);
+    expect(find.byType(AppSpinner), findsNothing);
+  });
 }

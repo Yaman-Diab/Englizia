@@ -26,6 +26,11 @@ abstract interface class AccountRepository {
     required String password,
   });
 
+  /// Asks for a link to set a new password, sent to [email] if it has an
+  /// account. The answer is the same either way, so no screen can tell
+  /// which emails are registered.
+  Future<Result<void>> requestPasswordReset(String email);
+
   /// Turns this phone's guest account into a member account with [account]'s
   /// email and password, keeping its progress (ADR 10). Fails like
   /// [createAccount].

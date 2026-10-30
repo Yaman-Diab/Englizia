@@ -148,6 +148,10 @@ enum AppIcon {
     '<path d="M8 12.5l2.8 2.8L16.5 9.5"/>',
   ),
   circle('<circle cx="12" cy="12" r="8.5"/>'),
+  infoCircle(
+    '<circle cx="12" cy="12" r="9.5"/>'
+    '<path d="M12 11v5.5M12 7.6v.2"/>',
+  ),
   questionCircle(
     '<circle cx="12" cy="12" r="9"/>'
     '<path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/>'

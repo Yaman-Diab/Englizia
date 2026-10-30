@@ -164,9 +164,9 @@ class AuthFooter extends StatelessWidget {
   const AuthFooter({
     required this.keyboardOpen,
     required this.submit,
-    required this.switchLead,
-    required this.switchAction,
-    required this.onSwitch,
+    this.switchLead,
+    this.switchAction,
+    this.onSwitch,
     this.above,
     super.key,
   });
@@ -174,9 +174,10 @@ class AuthFooter extends StatelessWidget {
   final bool keyboardOpen;
   final Widget submit;
 
-  /// "Have an account?" and "Sign in", or the other way round.
-  final String switchLead;
-  final String switchAction;
+  /// "Have an account?" and "Sign in", or the other way round; none when
+  /// both are null.
+  final String? switchLead;
+  final String? switchAction;
   final VoidCallback? onSwitch;
   final Widget? above;
 
@@ -208,7 +209,7 @@ class AuthFooter extends StatelessWidget {
             children: [
               if (keyboardOpen && above != null) above!,
               submit,
-              if (!keyboardOpen) ...[
+              if (!keyboardOpen && switchAction != null) ...[
                 const SizedBox(height: AppSpacing.xxs),
                 TextButton(
                   onPressed: onSwitch,
@@ -216,7 +217,7 @@ class AuthFooter extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: switchLead,
+                          text: switchLead ?? '',
                           style: texts.body.copyWith(
                             color: colors.textSecondary,
                           ),

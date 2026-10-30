@@ -20,6 +20,8 @@ abstract interface class AccountRemoteDataSource {
   /// [request] is [SignInModel.request].
   Future<AuthTokens> signIn(Map<String, Object?> request);
 
+  Future<void> requestPasswordReset(String email);
+
   /// Sent with the guest's own token; [request] is [RegisterModel.request].
   Future<AuthTokens> upgradeGuest(Map<String, Object?> request);
 
@@ -59,6 +61,13 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
         ),
         now: DateTime.now(),
       );
+
+  @override
+  Future<void> requestPasswordReset(String email) => _client.post(
+    ApiEndpoints.forgotPassword,
+    data: {'email': email},
+    options: ApiClient.publicOptions,
+  );
 
   @override
   Future<AuthTokens> upgradeGuest(Map<String, Object?> request) async =>
@@ -132,6 +141,11 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
     final body = jsonDecode(await _bundle.loadString(registerAsset));
     return SignInModel.tokens(body, now: DateTime.now());
   }
+
+  /// Always sent, as the server answers for any email.
+  @override
+  Future<void> requestPasswordReset(String email) =>
+      Future<void>.delayed(latency);
 
   /// Answers like [createAccount]: the upgraded account is a member.
   @override

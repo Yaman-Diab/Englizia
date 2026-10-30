@@ -262,5 +262,12 @@
     "zero": "You can try again now",
     "one": "You can try again in {} minute",
     "other": "You can try again in {} minutes"
-  }
+  },
+  "common_done": "Done",
+  "forgot_body": "Type your email, and we'll send you a link to set a new password.",
+  "forgot_email_invalid": "The email is incomplete, for example {example}",
+  "forgot_google_hint": "Sign in with Google? You don't need a password.",
+  "forgot_google": "Sign in with Google",
+  "forgot_submit": "Send the link",
+  "check_email_title": "Check your email"
 }

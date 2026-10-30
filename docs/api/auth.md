@@ -99,6 +99,12 @@ The response is register's: `TokenResponse` (201) for the member account, whose 
 
 Status: **proposed**, mock (the mock answers like register). The app never upgrades by calling register: a new account would leave the guest's progress behind.
 
+## `POST /api/v1/auth/password/forgot`
+
+Step 1 of password recovery (S §5.2): `{ "email": "user@example.com" }`, sent without a token. The server mails a link to set a new password (valid one hour, once) **if** the email has an account, and answers the same way either way (`202`, empty `data`), so no screen can tell which emails are registered. It limits requests per email and per device; the app treats `429` as sent too. Other errors (connection, server) show a retry.
+
+Status: **proposed**, mock (always sent). The next steps (the link opening the app, the new password) come with their screens.
+
 ## `POST /api/v1/auth/logout`
 
 Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. The app calls it on sign-out and never waits on it: signing out works offline, and a failure only means the server forgets the session later. Signing out as a guest loses the account; the app warns first («ستفقد تقدّمك لأنه غير محفوظ في حساب»).

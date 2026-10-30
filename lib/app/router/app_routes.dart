@@ -19,6 +19,7 @@ abstract final class AppRoutes {
   static const signIn = '/sign-in';
   static const signInWithProvider = '/sign-in/provider';
   static const forgotPassword = '/forgot-password';
+  static const forgotPasswordSent = '/forgot-password/sent';
   static const signUp = '/sign-up';
   static const signUpWithProvider = '/sign-up/provider';
   static const legalTerms = '/legal/terms';

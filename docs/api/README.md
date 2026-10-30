@@ -85,6 +85,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/password/forgot` | POST | `{email}` | none; the same answer whether or not the email has an account ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team
@@ -100,8 +101,9 @@ Paste-ready; each item names what the app needs and why.
 7. **The password policy and the full list of `error.code` values** per endpoint, kept in the OpenAPI document: the minimum password length (the app checks 8, S §4.3) and any name length limit as `minLength`/`maxLength`, and the codes for at least email taken (409 on register), wrong credentials (401 on login), account locked or disabled (403 on login), rate limited (429), and the `details` codes beyond `not_empty`. The app shows its own text per code.
 8. **`Retry-After` on 429** (seconds), so the app can tell the learner how long to wait after too many failed logins (§19.8).
 9. **Refresh semantics.** Confirm that 400/401/403 from refresh always mean the session is over (the app signs out on them) and anything else is transient; whether the refresh token rotates on every call (the app stores the new one when it comes back); and whether refresh should accept the expired access token header or ignore it.
-10. **App gate.** An endpoint for the minimum and recommended app version per platform (§19.2), e.g. `GET /api/v1/app/config`.
-11. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
-12. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
-13. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.
-14. **Lesson content** follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids), with its JSON Schema in v0.1.
+10. **Password recovery** as in [auth.md](auth.md): `POST /api/v1/auth/password/forgot` answering the same for any email, the one-hour single-use link (opening the app), and setting the new password; plus the Apple relay domain registered so the link reaches hidden Apple emails (S §5.1).
+11. **App gate.** An endpoint for the minimum and recommended app version per platform (§19.2), e.g. `GET /api/v1/app/config`.
+12. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
+13. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
+14. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.
+15. **Lesson content** follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids), with its JSON Schema in v0.1.

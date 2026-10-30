@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,7 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.primary,
     this.icon,
     this.isLoading = false,
+    this.isDone = false,
     this.expand = true,
     this.size = AppButtonSize.regular,
     this.focusNode,
@@ -44,6 +46,10 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final IconData? icon;
   final bool isLoading;
+
+  /// The action succeeded: the label becomes a check, the same way it
+  /// becomes a spinner, just before the screen moves on.
+  final bool isDone;
   final bool expand;
   final AppButtonSize size;
 
@@ -56,9 +62,11 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final callback = isLoading ? null : onPressed;
+    final busy = isLoading || isDone;
+    final callback = busy ? null : onPressed;
     final content = ButtonLoadingLabel(
       isLoading: isLoading,
+      isDone: isDone,
       spinnerSize: size == AppButtonSize.regular
           ? AppSpinner.compactSize
           : AppSpinner.buttonSize,
@@ -67,7 +75,7 @@ class AppButton extends StatelessWidget {
     // While loading, the button may hide its icon but not change size.
     final iconWidget = icon == null
         ? null
-        : Opacity(opacity: isLoading ? 0 : 1, child: Icon(icon));
+        : Opacity(opacity: busy ? 0 : 1, child: Icon(icon));
     final sizeStyle = switch (size) {
       AppButtonSize.regular => null,
       AppButtonSize.large => ButtonStyle(
@@ -97,9 +105,7 @@ class AppButton extends StatelessWidget {
         ? TextButton.styleFrom(foregroundColor: context.colors.error.text)
         : null;
     final shaped = tone?.merge(sizeStyle) ?? sizeStyle;
-    final style = isLoading
-        ? _enabledLook(context, tone).merge(shaped)
-        : shaped;
+    final style = busy ? _enabledLook(context, tone).merge(shaped) : shaped;
 
     final button = switch (variant) {
       AppButtonVariant.primary =>
@@ -176,36 +182,71 @@ class AppButton extends StatelessWidget {
   }
 }
 
-/// A button's label that becomes an [AppSpinner] while [isLoading], without
-/// changing the button's size: the label keeps its space, hidden, and the
-/// spinner takes the label's color.
+/// A button's label that becomes an [AppSpinner] while [isLoading], or a
+/// check once [isDone], without changing the button's size: the label keeps
+/// its space, hidden, and the mark takes the label's color.
 class ButtonLoadingLabel extends StatelessWidget {
   const ButtonLoadingLabel({
     required this.isLoading,
     required this.child,
+    this.isDone = false,
     this.spinnerSize = AppSpinner.buttonSize,
     super.key,
   });
 
   final bool isLoading;
+  final bool isDone;
   final Widget child;
   final double spinnerSize;
 
   @override
   Widget build(BuildContext context) {
     final duration = AppMotion.resolve(context, AppMotion.quick);
+    final marked = isLoading || isDone;
     return Stack(
       alignment: Alignment.center,
       children: [
         AnimatedOpacity(
-          opacity: isLoading ? 0 : 1,
+          opacity: marked ? 0 : 1,
           duration: duration,
           curve: AppMotion.out,
-          child: ExcludeSemantics(excluding: isLoading, child: child),
+          child: ExcludeSemantics(excluding: marked, child: child),
         ),
         // Laid out only while needed: a spinner taller than the label must
         // not grow the button.
-        if (isLoading)
+        if (isDone)
+          Positioned.fill(
+            child: OverflowBox(
+              minWidth: 0,
+              minHeight: 0,
+              maxHeight: spinnerSize,
+              maxWidth: spinnerSize,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: duration,
+                curve: AppMotion.out,
+                builder: (context, value, check) => Opacity(
+                  opacity: value,
+                  child: Transform.scale(
+                    scale:
+                        AppMotion.scaleMark + (1 - AppMotion.scaleMark) * value,
+                    child: check,
+                  ),
+                ),
+                child: Semantics(
+                  label: 'common_done'.tr(),
+                  child: AppIconView(
+                    AppIcon.check,
+                    size: spinnerSize,
+                    color:
+                        DefaultTextStyle.of(context).style.color ??
+                        context.colors.onPrimaryStrong,
+                  ),
+                ),
+              ),
+            ),
+          )
+        else if (isLoading)
           Positioned.fill(
             child: OverflowBox(
               minWidth: 0,
