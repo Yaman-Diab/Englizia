@@ -170,13 +170,13 @@ void main() {
   });
 
   group('PlacementIntroPage', () {
-    late List<bool> starts;
+    late int starts;
     late int skips;
     late int lessons;
     late int backs;
 
     setUp(() {
-      starts = [];
+      starts = 0;
       skips = 0;
       lessons = 0;
       backs = 0;
@@ -206,7 +206,7 @@ void main() {
           value: cubit,
           child: PlacementIntroPage(
             onBack: () => backs++,
-            onStart: starts.add,
+            onStart: () async => starts++,
             onSkip: () => skips++,
             onLessons: () => lessons++,
           ),
@@ -268,8 +268,9 @@ void main() {
       expect(find.byType(NoticeCard), findsNothing);
 
       await tester.tap(find.text('preparing_start_test'.tr()));
-      expect(starts, [false]);
+      expect(starts, 1);
       await tester.tap(find.byType(TextButton).last);
+      await tester.pump();
       expect(skips, 1);
     });
 
@@ -282,8 +283,11 @@ void main() {
         findsOneWidget,
       );
       await tester.tap(find.text('placement_continue'.tr()));
+      expect(starts, 1);
       await tester.tap(find.text('placement_restart'.tr()));
-      expect(starts, [false, true]);
+      await tester.pump();
+      await tester.pump();
+      expect(starts, 2);
     });
 
     testWidgets('an open retake: the result, and back to the lessons', (
@@ -291,9 +295,18 @@ void main() {
     ) async {
       await pumpPage(tester, status: retake);
       expect(find.text('placement_intro_subtitle_again'.tr()), findsOneWidget);
-      expect(find.textContaining('A2'), findsOneWidget);
+      final line = tester.widget<Text>(
+        find.descendant(
+          of: find.byType(NoticeCard),
+          matching: find.byType(Text),
+        ),
+      );
+      final title = line.textSpan! as TextSpan;
+      final level = title.children![1] as TextSpan;
+      expect(level.text, contains('A2'));
+      expect(level.style, isNot(title.style));
       await tester.tap(find.text('placement_retake'.tr()));
-      expect(starts, [false]);
+      expect(starts, 1);
       await tester.tap(find.text('placement_back_to_lessons'.tr()));
       expect(lessons, 1);
     });
@@ -311,8 +324,7 @@ void main() {
       final cubit = await pumpPage(tester, online: false);
       expect(find.text('placement_offline'.tr()), findsOneWidget);
       expect(button(tester).onPressed, isNull);
-      // Skipping and the sound check need no connection.
-      expect(other(tester).onPressed, isNotNull);
+      // The sound check needs no connection.
       await tester.tap(find.byTooltip('placement_sound_play'.tr()));
       await tester.pump();
       expect(cubit.state.trying, isTrue);
@@ -373,6 +385,188 @@ void main() {
       expect(backs, 2);
     });
 
+    testWidgets('offline with a saved status: that state, button disabled', (
+      tester,
+    ) async {
+      connectivity.online = false;
+      final cubit = cubitWith(
+        placement: FakePlacementRepository(
+          const [Err(NetworkFailure())],
+          const [Ok(retake)],
+        ),
+      );
+      await cubit.start('trk');
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: PlacementIntroPage(
+            onBack: () {},
+            onStart: () async {},
+            onSkip: () {},
+            onLessons: () => lessons++,
+          ),
+        ),
+      );
+      await tester.settleEntrance(const Duration(seconds: 2));
+
+      expect(find.text('placement_offline'.tr()), findsOneWidget);
+      expect(find.textContaining('A2', findRichText: true), findsOneWidget);
+      expect(find.text('placement_retake'.tr()), findsOneWidget);
+      expect(find.text('preparing_start_test'.tr()), findsNothing);
+      expect(button(tester).onPressed, isNull);
+      await tester.tap(find.text('placement_back_to_lessons'.tr()));
+      expect(lessons, 1);
+    });
+
+    testWidgets('offline with an unfinished test saved: no starting over', (
+      tester,
+    ) async {
+      connectivity.online = false;
+      final cubit = cubitWith(
+        placement: FakePlacementRepository(
+          const [Err(NetworkFailure())],
+          const [Ok(inProgress)],
+        ),
+      );
+      await cubit.start(null);
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: PlacementIntroPage(
+            onBack: () {},
+            onStart: () async {},
+            onSkip: () {},
+            onLessons: () {},
+          ),
+        ),
+      );
+      await tester.settleEntrance(const Duration(seconds: 2));
+      expect(find.text('placement_continue'.tr()), findsOneWidget);
+      expect(button(tester).onPressed, isNull);
+      expect(other(tester).onPressed, isNull);
+    });
+
+    testWidgets('offline knowing nothing: promises no first test', (
+      tester,
+    ) async {
+      await pumpPage(tester, online: false);
+      expect(find.byType(TextButton), findsNothing);
+      expect(button(tester).onPressed, isNull);
+      expect(find.text('placement_offline'.tr()), findsOneWidget);
+    });
+
+    testWidgets('a new account offline is on its first test', (tester) async {
+      connectivity.online = false;
+      final placement = FakePlacementRepository(
+        const [Err(NetworkFailure())],
+        const [Err(NetworkFailure())],
+      );
+      final cubit = cubitWith(placement: placement);
+      await cubit.start('trk', newAccount: true);
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: PlacementIntroPage(
+            onBack: () {},
+            onStart: () async {},
+            onSkip: () {},
+            onLessons: () {},
+          ),
+        ),
+      );
+      await tester.settleEntrance(const Duration(seconds: 2));
+      expect(find.text('placement_skip_plain'.tr()), findsOneWidget);
+    });
+
+    testWidgets('skipping tells the server, then moves on', (tester) async {
+      final placement = FakePlacementRepository();
+      final cubit = cubitWith(placement: placement);
+      await cubit.start('trk');
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: PlacementIntroPage(
+            onBack: () {},
+            onStart: () async {},
+            onSkip: () => skips++,
+            onLessons: () {},
+          ),
+        ),
+      );
+      await tester.settleEntrance(const Duration(seconds: 2));
+      await tester.tap(find.text('placement_skip_plain'.tr()));
+      await tester.pump();
+      await tester.pump();
+      expect(placement.defers, 1);
+      expect(skips, 1);
+    });
+
+    testWidgets('a failed skip stays, says so and retries', (tester) async {
+      final placement = FakePlacementRepository(
+        const [Ok(testPlacementSummary)],
+        const [Ok(PlacementNotTaken())],
+        const [Err(NetworkFailure()), Ok(null)],
+      );
+      final cubit = cubitWith(placement: placement);
+      await cubit.start('trk');
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: PlacementIntroPage(
+            onBack: () {},
+            onStart: () async {},
+            onSkip: () => skips++,
+            onLessons: () {},
+          ),
+        ),
+      );
+      await tester.settleEntrance(const Duration(seconds: 2));
+      await tester.tap(find.text('placement_skip_plain'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(skips, 0);
+      expect(find.text('error_network'.tr()), findsOneWidget);
+
+      await tester.tap(find.text('common_retry'.tr()));
+      await tester.pump();
+      await tester.pump();
+      expect(placement.defers, 2);
+      expect(skips, 1);
+    });
+
+    testWidgets('starting over asks the server first, and reloads on return', (
+      tester,
+    ) async {
+      final placement = FakePlacementRepository(
+        const [Ok(testPlacementSummary)],
+        const [Ok(inProgress), Ok(PlacementInProgress(stage: 1, question: 1))],
+      );
+      final cubit = cubitWith(placement: placement);
+      await cubit.start(null);
+      var opened = 0;
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: PlacementIntroPage(
+            onBack: () {},
+            onStart: () async => opened++,
+            onSkip: () {},
+            onLessons: () {},
+          ),
+        ),
+      );
+      await tester.settleEntrance(const Duration(seconds: 2));
+      await tester.tap(find.text('placement_restart'.tr()));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+      expect(placement.restarts, 1);
+      expect(opened, 1);
+      expect(placement.statusCalls, 2);
+      expect(cubit.state.done, isNull);
+      await tester.pump(const Duration(seconds: 2));
+    });
+
     testWidgets('a server failure offers a retry', (tester) async {
       final cubit = cubitWith(
         placement: FakePlacementRepository(const [
@@ -386,7 +580,7 @@ void main() {
           value: cubit,
           child: PlacementIntroPage(
             onBack: () {},
-            onStart: (_) {},
+            onStart: () async {},
             onSkip: () {},
             onLessons: () {},
           ),

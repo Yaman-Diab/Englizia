@@ -15,12 +15,18 @@ class FakePlacementRepository implements PlacementRepository {
   FakePlacementRepository([
     this.results = const [Ok(testPlacementSummary)],
     this.statuses = const [Ok(PlacementNotTaken())],
+    this.actions = const [Ok(null)],
   ]);
 
   final List<Result<PlacementSummary>> results;
   final List<Result<PlacementStatus>> statuses;
+
+  /// What restarting and putting off answer, one after another.
+  final List<Result<void>> actions;
   var calls = 0;
   var statusCalls = 0;
+  var restarts = 0;
+  var defers = 0;
 
   @override
   Future<Result<PlacementSummary>> getSummary() async =>
@@ -29,4 +35,19 @@ class FakePlacementRepository implements PlacementRepository {
   @override
   Future<Result<PlacementStatus>> getStatus() async =>
       statuses[(statusCalls++).clamp(0, statuses.length - 1)];
+
+  @override
+  Future<Result<void>> restartTest() async {
+    restarts++;
+    return _action();
+  }
+
+  @override
+  Future<Result<void>> deferTest() async {
+    defers++;
+    return _action();
+  }
+
+  Result<void> _action() =>
+      actions[(restarts + defers - 1).clamp(0, actions.length - 1)];
 }

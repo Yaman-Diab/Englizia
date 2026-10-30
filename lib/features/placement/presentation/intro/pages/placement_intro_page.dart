@@ -7,7 +7,9 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
+import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
@@ -35,10 +37,10 @@ class PlacementIntroPage extends StatefulWidget {
 
   final VoidCallback onBack;
 
-  /// Opens the questions; true throws away the unfinished test first.
-  final ValueChanged<bool> onStart;
+  /// Opens the questions, and completes when the learner comes back.
+  final Future<void> Function() onStart;
 
-  /// Starts from the first level with no test.
+  /// The test was put off: on to the lessons, from the first level.
   final VoidCallback onSkip;
 
   /// A learner with a result already goes back to the lessons.
@@ -66,16 +68,47 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
     return false;
   }
 
+  Future<void> _onDone(PlacementAction action) async {
+    switch (action) {
+      case PlacementAction.skip:
+        widget.onSkip();
+      case PlacementAction.restart:
+        final cubit = context.read<PlacementIntroCubit>();
+        await widget.onStart();
+        if (mounted) await cubit.reopened();
+    }
+  }
+
   @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<PlacementIntroCubit, PlacementIntroState>(builder: _build);
+  Widget build(BuildContext context) => MultiBlocListener(
+    listeners: [
+      BlocListener<PlacementIntroCubit, PlacementIntroState>(
+        listenWhen: (before, now) =>
+            now.done != null && now.done != before.done,
+        listener: (_, state) => _onDone(state.done!),
+      ),
+      BlocListener<PlacementIntroCubit, PlacementIntroState>(
+        listenWhen: (before, now) =>
+            now.actionFailure != null &&
+            now.actionFailure != before.actionFailure,
+        listener: (context, state) => showFailureSnackBar(
+          context,
+          state.actionFailure!,
+          onRetry: context.read<PlacementIntroCubit>().retryAction,
+        ),
+      ),
+    ],
+    child: BlocBuilder<PlacementIntroCubit, PlacementIntroState>(
+      builder: _build,
+    ),
+  );
 
   Widget _build(BuildContext context, PlacementIntroState state) {
     final cubit = context.read<PlacementIntroCubit>();
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) widget.onBack();
+        if (!didPop && !state.busy) widget.onBack();
       },
       child: Scaffold(
         body: SafeArea(
@@ -90,7 +123,7 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
                   child: Align(
                     alignment: AlignmentDirectional.centerStart,
                     child: IconButton(
-                      onPressed: widget.onBack,
+                      onPressed: state.busy ? null : widget.onBack,
                       tooltip: 'common_back'.tr(),
                       icon: const Icon(Icons.arrow_back_rounded),
                     ),
@@ -139,6 +172,7 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
       PlacementRetakeOpen(:final level, :final daysAgo) => NoticeCard(
         icon: AppIcon.steps,
         primary: true,
+        emphasis: '${Unicode.LRI}$level${Unicode.PDI}',
         title: 'placement_last_result'.plural(
           daysAgo,
           namedArgs: {'level': '${Unicode.LRI}$level${Unicode.PDI}'},
@@ -256,23 +290,26 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
       PlacementRetakeLocked() => 'placement_retake'.tr(),
       _ => 'preparing_start_test'.tr(),
     };
+    final cubit = context.read<PlacementIntroCubit>();
     final (other, onOther) = switch (status) {
       PlacementInProgress() => (
         'placement_restart'.tr(),
-        state.canRestart ? () => widget.onStart(true) : null,
+        state.canRestart ? cubit.restart : null,
       ),
       PlacementRetakeOpen() || PlacementRetakeLocked() => (
         'placement_back_to_lessons'.tr(),
-        widget.onLessons,
+        state.busy ? null : widget.onLessons,
       ),
-      _ => (
+      PlacementNotTaken() => (
         levelName == null
             ? 'placement_skip_plain'.tr()
             : 'placement_skip'.tr(
                 namedArgs: {'level': '${Unicode.LRI}$levelName${Unicode.PDI}'},
               ),
-        widget.onSkip,
+        state.busy ? null : cubit.skip,
       ),
+      // Nothing to offer a learner who may already have a result.
+      null => (null, null),
     };
     final band = !state.online
         ? 'placement_offline'.tr()
@@ -309,10 +346,19 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
             AppButton(
               label: start,
               size: AppButtonSize.large,
-              onPressed: state.canStart ? () => widget.onStart(false) : null,
+              onPressed: state.canStart ? widget.onStart : null,
             ),
-            const SizedBox(height: AppSpacing.xxs),
-            TextButton(onPressed: onOther, child: Text(other)),
+            if (other != null) ...[
+              const SizedBox(height: AppSpacing.xxs),
+              TextButton(
+                onPressed: onOther,
+                child: ButtonLoadingLabel(
+                  isLoading: state.running != null,
+                  spinnerSize: AppSpinner.compactSize,
+                  child: Text(other),
+                ),
+              ),
+            ],
           ],
         ),
       ),

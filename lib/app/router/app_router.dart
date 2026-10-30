@@ -362,13 +362,14 @@ GoRouter createAppRouter(AppSessionController session) {
               ? state.extra! as OnboardingPath
               : null;
           return BlocProvider(
-            create: (_) => sl<PlacementIntroCubit>()..start(path?.trackId),
+            create: (_) =>
+                sl<PlacementIntroCubit>()
+                  ..start(path?.trackId, newAccount: path != null),
             child: PlacementIntroPage(
               // Preparing leaves nothing under this screen.
               onBack: () =>
                   context.canPop() ? context.pop() : context.go(AppRoutes.home),
-              onStart: (restart) =>
-                  context.push(AppRoutes.placementQuestions, extra: restart),
+              onStart: () => context.push(AppRoutes.placementQuestions),
               onSkip: () => context.go(AppRoutes.home),
               onLessons: () => context.go(AppRoutes.home),
             ),

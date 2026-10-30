@@ -25,8 +25,14 @@ abstract final class ApiEndpoints {
   static const placementSummary = '/api/v1/app/placement/summary';
   // ASSUMPTION(api): docs/api/placement.md.
   static const placementStatus = '/api/v1/app/placement/status';
+  // ASSUMPTION(api): docs/api/placement.md.
+  static const placementAttempts = '/api/v1/app/placement/attempts';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
+
+  // ASSUMPTION(api): docs/api/placement.md.
+  static String enrollment(String enrollmentId) =>
+      '/api/v1/app/enrollments/$enrollmentId';
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static String levelUnits(String levelId) =>

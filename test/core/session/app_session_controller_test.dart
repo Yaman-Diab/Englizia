@@ -113,4 +113,24 @@ void main() {
     expect(storage.clearCount, 1);
     expect(notifications, 1);
   });
+
+  group('what belongs to the account', () {
+    test('starting or ending a session forgets the placement status', () async {
+      final saved = await settings(launchedBefore: true);
+      final session = AppSessionController(
+        tokens: FakeTokenStorage(),
+        settings: saved,
+      );
+
+      await saved.setPlacementStatus('{}');
+      await session.signIn(
+        const AuthTokens(accessToken: 'a', refreshToken: 'r'),
+      );
+      expect(saved.placementStatus, isNull);
+
+      await saved.setPlacementStatus('{}');
+      await session.signOut();
+      expect(saved.placementStatus, isNull);
+    });
+  });
 }

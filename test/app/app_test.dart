@@ -9,6 +9,7 @@ import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
@@ -23,6 +24,8 @@ import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.da
 import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
+import 'package:englizia/features/placement/domain/repositories/placement_repository.dart';
+import 'package:englizia/features/placement/presentation/intro/pages/placement_intro_page.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
@@ -34,8 +37,10 @@ import 'package:go_router/go_router.dart';
 
 import '../helpers/fake_accounts.dart';
 import '../helpers/fake_http_adapter.dart';
+import '../helpers/fake_placement_repository.dart';
 import '../helpers/fake_settings_repository.dart';
 import '../helpers/fake_track_repository.dart';
+import '../helpers/fakes.dart';
 import '../helpers/platform_mocks.dart';
 import '../helpers/pump_app.dart';
 
@@ -397,6 +402,100 @@ void main() {
       expect(find.byType(FoundationPage), findsOneWidget);
     },
   );
+
+  group('the placement test\'s intro', () {
+    setUp(() {
+      sl
+        ..unregister<TrackRepository>()
+        ..registerLazySingleton<TrackRepository>(FakeTrackRepository.new)
+        ..unregister<SettingsRepository>()
+        ..registerLazySingleton<SettingsRepository>(FakeSettingsRepository.new)
+        ..unregister<PlacementRepository>()
+        ..registerLazySingleton<PlacementRepository>(
+          FakePlacementRepository.new,
+        )
+        ..unregister<ConnectivityService>()
+        ..registerLazySingleton<ConnectivityService>(
+          FakeConnectivityService.new,
+        );
+    });
+
+    Future<void> boot(WidgetTester tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await sl<AppSessionController>().bootstrap();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+    }
+
+    testWidgets('opens for a guest, who has a session', (tester) async {
+      await boot(tester);
+      await sl<AppSessionController>().signIn(guestTokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      GoRouter.of(
+        tester.element(find.byType(FoundationPage)),
+      ).go(AppRoutes.onboardingPlacement);
+      await tester.pump();
+      await tester.settleEntrance(const Duration(seconds: 2));
+      expect(find.byType(PlacementIntroPage), findsOneWidget);
+      expect(find.text('preparing_start_test'.tr()), findsOneWidget);
+    });
+
+    testWidgets('a guest reaches it from preparing', (tester) async {
+      await boot(tester);
+      GoRouter.of(tester.element(find.byType(WelcomePage))).go(
+        AppRoutes.onboardingPreparing,
+        extra: const PreparingArgs(
+          path: OnboardingPath(
+            audience: TrackAudience.self,
+            placementTest: true,
+          ),
+          session: guestTokens,
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 4));
+      expect(sl<AppSessionController>().status, SessionStatus.guest);
+
+      await tester.tap(find.text('preparing_start_test'.tr()));
+      await tester.pump();
+      await tester.settleEntrance(const Duration(seconds: 2));
+      expect(find.byType(PlacementIntroPage), findsOneWidget);
+      expect(find.byType(WelcomePage), findsNothing);
+    });
+
+    testWidgets('a guest\'s skip goes home', (tester) async {
+      await boot(tester);
+      await sl<AppSessionController>().signIn(guestTokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      GoRouter.of(
+        tester.element(find.byType(FoundationPage)),
+      ).go(AppRoutes.onboardingPlacement);
+      await tester.pump();
+      await tester.settleEntrance(const Duration(seconds: 2));
+
+      await tester.tap(find.text('placement_skip_plain'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(FoundationPage), findsOneWidget);
+    });
+
+    testWidgets('with no session, it sends to welcome', (tester) async {
+      await boot(tester);
+      GoRouter.of(
+        tester.element(find.byType(WelcomePage)),
+      ).go(AppRoutes.onboardingPlacement);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(PlacementIntroPage), findsNothing);
+      expect(find.byType(WelcomePage), findsOneWidget);
+    });
+  });
 
   testWidgets('a guest who creates an account keeps it and stays home', (
     tester,

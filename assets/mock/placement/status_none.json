@@ -2,6 +2,7 @@
   "statusCode": 200,
   "message": "Data retrieved successfully",
   "data": {
+    "enrollmentId": "enr_general",
     "state": "none"
   },
   "error": null,

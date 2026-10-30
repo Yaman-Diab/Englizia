@@ -11,6 +11,10 @@ abstract interface class PlacementRemoteDataSource {
   Future<PlacementSummaryModel> getSummary();
 
   Future<PlacementStatusModel> getStatus();
+
+  Future<void> restartTest();
+
+  Future<void> deferTest(String enrollmentId);
 }
 
 final class PlacementRemoteDataSourceImpl implements PlacementRemoteDataSource {
@@ -29,6 +33,16 @@ final class PlacementRemoteDataSourceImpl implements PlacementRemoteDataSource {
       PlacementStatusModel.fromJson(
         asJsonMap(await _client.get(ApiEndpoints.placementStatus)),
       );
+
+  @override
+  Future<void> restartTest() =>
+      _client.post(ApiEndpoints.placementAttempts, data: {'restart': true});
+
+  @override
+  Future<void> deferTest(String enrollmentId) => _client.patch(
+    ApiEndpoints.enrollment(enrollmentId),
+    data: {'placement_state': 'deferred'},
+  );
 }
 
 /// Mock mode (`env/mock.json`): the contract's examples from the bundled
@@ -67,4 +81,10 @@ final class PlacementFakeDataSource implements PlacementRemoteDataSource {
     );
     return PlacementStatusModel.fromJson(asJsonMap(ApiClient.unwrap(body)));
   }
+
+  @override
+  Future<void> restartTest() => Future<void>.delayed(latency);
+
+  @override
+  Future<void> deferTest(String enrollmentId) => Future<void>.delayed(latency);
 }

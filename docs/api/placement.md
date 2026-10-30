@@ -39,6 +39,8 @@ The common errors (`docs/api/README.md`). With no published test version, `404` 
 
 Where this account stands with the test, for the test's intro (S §12.2). Needs a session, a guest's or a member's.
 
+Every state also carries `enrollmentId`, the learner's enrollment in the track, which the app needs to put the test off. **The app assumes this field**: nothing else gives it the id.
+
 | `state` | Other fields | Screen |
 |---|---|---|
 | `none` | — | First test |
@@ -48,14 +50,24 @@ Where this account stands with the test, for the test's intro (S §12.2). Needs 
 
 The server counts the days, as it knows the wait (30 days by default, from the panel) and its clock is the one that counts. A state the app doesn't know reads as `none`, since the server still decides what starting means. A known state with its fields missing is an error.
 
+The app saves the last response on the phone, with when it was saved. With no connection the intro shows that state, adding the days passed to `daysSinceResult` and taking them from `daysUntilRetake` (never under 1: only the server can say the wait is over). It is forgotten when a session starts or ends, so it never reaches another account.
+
 Status: **proposed**, mock (`assets/mock/placement/status_*.json`).
 
-## Still to agree, with the questions screen
+## `POST /api/v1/app/placement/attempts`
 
-- Starting over: dropping the unfinished test, so the next start begins a new one.
-- Skipping («ابدأ من البداية دون اختبار»): placing the learner at the track's first level, with the test still available from "Me" (STATUS D-049).
+«ابدأ من جديد»: `{ "restart": true }` throws away the unfinished test, and the questions then begin a new one. The app ignores the response for now; the questions screen will define what it needs from it.
+
+Status: given by the owner from the backend guide, **unconfirmed** by the backend developer, mock.
+
+## `PATCH /api/v1/app/enrollments/{id}`
+
+«ابدأ من البداية دون اختبار»: `{ "placement_state": "deferred" }` starts the learner from the track's first level, with the test still available from "Me". The app then goes home. `{id}` is `enrollmentId` from the status above.
+
+Status: given by the owner from the backend guide, **unconfirmed** by the backend developer, mock.
 
 ## Questions for the backend team
 
 1. Confirm the path and field names, and that it is available without a token.
 2. Confirm `stages` counts the mandatory stages only, and the error for "no published version".
+3. Confirm the two actions above, with these details the app assumed: the `/api/v1/app/` prefix on both paths; where `enrollmentId` comes from (assumed: the status response); and `placement_state`, which is snake_case where every other field in the API is camelCase.

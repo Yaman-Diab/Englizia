@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:englizia/core/logging/app_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,6 +13,7 @@ final class SettingsStorageService {
   static const _installationIdKey = 'app.installation_id';
   static const _lastSignInKey = 'account.last_sign_in';
   static const _deviceIdKey = 'account.device_id';
+  static const _placementStatusKey = 'account.placement_status';
 
   final SharedPreferences _prefs;
 
@@ -43,6 +45,28 @@ final class SettingsStorageService {
 
   Future<void> setDeviceId(String id) async {
     await _prefs.setString(_deviceIdKey, id);
+  }
+
+  /// The last placement status the server sent, as JSON, for the test's
+  /// intro while offline. A level and some counts: nothing that names anyone.
+  String? get placementStatus => _prefs.getString(_placementStatusKey);
+
+  Future<void> setPlacementStatus(String json) async {
+    await _prefs.setString(_placementStatusKey, json);
+  }
+
+  Future<void> clearPlacementStatus() async {
+    await _prefs.remove(_placementStatusKey);
+  }
+
+  /// Forgets what belongs to the account in use, when another may follow.
+  /// Never fails its caller: starting or ending a session must go on.
+  Future<void> clearAccountData() async {
+    try {
+      await clearPlacementStatus();
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Clearing account data failed');
+    }
   }
 
   /// A random id for this install, made on first use. Not personal: the

@@ -14,7 +14,7 @@ void registerPlacementDependencies(GetIt sl) {
           : PlacementRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<PlacementRepository>(
-      () => PlacementRepositoryImpl(sl()),
+      () => PlacementRepositoryImpl(sl(), settings: sl()),
     )
     ..registerFactory(() => PlacementIntroCubit(sl(), sl(), sl(), sl()));
 }

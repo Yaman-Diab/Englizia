@@ -5,10 +5,10 @@ import 'package:englizia/features/placement/domain/entities/placement_status.dar
 /// docs/api/placement.md.
 // ASSUMPTION(api): field names proposed, not confirmed (docs/api/placement.md).
 final class PlacementStatusModel {
-  const PlacementStatusModel(this.entity);
+  const PlacementStatusModel(this.entity, {required this.json});
 
   factory PlacementStatusModel.fromJson(Map<String, Object?> json) =>
-      PlacementStatusModel(switch (json.readString('state')) {
+      PlacementStatusModel(json: json, switch (json.readString('state')) {
         'inProgress' => PlacementInProgress(
           stage: _require(json.readInt('stage')),
           question: _require(json.readInt('question')),
@@ -29,4 +29,10 @@ final class PlacementStatusModel {
       value ?? (throw const FormatException('Placement status is incomplete'));
 
   final PlacementStatus entity;
+
+  /// As received, to keep on the phone.
+  final Map<String, Object?> json;
+
+  /// The learner's enrollment in the track, which putting the test off changes.
+  String? get enrollmentId => json.readString('enrollmentId');
 }
