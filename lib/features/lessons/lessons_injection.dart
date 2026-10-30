@@ -1,4 +1,5 @@
 import 'package:englizia/core/config/app_config.dart';
+import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
@@ -19,4 +20,7 @@ void registerLessonDependencies(GetIt sl) {
     ..registerFactoryParam<ExerciseCubit, String, void>(
       (lessonId, _) => ExerciseCubit(sl(), sl(), sl(), lessonId: lessonId),
     );
+  sl<AppSessionController>().onLeaving(
+    () => sl<LessonRepository>().sendSaved(),
+  );
 }

@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
@@ -14,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fake_lesson_repository.dart';
+import '../../../helpers/fakes.dart';
 
 class _Remote implements LessonRemoteDataSource {
   final sent = <Map<String, Object?>>[];
@@ -38,6 +41,11 @@ const _answer = ExerciseAnswer(
   optionId: 'o2',
   hinted: true,
 );
+
+const _memberTokens = AuthTokens(accessToken: 'a', refreshToken: 'r');
+
+AppSessionController _session(SettingsStorageService settings) =>
+    AppSessionController(tokens: FakeTokenStorage(), settings: settings);
 
 void main() {
   group('the example lesson', () {
@@ -254,6 +262,30 @@ void main() {
       await repository.saveAnswer(_answer);
 
       await settings.clearAccountData();
+
+      expect(settings.lessonProgress, isNull);
+    });
+
+    test('a guest who becomes a member keeps what was not sent', () async {
+      remote.offline = true;
+      await repository.saveAnswer(_answer);
+      await repository.saveProgress('les', const ExerciseProgress(position: 2));
+      await settle();
+
+      await _session(settings).upgrade(_memberTokens);
+
+      expect(repository.progress('les').position, 2);
+      remote.offline = false;
+      await repository.sendSaved();
+      expect(remote.sent, hasLength(1));
+    });
+
+    test('another account starts clean', () async {
+      remote.offline = true;
+      await repository.saveAnswer(_answer);
+      await settle();
+
+      await _session(settings).signIn(_memberTokens);
 
       expect(settings.lessonProgress, isNull);
     });
