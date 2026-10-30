@@ -110,23 +110,32 @@ void main() {
 
   test('no visible text is hardcoded in Dart', () {
     final arabic = RegExp(r'[؀-ۿ]');
-    // Text('literal') unless the literal is a key followed by .tr( / .plural(
-    final textLiteral = RegExp(
-      r'''\bText\(\s*['"]([^'"]*)['"](\s*\.\s*(?:tr|plural)\()?''',
+    // Text('literal') or a visible argument (tooltip: 'literal'), unless the
+    // literal is a key followed by .tr( / .plural(. The literal may sit on the
+    // next line, as dart format puts a long one.
+    final visibleLiteral = RegExp(
+      r'''(?:\bText\(|\b(?:tooltip|hintText|labelText|semanticsLabel|semanticLabel|message|label):)'''
+      r'''\s*['"]([^'"]*)['"](\s*\.\s*(?:tr|plural)\()?''',
     );
+    // '$days' or '@${domain}' shows a value, not a sentence.
+    final interpolation = RegExp(r'\$(?:\w+|\{[^}]*\}?)');
     final letter = RegExp('[A-Za-z]');
     final violations = <String>[];
     for (final file in dartFiles) {
-      final lines = file.readAsLinesSync();
+      final source = file.readAsStringSync();
+      final lines = source.split('\n');
       for (var i = 0; i < lines.length; i++) {
         final line = lines[i];
-        if (line.trimLeft().startsWith('//')) continue;
-        final hardcoded = textLiteral
-            .allMatches(line)
-            .any((m) => m.group(2) == null && letter.hasMatch(m.group(1)!));
-        if (arabic.hasMatch(line) || hardcoded) {
+        if (!line.trimLeft().startsWith('//') && arabic.hasMatch(line)) {
           violations.add('${file.path}:${i + 1}');
         }
+      }
+      for (final match in visibleLiteral.allMatches(source)) {
+        final literal = match.group(1)!.replaceAll(interpolation, '');
+        if (match.group(2) != null || !letter.hasMatch(literal)) continue;
+        final index = source.substring(0, match.start).split('\n').length - 1;
+        if (lines[index].trimLeft().startsWith('//')) continue;
+        violations.add('${file.path}:${index + 1}');
       }
     }
     expect(violations, isEmpty);
