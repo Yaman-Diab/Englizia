@@ -2,10 +2,12 @@ import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
+import 'package:englizia/features/account/domain/entities/password_link.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
 import 'package:englizia/features/account/presentation/check_email/cubit/check_email_cubit.dart';
 import 'package:englizia/features/account/presentation/forgot_password/cubit/forgot_password_cubit.dart';
+import 'package:englizia/features/account/presentation/new_password/cubit/new_password_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:flutter/foundation.dart';
@@ -25,6 +27,9 @@ void registerAccountDependencies(GetIt sl) {
     ..registerFactory(() => AccountCubit(sl(), sl()))
     ..registerFactoryParam<ForgotPasswordCubit, String, void>(
       (email, _) => ForgotPasswordCubit(sl(), email: email),
+    )
+    ..registerFactoryParam<NewPasswordCubit, PasswordLink, void>(
+      (link, _) => NewPasswordCubit(sl(), link: link),
     )
     ..registerFactoryParam<CheckEmailCubit, String, void>(
       (email, _) => CheckEmailCubit(sl(), sl(), email: email),

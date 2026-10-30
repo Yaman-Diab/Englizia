@@ -6,6 +6,7 @@ import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
+import 'package:englizia/features/account/data/models/reset_password_model.dart';
 import 'package:englizia/features/account/data/models/sign_in_model.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
@@ -85,6 +86,26 @@ final class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Result<void>> requestPasswordReset(String email) =>
       guard(() => _remote.requestPasswordReset(email.trim()));
+
+  @override
+  Future<Result<void>> verifyPasswordLink(String token) =>
+      guard(() => _remote.verifyPasswordLink(token));
+
+  @override
+  Future<Result<AuthTokens?>> resetPassword({
+    required String token,
+    required String password,
+  }) => guard(() async {
+    final tokens = await _remote.resetPassword(
+      ResetPasswordModel.request(
+        token: token,
+        password: password,
+        deviceId: savedDeviceId(),
+        platform: devicePlatform,
+      ),
+    );
+    return tokens == null ? null : _remembered(tokens);
+  });
 
   // ASSUMPTION(api): the upgrade takes register's fields (docs/api/auth.md).
   @override

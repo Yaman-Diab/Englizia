@@ -70,6 +70,13 @@ class _RecordingDataSource implements AccountRemoteDataSource {
   Future<void> requestPasswordReset(String email) async {}
 
   @override
+  Future<void> verifyPasswordLink(String token) async {}
+
+  @override
+  Future<AuthTokens?> resetPassword(Map<String, Object?> request) =>
+      createAccount(request);
+
+  @override
   Future<void> logOut(String refreshToken) async {
     if (fail) throw const NetworkException('connectionError');
   }

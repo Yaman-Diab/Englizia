@@ -280,5 +280,16 @@
   "check_email_resent": "We sent a new link",
   "check_email_no_mail_app": "We couldn't find a mail app. Open your email in the browser.",
   "error_storage": "Couldn't save on this phone. Try again.",
-  "preparing_save_failed": "Couldn't save your account on this phone"
+  "preparing_save_failed": "Couldn't save your account on this phone",
+  "common_close": "Close",
+  "error_link_expired": "This link has expired",
+  "new_password_title": "Set a new password",
+  "new_password_for": "For",
+  "new_password_field": "New password",
+  "new_password_submit": "Save password",
+  "new_password_verifying": "Checking the link",
+  "new_password_expired_title": "This link has expired",
+  "new_password_expired_body": "A link works once, for one hour. Ask for a new one.",
+  "new_password_new_link": "Send a new link",
+  "new_password_changed_title": "Password changed"
 }

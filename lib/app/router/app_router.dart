@@ -9,11 +9,14 @@ import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
+import 'package:englizia/features/account/domain/entities/password_link.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
 import 'package:englizia/features/account/presentation/check_email/cubit/check_email_cubit.dart';
 import 'package:englizia/features/account/presentation/check_email/pages/check_email_page.dart';
 import 'package:englizia/features/account/presentation/forgot_password/cubit/forgot_password_cubit.dart';
 import 'package:englizia/features/account/presentation/forgot_password/pages/forgot_password_page.dart';
+import 'package:englizia/features/account/presentation/new_password/cubit/new_password_cubit.dart';
+import 'package:englizia/features/account/presentation/new_password/pages/new_password_page.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
@@ -390,18 +393,28 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.forgotPassword,
-        builder: (context, state) => BlocProvider(
-          create: (_) => sl<ForgotPasswordCubit>(
-            param1: state.extra is String ? state.extra! as String : '',
-          ),
-          child: ForgotPasswordPage(
-            onSent: (email) =>
-                context.push(AppRoutes.forgotPasswordSent, extra: email),
-            // Google is on sign-in, the screen before this one.
-            onGoogle: () => context.pop(),
-            onBack: () => context.pop(),
-          ),
-        ),
+        builder: (context, state) {
+          // Sign-in hands over its email; an expired link, the link's.
+          final link = state.extra is PasswordLink
+              ? state.extra! as PasswordLink
+              : null;
+          return BlocProvider(
+            create: (_) => sl<ForgotPasswordCubit>(
+              param1:
+                  link?.email ??
+                  (state.extra is String ? state.extra! as String : ''),
+            ),
+            child: ForgotPasswordPage(
+              onSent: (email) =>
+                  context.push(AppRoutes.forgotPasswordSent, extra: email),
+              // Google is on sign-in: the screen before this one, unless a
+              // link led here.
+              onGoogle: () =>
+                  link == null ? context.pop() : context.push(AppRoutes.signIn),
+              onBack: () => context.pop(),
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.forgotPasswordSent,
@@ -411,6 +424,34 @@ GoRouter createAppRouter(AppSessionController session) {
           create: (_) => sl<CheckEmailCubit>(param1: state.extra! as String),
           child: CheckEmailPage(onChange: () => context.pop()),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.newPassword,
+        builder: (context, state) {
+          // The link in the email is the one way in, so this route alone
+          // reads its arguments from the URL. A second link replaces the first.
+          final query = state.uri.queryParameters;
+          final link = PasswordLink(
+            token: query['token'] ?? '',
+            email: query['email'] ?? '',
+          );
+          return BlocProvider(
+            key: ValueKey(link),
+            create: (_) => sl<NewPasswordCubit>(param1: link)..verify(),
+            child: NewPasswordPage(
+              onClose: () => context.go(AppRoutes.home),
+              onNewLink: () =>
+                  context.push(AppRoutes.forgotPassword, extra: link),
+              onSaved: (_) => context.go(AppRoutes.passwordChanged),
+            ),
+          );
+        },
+      ),
+      // "Password changed" is not built yet.
+      GoRoute(
+        path: AppRoutes.passwordChanged,
+        builder: (_, _) =>
+            PendingPage(title: 'new_password_changed_title'.tr()),
       ),
     ],
   );

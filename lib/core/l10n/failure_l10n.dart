@@ -11,6 +11,7 @@ extension FailureL10n on Failure {
     ForbiddenFailure() => 'error_forbidden'.tr(),
     NotFoundFailure() => 'error_not_found'.tr(),
     ConflictFailure() => 'error_conflict'.tr(),
+    LinkExpiredFailure() => 'error_link_expired'.tr(),
     ValidationFailure() => 'error_validation'.tr(),
     RateLimitFailure() => 'error_rate_limit'.tr(),
     ServerFailure() => 'error_server'.tr(),

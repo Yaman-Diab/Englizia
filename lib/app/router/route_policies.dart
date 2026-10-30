@@ -24,8 +24,11 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.onboardingKidWelcome: RoutePolicy.public,
   AppRoutes.signIn: RoutePolicy.withoutAccount,
   AppRoutes.signInWithProvider: RoutePolicy.withoutAccount,
-  AppRoutes.forgotPassword: RoutePolicy.withoutAccount,
-  AppRoutes.forgotPasswordSent: RoutePolicy.withoutAccount,
+  // A recovery link can open these on a phone that is signed in.
+  AppRoutes.forgotPassword: RoutePolicy.public,
+  AppRoutes.forgotPasswordSent: RoutePolicy.public,
+  AppRoutes.newPassword: RoutePolicy.public,
+  AppRoutes.passwordChanged: RoutePolicy.public,
   AppRoutes.signUp: RoutePolicy.withoutAccount,
   AppRoutes.signUpWithProvider: RoutePolicy.withoutAccount,
   AppRoutes.legalTerms: RoutePolicy.public,

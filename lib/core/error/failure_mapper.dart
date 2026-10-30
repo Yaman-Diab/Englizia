@@ -59,6 +59,10 @@ abstract final class FailureMapper {
         code: code,
         serverMessage: message,
       ),
+      ApiStatusCodes.gone => LinkExpiredFailure(
+        code: code,
+        serverMessage: message,
+      ),
       ApiStatusCodes.tooManyRequests => RateLimitFailure(
         retryAfter: e.retryAfter,
         code: code,

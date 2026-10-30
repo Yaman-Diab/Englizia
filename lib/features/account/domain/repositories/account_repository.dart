@@ -31,6 +31,19 @@ abstract interface class AccountRepository {
   /// which emails are registered.
   Future<Result<void>> requestPasswordReset(String email);
 
+  /// Checks a recovery link before its form shows. One out of date or used
+  /// already fails with `LinkExpiredFailure`.
+  Future<Result<void>> verifyPasswordLink(String token);
+
+  /// Sets the new password from a recovery link, which ends the account's
+  /// other sessions. Returns the new session, or null when the password
+  /// changed but the server started none. Fails with `LinkExpiredFailure`
+  /// or, for a password it refuses, `ValidationFailure` naming `password`.
+  Future<Result<AuthTokens?>> resetPassword({
+    required String token,
+    required String password,
+  });
+
   /// Turns this phone's guest account into a member account with [account]'s
   /// email and password, keeping its progress (ADR 10). Fails like
   /// [createAccount].

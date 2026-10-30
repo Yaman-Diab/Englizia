@@ -105,7 +105,23 @@ Step 1 of password recovery (S §5.2): `{ "email": "user@example.com" }`, sent w
 
 "Check your email" sends the same request again after a growing wait the app keeps (1, 2, then 5 minutes, S §5.2), so the server's own limit should allow at least that. The link must open the app directly (App Links and Universal Links, not Firebase Dynamic Links, which are shut down).
 
-Status: **proposed**, mock (always sent). The next steps (the link opening the app, the new password) come with their screens.
+Status: **proposed**, mock (always sent).
+
+## The link in the recovery email
+
+`https://engleazia.com/reset-password?token=<token>&email=<email>` opens the app's "set a new password" screen (S §5.2), which shows the email while the token is checked, and hands it to "forgot your password" when the link has expired. A link without a token counts as expired; without an email the screen only leaves that line out. Host and path are **proposed** (`android/app/src/main/AndroidManifest.xml`, STATUS D-024): the server needs `/.well-known/assetlinks.json` on that host for Android and an apple-app-site-association file for iOS. A browser that opens the link without the app needs a page of its own, the backend's to decide.
+
+## `POST /api/v1/auth/password/reset/verify`
+
+`{ "token": "..." }`, sent without a session token, when the screen opens and before the field shows. `200`, empty `data`, for a good link. `410` for one expired, used already or unknown: the same answer for all three.
+
+Status: **proposed**, mock (any token but `expired` is good).
+
+## `POST /api/v1/auth/password/reset`
+
+`{ "token", "password", "deviceId", "platform" }`, sent without a session token. The token works once. Success ends the account's other sessions and answers with a `TokenResponse`, the session that signs the learner in on this phone; a `200` with no tokens means the password changed but no session started, and the learner signs in by hand. `410` as above, `400` (`validation.failed`, naming `password`) for a password the server refuses.
+
+Status: **proposed**, mock (answers like register; the token `offline` fails with no connection).
 
 ## `POST /api/v1/auth/logout`
 

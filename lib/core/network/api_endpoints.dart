@@ -14,6 +14,10 @@ abstract final class ApiEndpoints {
   static const upgradeGuest = '/api/v1/auth/guest/upgrade';
   // ASSUMPTION(api): docs/api/auth.md.
   static const forgotPassword = '/api/v1/auth/password/forgot';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const verifyPasswordLink = '/api/v1/auth/password/reset/verify';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const resetPassword = '/api/v1/auth/password/reset';
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static const tracks = '/api/v1/app/tracks';

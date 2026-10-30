@@ -15,11 +15,15 @@ class AuthScaffold extends StatelessWidget {
     required this.onBack,
     required this.body,
     required this.footer,
+    this.closes = false,
     super.key,
   });
 
   /// Null while something is being sent.
   final VoidCallback? onBack;
+
+  /// A screen opened from a link has nothing to go back to: it closes.
+  final bool closes;
   final Widget body;
   final Widget footer;
 
@@ -53,8 +57,10 @@ class AuthScaffold extends StatelessWidget {
                 alignment: AlignmentDirectional.centerStart,
                 child: IconButton(
                   onPressed: onBack,
-                  tooltip: 'common_back'.tr(),
-                  icon: const Icon(Icons.arrow_back_rounded),
+                  tooltip: closes ? 'common_close'.tr() : 'common_back'.tr(),
+                  icon: Icon(
+                    closes ? Icons.close_rounded : Icons.arrow_back_rounded,
+                  ),
                 ),
               ),
             ),

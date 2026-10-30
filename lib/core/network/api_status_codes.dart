@@ -7,6 +7,7 @@ abstract final class ApiStatusCodes {
   static const forbidden = 403;
   static const notFound = 404;
   static const conflict = 409;
+  static const gone = 410;
   static const unprocessableEntity = 422;
   static const tooManyRequests = 429;
   static const internalServerError = 500;

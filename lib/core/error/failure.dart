@@ -44,6 +44,11 @@ final class ConflictFailure extends Failure {
   const ConflictFailure({super.code, super.serverMessage});
 }
 
+/// A link from an email that is out of date or was used already.
+final class LinkExpiredFailure extends Failure {
+  const LinkExpiredFailure({super.code, super.serverMessage});
+}
+
 final class ValidationFailure extends Failure {
   const ValidationFailure({
     this.fieldErrors = const {},

@@ -267,7 +267,7 @@ class _Message extends StatelessWidget {
       FieldMessageTone.success => (AppIcon.checkCircle, colors.success.text),
     };
     return Semantics(
-      liveRegion: message.tone == FieldMessageTone.error,
+      liveRegion: message.tone != FieldMessageTone.hint,
       child: Row(
         children: [
           AnimatedSwitcher(
