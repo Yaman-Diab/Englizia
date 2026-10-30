@@ -129,7 +129,7 @@ void main() {
         BlocProvider.value(
           value: cubit,
           child: ForgotPasswordPage(
-            onSent: sent.add,
+            onSent: (email) async => sent.add(email),
             onGoogle: () => googles++,
             onBack: () {},
           ),
@@ -223,6 +223,27 @@ void main() {
       expect(google.onPressed, isNull);
       accounts.gate!.complete();
       await settle(tester);
+    });
+
+    testWidgets('coming back from the next step opens the form again', (
+      tester,
+    ) async {
+      final cubit = await pumpPage(tester, email: 'user@example.com');
+      await cubit.submit();
+      await tester.pump();
+      expect(send(tester).isDone, isTrue);
+
+      // The next step was opened and closed again.
+      await tester.pump(AppMotion.verySlow);
+      await tester.pump();
+      expect(sent, ['user@example.com']);
+      expect(cubit.state.sent, isFalse);
+      expect(send(tester).isDone, isFalse);
+      expect(send(tester).onPressed, isNotNull);
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).readOnly,
+        isFalse,
+      );
     });
 
     testWidgets('Google users go back to sign-in', (tester) async {

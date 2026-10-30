@@ -103,6 +103,8 @@ Status: **proposed**, mock (the mock answers like register). The app never upgra
 
 Step 1 of password recovery (S §5.2): `{ "email": "user@example.com" }`, sent without a token. The server mails a link to set a new password (valid one hour, once) **if** the email has an account, and answers the same way either way (`202`, empty `data`), so no screen can tell which emails are registered. It limits requests per email and per device; the app treats `429` as sent too. Other errors (connection, server) show a retry.
 
+"Check your email" sends the same request again after a growing wait the app keeps (1, 2, then 5 minutes, S §5.2), so the server's own limit should allow at least that. The link must open the app directly (App Links and Universal Links, not Firebase Dynamic Links, which are shut down).
+
 Status: **proposed**, mock (always sent). The next steps (the link opening the app, the new password) come with their screens.
 
 ## `POST /api/v1/auth/logout`

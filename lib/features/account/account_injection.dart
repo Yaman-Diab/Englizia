@@ -4,6 +4,7 @@ import 'package:englizia/features/account/data/datasources/account_remote_data_s
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
+import 'package:englizia/features/account/presentation/check_email/cubit/check_email_cubit.dart';
 import 'package:englizia/features/account/presentation/forgot_password/cubit/forgot_password_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
@@ -24,6 +25,9 @@ void registerAccountDependencies(GetIt sl) {
     ..registerFactory(() => AccountCubit(sl(), sl()))
     ..registerFactoryParam<ForgotPasswordCubit, String, void>(
       (email, _) => ForgotPasswordCubit(sl(), email: email),
+    )
+    ..registerFactoryParam<CheckEmailCubit, String, void>(
+      (email, _) => CheckEmailCubit(sl(), sl(), email: email),
     )
     ..registerFactoryParam<SignInCubit, String, void>(
       (email, _) => SignInCubit(sl(), email: email),

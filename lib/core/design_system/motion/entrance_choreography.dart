@@ -42,3 +42,10 @@ abstract final class FormEntrance {
 
   static Duration field(int index) => firstField + fieldStagger * index;
 }
+
+/// The mail scene (design "Check Email"): the envelope lands at once, then
+/// the letter slides up, then the guide peeks out.
+abstract final class MailSceneEntrance {
+  static const letter = Duration(milliseconds: 380);
+  static const guide = Duration(milliseconds: 580);
+}

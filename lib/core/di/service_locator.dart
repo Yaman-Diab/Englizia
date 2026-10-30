@@ -3,6 +3,7 @@ import 'package:englizia/core/audio/device_volume.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/mail/mail_app.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/app_headers_interceptor.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
@@ -68,6 +69,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     // Silent until sounds are turned on (ADR 9).
     ..registerLazySingleton<SoundPlayer>(() => const SilentSoundPlayer())
     ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
+    ..registerLazySingleton<MailApp>(() => const PlatformMailApp())
     ..registerFactory(() => SettingsCubit(sl()));
 }
 

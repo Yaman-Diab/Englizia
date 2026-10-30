@@ -314,5 +314,14 @@
   "forgot_google_hint": "تدخل بحساب Google؟ لا تحتاج كلمة مرور.",
   "forgot_google": "ادخل بـ Google",
   "forgot_submit": "أرسل الرابط",
-  "check_email_title": "تحقق من بريدك"
+  "check_email_title": "تحقق من بريدك",
+  "check_email_body": "إن كان لهذا البريد حساب، أرسلنا إليه رابطًا لتعيين كلمة مرور جديدة:",
+  "check_email_change": "تغيير",
+  "check_email_valid": "الرابط صالح لمدة ساعة.",
+  "check_email_spam": "لم تجده؟ ابحث في مجلد الرسائل غير المرغوبة {spam}.",
+  "check_email_open": "افتح تطبيق البريد",
+  "check_email_resend": "أعد الإرسال",
+  "check_email_resend_after": "أعد الإرسال بعد {time}",
+  "check_email_resent": "أرسلنا رابطًا جديدًا",
+  "check_email_no_mail_app": "لم نجد تطبيق بريد. افتح بريدك من المتصفح."
 }

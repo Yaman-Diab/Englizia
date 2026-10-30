@@ -29,8 +29,9 @@ class ForgotPasswordPage extends StatefulWidget {
     super.key,
   });
 
-  /// The link was asked for: opens "check your email" with the address.
-  final ValueChanged<String> onSent;
+  /// The link was asked for: opens "check your email" with the address,
+  /// and completes when the learner comes back.
+  final Future<void> Function(String email) onSent;
 
   /// Back to sign-in, where Google is.
   final VoidCallback onGoogle;
@@ -75,7 +76,9 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
 
   Future<void> _moveOn(String email) async {
     await Future<void>.delayed(_doneHold);
-    if (mounted) widget.onSent(email.trim());
+    if (!mounted) return;
+    await widget.onSent(email.trim());
+    if (mounted) context.read<ForgotPasswordCubit>().reopened();
   }
 
   @override
