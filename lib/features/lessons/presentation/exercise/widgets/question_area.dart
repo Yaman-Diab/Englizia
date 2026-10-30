@@ -7,82 +7,13 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/listening_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/design_system/widgets/clip_failed_view.dart';
 import 'package:englizia/core/design_system/widgets/clip_progress_ring.dart';
-import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 const _english = Locale('en');
-
-/// A sentence with its blank. The chosen word takes the blank's place, so the
-/// whole sentence reads before checking; a long one wraps inside it.
-class BlankSentence extends StatelessWidget {
-  const BlankSentence({required this.question, this.word, super.key});
-
-  final Exercise question;
-
-  /// The option chosen, if any.
-  final String? word;
-
-  static const _blankWidth = 64.0;
-  static const _blankHeight = 24.0;
-  static const _line = 2.0;
-  static final _punctuation = RegExp(r'^[.,?!;:]');
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final texts = context.texts;
-    final word = this.word;
-    // Punctuation sits against a chosen word, but leaves the blank room.
-    final gap = word != null && _punctuation.hasMatch(question.after)
-        ? ''
-        : ' ';
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Text.rich(
-        locale: _english,
-        TextSpan(
-          style: texts.reading.copyWith(color: colors.textPrimary),
-          children: [
-            TextSpan(text: '${question.before} '),
-            if (word == null)
-              WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: Semantics(
-                  label: 'placement_blank'.tr(),
-                  child: Container(
-                    width: _blankWidth,
-                    height: _blankHeight,
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(color: colors.border, width: _line),
-                      ),
-                    ),
-                  ),
-                ),
-              )
-            else
-              TextSpan(
-                text: word,
-                style: texts.reading.copyWith(
-                  // The strong weight of the same size: each weight has its
-                  // own family (ADR 5).
-                  fontFamily: texts.bodyStrong.fontFamily,
-                  color: colors.primary.text,
-                  decoration: TextDecoration.underline,
-                  decorationColor: colors.primaryStrong,
-                  decorationThickness: _line,
-                ),
-              ),
-            TextSpan(text: '$gap${question.after}'),
-          ],
-        ),
-      ),
-    );
-  }
-}
 
 /// The word of an image choice, with the button that says it.
 class SpokenWord extends StatelessWidget {
@@ -171,37 +102,11 @@ class ListeningPlayer extends StatelessWidget {
     final colors = context.colors;
     final cubit = context.read<ExerciseCubit>();
     if (state.audio == ExerciseAudio.failed) {
-      return Column(
-        children: [
-          Container(
-            width: _failed,
-            height: _failed,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.info.surface,
-              shape: BoxShape.circle,
-            ),
-            child: AppIconView(
-              AppIcon.volumeOff,
-              size: _failedIcon,
-              color: colors.info.fill,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              'placement_audio_failed'.tr(),
-              style: context.texts.bodyStrong.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: cubit.togglePlay,
-            child: Text('common_retry'.tr()),
-          ),
-        ],
+      return ClipFailedView(
+        circle: _failed,
+        iconSize: _failedIcon,
+        gap: AppSpacing.sm,
+        onRetry: cubit.togglePlay,
       );
     }
     final playing = state.audio == ExerciseAudio.playing;

@@ -333,7 +333,7 @@
   "placement_q_grammar": "Choose what completes the sentence",
   "placement_q_reading": "Read the text, then answer",
   "placement_q_listening": "Listen, then answer",
-  "placement_blank": "blank",
+  "question_blank": "blank",
   "placement_passage": "Reading text",
   "placement_dont_know": "I don't know",
   "placement_next": "Next",
@@ -353,7 +353,7 @@
     "two": "You listened twice",
     "other": "You listened {} times"
   },
-  "placement_audio_failed": "Couldn't play the sound",
+  "audio_failed": "Couldn't play the sound",
   "placement_finished_stage_1": "You finished the first stage",
   "placement_finished_stage_2": "You finished the second stage",
   "placement_next_stage": "{stage}: {questions}, {listening} of them.",

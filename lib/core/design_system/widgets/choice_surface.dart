@@ -13,6 +13,9 @@ enum ChoiceShape {
   pill,
 }
 
+/// What checking found, shown by color and the mark's icon together.
+enum ChoiceMark { correct, wrong }
+
 /// One answer of a mutually exclusive group (a radio): the selected look,
 /// press feedback and screen-reader semantics, around the caller's content.
 /// Disabled when [onTap] is null; [dashed] marks a choice that is not
@@ -26,6 +29,8 @@ class ChoiceSurface extends StatelessWidget {
     this.dashed = false,
     this.multiple = false,
     this.semanticLabel,
+    this.mark,
+    this.radius = AppRadius.lg,
     super.key,
   });
 
@@ -42,12 +47,24 @@ class ChoiceSurface extends StatelessWidget {
   /// Replaces what screen readers would read from [child].
   final String? semanticLabel;
 
+  /// Overrides the selected look once the answer is checked.
+  final ChoiceMark? mark;
+
+  /// Of a card.
+  final double radius;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final outline = context.scheme.outlineVariant;
+    final tone = switch (mark) {
+      ChoiceMark.correct => colors.success,
+      ChoiceMark.wrong => colors.error,
+      null => null,
+    };
     final pill = shape == ChoiceShape.pill;
     final side = switch ((selected, pill, dashed)) {
+      _ when tone != null => BorderSide(color: tone.fill, width: 2),
       (true, true, _) => BorderSide.none,
       (true, false, _) => BorderSide(color: colors.selection, width: 2),
       (false, _, true) => BorderSide.none,
@@ -56,7 +73,7 @@ class ChoiceSurface extends StatelessWidget {
     final ShapeBorder border = pill
         ? StadiumBorder(side: side)
         : RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.lg),
+            borderRadius: BorderRadius.circular(radius),
             side: side,
           );
 
@@ -65,6 +82,7 @@ class ChoiceSurface extends StatelessWidget {
         : ExcludeSemantics(child: child);
     content = Material(
       color: switch ((selected, pill)) {
+        _ when tone != null => tone.surface,
         (true, true) => colors.primaryStrong,
         (true, false) => colors.selectionSurface,
         (false, _) => colors.surface,
@@ -75,10 +93,7 @@ class ChoiceSurface extends StatelessWidget {
     );
     if (dashed) {
       content = CustomPaint(
-        foregroundPainter: _DashedBorderPainter(
-          color: outline,
-          radius: AppRadius.lg,
-        ),
+        foregroundPainter: _DashedBorderPainter(color: outline, radius: radius),
         child: content,
       );
     }
@@ -95,13 +110,14 @@ class ChoiceSurface extends StatelessWidget {
 
 /// The selection mark of a [ChoiceSurface]: a filled check when [selected],
 /// otherwise an empty ring (or nothing without [showRing]); a thinner ring
-/// marks a [multiple] choice. Pops in.
+/// marks a [multiple] choice. A [mark] shows what checking found. Pops in.
 class ChoiceCheck extends StatelessWidget {
   const ChoiceCheck({
     required this.selected,
     this.size = defaultSize,
     this.showRing = true,
     this.multiple = false,
+    this.mark,
     super.key,
   });
 
@@ -109,6 +125,7 @@ class ChoiceCheck extends StatelessWidget {
   final double size;
   final bool showRing;
   final bool multiple;
+  final ChoiceMark? mark;
 
   static const defaultSize = 24.0;
 
@@ -122,15 +139,21 @@ class ChoiceCheck extends StatelessWidget {
         switchInCurve: AppMotion.bounce,
         transitionBuilder: (child, animation) =>
             ScaleTransition(scale: animation, child: child),
-        child: selected
+        child: selected || mark != null
             ? DecoratedBox(
-                key: const ValueKey(true),
+                key: ValueKey(mark ?? true),
                 decoration: BoxDecoration(
-                  color: colors.selection,
+                  color: switch (mark) {
+                    ChoiceMark.correct => colors.success.fill,
+                    ChoiceMark.wrong => colors.error.fill,
+                    null => colors.selection,
+                  },
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.check_rounded,
+                  mark == ChoiceMark.wrong
+                      ? Icons.close_rounded
+                      : Icons.check_rounded,
                   size: size * 2 / 3,
                   color: colors.surface,
                 ),

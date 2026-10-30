@@ -82,6 +82,8 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - `test/core/design_system/theme_test.dart` pins identity values and checks WCAG contrast in light and dark.
 - Fonts: Readex Pro (UI, Arabic + Latin) and Andika (kids) through `google_fonts`, loaded from bundled files in `assets/fonts/` (runtime fetching off). Each weight is its own family, so weights come from roles (`bodyStrong`, `captionStrong`), never `copyWith(fontWeight:)`.
 
+Pieces shared by the placement test and the exercises live in core: `ClipPlayback` (one clip at a time, on `ClipPlayer`), `BlankSentence`, `ClipFailedView`, `ClipProgressRing`, `ListeningWaves`, and `ChoiceSurface`/`ChoiceCheck`, which also carry the marks of a checked answer (`ChoiceMark`).
+
 ## Localization
 
 - easy_localization, `assets/translations/{ar,en}.json`, flat snake_case keys prefixed by feature.

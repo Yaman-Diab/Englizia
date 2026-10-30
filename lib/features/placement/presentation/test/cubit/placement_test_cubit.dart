@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
@@ -158,23 +159,20 @@ final class PlacementTestState extends Equatable {
 /// a stage that ends offline only waits. A failed clip doesn't count as a
 /// listen; one stopped does, and so does one cut off by the stop sheet.
 class PlacementTestCubit extends Cubit<PlacementTestState> {
-  PlacementTestCubit(this._placement, this._player)
-    : super(const PlacementTestState());
+  PlacementTestCubit(this._placement, ClipPlayer player)
+    : _clip = ClipPlayback(player),
+      super(const PlacementTestState());
 
   final PlacementRepository _placement;
-  final ClipPlayer _player;
+  final ClipPlayback _clip;
   String _attemptId = '';
 
   /// The attempt in progress, whose result follows it.
   String get attemptId => _attemptId;
-  Timer? _clipEnd;
 
   /// The question whose answer is already kept, when closing its stage failed
   /// and the learner tries again.
   int? _keptIndex;
-
-  /// Changes with each question, so a clip still loading can't play on another.
-  var _clipToken = 0;
 
   Future<void> start() async {
     emit(state.copyWith(view: PlacementView.loading, failure: () => null));
@@ -220,7 +218,7 @@ class PlacementTestCubit extends Cubit<PlacementTestState> {
   }
 
   void _show(int index) {
-    _clipToken++;
+    _clip.stop();
     final question = state.questions[index];
     final used = _placement.playsUsed(_attemptId, question.id);
     emit(
@@ -351,23 +349,26 @@ class PlacementTestCubit extends Cubit<PlacementTestState> {
         return;
       case PlacementAudio.idle || PlacementAudio.failed:
         if (state.playsLeft <= 0) return;
-        final token = _clipToken;
         emit(state.copyWith(audio: PlacementAudio.loading));
-        final length = await _player.load(question.audioUrl);
-        if (isClosed || token != _clipToken) return;
-        if (length == null) {
-          emit(state.copyWith(audio: PlacementAudio.failed));
-          return;
-        }
-        emit(
-          state.copyWith(
-            audio: PlacementAudio.playing,
-            clipLength: length,
-            playCount: state.playCount + 1,
-          ),
+        final outcome = await _clip.start(
+          question.audioUrl,
+          onEnd: () => _endClip(counted: true),
         );
-        unawaited(_player.play());
-        _clipEnd = Timer(length, () => _endClip(counted: true));
+        if (isClosed) return;
+        switch (outcome) {
+          case ClipCancelled():
+            return;
+          case ClipUnavailable():
+            emit(state.copyWith(audio: PlacementAudio.failed));
+          case ClipPlaying(:final length):
+            emit(
+              state.copyWith(
+                audio: PlacementAudio.playing,
+                clipLength: length,
+                playCount: state.playCount + 1,
+              ),
+            );
+        }
     }
   }
 
@@ -375,12 +376,9 @@ class PlacementTestCubit extends Cubit<PlacementTestState> {
   Future<void> interrupt() => _endClip(counted: true);
 
   Future<void> _endClip({required bool counted}) async {
-    _clipToken++;
-    _clipEnd?.cancel();
-    _clipEnd = null;
+    _clip.stop();
     final question = state.question;
     if (state.audio != PlacementAudio.playing || question == null) return;
-    unawaited(_player.stop());
     final left = counted ? state.playsLeft - 1 : state.playsLeft;
     emit(
       state.copyWith(
@@ -399,8 +397,7 @@ class PlacementTestCubit extends Cubit<PlacementTestState> {
 
   @override
   Future<void> close() async {
-    _clipEnd?.cancel();
-    if (state.audio == PlacementAudio.playing) unawaited(_player.stop());
+    _clip.stop();
     return super.close();
   }
 }

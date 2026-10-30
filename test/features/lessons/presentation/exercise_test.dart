@@ -653,7 +653,7 @@ void main() {
       final subject = await pump(tester);
       await moveTo(tester, subject, 2);
 
-      expect(find.text('placement_audio_failed'.tr()), findsOneWidget);
+      expect(find.text('audio_failed'.tr()), findsOneWidget);
       await tester.tap(find.text("I'm going to the market."));
       await tester.pump();
       expect(subject.state.canCheck, isTrue);

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
@@ -132,23 +133,20 @@ final class ExerciseState extends Equatable {
 class ExerciseCubit extends Cubit<ExerciseState> {
   ExerciseCubit(
     this._lessons,
-    this._player,
+    ClipPlayer player,
     this._connectivity, {
     required this.lessonId,
-  }) : super(const ExerciseState());
+  }) : _clip = ClipPlayback(player),
+       super(const ExerciseState());
 
   /// "Slower" plays the same file at this speed (S §7.3).
   static const slowSpeed = .75;
 
   final LessonRepository _lessons;
-  final ClipPlayer _player;
+  final ClipPlayback _clip;
   final ConnectivityService _connectivity;
   final String lessonId;
   StreamSubscription<bool>? _connection;
-  Timer? _clipEnd;
-
-  /// Changes with each question and stop, so a clip still loading can't play.
-  var _clipToken = 0;
 
   Future<void> start() async {
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
@@ -284,49 +282,45 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   Future<void> _play({required bool slow}) async {
     final question = state.question;
     if (question == null || question.audioUrl.isEmpty) return;
-    final token = ++_clipToken;
     emit(state.copyWith(audio: ExerciseAudio.loading, slow: slow));
-    final length = await _player.load(question.audioUrl);
-    if (isClosed || token != _clipToken) return;
-    if (length == null) {
-      // Never stops the answer: the options stay open (S §7.1). An image
-      // choice has only its word's button, which simply goes quiet.
-      emit(
-        state.copyWith(
-          audio: question.kind == ExerciseKind.listeningChoice
-              ? ExerciseAudio.failed
-              : ExerciseAudio.idle,
-          slow: false,
-        ),
-      );
-      return;
-    }
-    final played = slow
-        ? Duration(microseconds: (length.inMicroseconds / slowSpeed).round())
-        : length;
-    emit(
-      state.copyWith(
-        audio: ExerciseAudio.playing,
-        clipLength: played,
-        playCount: state.playCount + 1,
-      ),
+    final outcome = await _clip.start(
+      question.audioUrl,
+      speed: slow ? slowSpeed : 1,
+      onEnd: () {
+        if (!isClosed) {
+          emit(state.copyWith(audio: ExerciseAudio.idle, slow: false));
+        }
+      },
     );
-    unawaited(_player.play(speed: slow ? slowSpeed : 1));
-    _clipEnd = Timer(played, () {
-      if (!isClosed) {
-        emit(state.copyWith(audio: ExerciseAudio.idle, slow: false));
-      }
-    });
+    if (isClosed) return;
+    switch (outcome) {
+      case ClipCancelled():
+        return;
+      case ClipUnavailable():
+        // Never stops the answer: the options stay open (S §7.1). An image
+        // choice has only its word's button, which simply goes quiet.
+        emit(
+          state.copyWith(
+            audio: question.kind == ExerciseKind.listeningChoice
+                ? ExerciseAudio.failed
+                : ExerciseAudio.idle,
+            slow: false,
+          ),
+        );
+      case ClipPlaying(:final length):
+        emit(
+          state.copyWith(
+            audio: ExerciseAudio.playing,
+            clipLength: length,
+            playCount: state.playCount + 1,
+          ),
+        );
+    }
   }
 
   /// Stops any clip, as the exit sheet does on opening.
   Future<void> stopAudio() async {
-    _clipToken++;
-    _clipEnd?.cancel();
-    _clipEnd = null;
-    if (state.audio == ExerciseAudio.playing) {
-      unawaited(_player.stop());
-    }
+    _clip.stop();
     if (state.audio == ExerciseAudio.playing ||
         state.audio == ExerciseAudio.loading) {
       emit(state.copyWith(audio: ExerciseAudio.idle, slow: false));
@@ -341,8 +335,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
 
   @override
   Future<void> close() async {
-    _clipEnd?.cancel();
-    if (state.audio == ExerciseAudio.playing) unawaited(_player.stop());
+    _clip.stop();
     await _connection?.cancel();
     return super.close();
   }

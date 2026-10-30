@@ -1,10 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
-import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/swap.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/design_system/widgets/clip_failed_view.dart';
 import 'package:englizia/core/design_system/widgets/clip_progress_ring.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
 import 'package:flutter/material.dart';
@@ -40,32 +40,11 @@ class ListeningBlock extends StatelessWidget {
     final colors = context.colors;
     final texts = context.texts;
     if (audio == PlacementAudio.failed) {
-      return Column(
-        children: [
-          Container(
-            width: _button,
-            height: _button,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: colors.info.surface,
-              shape: BoxShape.circle,
-            ),
-            child: AppIconView(
-              AppIcon.volumeOff,
-              size: _failedIcon,
-              color: colors.info.fill,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Semantics(
-            liveRegion: true,
-            child: Text(
-              'placement_audio_failed'.tr(),
-              style: texts.bodyStrong.copyWith(color: colors.textPrimary),
-            ),
-          ),
-          TextButton(onPressed: onToggle, child: Text('common_retry'.tr())),
-        ],
+      return ClipFailedView(
+        circle: _button,
+        iconSize: _failedIcon,
+        gap: AppSpacing.md,
+        onRetry: onToggle,
       );
     }
     final playing = audio == PlacementAudio.playing;

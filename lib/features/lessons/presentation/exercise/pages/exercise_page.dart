@@ -9,6 +9,7 @@ import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
+import 'package:englizia/core/design_system/widgets/blank_sentence.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
@@ -365,7 +366,8 @@ class _Question extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
           switch (question.kind) {
             ExerciseKind.multipleChoice => BlankSentence(
-              question: question,
+              before: question.before,
+              after: question.after,
               word: state.selected?.text,
             ),
             ExerciseKind.imageChoice => SpokenWord(
