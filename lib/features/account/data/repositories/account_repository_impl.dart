@@ -8,6 +8,7 @@ import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
 import 'package:englizia/features/account/data/models/reset_password_model.dart';
 import 'package:englizia/features/account/data/models/sign_in_model.dart';
+import 'package:englizia/features/account/domain/entities/account_email.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -106,6 +107,20 @@ final class AccountRepositoryImpl implements AccountRepository {
     );
     return tokens == null ? null : _remembered(tokens);
   });
+
+  @override
+  Future<Result<AccountEmail>> getEmail() => guard(_remote.getEmail);
+
+  @override
+  Future<Result<void>> resendEmailLink() => guard(_remote.resendEmailLink);
+
+  @override
+  Future<Result<void>> changeEmail(String email) =>
+      guard(() => _remote.changeEmail(email.trim()));
+
+  @override
+  Future<Result<void>> verifyEmail(String token) =>
+      guard(() => _remote.verifyEmail(token));
 
   // ASSUMPTION(api): the upgrade takes register's fields (docs/api/auth.md).
   @override

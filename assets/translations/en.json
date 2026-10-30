@@ -396,5 +396,20 @@
   "placement_result_computing": "Working out your result…",
   "placement_result_saved": "Your answers are saved.",
   "placement_result_when_back": "We'll show your result when the connection is back.",
-  "placement_result_heading_first": "{caption}, {code}"
+  "placement_result_heading_first": "{caption}, {code}",
+  "common_cancel": "Cancel",
+  "verify_reminder": "Confirm your email to protect your account",
+  "verify_reminder_action": "Confirm",
+  "verify_reminder_hide": "Hide the reminder",
+  "verify_title": "Confirm your email",
+  "verify_sent_to": "We sent a confirmation link to:",
+  "verify_correct": "Correct the email",
+  "verify_edit_body": "Type the right email, and we'll send a new link to it.",
+  "verify_send_new": "Send to the new email",
+  "verify_taken": "This email is used by another account",
+  "verify_send_failed": "Couldn't send. Check your connection",
+  "verify_done": "Your email is confirmed",
+  "verify_expired": "This confirmation link has expired",
+  "account_email_unverified": "Not confirmed",
+  "account_email_verified": "Confirmed"
 }

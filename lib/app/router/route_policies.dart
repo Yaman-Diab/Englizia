@@ -27,6 +27,8 @@ const routePolicies = <String, RoutePolicy>{
   AppRoutes.forgotPasswordSent: RoutePolicy.public,
   AppRoutes.newPassword: RoutePolicy.public,
   AppRoutes.passwordChanged: RoutePolicy.public,
+  // A link can open it on a phone signed out, or signed in as anyone.
+  AppRoutes.verifyEmail: RoutePolicy.public,
   AppRoutes.signUp: RoutePolicy.withoutAccount,
   AppRoutes.signUpWithProvider: RoutePolicy.withoutAccount,
   AppRoutes.legalTerms: RoutePolicy.public,

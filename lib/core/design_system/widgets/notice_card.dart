@@ -15,7 +15,9 @@ class NoticeCard extends StatelessWidget {
     this.detail,
     this.error = false,
     this.primary = false,
+    this.success = false,
     this.emphasis,
+    this.trailing,
     this.announcement,
     super.key,
   });
@@ -25,10 +27,14 @@ class NoticeCard extends StatelessWidget {
   final String? detail;
   final bool error;
   final bool primary;
+  final bool success;
 
   /// The part of [title] that matters most (a level): the rest of the title
   /// turns lighter so that it stands out.
   final String? emphasis;
+
+  /// An action at its end, such as a retry.
+  final Widget? trailing;
   final String? announcement;
 
   static const _iconSize = 20.0;
@@ -41,6 +47,8 @@ class NoticeCard extends StatelessWidget {
         ? colors.error
         : primary
         ? colors.primary
+        : success
+        ? colors.success
         : colors.info;
     return Semantics(
       container: true,
@@ -76,6 +84,7 @@ class NoticeCard extends StatelessWidget {
                   ],
                 ),
               ),
+              ?trailing,
             ],
           ),
         ),

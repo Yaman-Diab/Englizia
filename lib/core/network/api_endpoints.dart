@@ -19,6 +19,15 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/auth.md.
   static const resetPassword = '/api/v1/auth/password/reset';
 
+  // Confirmed in docs/api/openapi.json.
+  static const me = '/api/v1/app/me';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const emailResend = '/api/v1/auth/email/resend';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const emailChange = '/api/v1/auth/email';
+  // ASSUMPTION(api): docs/api/auth.md.
+  static const emailVerify = '/api/v1/auth/email/verify';
+
   // ASSUMPTION(api): docs/api/tracks.md.
   static const tracks = '/api/v1/app/tracks';
   // ASSUMPTION(api): docs/api/placement.md.

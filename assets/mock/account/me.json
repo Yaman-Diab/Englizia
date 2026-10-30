@@ -1,0 +1,18 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "userName": "user@example.com",
+    "email": "user@example.com",
+    "displayName": "Learner",
+    "emailVerified": false,
+    "roles": [
+      "student"
+    ],
+    "timeZone": "Asia/Damascus",
+    "uiLanguage": "ar"
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

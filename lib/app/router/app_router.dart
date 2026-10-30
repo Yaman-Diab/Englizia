@@ -23,6 +23,9 @@ import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cub
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
+import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
+import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
+import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -97,7 +100,11 @@ GoRouter createAppRouter(AppSessionController session) {
     redirect: redirect.call,
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
-      GoRoute(path: AppRoutes.home, builder: (_, _) => const FoundationPage()),
+      GoRoute(
+        path: AppRoutes.home,
+        builder: (_, state) =>
+            FoundationPage(sendEmailLink: state.extra is SendEmailLinkRequest),
+      ),
       GoRoute(
         path: AppRoutes.welcome,
         builder: (context, _) => WelcomePage(
@@ -514,6 +521,26 @@ GoRouter createAppRouter(AppSessionController session) {
                   );
                 }
               },
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.verifyEmail,
+        builder: (context, state) {
+          // Like the recovery link, the email is the one way in.
+          final token = state.uri.queryParameters['token'] ?? '';
+          return BlocProvider(
+            key: ValueKey(token),
+            create: (_) => sl<EmailLinkCubit>(param1: token)..verify(),
+            child: EmailLinkPage(
+              onContinue: () => context.go(AppRoutes.home),
+              onNewLink: () => session.status == SessionStatus.member
+                  ? context.go(
+                      AppRoutes.home,
+                      extra: const SendEmailLinkRequest(),
+                    )
+                  : context.go(AppRoutes.signIn),
             ),
           );
         },

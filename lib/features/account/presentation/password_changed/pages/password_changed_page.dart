@@ -4,7 +4,9 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/hop_once.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/design_system/widgets/success_badge.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -30,6 +32,8 @@ class PasswordChangedPage extends StatelessWidget {
 
   static const _circle = 168.0;
   static const _guide = 140.0;
+  static const _badge = 48.0;
+  static const _badgeCheck = 26.0;
 
   /// The design stands the guide a little above the circle's middle.
   static const _guideLift = 8.0;
@@ -81,45 +85,29 @@ class PasswordChangedPage extends StatelessWidget {
                                     color: colors.primary.surface,
                                     shape: BoxShape.circle,
                                   ),
-                                  child: Padding(
-                                    padding: const EdgeInsetsDirectional.only(
+                                  child: const Padding(
+                                    padding: EdgeInsetsDirectional.only(
                                       bottom: _guideLift,
                                     ),
                                     child: Center(
-                                      child: reduce
-                                          ? guide
-                                          : Animate(
-                                                  delay: PasswordChangedEntrance
-                                                      .hop,
-                                                  child: guide,
-                                                )
-                                                .moveY(
-                                                  begin: 0,
-                                                  end: -PasswordChangedEntrance
-                                                      .hopHeight,
-                                                  duration:
-                                                      PasswordChangedEntrance
-                                                          .hopUp,
-                                                  curve: AppMotion.out,
-                                                )
-                                                .then()
-                                                .moveY(
-                                                  begin: 0,
-                                                  end: PasswordChangedEntrance
-                                                      .hopHeight,
-                                                  duration:
-                                                      PasswordChangedEntrance
-                                                          .hopDown,
-                                                  curve: AppMotion.inOut,
-                                                ),
+                                      child: HopOnce(
+                                        delay: PasswordChangedEntrance.hop,
+                                        child: guide,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                              const PositionedDirectional(
+                              PositionedDirectional(
                                 end: 1,
                                 bottom: 1,
-                                child: _SuccessBadge(),
+                                child: SuccessBadge(
+                                  size: _badge,
+                                  checkSize: _badgeCheck,
+                                  ringColor: colors.background,
+                                  growDelay: PasswordChangedEntrance.badge,
+                                  checkDelay: PasswordChangedEntrance.check,
+                                ),
                               ),
                             ],
                           ),
@@ -186,95 +174,4 @@ class PasswordChangedPage extends StatelessWidget {
       ),
     );
   }
-}
-
-/// The success mark on the circle's edge: it grows, then its check draws
-/// itself. Under reduce motion, all of it is simply there.
-class _SuccessBadge extends StatelessWidget {
-  const _SuccessBadge();
-
-  static const _size = 48.0;
-  static const _ring = 4.0;
-  static const _checkSize = 26.0;
-  static const _growFrom = .6;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final reduce = AppMotion.reduceMotion(context);
-    final mark = colors.onPrimaryStrong;
-    final badge = Container(
-      width: _size,
-      height: _size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: colors.success.fill,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: colors.background,
-          width: _ring,
-          strokeAlign: BorderSide.strokeAlignOutside,
-        ),
-      ),
-      child: reduce
-          ? _check(1, mark)
-          : const SizedBox.square(dimension: _checkSize).animate().custom(
-              delay: PasswordChangedEntrance.check,
-              duration: PasswordChangedEntrance.checkDraw,
-              curve: AppMotion.inOut,
-              builder: (_, value, _) => _check(value, mark),
-            ),
-    );
-    return ExcludeSemantics(
-      child: reduce
-          ? badge
-          : badge
-                .animate()
-                .fadeIn(
-                  delay: PasswordChangedEntrance.badge,
-                  duration: PasswordChangedEntrance.badgeGrow,
-                  curve: AppMotion.out,
-                )
-                .scaleXY(begin: _growFrom, end: 1, curve: AppMotion.bounce),
-    );
-  }
-
-  static Widget _check(double progress, Color color) => CustomPaint(
-    size: const Size.square(_checkSize),
-    painter: _CheckPainter(progress: progress, color: color),
-  );
-}
-
-/// The check of the app's icons (`AppIcon.check`), drawn up to [progress].
-class _CheckPainter extends CustomPainter {
-  const _CheckPainter({required this.progress, required this.color});
-
-  final double progress;
-  final Color color;
-
-  static const _viewBox = 24.0;
-  static const _stroke = 2.8;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.scale(size.width / _viewBox);
-    final check = Path()
-      ..moveTo(5, 12.5)
-      ..lineTo(9.5, 17)
-      ..lineTo(19, 7.5);
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _stroke
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..color = color;
-    final metric = check.computeMetrics().single;
-    if (progress > 0) {
-      canvas.drawPath(metric.extractPath(0, metric.length * progress), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_CheckPainter oldDelegate) =>
-      oldDelegate.progress != progress || oldDelegate.color != color;
 }

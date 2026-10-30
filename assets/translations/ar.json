@@ -465,5 +465,20 @@
   "placement_result_computing": "نحسب نتيجتك…",
   "placement_result_saved": "إجاباتك محفوظة.",
   "placement_result_when_back": "نعرض نتيجتك حين يعود الاتصال.",
-  "placement_result_heading_first": "{caption}، {code}"
+  "placement_result_heading_first": "{caption}، {code}",
+  "common_cancel": "إلغاء",
+  "verify_reminder": "أكّد بريدك لتحمي حسابك",
+  "verify_reminder_action": "تأكيد",
+  "verify_reminder_hide": "إخفاء التذكير",
+  "verify_title": "أكّد بريدك",
+  "verify_sent_to": "أرسلنا رابط تأكيد إلى:",
+  "verify_correct": "تصحيح البريد",
+  "verify_edit_body": "اكتب البريد الصحيح، وسنرسل إليه رابطًا جديدًا.",
+  "verify_send_new": "أرسل إلى البريد الجديد",
+  "verify_taken": "هذا البريد مستخدم في حساب آخر",
+  "verify_send_failed": "تعذّر الإرسال، تحقق من الإنترنت",
+  "verify_done": "تم تأكيد بريدك",
+  "verify_expired": "انتهت صلاحية رابط التأكيد",
+  "account_email_unverified": "غير مؤكّد",
+  "account_email_verified": "مؤكّد"
 }
