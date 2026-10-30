@@ -86,7 +86,7 @@ Pieces shared by the placement test and the exercises live in core: `ClipPlaybac
 
 ## Exercises
 
-ADR 11. `ExerciseCubit` runs a lesson's session and knows no template's details: a body reports an `ExerciseDraft`, `evaluate` (pure, in domain) gives an `Evaluation`, and an `ExerciseAttempt` is kept on the phone and sent. `exerciseBody` is one exhaustive `switch` on the sealed `Exercise`; bodies take `BodyAnswer` and `BodyClip` and don't read the cubit. What only draws a question stays in its body. Offline (ADR 12): the repository keeps the last lessons and the answers in preferences, a lesson in progress carries on with its version, and `AnswersSync`, started by `App`, sends what waits. To add a template: a subclass in `domain/entities/exercise.dart`, a case in `LessonModel`, a body and its case in `exerciseBody`, and a draft and evaluation if it answers in a new way.
+ADR 11. `ExerciseCubit` runs a lesson's session and knows no template's details: a body reports an `ExerciseDraft`, `evaluate` (pure, in domain) gives an `Evaluation`, and an `ExerciseAttempt` is kept on the phone and sent. `exerciseBody` is one exhaustive `switch` on the sealed `Exercise`; bodies take `BodyAnswer` and `BodyClip` and don't read the cubit. What only draws a question stays in its body (the active blank, the picked card). `ChipStage` flies word cards between their places. Offline (ADR 12): the repository keeps the last lessons and the answers in preferences, a lesson in progress carries on with its version, and `AnswersSync`, started by `App`, sends what waits. To add a template: a subclass in `domain/entities/exercise.dart`, a case in `LessonModel`, a body and its case in `exerciseBody`, and a draft and evaluation if it answers in a new way.
 
 ## Localization
 

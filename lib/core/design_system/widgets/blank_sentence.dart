@@ -18,7 +18,7 @@ class BlankSentence extends StatelessWidget {
   final String after;
   final String? word;
 
-  /// The line of the empty blank; the border color by default.
+  /// The line of the empty blank; the outline color by default.
   final Color? blankColor;
 
   static const _blankWidth = 64.0;
@@ -52,7 +52,7 @@ class BlankSentence extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: Border(
                         bottom: BorderSide(
-                          color: blankColor ?? colors.border,
+                          color: blankColor ?? context.scheme.outline,
                           width: _line,
                         ),
                       ),

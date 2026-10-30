@@ -123,23 +123,25 @@ class ExercisePage extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsetsDirectional.fromSTEB(
-              AppSpacing.xl,
-              AppSpacing.md,
-              AppSpacing.xl,
-              AppSpacing.md,
+          // Matching checks itself, so there is nothing to press until it ends.
+          if (!question.checksItself || state.checked)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.xl,
+                AppSpacing.md,
+                AppSpacing.xl,
+                AppSpacing.md,
+              ),
+              child: AppButton(
+                label: state.checked ? 'lesson_next'.tr() : 'lesson_check'.tr(),
+                size: AppButtonSize.large,
+                onPressed: state.checked
+                    ? cubit.next
+                    : state.canCheck
+                    ? cubit.check
+                    : null,
+              ),
             ),
-            child: AppButton(
-              label: state.checked ? 'lesson_next'.tr() : 'lesson_check'.tr(),
-              size: AppButtonSize.large,
-              onPressed: state.checked
-                  ? cubit.next
-                  : state.canCheck
-                  ? cubit.check
-                  : null,
-            ),
-          ),
         ],
       ),
     };
@@ -193,6 +195,7 @@ class _Question extends StatelessWidget {
               draft: state.draft,
               evaluation: state.evaluation,
               onDraft: cubit.updateDraft,
+              onSubmit: cubit.check,
             ),
             BodyClip(
               status: state.audio,

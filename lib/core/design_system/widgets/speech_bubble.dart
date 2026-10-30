@@ -9,9 +9,20 @@ import 'package:flutter/material.dart';
 /// the start side. A new [text] swaps in with a short rise; screen readers
 /// announce it.
 class SpeechBubble extends StatelessWidget {
-  const SpeechBubble({required this.text, super.key});
+  const SpeechBubble({
+    required this.text,
+    this.strong = true,
+    this.textDirection,
+    super.key,
+  });
 
   final String text;
+
+  /// Heavier, as what the guide says to the learner; regular for text to read.
+  final bool strong;
+
+  /// For text in a set language, whatever the app's.
+  final TextDirection? textDirection;
 
   static const _radius = 18.0;
   static const _tailSize = 12.0;
@@ -47,7 +58,12 @@ class SpeechBubble extends StatelessWidget {
                   child: Text(
                     text,
                     key: ValueKey(text),
-                    style: context.texts.bodyStrong,
+                    textDirection: textDirection,
+                    style: strong
+                        ? context.texts.bodyStrong
+                        : context.texts.body.copyWith(
+                            color: colors.textPrimary,
+                          ),
                   ),
                 ),
               ),

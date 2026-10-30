@@ -6,7 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
-- Lesson exercises: one container for multiple choice, picture choice and listening, with progress, hints, a book reference, slower audio, each learner's own steady order of options, leaving and carrying on, lessons that open again offline, and answers that wait on the phone and go out when the connection returns. Runs on mock data, and silently, for now.
+- Lesson exercises: one container for multiple choice, picture choice, listening, filling blanks, ordering words and matching, where word cards fly to their place, with progress, hints, a book reference, slower audio, each learner's own steady order of options, leaving and carrying on, lessons that open again offline, and answers that wait on the phone and go out when the connection returns. Runs on mock data, and silently, for now.
 - Project foundation: Clean Architecture skeleton, DI, router with route policies, session bootstrap.
 - Networking for the .NET backend: `ApiClient`, ProblemDetails parsing, typed failures, auth interceptor with a shared token refresh.
 - Design system from visual identity v2: semantic color tokens (light + dark), type scale, component themes.

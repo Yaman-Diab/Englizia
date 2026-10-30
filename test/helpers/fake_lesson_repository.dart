@@ -18,61 +18,13 @@ Map<String, Object?> sampleLessonJson() => asJsonMap(
   ),
 );
 
-/// The example's questions, each with its options in the order written, which
-/// the app's own order would otherwise hide from a test.
-List<Exercise> sampleExercises() {
-  final lesson = LessonModel(sampleLessonJson()).toEntity('seed');
-  final written = {
-    for (final q in sampleLessonJson().readList('exercises')!)
-      asJsonMap(q).readString('id'): [
-        for (final o in asJsonMap(q).readList('options')!)
-          asJsonMap(o).readString('id'),
-      ],
-  };
-  return [
-    for (final exercise in lesson.exercises)
-      _inOrder(exercise, written[exercise.id]!),
-  ];
-}
+/// The example's questions.
+List<Exercise> sampleExercises() =>
+    LessonModel(sampleLessonJson()).toEntity('seed').exercises;
 
-Exercise _inOrder(Exercise exercise, List<String?> ids) {
-  final options = switch (exercise) {
-    final ChoiceExercise e => [
-      for (final id in ids) e.options.firstWhere((o) => o.id == id),
-    ],
-  };
-  return switch (exercise) {
-    final MultipleChoiceExercise e => MultipleChoiceExercise(
-      id: e.id,
-      instruction: e.instruction,
-      options: options,
-      answerId: e.answerId,
-      before: e.before,
-      after: e.after,
-      hint: e.hint,
-      bookReference: e.bookReference,
-    ),
-    final ImageChoiceExercise e => ImageChoiceExercise(
-      id: e.id,
-      instruction: e.instruction,
-      options: options,
-      answerId: e.answerId,
-      word: e.word,
-      audioUrl: e.audioUrl,
-      hint: e.hint,
-      bookReference: e.bookReference,
-    ),
-    final ListenChooseExercise e => ListenChooseExercise(
-      id: e.id,
-      instruction: e.instruction,
-      options: options,
-      answerId: e.answerId,
-      audioUrl: e.audioUrl,
-      hint: e.hint,
-      bookReference: e.bookReference,
-    ),
-  };
-}
+/// Only the choice templates of the example.
+List<Exercise> sampleChoiceExercises() =>
+    sampleExercises().whereType<ChoiceExercise>().toList();
 
 class FakeLessonRepository implements LessonRepository {
   FakeLessonRepository({List<Exercise>? exercises, this.failure})

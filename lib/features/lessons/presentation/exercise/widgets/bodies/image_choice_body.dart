@@ -4,12 +4,11 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
-import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_card.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/lesson_picture.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// A word with its sound, and four square pictures, two by two.
 class ImageChoiceBody extends StatelessWidget {
@@ -56,7 +55,7 @@ class ImageChoiceBody extends StatelessWidget {
                 children: [
                   Padding(
                     padding: const EdgeInsetsDirectional.all(AppSpacing.md),
-                    child: _Picture(url: option.image),
+                    child: LessonPicture(url: option.image),
                   ),
                   PositionedDirectional(
                     top: _badgeInset,
@@ -136,40 +135,6 @@ class _SpokenWord extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// A picture from the server, on a soft circle. Mock lessons name bundled files.
-class _Picture extends StatelessWidget {
-  const _Picture({required this.url});
-
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return ExcludeSemantics(
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: colors.primary.surface,
-          shape: BoxShape.circle,
-        ),
-        child: url.startsWith('http')
-            ? Image.network(
-                url,
-                fit: BoxFit.contain,
-                loadingBuilder: (_, image, progress) =>
-                    progress == null ? image : const AppSpinner(),
-                errorBuilder: (context, _, _) => Center(
-                  child: AppIconView(
-                    AppIcon.infoCircle,
-                    color: colors.textSecondary,
-                  ),
-                ),
-              )
-            : SvgPicture.asset(url),
       ),
     );
   }

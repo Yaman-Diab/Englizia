@@ -70,6 +70,18 @@ abstract final class AppMotion {
 
   /// A step of a flow leaving, then the next one arriving ([SlideSwap]).
   static const stepOut = Duration(milliseconds: 110);
+
+  /// What follows a word taken out closes up.
+  static const closeUp = Duration(milliseconds: 200);
+
+  /// A wrong pair stays marked this long, then the cards go back.
+  static const pairWrongHold = Duration(milliseconds: 600);
+
+  /// A right pair shows its check this long, then fades out of the way.
+  static const pairLock = Duration(milliseconds: 450);
+
+  /// From the last pair to the end of the question.
+  static const pairsDone = Duration(milliseconds: 400);
   static const stepOutReduced = Duration(milliseconds: 100);
 
   /// A new part joining a progress bar.

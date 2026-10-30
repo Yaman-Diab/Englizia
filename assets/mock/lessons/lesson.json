@@ -139,6 +139,139 @@
           "exercise": 2
         },
         "reviewOnly": false
+      },
+      {
+        "id": "q5",
+        "template": "fillChoices",
+        "instructionAr": "أكمل الجملة",
+        "prompt": {
+          "en": "If it ___ tomorrow, we ___ stay at home.",
+          "audio": "https://example.com/mock/lessons/rains.mp3"
+        },
+        "blanks": [
+          {
+            "answer": "rains",
+            "alternatives": []
+          },
+          {
+            "answer": "will",
+            "alternatives": []
+          }
+        ],
+        "distractors": [
+          {
+            "text": "rained"
+          },
+          {
+            "text": "would"
+          },
+          {
+            "text": "is"
+          }
+        ],
+        "hint": {
+          "ar": "الجملة شرطية. انتبه لزمن الفعل بعد if"
+        },
+        "explanation": {
+          "ar": "في الشرط الأول: if + المضارع البسيط، والجواب will + الفعل. لا نستخدم will بعد if."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q6",
+        "template": "wordOrder",
+        "instructionAr": "رتّب الجملة",
+        "prompt": {
+          "audio": "https://example.com/mock/lessons/sara.mp3"
+        },
+        "meaningAr": "تُطعم سارة الدجاج قبل المدرسة.",
+        "answer": "Sara feeds the chickens before school.",
+        "chips": [
+          "Sara",
+          "feeds",
+          "the",
+          "chickens",
+          "before",
+          "school"
+        ],
+        "distractors": [
+          {
+            "text": "eats"
+          }
+        ],
+        "alternatives": [
+          "Before school, Sara feeds the chickens."
+        ],
+        "hint": {
+          "ar": "ابدأ بالفاعل Sara"
+        },
+        "explanation": {
+          "ar": "الفاعل Sara ثم الفعل feeds ثم المفعول به the chickens، ووقت الفعل before school في آخر الجملة."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q7",
+        "template": "matching",
+        "kind": "text",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "pairs": [
+          {
+            "left": "chicken",
+            "right": "دجاجة"
+          },
+          {
+            "left": "field",
+            "right": "حقل"
+          },
+          {
+            "left": "barn",
+            "right": "حظيرة"
+          },
+          {
+            "left": "egg",
+            "right": "بيضة"
+          },
+          {
+            "left": "cow",
+            "right": "بقرة"
+          }
+        ],
+        "reviewOnly": false
+      },
+      {
+        "id": "q8",
+        "template": "matching",
+        "kind": "image",
+        "instructionAr": "طابق كل كلمة بصورتها",
+        "pairs": [
+          {
+            "left": "cow",
+            "rightImage": "assets/mock/lessons/cow.svg",
+            "rightAlt": "بقرة"
+          },
+          {
+            "left": "barn",
+            "rightImage": "assets/mock/lessons/barn.svg",
+            "rightAlt": "حظيرة"
+          },
+          {
+            "left": "egg",
+            "rightImage": "assets/mock/lessons/egg.svg",
+            "rightAlt": "بيضة"
+          },
+          {
+            "left": "chicken",
+            "rightImage": "assets/mock/lessons/chicken.svg",
+            "rightAlt": "دجاجة"
+          },
+          {
+            "left": "field",
+            "rightImage": "assets/mock/lessons/field.svg",
+            "rightAlt": "حقل"
+          }
+        ],
+        "reviewOnly": false
       }
     ]
   },

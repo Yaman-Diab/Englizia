@@ -1,8 +1,7 @@
-import 'dart:ui' show PathMetric;
-
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/widgets/dashed_border.dart';
 import 'package:flutter/material.dart';
 
 enum ChoiceShape {
@@ -92,10 +91,7 @@ class ChoiceSurface extends StatelessWidget {
       child: InkWell(onTap: onTap, child: content),
     );
     if (dashed) {
-      content = CustomPaint(
-        foregroundPainter: _DashedBorderPainter(color: outline, radius: radius),
-        child: content,
-      );
+      content = DashedBorder(color: outline, radius: radius, child: content);
     }
     return MergeSemantics(
       child: Semantics(
@@ -174,37 +170,4 @@ class ChoiceCheck extends StatelessWidget {
       ),
     );
   }
-}
-
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({required this.color, required this.radius});
-
-  final Color color;
-  final double radius;
-
-  static const _dash = 6.0;
-  static const _gap = 4.0;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final border = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          (Offset.zero & size).deflate(.5),
-          Radius.circular(radius),
-        ),
-      );
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke;
-    for (final PathMetric metric in border.computeMetrics()) {
-      for (var d = 0.0; d < metric.length; d += _dash + _gap) {
-        canvas.drawPath(metric.extractPath(d, d + _dash), paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(_DashedBorderPainter old) =>
-      old.color != color || old.radius != radius;
 }

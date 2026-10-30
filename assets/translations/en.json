@@ -429,5 +429,18 @@
   "lesson_exit_stay": "Continue the lesson",
   "lesson_exit_leave": "Leave",
   "lesson_complete_title": "Lesson complete",
-  "lesson_book_ref": "Student's book, page {page}, exercise {exercise}"
+  "lesson_book_ref": "Student's book, page {page}, exercise {exercise}",
+  "lesson_chip_add": "Add {word}",
+  "lesson_chip_remove": "Remove {word}",
+  "lesson_chip_right": "{word}, correct",
+  "lesson_chip_wrong": "{word}, wrong",
+  "lesson_blank": "Blank {number}",
+  "lesson_blank_active": "Blank {number}, active",
+  "lesson_your_sentence": "Your sentence",
+  "lesson_pair_right": "Correct: {word}",
+  "lesson_pair_wrong": "They don't match. Try again",
+  "lesson_picture_named": "Picture: {name}",
+  "lesson_pictures": "Pictures",
+  "lesson_meanings": "Arabic words",
+  "lesson_english_words": "English words"
 }

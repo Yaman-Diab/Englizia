@@ -46,17 +46,24 @@ The example is `assets/mock/lessons/lesson.json`.
 | `id` | string | The lesson | yes |
 | `version` | int | The published version; an attempt counts for the version it was answered on (server doc §19.2) | yes, sent with each answer |
 | `exercises[].id` | string | Stable question id | yes |
-| `exercises[].template` | string | `multipleChoice`, `imageChoice`, `listenChoose`; the rest of §20.6 as they are built. One the app doesn't know is left out | yes |
+| `exercises[].template` | string | `multipleChoice`, `imageChoice`, `listenChoose`, `fillChoices`, `wordOrder`, `matching`; the rest of §20.6 as they are built. One the app doesn't know is left out | yes |
 | `exercises[].instructionAr` | string | The line over the question | yes |
 | `exercises[].instructionArAudio` | string? | Required for kids | not yet |
-| `exercises[].prompt.en` | string | `multipleChoice`: the sentence with one `___`. `imageChoice`: the word | yes |
+| `exercises[].prompt.en` | string | `multipleChoice`: the sentence with one `___`. `fillChoices`: with one `___` per blank. `imageChoice`: the word | yes |
 | `exercises[].prompt.audio` | string | `imageChoice`: the word said (optional). `listenChoose`: the clip. "Slower" plays this file at 0.75 | yes |
 | `exercises[].prompt.transcript` | string | `listenChoose`: what the clip says, for the feedback | not yet |
 | `exercises[].options[].id` | string | Stable option id | yes |
 | `exercises[].options[].text` | string | English text of a text option | yes |
 | `exercises[].options[].image` / `.alt` | string | A picture and its Arabic name for screen readers. WebP (S §22) | yes |
 | `exercises[].options[].misconception` | string? | The concept a wrong option points to | not yet |
-| `exercises[].answer` | string | The right option's id | yes |
+| `exercises[].answer` | string | The right option's id; `wordOrder`: the right sentence | yes |
+| `exercises[].blanks[]` | `{answer, alternatives[]}` | `fillChoices`: what each blank takes, in order | yes |
+| `exercises[].distractors[]` | `{text, misconception?}` | `fillChoices`, `wordOrder`: the extra cards | yes |
+| `exercises[].meaningAr` | string | `wordOrder`: what the guide says | yes |
+| `exercises[].chips` | string[]? | `wordOrder`: the sentence as cards; with none, split by spaces | yes |
+| `exercises[].alternatives` | string[] | `wordOrder`: other right sentences. Compared without case, punctuation or extra spaces | yes |
+| `exercises[].kind` | string | `matching`: `text` or `image` | yes |
+| `exercises[].pairs[]` | `{left, right}` or `{left, rightImage, rightAlt}` | `matching`, 3 to 5 pairs. `left` is the English word, unique in its question, and the pair's id. `rightAlt` is the picture's Arabic name for screen readers (server doc §20.6 has no such field: proposed) | yes |
 | `exercises[].hint.ar` | string? | The hint. None hides the button. English words in it are shown strong | yes |
 | `exercises[].explanation.ar` | string? | For the feedback | not yet |
 | `exercises[].concepts` | string[] | For the mistakes bank (v0.5) | not yet |
@@ -95,7 +102,7 @@ One checked answer. Safe to repeat: the server ignores an `attemptId` it has see
 | `attemptId` | string | A UUID made on the phone when the answer is checked, the same on every resend |
 | `lessonVersion` | int | The version the learner answered |
 | `questionId` | string | The question |
-| `answer` | object | By way of answering. Choice templates: `{optionId}` |
+| `answer` | object | By way of answering. Choice templates: `{optionId}`. `fillChoices`: `{words}`, one per blank in order. `wordOrder`: `{words}` as placed. `matching`: `{mistakes}`, the pairs with a mistake on the way, each once, for the question's concept (S §7.3) |
 | `hinted` | bool | The hint was opened on this question: a right answer is an assisted success (S §7.1) |
 
 ### Errors

@@ -10,11 +10,15 @@ final class BodyAnswer {
     required this.draft,
     required this.evaluation,
     required this.onDraft,
+    required this.onSubmit,
   });
 
   final ExerciseDraft? draft;
   final Evaluation? evaluation;
   final ValueChanged<ExerciseDraft> onDraft;
+
+  /// Checks the answer, for a body with no «تحقق» under it.
+  final VoidCallback onSubmit;
 
   /// How the option [id] of a choice looks now.
   AnswerLook lookOf(String id) {

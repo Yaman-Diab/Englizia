@@ -54,6 +54,9 @@ sealed class Exercise extends Equatable {
   /// Plays once by itself on opening (S §7.3).
   bool get autoplays => false;
 
+  /// Checked as it goes, with no «تحقق» (S §7.3: matching).
+  bool get checksItself => false;
+
   /// A clip that fails is the question's business, so it says so. Elsewhere the
   /// clip is only an extra, and goes quiet.
   bool get reportsClipFailure => false;
@@ -169,4 +172,139 @@ final class ListenChooseExercise extends ChoiceExercise {
 
   @override
   List<Object?> get props => [...super.props, audioUrl];
+}
+
+/// A word card of a bank. Its [id] tells apart two cards with the same word.
+final class WordChip extends Equatable {
+  const WordChip({required this.id, required this.text});
+
+  final String id;
+  final String text;
+
+  @override
+  List<Object?> get props => [id, text];
+}
+
+final class FillBlank extends Equatable {
+  const FillBlank({required this.answer, this.alternatives = const []});
+
+  final String answer;
+  final List<String> alternatives;
+
+  bool accepts(String word) => word == answer || alternatives.contains(word);
+
+  @override
+  List<Object?> get props => [answer, alternatives];
+}
+
+/// A sentence with blanks, and word cards with some extra among them.
+final class FillChoicesExercise extends Exercise {
+  const FillChoicesExercise({
+    required super.id,
+    required super.instruction,
+    required this.segments,
+    required this.blanks,
+    required this.bank,
+    super.hint,
+    super.bookReference,
+  });
+
+  /// The sentence around the blanks: one more than [blanks].
+  final List<String> segments;
+  final List<FillBlank> blanks;
+
+  /// In the order to show them.
+  final List<WordChip> bank;
+
+  @override
+  List<Object?> get props => [...super.props, segments, blanks, bank];
+}
+
+/// The meaning in Arabic, and word cards to build the English with.
+final class WordOrderExercise extends Exercise {
+  const WordOrderExercise({
+    required super.id,
+    required super.instruction,
+    required this.meaning,
+    required this.answer,
+    required this.answerWords,
+    required this.bank,
+    this.alternatives = const [],
+    super.hint,
+    super.bookReference,
+  });
+
+  final String meaning;
+  final String answer;
+
+  /// [answer] as cards, in order.
+  final List<String> answerWords;
+
+  /// Other orders that are right too.
+  final List<String> alternatives;
+
+  /// In the order to show them.
+  final List<WordChip> bank;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    meaning,
+    answer,
+    answerWords,
+    alternatives,
+    bank,
+  ];
+}
+
+/// A word and what it goes with: a [meaning], or a picture with its name.
+final class MatchPair extends Equatable {
+  const MatchPair({
+    required this.id,
+    this.meaning = '',
+    this.image = '',
+    this.alt = '',
+  });
+
+  /// The English word, which is unique in its question.
+  final String id;
+  final String meaning;
+  final String image;
+  final String alt;
+
+  @override
+  List<Object?> get props => [id, meaning, image, alt];
+}
+
+/// Pairs to put together, in two columns shuffled apart.
+final class MatchingExercise extends Exercise {
+  const MatchingExercise({
+    required super.id,
+    required super.instruction,
+    required this.pairs,
+    required this.meaningsShown,
+    required this.wordsShown,
+    required this.pictures,
+    super.hint,
+    super.bookReference,
+  });
+
+  final List<MatchPair> pairs;
+  final List<MatchPair> meaningsShown;
+  final List<MatchPair> wordsShown;
+
+  /// A word goes with a picture.
+  final bool pictures;
+
+  @override
+  bool get checksItself => true;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    pairs,
+    meaningsShown,
+    wordsShown,
+    pictures,
+  ];
 }

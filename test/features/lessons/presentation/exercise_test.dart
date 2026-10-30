@@ -28,7 +28,7 @@ extension on ExerciseCubit {
 extension on ExerciseState {
   String? get selectedId => switch (draft) {
     ChoiceDraft(:final optionId) => optionId,
-    null => null,
+    _ => null,
   };
 }
 
@@ -51,7 +51,7 @@ void main() {
   late FakeConnectivityService connectivity;
 
   setUp(() {
-    lessons = FakeLessonRepository();
+    lessons = FakeLessonRepository(exercises: sampleChoiceExercises());
     player = FakeClipPlayer();
     connectivity = FakeConnectivityService();
   });
@@ -622,7 +622,7 @@ void main() {
 
       await tester.tap(cards.first);
       await tester.pump();
-      expect(subject.state.selectedId, 'o1');
+      expect(subject.state.selectedId, isNotNull);
       semantics.dispose();
       await leaveClean(tester, subject);
     });

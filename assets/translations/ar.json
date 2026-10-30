@@ -498,5 +498,18 @@
   "lesson_exit_stay": "أكمل الدرس",
   "lesson_exit_leave": "اخرج",
   "lesson_complete_title": "أكملت الدرس",
-  "lesson_book_ref": "كتاب الطالب، صفحة {page}، تمرين {exercise}"
+  "lesson_book_ref": "كتاب الطالب، صفحة {page}، تمرين {exercise}",
+  "lesson_chip_add": "أضف {word}",
+  "lesson_chip_remove": "أزل {word}",
+  "lesson_chip_right": "{word}، صحيح",
+  "lesson_chip_wrong": "{word}، غير صحيح",
+  "lesson_blank": "الفراغ {number}",
+  "lesson_blank_active": "الفراغ {number}، نشط",
+  "lesson_your_sentence": "جملتك",
+  "lesson_pair_right": "صحيح: {word}",
+  "lesson_pair_wrong": "الزوج غير متطابق، جرّب مرة أخرى",
+  "lesson_picture_named": "صورة: {name}",
+  "lesson_pictures": "الصور",
+  "lesson_meanings": "الكلمات العربية",
+  "lesson_english_words": "الكلمات الإنجليزية"
 }

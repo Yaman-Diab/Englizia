@@ -44,23 +44,76 @@ final class LessonModel {
 Exercise? _exercise(Map<String, Object?> json, String seed) {
   if (json.readBool('reviewOnly') ?? false) return null;
   final template = json.readString('template');
+  if (template == null) throw const FormatException('Exercise: no template');
+  if (!_templates.contains(template)) return null;
   final id = json.readString('id');
   final instruction = json.readString('instructionAr');
-  final prompt = json.readMap('prompt') ?? const <String, Object?>{};
-  final answer = json.readString('answer');
-  final hint = json.readMap('hint')?.readString('ar');
-  final bookReference = _bookReference(json.readMap('bookRef'));
-  if (template == null) throw const FormatException('Exercise: no template');
-  if (!const {
-    'multipleChoice',
-    'imageChoice',
-    'listenChoose',
-  }.contains(template)) {
-    return null;
-  }
   if (id == null || instruction == null) {
     throw const FormatException('Exercise: no id or instruction');
   }
+  final prompt = json.readMap('prompt') ?? const <String, Object?>{};
+  final hint = json.readMap('hint')?.readString('ar');
+  final bookReference = _bookReference(json.readMap('bookRef'));
+  final key = '$seed:$id';
+  return switch (template) {
+    'fillChoices' => _fillChoices(
+      json,
+      prompt,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+    ),
+    'wordOrder' => _wordOrder(
+      json,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+    ),
+    'matching' => _matching(
+      json,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+    ),
+    _ => _choice(
+      template,
+      json,
+      prompt,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+    ),
+  };
+}
+
+const _templates = {
+  'multipleChoice',
+  'imageChoice',
+  'listenChoose',
+  'fillChoices',
+  'wordOrder',
+  'matching',
+};
+
+ChoiceExercise _choice(
+  String template,
+  Map<String, Object?> json,
+  Map<String, Object?> prompt, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+}) {
+  final answer = json.readString('answer');
   final options = [
     for (final option in json.readList('options') ?? const <Object?>[])
       _option(asJsonMap(option)),
@@ -68,7 +121,7 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
   if (options.isEmpty || !options.any((o) => o.id == answer)) {
     throw const FormatException('Exercise: no options, or no right one');
   }
-  final shown = stableOrder(options, '$seed:$id');
+  final shown = stableOrder(options, key);
   return switch (template) {
     'multipleChoice' => _multipleChoice(
       id: id,
@@ -100,6 +153,123 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
     ),
   };
 }
+
+FillChoicesExercise _fillChoices(
+  Map<String, Object?> json,
+  Map<String, Object?> prompt, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+}) {
+  final segments = [
+    for (final part in _required(prompt.readString('en')).split(_blank))
+      part.trim(),
+  ];
+  final blanks = [
+    for (final blank in json.readList('blanks') ?? const <Object?>[])
+      _fillBlank(asJsonMap(blank)),
+  ];
+  if (blanks.isEmpty || segments.length != blanks.length + 1) {
+    throw const FormatException('Exercise: blanks do not fit the sentence');
+  }
+  return FillChoicesExercise(
+    id: id,
+    instruction: instruction,
+    segments: segments,
+    blanks: blanks,
+    bank: _bank([
+      for (final blank in blanks) blank.answer,
+      ..._distractors(json),
+    ], key),
+    hint: hint,
+    bookReference: bookReference,
+  );
+}
+
+FillBlank _fillBlank(Map<String, Object?> json) => FillBlank(
+  answer: _required(json.readString('answer')),
+  alternatives: _strings(json.readList('alternatives')),
+);
+
+WordOrderExercise _wordOrder(
+  Map<String, Object?> json, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+}) {
+  final answer = _required(json.readString('answer'));
+  final chips = _strings(json.readList('chips'));
+  final words = chips.isEmpty ? answer.split(' ') : chips;
+  return WordOrderExercise(
+    id: id,
+    instruction: instruction,
+    meaning: _required(json.readString('meaningAr')),
+    answer: answer,
+    answerWords: words,
+    alternatives: _strings(json.readList('alternatives')),
+    bank: _bank([...words, ..._distractors(json)], key),
+    hint: hint,
+    bookReference: bookReference,
+  );
+}
+
+MatchingExercise _matching(
+  Map<String, Object?> json, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+}) {
+  final pictures = json.readString('kind') == 'image';
+  final pairs = [
+    for (final pair in json.readList('pairs') ?? const <Object?>[])
+      _pair(asJsonMap(pair), pictures: pictures),
+  ];
+  if (pairs.isEmpty || pairs.map((p) => p.id).toSet().length != pairs.length) {
+    throw const FormatException('Exercise: no pairs, or two the same');
+  }
+  return MatchingExercise(
+    id: id,
+    instruction: instruction,
+    pairs: pairs,
+    meaningsShown: stableOrder(pairs, '$key:meanings'),
+    wordsShown: stableOrder(pairs, '$key:words'),
+    pictures: pictures,
+    hint: hint,
+    bookReference: bookReference,
+  );
+}
+
+MatchPair _pair(Map<String, Object?> json, {required bool pictures}) => pictures
+    ? MatchPair(
+        id: _required(json.readString('left')),
+        image: _required(json.readString('rightImage')),
+        alt: json.readString('rightAlt') ?? '',
+      )
+    : MatchPair(
+        id: _required(json.readString('left')),
+        meaning: _required(json.readString('right')),
+      );
+
+List<String> _distractors(Map<String, Object?> json) => [
+  for (final distractor in json.readList('distractors') ?? const <Object?>[])
+    _required(asJsonMap(distractor).readString('text')),
+];
+
+/// The cards in this learner's order. Ids go by position, as a word may repeat.
+List<WordChip> _bank(List<String> words, String key) => stableOrder([
+  for (final (i, word) in words.indexed) WordChip(id: 'c$i', text: word),
+], key);
+
+List<String> _strings(List<Object?>? values) => [
+  for (final value in values ?? const <Object?>[])
+    if (value is String) value,
+];
 
 MultipleChoiceExercise _multipleChoice({
   required String id,
@@ -158,7 +328,15 @@ Map<String, Object?> attemptToJson(ExerciseAttempt attempt, String attemptId) =>
       'questionId': attempt.questionId,
       'answer': switch (attempt.draft) {
         ChoiceDraft(:final optionId) => {'optionId': optionId},
+        SlotsDraft(:final chips) => {
+          'words': [for (final chip in chips) chip?.text],
+        },
+        SequenceDraft(:final chips) => {
+          'words': [for (final chip in chips) chip.text],
+        },
+        PairsDraft(:final mistakes) => {'mistakes': mistakes.toList()},
       },
+
       'hinted': attempt.hinted,
     };
 
