@@ -98,6 +98,10 @@ One checked answer. Safe to repeat: the server ignores an `attemptId` it has see
 | `answer` | object | By way of answering. Choice templates: `{optionId}` |
 | `hinted` | bool | The hint was opened on this question: a right answer is an assisted success (S §7.1) |
 
+### Errors
+
+The app assumes 400, 404, 409, 410 and 422 mean this answer will never be accepted: it drops it and logs that, so it can't hold back the others. Anything else, it sends again later. To confirm with the backend team.
+
 ### Response
 
 `200` or `204`; the app reads nothing from it. Marks and XP stay on the server. The app's own marking only drives what the learner sees; if the two differ, the screen doesn't change, and completion and points follow the server (ADR 11).

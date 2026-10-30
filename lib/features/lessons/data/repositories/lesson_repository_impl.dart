@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/logging/app_logger.dart';
+import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
@@ -19,14 +21,76 @@ final class LessonRepositoryImpl implements LessonRepository {
   final LessonRemoteDataSource _remote;
   final SettingsStorageService _settings;
 
+  /// Lessons kept to open offline: small enough for preferences (ADR 12).
+  static const _cachedLessons = 5;
+
+  /// What the server refuses for good: resending can't help, and keeping it
+  /// first in the queue would hold back the rest.
+  /// ASSUMPTION(api): docs/api/lessons.md.
+  static const _rejected = {400, 404, 409, 410, 422};
+
   /// The answers on their way, so they go one at a time and in order.
   Future<void>? _sending;
 
   @override
-  Future<Result<Lesson>> getLesson(String lessonId) => guard(() async {
-    final model = await _remote.getLesson(lessonId);
-    return model.toEntity(await _settings.installationId());
-  });
+  Future<Result<Lesson>> getLesson(String lessonId) async {
+    final seed = await _settings.installationId();
+    final cached = _cachedLesson(lessonId, seed);
+    // A lesson in progress carries on with the version it started on.
+    if (cached != null && !progress(lessonId).isEmpty) return Ok(cached);
+    final fetched = await guard(() async {
+      final model = await _remote.getLesson(lessonId);
+      final lesson = model.toEntity(seed);
+      await _cacheLesson(lessonId, model.json);
+      return lesson;
+    });
+    return switch (fetched) {
+      Err(failure: NetworkFailure()) when cached != null => Ok(cached),
+      _ => fetched,
+    };
+  }
+
+  Lesson? _cachedLesson(String lessonId, String seed) {
+    final json = _cache()[lessonId];
+    if (json == null) return null;
+    try {
+      return LessonModel(asJsonMap(json)).toEntity(seed);
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Cached lesson unreadable');
+      return null;
+    }
+  }
+
+  Map<String, Object?> _cache() {
+    final saved = _settings.lessonCache;
+    if (saved == null) return {};
+    try {
+      return asJsonMap(jsonDecode(saved));
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Lesson cache unreadable');
+      return {};
+    }
+  }
+
+  /// Newest last. The oldest go first, but never one in progress, which has to
+  /// carry on with its own version.
+  Future<void> _cacheLesson(String lessonId, Map<String, Object?> json) async {
+    final cache = _cache()
+      ..remove(lessonId)
+      ..[lessonId] = json;
+    final inProgress = _store().lessons;
+    final spare = [
+      for (final id in cache.keys)
+        if (id != lessonId && !inProgress.containsKey(id)) id,
+    ];
+    final over = cache.length - _cachedLessons;
+    spare.take(over < 0 ? 0 : over).forEach(cache.remove);
+    try {
+      await _settings.setLessonCache(jsonEncode(cache));
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Caching the lesson failed');
+    }
+  }
 
   @override
   Future<void> saveAttempt(ExerciseAttempt attempt) async {
@@ -53,7 +117,12 @@ final class LessonRepositoryImpl implements LessonRepository {
       if (unsent.isEmpty) return;
       final first = unsent.first;
       final request = asJsonMap(first['request']);
-      await _remote.sendAnswer(first['lessonId']! as String, request);
+      try {
+        await _remote.sendAnswer(first['lessonId']! as String, request);
+      } on ApiException catch (error, stackTrace) {
+        if (!_rejected.contains(error.statusCode)) rethrow;
+        AppLogger.error(error, stackTrace, 'An answer refused, and dropped');
+      }
       final store = _store();
       store.unsent.removeWhere(
         (a) => asJsonMap(a['request'])['attemptId'] == request['attemptId'],

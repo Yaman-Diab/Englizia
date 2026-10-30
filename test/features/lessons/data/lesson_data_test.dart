@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -25,17 +27,24 @@ class _Remote implements LessonRemoteDataSource {
   final sent = <Map<String, Object?>>[];
   final lessons = <String>[];
   var offline = false;
+  ApiException? failWith;
+  ApiException? refuseOnce;
   Map<String, Object?> lesson = sampleLessonJson();
 
   @override
   Future<LessonModel> getLesson(String lessonId) async {
     if (offline) throw const NetworkException('connectionError');
+    if (failWith case final error?) throw error;
     return LessonModel(lesson);
   }
 
   @override
   Future<void> sendAnswer(String lessonId, Map<String, Object?> request) async {
     if (offline) throw const NetworkException('connectionError');
+    if (refuseOnce case final error?) {
+      refuseOnce = null;
+      throw error;
+    }
     lessons.add(lessonId);
     sent.add(request);
   }
@@ -447,6 +456,138 @@ void main() {
       final two = await repository.getLesson('les');
 
       expect((one as Ok<Lesson>).value, (two as Ok<Lesson>).value);
+    });
+
+    group('offline', () {
+      Future<Lesson> open(String id) async =>
+          ((await repository.getLesson(id)) as Ok<Lesson>).value;
+
+      test('a lesson opened before opens again', () async {
+        final online = await open('les');
+
+        remote.offline = true;
+
+        expect(await open('les'), online);
+      });
+
+      test('it survives a new start', () async {
+        final online = await open('les');
+        remote.offline = true;
+
+        final again = LessonRepositoryImpl(remote, settings: settings);
+
+        expect(((await again.getLesson('les')) as Ok<Lesson>).value, online);
+      });
+
+      test('a lesson never opened is a network failure', () async {
+        remote.offline = true;
+
+        expect(
+          await repository.getLesson('les'),
+          isA<Err<Lesson>>().having(
+            (e) => e.failure,
+            'failure',
+            isA<NetworkFailure>(),
+          ),
+        );
+      });
+
+      test('online, a lesson not started takes the newer version', () async {
+        await open('les');
+        remote.lesson = {...sampleLessonJson(), 'version': 2};
+
+        expect((await open('les')).version, 2);
+      });
+
+      test('a lesson in progress carries on with its version', () async {
+        await open('les');
+        await repository.saveProgress(
+          'les',
+          const ExerciseProgress(done: {'q1'}),
+        );
+        remote.lesson = {...sampleLessonJson(), 'version': 2};
+
+        expect((await open('les')).version, 1);
+      });
+
+      test('a server failure is not treated as offline', () async {
+        await open('les');
+        remote.failWith = const ApiException(statusCode: 404);
+
+        expect(await repository.getLesson('les'), isA<Err<Lesson>>());
+      });
+
+      test('an unreadable cache is no cache', () async {
+        await settings.setLessonCache('{not json');
+        remote.offline = true;
+
+        expect(await repository.getLesson('les'), isA<Err<Lesson>>());
+      });
+
+      test(
+        'only the last few are kept, and none in progress is lost',
+        () async {
+          await open('first');
+          await repository.saveProgress(
+            'first',
+            const ExerciseProgress(done: {'q1'}),
+          );
+          for (final id in ['a', 'b', 'c', 'd', 'e', 'f']) {
+            await open(id);
+          }
+
+          final kept = (jsonDecode(settings.lessonCache!) as Map).keys;
+          expect(kept, containsAll(['first', 'f', 'e']));
+          expect(kept, isNot(contains('a')));
+          expect(kept, hasLength(5));
+        },
+      );
+
+      test('leaving the account forgets the lessons', () async {
+        await open('les');
+
+        await settings.clearAccountData();
+
+        expect(settings.lessonCache, isNull);
+      });
+    });
+
+    group('an answer the server refuses', () {
+      for (final status in [400, 404, 409, 410, 422]) {
+        test('$status is dropped, and the rest go on', () async {
+          remote.offline = true;
+          await repository.saveAttempt(_attempt);
+          await repository.saveAttempt(
+            const ExerciseAttempt(
+              lessonId: 'les',
+              lessonVersion: 3,
+              questionId: 'q2',
+              draft: ChoiceDraft('o1'),
+              hinted: false,
+            ),
+          );
+          await settle();
+          remote
+            ..offline = false
+            ..refuseOnce = ApiException(statusCode: status);
+
+          await repository.sendSaved();
+
+          expect(remote.sent.map((a) => a['questionId']), ['q2']);
+          expect(unsent(), isEmpty);
+        });
+      }
+
+      test('a server error stays, and goes later', () async {
+        remote.refuseOnce = const ApiException(statusCode: 500);
+        await repository.saveAttempt(_attempt);
+        await settle();
+        expect(remote.sent, isEmpty);
+        expect(unsent(), hasLength(1));
+
+        await repository.sendSaved();
+        expect(remote.sent, hasLength(1));
+      });
     });
 
     test('a failed fetch is a failure, not a throw', () async {

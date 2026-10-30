@@ -163,7 +163,6 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
     final online = await _connectivity.isOnline();
     if (isClosed) return;
-    if (online) unawaited(_lessons.sendSaved());
     emit(
       state.copyWith(
         online: online,
@@ -337,9 +336,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   }
 
   void _setOnline(bool online) {
-    if (isClosed) return;
-    emit(state.copyWith(online: online));
-    if (online) unawaited(_lessons.sendSaved());
+    if (!isClosed) emit(state.copyWith(online: online));
   }
 
   @override

@@ -7,6 +7,7 @@ import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/core/settings/settings_state.dart';
+import 'package:englizia/features/lessons/data/answers_sync.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -22,6 +23,13 @@ class App extends StatefulWidget {
 
 class _AppState extends State<App> {
   late final GoRouter _router = createAppRouter(sl<AppSessionController>());
+  late final AnswersSync _answers;
+
+  @override
+  void initState() {
+    super.initState();
+    _answers = sl<AnswersSync>()..start();
+  }
 
   @override
   void didChangeDependencies() {
@@ -31,6 +39,7 @@ class _AppState extends State<App> {
 
   @override
   void dispose() {
+    _answers.stop();
     _router.dispose();
     super.dispose();
   }

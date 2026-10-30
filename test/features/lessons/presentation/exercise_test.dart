@@ -388,10 +388,9 @@ void main() {
         await subject.close();
       });
 
-      test('what was kept is sent on opening and on reconnecting', () async {
+      test('it follows the connection', () async {
         final subject = cubit();
         await subject.start();
-        expect(lessons.sends, 1);
 
         connectivity.online = false;
         await pumpEventQueue();
@@ -400,7 +399,6 @@ void main() {
         connectivity.online = true;
         await pumpEventQueue();
         expect(subject.state.online, isTrue);
-        expect(lessons.sends, 2);
         await subject.close();
       });
     });
