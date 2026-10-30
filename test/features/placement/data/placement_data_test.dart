@@ -8,8 +8,10 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
+import 'package:englizia/features/placement/data/models/placement_status_model.dart';
 import 'package:englizia/features/placement/data/models/placement_summary_model.dart';
 import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
+import 'package:englizia/features/placement/domain/entities/placement_status.dart';
 import 'package:englizia/features/placement/domain/entities/placement_summary.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +33,9 @@ class _FailingDataSource implements PlacementRemoteDataSource {
   @override
   Future<PlacementSummaryModel> getSummary() async =>
       throw const NetworkException('connectionError');
+
+  @override
+  Future<PlacementStatusModel> getStatus() => throw UnimplementedError();
 }
 
 void main() {
@@ -86,6 +91,41 @@ void main() {
       latency: Duration.zero,
     ).getSummary();
     expect(summary.entity, expected);
+  });
+
+  group('status', () {
+    test('every state of the contract parses from the mock files', () async {
+      final source = PlacementFakeDataSource(
+        _DiskBundle(),
+        latency: Duration.zero,
+      );
+      final seen = [
+        for (final _ in PlacementFakeDataSource.statusAssets)
+          (await source.getStatus()).entity,
+      ];
+      expect(seen, const [
+        PlacementNotTaken(),
+        PlacementInProgress(stage: 1, question: 9),
+        PlacementRetakeOpen(level: 'A2', daysAgo: 34),
+        PlacementRetakeLocked(daysLeft: 12),
+      ]);
+      // Then it starts over, to walk through them again.
+      expect((await source.getStatus()).entity, const PlacementNotTaken());
+    });
+
+    test('a state this version does not know reads as not taken', () {
+      expect(
+        PlacementStatusModel.fromJson(const {'state': 'somethingNew'}).entity,
+        const PlacementNotTaken(),
+      );
+    });
+
+    test('a state with missing fields is rejected', () {
+      expect(
+        () => PlacementStatusModel.fromJson(const {'state': 'retakeLocked'}),
+        throwsFormatException,
+      );
+    });
   });
 
   test('the repository maps errors through the error funnel', () async {

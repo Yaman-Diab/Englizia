@@ -23,6 +23,8 @@ abstract final class ApiEndpoints {
   static const tracks = '/api/v1/app/tracks';
   // ASSUMPTION(api): docs/api/placement.md.
   static const placementSummary = '/api/v1/app/placement/summary';
+  // ASSUMPTION(api): docs/api/placement.md.
+  static const placementStatus = '/api/v1/app/placement/status';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
 

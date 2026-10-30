@@ -1,0 +1,9 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "state": "none"
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

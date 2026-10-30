@@ -5,9 +5,9 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/illustrations/mail_scene.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
+import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
 import 'package:englizia/features/account/presentation/check_email/cubit/check_email_cubit.dart';
-import 'package:englizia/features/account/presentation/widgets/account_notice.dart';
 import 'package:englizia/features/account/presentation/widgets/auth_layout.dart';
 import 'package:flutter/foundation.dart' show Unicode;
 import 'package:flutter/material.dart';
@@ -137,7 +137,7 @@ class CheckEmailPage extends StatelessWidget {
                   style: texts.caption.copyWith(color: colors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                AccountNotice(
+                NoticeCard(
                   icon: AppIcon.infoCircle,
                   title: 'check_email_spam'.tr(
                     namedArgs: {'spam': '${Unicode.LRI}(Spam)${Unicode.PDI}'},

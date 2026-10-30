@@ -3,16 +3,17 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:flutter/material.dart';
 
-/// A card in an account screen: a refused sign-in ([error]), the wait after
-/// too many tries, a tip. Read out as soon as it appears; [announcement]
-/// (the minutes left) is its spoken value, read out each time it changes
-/// and never shown.
-class AccountNotice extends StatelessWidget {
-  const AccountNotice({
+/// A card with something to know: a refused sign-in ([error]), a wait, a
+/// tip, what is left of a test ([primary]). Information unless told otherwise.
+/// Read out as soon as it appears; [announcement] (the minutes left) is its
+/// spoken value, read out each time it changes and never shown.
+class NoticeCard extends StatelessWidget {
+  const NoticeCard({
     required this.icon,
     required this.title,
     this.detail,
     this.error = false,
+    this.primary = false,
     this.announcement,
     super.key,
   });
@@ -21,6 +22,7 @@ class AccountNotice extends StatelessWidget {
   final String title;
   final String? detail;
   final bool error;
+  final bool primary;
   final String? announcement;
 
   static const _iconSize = 20.0;
@@ -29,7 +31,11 @@ class AccountNotice extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final texts = context.texts;
-    final tone = error ? colors.error : colors.info;
+    final tone = error
+        ? colors.error
+        : primary
+        ? colors.primary
+        : colors.info;
     return Semantics(
       container: true,
       liveRegion: true,
@@ -55,7 +61,9 @@ class AccountNotice extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: texts.bodyStrong.copyWith(color: tone.text),
+                      style: texts.bodyStrong.copyWith(
+                        color: primary ? colors.textPrimary : tone.text,
+                      ),
                     ),
                     if (detail case final detail?)
                       Text(

@@ -2,6 +2,7 @@ import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
 import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
 import 'package:englizia/features/placement/domain/repositories/placement_repository.dart';
+import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -14,5 +15,6 @@ void registerPlacementDependencies(GetIt sl) {
     )
     ..registerLazySingleton<PlacementRepository>(
       () => PlacementRepositoryImpl(sl()),
-    );
+    )
+    ..registerFactory(() => PlacementIntroCubit(sl(), sl(), sl(), sl()));
 }

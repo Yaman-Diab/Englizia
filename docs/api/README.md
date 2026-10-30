@@ -83,6 +83,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
+| `/api/v1/app/placement/status` | GET | — | `{state, stage?, question?, lastLevel?, daysSinceResult?, daysUntilRetake?}` ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/password/forgot` | POST | `{email}` | none; the same answer whether or not the email has an account ([auth.md](auth.md)) | proposed, mock |

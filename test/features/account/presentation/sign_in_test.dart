@@ -5,13 +5,13 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/account_button.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
-import 'package:englizia/features/account/presentation/widgets/account_notice.dart';
 import 'package:flutter/foundation.dart' show Unicode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -208,7 +208,7 @@ void main() {
       fill(cubit, password: 'wrong');
       await cubit.submit();
       await settle(tester);
-      expect(find.byType(AccountNotice), findsOneWidget);
+      expect(find.byType(NoticeCard), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -326,7 +326,7 @@ void main() {
       );
       expect(submit(tester).onPressed, isNull);
       expect(
-        tester.getSemantics(find.byType(AccountNotice)),
+        tester.getSemantics(find.byType(NoticeCard)),
         isSemantics(value: 'يمكنك المحاولة بعد 5 دقائق', isLiveRegion: true),
       );
 

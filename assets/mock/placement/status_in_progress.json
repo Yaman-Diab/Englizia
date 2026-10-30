@@ -1,0 +1,11 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "state": "inProgress",
+    "stage": 1,
+    "question": 9
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

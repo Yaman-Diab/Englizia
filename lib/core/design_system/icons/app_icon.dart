@@ -152,6 +152,20 @@ enum AppIcon {
     '<circle cx="12" cy="12" r="9.5"/>'
     '<path d="M12 11v5.5M12 7.6v.2"/>',
   ),
+  bookmark('<path d="M6 3.5h12v17l-6-4-6 4z"/>'),
+  calendar(
+    '<rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/>'
+    '<path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  ),
+  headphones(
+    '<path d="M4 15v-3a8 8 0 0 1 16 0v3"/>'
+    '<rect x="3" y="14" width="4.5" height="6.5" rx="2"/>'
+    '<rect x="16.5" y="14" width="4.5" height="6.5" rx="2"/>',
+  ),
+  pauseCircle(
+    '<circle cx="12" cy="12" r="9"/>'
+    '<path d="M10 9v6M14 9v6"/>',
+  ),
   questionCircle(
     '<circle cx="12" cy="12" r="9"/>'
     '<path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/>'

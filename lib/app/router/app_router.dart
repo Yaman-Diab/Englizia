@@ -49,6 +49,8 @@ import 'package:englizia/features/onboarding/presentation/reminder/pages/reminde
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
 import 'package:englizia/features/onboarding/presentation/welcome/pages/welcome_page.dart';
+import 'package:englizia/features/placement/presentation/intro/cubit/placement_intro_cubit.dart';
+import 'package:englizia/features/placement/presentation/intro/pages/placement_intro_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
@@ -355,6 +357,27 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.onboardingPlacement,
+        builder: (context, state) {
+          final path = state.extra is OnboardingPath
+              ? state.extra! as OnboardingPath
+              : null;
+          return BlocProvider(
+            create: (_) => sl<PlacementIntroCubit>()..start(path?.trackId),
+            child: PlacementIntroPage(
+              // Preparing leaves nothing under this screen.
+              onBack: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
+              onStart: (restart) =>
+                  context.push(AppRoutes.placementQuestions, extra: restart),
+              onSkip: () => context.go(AppRoutes.home),
+              onLessons: () => context.go(AppRoutes.home),
+            ),
+          );
+        },
+      ),
+      // The test's questions are not built yet.
+      GoRoute(
+        path: AppRoutes.placementQuestions,
         builder: (_, _) => PendingPage(title: 'placement_intro_title'.tr()),
       ),
       GoRoute(

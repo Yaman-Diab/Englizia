@@ -294,5 +294,35 @@
   "password_changed_title": "Password changed",
   "password_changed_signed_in": "You're signed in with your new password, and can carry on where you left off.",
   "password_changed_sign_in": "Sign in now with your new password.",
-  "password_changed_continue": "Keep learning"
+  "password_changed_continue": "Keep learning",
+  "placement_intro_subtitle": "Short questions to find where you should start, so you don't repeat what you know.",
+  "placement_intro_subtitle_again": "You'll get different questions from last time.",
+  "placement_minutes": {
+    "other": "{min} to {max} minutes"
+  },
+  "placement_dont_guess": "Don't guess. Choosing \"I don't know\" makes your result more accurate",
+  "placement_can_pause": "You can stop and carry on later",
+  "placement_unfinished_stage_1": "You have an unfinished test: you stopped at question {question} of the first stage",
+  "placement_unfinished_stage_2": "You have an unfinished test: you stopped at question {question} of the second stage",
+  "placement_unfinished_stage_3": "You have an unfinished test: you stopped at question {question} of the third stage",
+  "placement_last_result": {
+    "zero": "Your last result: {level}, today",
+    "one": "Your last result: {level}, a day ago",
+    "other": "Your last result: {level}, {} days ago"
+  },
+  "placement_retake_after": {
+    "one": "You can take the test again in a day",
+    "other": "You can take the test again in {} days"
+  },
+  "placement_continue": "Continue the test",
+  "placement_retake": "Take the test again",
+  "placement_restart": "Start over",
+  "placement_back_to_lessons": "Back to my lessons",
+  "placement_skip": "Start from the beginning ({level}) with no test",
+  "placement_skip_plain": "Start from the beginning with no test",
+  "placement_offline": "The test needs a connection to load its questions",
+  "placement_sound_try": "The test has listening questions. Try the sound now",
+  "placement_sound_hear": "Can you hear the sentence clearly?",
+  "placement_sound_play": "Play the sentence that tries the sound",
+  "placement_sound_stop": "Stop the sound"
 }
