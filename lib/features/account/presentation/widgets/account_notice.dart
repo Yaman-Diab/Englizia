@@ -3,12 +3,12 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:flutter/material.dart';
 
-/// A card above the sign-in form: the refused try ([error]), or the wait
-/// after too many tries. Read out as soon as it appears; [announcement]
+/// A card in an account screen: a refused sign-in ([error]), the wait after
+/// too many tries, a tip. Read out as soon as it appears; [announcement]
 /// (the minutes left) is its spoken value, read out each time it changes
 /// and never shown.
-class SignInNotice extends StatelessWidget {
-  const SignInNotice({
+class AccountNotice extends StatelessWidget {
+  const AccountNotice({
     required this.icon,
     required this.title,
     this.detail,

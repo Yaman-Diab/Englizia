@@ -10,6 +10,8 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
+import 'package:englizia/features/account/presentation/check_email/cubit/check_email_cubit.dart';
+import 'package:englizia/features/account/presentation/check_email/pages/check_email_page.dart';
 import 'package:englizia/features/account/presentation/forgot_password/cubit/forgot_password_cubit.dart';
 import 'package:englizia/features/account/presentation/forgot_password/pages/forgot_password_page.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
@@ -401,10 +403,14 @@ GoRouter createAppRouter(AppSessionController session) {
           ),
         ),
       ),
-      // "Check your email" (S §5.2 step 2) is not built yet.
       GoRoute(
         path: AppRoutes.forgotPasswordSent,
-        builder: (_, _) => PendingPage(title: 'check_email_title'.tr()),
+        redirect: (_, state) =>
+            state.extra is String ? null : AppRoutes.forgotPassword,
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<CheckEmailCubit>(param1: state.extra! as String),
+          child: CheckEmailPage(onChange: () => context.pop()),
+        ),
       ),
     ],
   );

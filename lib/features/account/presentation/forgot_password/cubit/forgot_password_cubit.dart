@@ -72,6 +72,9 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
     if (!state.checked) emit(state.copyWith(checked: true));
   }
 
+  /// Back from the next step, to change the email or send again.
+  void reopened() => emit(state.copyWith(sent: false));
+
   Future<void> submit() async {
     if (!state.emailValid) {
       emit(state.copyWith(checked: true));

@@ -12,5 +12,15 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    FlutterMethodChannel(
+      name: "englizia/mail_app",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    ).setMethodCallHandler { call, result in
+      guard call.method == "open", let mail = URL(string: "message://") else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      UIApplication.shared.open(mail) { opened in result(opened) }
+    }
   }
 }

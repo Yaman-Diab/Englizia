@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/core/state/wait_countdown.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -97,12 +96,11 @@ final class SignInState extends Equatable {
 /// for a retry. The session is handed on (`SignInState.session`).
 class SignInCubit extends Cubit<SignInState> {
   SignInCubit(this._accounts, {String email = '', DateTime Function()? now})
-    : _now = now ?? DateTime.now,
+    : _countdown = WaitCountdown(now: now),
       super(SignInState(email: email, now: (now ?? DateTime.now)()));
 
   final AccountRepository _accounts;
-  final DateTime Function() _now;
-  Timer? _clock;
+  final WaitCountdown _countdown;
 
   /// When the server asks to wait but does not say how long.
   // ASSUMPTION(api): `Retry-After` on 429 is requested (docs/api/README.md,
@@ -144,37 +142,30 @@ class SignInCubit extends Cubit<SignInState> {
           ),
         );
       case Err(failure: RateLimitFailure(:final retryAfter)):
-        final now = _now();
+        final now = _countdown.now();
+        final until = now.add(retryAfter ?? defaultWait);
         emit(
           state.copyWith(
             sending: false,
             password: '',
             now: now,
-            lockedUntil: () => now.add(retryAfter ?? defaultWait),
+            lockedUntil: () => until,
           ),
         );
-        _tick();
+        _countdown.start(
+          until,
+          onTick: (now) => emit(state.copyWith(now: now)),
+          onEnd: (now) =>
+              emit(state.copyWith(now: now, lockedUntil: () => null)),
+        );
       case Err(:final failure):
         emit(state.copyWith(sending: false, failure: () => failure));
     }
   }
 
-  void _tick() {
-    _clock?.cancel();
-    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
-      final now = _now();
-      if (state.lockedUntil case final until? when !now.isBefore(until)) {
-        _clock?.cancel();
-        emit(state.copyWith(now: now, lockedUntil: () => null));
-      } else {
-        emit(state.copyWith(now: now));
-      }
-    });
-  }
-
   @override
   Future<void> close() {
-    _clock?.cancel();
+    _countdown.cancel();
     return super.close();
   }
 }

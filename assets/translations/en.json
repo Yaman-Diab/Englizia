@@ -269,5 +269,14 @@
   "forgot_google_hint": "Sign in with Google? You don't need a password.",
   "forgot_google": "Sign in with Google",
   "forgot_submit": "Send the link",
-  "check_email_title": "Check your email"
+  "check_email_title": "Check your email",
+  "check_email_body": "If this email has an account, we sent it a link to set a new password:",
+  "check_email_change": "Change",
+  "check_email_valid": "The link works for one hour.",
+  "check_email_spam": "Can't find it? Look in your spam folder {spam}.",
+  "check_email_open": "Open the mail app",
+  "check_email_resend": "Send again",
+  "check_email_resend_after": "Send again in {time}",
+  "check_email_resent": "We sent a new link",
+  "check_email_no_mail_app": "We couldn't find a mail app. Open your email in the browser."
 }
