@@ -5,6 +5,8 @@ abstract final class ApiEndpoints {
   // Confirmed in docs/api/openapi.json.
   static const register = '/api/v1/auth/register';
   // Confirmed in docs/api/openapi.json.
+  static const login = '/api/v1/auth/login';
+  // Confirmed in docs/api/openapi.json.
   static const logout = '/api/v1/auth/logout';
   // ASSUMPTION(api): docs/api/auth.md.
   static const guestAccount = '/api/v1/auth/guest';

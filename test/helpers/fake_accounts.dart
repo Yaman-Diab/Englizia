@@ -21,10 +21,13 @@ class FakeAccountRepository implements AccountRepository {
   FakeAccountRepository({
     this.guestResults = const [Ok(guestTokens)],
     this.accountResults = const [Ok(memberTokens)],
+    this.signInResults = const [Ok(memberTokens)],
   });
 
   final List<Result<AuthTokens>> guestResults;
   final List<Result<AuthTokens>> accountResults;
+  final List<Result<AuthTokens>> signInResults;
+  final signIns = <(String, String)>[];
   final guestAnswers = <OnboardingPath>[];
   final accounts = <NewAccount>[];
   final upgrades = <NewAccount>[];
@@ -47,6 +50,16 @@ class FakeAccountRepository implements AccountRepository {
     accounts.add(account);
     await gate?.future;
     return _nth(accountResults, accounts.length);
+  }
+
+  @override
+  Future<Result<AuthTokens>> signIn({
+    required String email,
+    required String password,
+  }) async {
+    signIns.add((email, password));
+    await gate?.future;
+    return _nth(signInResults, signIns.length);
   }
 
   /// Answers from [accountResults], like [createAccount].

@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_spacing.dart';
-import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -14,6 +13,7 @@ import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/widgets/email_suggestions.dart';
 import 'package:englizia/features/account/presentation/sign_up/widgets/email_taken_card.dart';
+import 'package:englizia/features/account/presentation/widgets/auth_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,7 +52,6 @@ class _SignUpPageState extends State<SignUpPage> {
       field: FocusNode()..addListener(() => _onFocus(field)),
   };
 
-  static const _mascotSize = 68.0;
   static const _fieldGap = AppSpacing.lg + AppSpacing.xxs;
 
   @override
@@ -127,108 +126,72 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget _build(BuildContext context, SignUpState state) {
     final cubit = context.read<SignUpCubit>();
-    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     final expression = _expressionFor(state);
     return PopScope(
       canPop: !state.sending,
-      child: Scaffold(
-        // The footer rides on the keyboard itself, so the body shrinks
-        // above it and a snack bar floats over the button, not on it.
-        resizeToAvoidBottomInset: false,
-        bottomNavigationBar: Padding(
-          padding: EdgeInsetsDirectional.only(
-            bottom: MediaQuery.viewInsetsOf(context).bottom,
+      child: AuthScaffold(
+        onBack: state.sending ? null : widget.onBack,
+        footer: AuthFooter(
+          keyboardOpen: MediaQuery.viewInsetsOf(context).bottom > 0,
+          above: _focus[SignUpField.email]!.hasFocus
+              ? EmailSuggestions(email: state.email, onPick: _pickEmail)
+              : null,
+          submit: AppButton(
+            label: 'account_create_submit'.tr(),
+            size: AppButtonSize.large,
+            isLoading: state.sending,
+            onPressed: state.canSubmit ? _submit : null,
           ),
-          child: SafeArea(
-            top: false,
-            child: Entrance(
-              motion: EntranceMotion.up,
-              delay: FormEntrance.action,
-              child: _Footer(
-                keyboardOpen: keyboardOpen,
-                suggestions: _focus[SignUpField.email]!.hasFocus
-                    ? EmailSuggestions(email: state.email, onPick: _pickEmail)
-                    : null,
-                submit: AppButton(
-                  label: 'account_create_submit'.tr(),
-                  size: AppButtonSize.large,
-                  isLoading: state.sending,
-                  onPressed: state.canSubmit ? _submit : null,
-                ),
-                onSignIn: state.sending
-                    ? null
-                    : () => widget.onSignIn(state.email.trim()),
+          switchLead: 'account_have_account'.tr(),
+          switchAction: 'account_sign_in'.tr(),
+          onSwitch: state.sending
+              ? null
+              : () => widget.onSignIn(state.email.trim()),
+        ),
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AuthHeader(
+              title: 'account_create_title'.tr(),
+              subtitle: cubit.upgradesGuest
+                  ? 'account_upgrade_subtitle'.tr()
+                  : 'account_create_subtitle'.tr(),
+              expression: expression,
+              waving: expression == MascotExpression.welcome,
+            ),
+            AnimatedSize(
+              duration: AppMotion.resolve(context, AppMotion.medium),
+              curve: AppMotion.smoothOut,
+              alignment: AlignmentDirectional.topCenter,
+              child: state.emailTaken
+                  ? Padding(
+                      padding: const EdgeInsetsDirectional.only(
+                        top: AppSpacing.lg + AppSpacing.xs,
+                      ),
+                      child: EmailTakenCard(
+                        onSignIn: () => widget.onSignIn(state.email.trim()),
+                      ),
+                    )
+                  : const SizedBox(width: double.infinity),
+            ),
+            const SizedBox(height: AppSpacing.xl),
+            AutofillGroup(
+              onDisposeAction: AutofillContextAction.cancel,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final field in SignUpField.values) ...[
+                    if (field.index > 0) const SizedBox(height: _fieldGap),
+                    Entrance(
+                      motion: EntranceMotion.up,
+                      delay: FormEntrance.field(field.index),
+                      child: _field(field, state, cubit),
+                    ),
+                  ],
+                ],
               ),
             ),
-          ),
-        ),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              _TopBar(onBack: state.sending ? null : widget.onBack),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsetsDirectional.fromSTEB(
-                    AppSpacing.xl,
-                    0,
-                    AppSpacing.xl,
-                    AppSpacing.lg + AppSpacing.xs,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Entrance(
-                        motion: EntranceMotion.up,
-                        delay: FormEntrance.header,
-                        child: _Header(
-                          expression: expression,
-                          waving: expression == MascotExpression.welcome,
-                          subtitle: cubit.upgradesGuest
-                              ? 'account_upgrade_subtitle'.tr()
-                              : 'account_create_subtitle'.tr(),
-                        ),
-                      ),
-                      AnimatedSize(
-                        duration: AppMotion.resolve(context, AppMotion.medium),
-                        curve: AppMotion.smoothOut,
-                        alignment: AlignmentDirectional.topCenter,
-                        child: state.emailTaken
-                            ? Padding(
-                                padding: const EdgeInsetsDirectional.only(
-                                  top: AppSpacing.lg + AppSpacing.xs,
-                                ),
-                                child: EmailTakenCard(
-                                  onSignIn: () =>
-                                      widget.onSignIn(state.email.trim()),
-                                ),
-                              )
-                            : const SizedBox(width: double.infinity),
-                      ),
-                      const SizedBox(height: AppSpacing.xl),
-                      AutofillGroup(
-                        onDisposeAction: AutofillContextAction.cancel,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final field in SignUpField.values) ...[
-                              if (field.index > 0)
-                                const SizedBox(height: _fieldGap),
-                              Entrance(
-                                motion: EntranceMotion.up,
-                                delay: FormEntrance.field(field.index),
-                                child: _field(field, state, cubit),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
@@ -300,155 +263,4 @@ class _SignUpPageState extends State<SignUpPage> {
       MascotExpression.encourage,
     _ => MascotExpression.welcome,
   };
-}
-
-class _TopBar extends StatelessWidget {
-  const _TopBar({required this.onBack});
-
-  /// Null while the account is being created.
-  final VoidCallback? onBack;
-
-  static const _height = 56.0;
-
-  @override
-  Widget build(BuildContext context) => SizedBox(
-    height: _height,
-    child: Padding(
-      padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
-      child: Align(
-        alignment: AlignmentDirectional.centerStart,
-        child: IconButton(
-          onPressed: onBack,
-          tooltip: 'common_back'.tr(),
-          icon: const Icon(Icons.arrow_back_rounded),
-        ),
-      ),
-    ),
-  );
-}
-
-class _Header extends StatelessWidget {
-  const _Header({
-    required this.expression,
-    required this.waving,
-    required this.subtitle,
-  });
-
-  final MascotExpression expression;
-  final bool waving;
-  final String subtitle;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final texts = context.texts;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Semantics(
-                header: true,
-                child: Text(
-                  'account_create_title'.tr(),
-                  style: texts.display.copyWith(color: colors.textPrimary),
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                subtitle,
-                style: texts.body.copyWith(color: colors.textSecondary),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: AppSpacing.md),
-        Mascot(
-          expression: expression,
-          waving: waving,
-          size: _SignUpPageState._mascotSize,
-        ),
-      ],
-    );
-  }
-}
-
-/// The send button, with the domain suggestions above it while the email
-/// is typed, and "have an account? sign in" under it while the keyboard is
-/// closed (the keyboard would hide it).
-class _Footer extends StatelessWidget {
-  const _Footer({
-    required this.keyboardOpen,
-    required this.suggestions,
-    required this.submit,
-    required this.onSignIn,
-  });
-
-  final bool keyboardOpen;
-  final Widget? suggestions;
-  final Widget submit;
-  final VoidCallback? onSignIn;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final texts = context.texts;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: colors.background,
-        border: keyboardOpen
-            ? null
-            : Border(top: BorderSide(color: colors.border)),
-      ),
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(
-          AppSpacing.xl,
-          AppSpacing.sm + AppSpacing.xxs,
-          AppSpacing.xl,
-          AppSpacing.sm + AppSpacing.xxs,
-        ),
-        child: AnimatedSize(
-          duration: AppMotion.resolve(context, AppMotion.fast),
-          curve: AppMotion.smoothOut,
-          alignment: AlignmentDirectional.bottomCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (keyboardOpen && suggestions != null) suggestions!,
-              submit,
-              if (!keyboardOpen) ...[
-                const SizedBox(height: AppSpacing.xxs),
-                TextButton(
-                  onPressed: onSignIn,
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'account_have_account'.tr(),
-                          style: texts.body.copyWith(
-                            color: colors.textSecondary,
-                          ),
-                        ),
-                        const TextSpan(text: ' '),
-                        TextSpan(
-                          text: 'account_sign_in'.tr(),
-                          style: texts.bodyStrong.copyWith(
-                            color: colors.primary.text,
-                          ),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }

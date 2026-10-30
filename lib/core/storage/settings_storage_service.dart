@@ -10,6 +10,7 @@ final class SettingsStorageService {
   static const _themeModeKey = 'settings.theme_mode';
   static const _hasLaunchedKey = 'app.has_launched';
   static const _installationIdKey = 'app.installation_id';
+  static const _lastSignInKey = 'account.last_sign_in';
 
   final SharedPreferences _prefs;
 
@@ -25,6 +26,14 @@ final class SettingsStorageService {
 
   Future<void> markLaunched() async {
     await _prefs.setBool(_hasLaunchedKey, true);
+  }
+
+  /// The provider used for the last sign-in (`google`, `apple`), for the
+  /// «آخر دخول لك» badge. Kept on the phone only (S §5.1).
+  String? get lastSignInMethod => _prefs.getString(_lastSignInKey);
+
+  Future<void> setLastSignInMethod(String method) async {
+    await _prefs.setString(_lastSignInKey, method);
   }
 
   /// A random id for this install, made on first use. Not personal: the

@@ -18,6 +18,14 @@ abstract interface class AccountRepository {
   /// naming the field (`displayName`, `email`, `password`).
   Future<Result<AuthTokens>> createAccount(NewAccount account);
 
+  /// Signs in with email and password. Wrong credentials, whether or not
+  /// the email has an account, fail with `UnauthorizedFailure`; too many
+  /// tries with `RateLimitFailure`, whose wait comes from the server.
+  Future<Result<AuthTokens>> signIn({
+    required String email,
+    required String password,
+  });
+
   /// Turns this phone's guest account into a member account with [account]'s
   /// email and password, keeping its progress (ADR 10). Fails like
   /// [createAccount].

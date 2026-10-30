@@ -46,6 +46,7 @@ class AppTextField extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.shakeTrigger,
+    this.onObscuredChanged,
     super.key,
   });
 
@@ -70,6 +71,9 @@ class AppTextField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final Object? shakeTrigger;
+
+  /// The eye hid or showed the password (true while hidden).
+  final ValueChanged<bool>? onObscuredChanged;
 
   static const _height = 56.0;
   static const _iconSize = 20.0;
@@ -190,7 +194,10 @@ class _AppTextFieldState extends State<AppTextField> {
                 ? IconButton(
                     onPressed: widget.readOnly
                         ? null
-                        : () => setState(() => _hidden = !_hidden),
+                        : () {
+                            setState(() => _hidden = !_hidden);
+                            widget.onObscuredChanged?.call(_hidden);
+                          },
                     tooltip: _hidden
                         ? 'field_password_show'.tr()
                         : 'field_password_hide'.tr(),
