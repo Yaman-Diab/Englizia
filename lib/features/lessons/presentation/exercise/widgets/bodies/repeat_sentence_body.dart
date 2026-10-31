@@ -13,6 +13,7 @@ import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/b
 import 'package:englizia/features/lessons/presentation/exercise/widgets/session/mic_permission_sheet.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/clip_button.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/mic_block.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -212,7 +213,7 @@ class _SaidWord extends StatelessWidget {
       clipBehavior: Clip.none,
       children: [
         CustomPaint(
-          foregroundPainter: _WordLine(
+          foregroundPainter: WordLine(
             color: heard == null
                 ? Colors.transparent
                 : (heard ? colors.success.fill : context.scheme.outline)
@@ -268,34 +269,4 @@ class _SaidWord extends StatelessWidget {
       child: const SizedBox.shrink(),
     );
   }
-}
-
-class _WordLine extends CustomPainter {
-  const _WordLine({required this.color, required this.dotted});
-
-  final Color color;
-  final bool dotted;
-
-  static const _dot = 2.0;
-  static const _gap = 3.0;
-  static const _stroke = 2.0;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final y = size.height - _stroke / 2;
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = _stroke;
-    if (!dotted) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-      return;
-    }
-    for (var x = 0.0; x < size.width; x += _dot + _gap) {
-      canvas.drawLine(Offset(x, y), Offset(x + _dot, y), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(_WordLine oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.dotted != dotted;
 }

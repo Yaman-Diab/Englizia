@@ -3,6 +3,7 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/widgets/blank_sentence.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
+import 'package:englizia/core/design_system/widgets/fading_scroll.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
 import 'package:englizia/features/placement/presentation/test/widgets/listening_block.dart';
@@ -122,61 +123,17 @@ class _Ask extends StatelessWidget {
   );
 }
 
-/// The reading text: scrolls inside a card of limited height, fading out at the
-/// bottom until its end is reached.
-class _PassageCard extends StatefulWidget {
+/// The reading text, in a card of limited height.
+class _PassageCard extends StatelessWidget {
   const _PassageCard({required this.text, super.key});
 
   final String text;
 
-  @override
-  State<_PassageCard> createState() => _PassageCardState();
-}
-
-class _PassageCardState extends State<_PassageCard> {
-  final _scroll = ScrollController();
-  bool _atEnd = true;
-
   static const _maxHeight = 200.0;
-  static const _fade = 44.0;
-
-  bool _follow(ScrollMetrics metrics) {
-    final atEnd = metrics.extentAfter <= 2;
-    if (atEnd != _atEnd) setState(() => _atEnd = atEnd);
-    // The page must not take this scrolling for its own.
-    return true;
-  }
-
-  @override
-  void dispose() {
-    _scroll.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final text = NotificationListener<ScrollMetricsNotification>(
-      onNotification: (n) => _follow(n.metrics),
-      child: NotificationListener<ScrollUpdateNotification>(
-        onNotification: (n) => _follow(n.metrics),
-        child: Scrollbar(
-          controller: _scroll,
-          child: SingleChildScrollView(
-            controller: _scroll,
-            padding: const EdgeInsetsDirectional.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            child: Text(
-              widget.text,
-              locale: _english,
-              style: context.texts.body.copyWith(color: colors.textPrimary),
-            ),
-          ),
-        ),
-      ),
-    );
     return Semantics(
       container: true,
       label: 'placement_passage'.tr(),
@@ -190,25 +147,16 @@ class _PassageCardState extends State<_PassageCard> {
             borderRadius: BorderRadius.circular(AppRadius.md),
             border: Border.all(color: colors.border),
           ),
-          child: ShaderMask(
-            blendMode: BlendMode.dstIn,
-            shaderCallback: (bounds) => LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                colors.surface,
-                colors.surface,
-                if (_atEnd) colors.surface else Colors.transparent,
-              ],
-              stops: [
-                0,
-                bounds.height == 0
-                    ? 1
-                    : ((bounds.height - _fade) / bounds.height).clamp(0, 1),
-                1,
-              ],
-            ).createShader(bounds),
-            child: text,
+          child: FadingScroll(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.lg,
+              vertical: AppSpacing.md,
+            ),
+            child: Text(
+              text,
+              locale: _english,
+              style: context.texts.body.copyWith(color: colors.textPrimary),
+            ),
           ),
         ),
       ),
