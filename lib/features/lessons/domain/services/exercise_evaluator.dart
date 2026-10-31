@@ -42,6 +42,13 @@ Evaluation evaluate(Exercise exercise, ExerciseDraft draft) => switch ((
           draft.heard.where((word) => word).length * 100 >=
           exercise.passPercent * draft.heard.length,
     ),
+  (final ErrorCorrectionExercise exercise, final CorrectionDraft draft) =>
+    CorrectionEvaluation(
+      wordRight: draft.tokenId == exercise.wrongTokenId,
+      correctionRight: draft.replacement == exercise.correction,
+    ),
+  // Only the server's AI can judge the learner's own words.
+  (SpeakAnswerExercise(), SpokenDraft()) => const ReviewPending(),
   _ => throw ArgumentError.value(draft, 'draft', 'Not for this exercise'),
 };
 

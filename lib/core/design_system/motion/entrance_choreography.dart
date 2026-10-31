@@ -132,3 +132,23 @@ abstract final class FeedbackEntrance {
   static const stroke = Duration(milliseconds: 270);
   static const reward = Duration(milliseconds: 520);
 }
+
+/// A conversation's lines, one after the other.
+abstract final class DialogueEntrance {
+  static const first = Duration(milliseconds: 160);
+  static const stagger = Duration(milliseconds: 150);
+
+  static Duration line(int index) => first + stagger * index;
+}
+
+/// The learner's words arriving in their bubble, then the judging.
+abstract final class SpokenEntrance {
+  static const first = Duration(milliseconds: 120);
+  static const stagger = Duration(milliseconds: 80);
+  static const toCheck = Duration(milliseconds: 300);
+
+  static Duration word(int index) => first + stagger * index;
+
+  /// When the last of [words] has had its turn and the judging can start.
+  static Duration settled(int words) => word(words) + toCheck;
+}

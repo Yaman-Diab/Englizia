@@ -568,5 +568,27 @@
     "few": "سمعنا {heard} من {} كلمات",
     "many": "سمعنا {heard} من {} كلمة",
     "other": "سمعنا {heard} من {} كلمة"
-  }
+  },
+  "lesson_fb_other_translation": "ترجمة أخرى صحيحة:",
+  "lesson_fb_answered": "أجبت عن السؤال",
+  "lesson_fb_ai_note": "ملاحظة",
+  "lesson_fb_ai_better": "صيغة أدق:",
+  "lesson_fb_off_title": "لم تجب عن السؤال",
+  "lesson_fb_quota": "انتهى رصيد التقييم لليوم. تخطّينا السؤال دون احتسابه.",
+  "lesson_fix_choose": "اختر التصحيح",
+  "lesson_fix_pick": "اختر {word}",
+  "lesson_fix_selected": "{word}، محددة",
+  "lesson_dialogue": "الحوار",
+  "lesson_dialogue_your_reply": "ردّك هنا",
+  "lesson_reading_step": "سؤال {step} من {steps} عن النص",
+  "lesson_reading_text": "النص",
+  "lesson_reading_listen": "استمع إلى النص",
+  "lesson_reading_stop": "أوقف النص",
+  "lesson_reading_expand": "اعرض النص بملء الشاشة",
+  "lesson_reading_close": "أغلق النص",
+  "lesson_reading_back": "عُد إلى السؤال",
+  "lesson_speak_type_instead": "اكتب بدل الكلام",
+  "lesson_speak_instead": "تحدّث بدل الكتابة",
+  "lesson_speak_your_answer": "إجابتك",
+  "lesson_speak_said": "إجابتك: {text}"
 }

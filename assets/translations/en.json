@@ -495,5 +495,27 @@
   "lesson_heard_count": {
     "one": "We heard {heard} of {} word",
     "other": "We heard {heard} of {} words"
-  }
+  },
+  "lesson_fb_other_translation": "Another correct translation:",
+  "lesson_fb_answered": "You answered the question",
+  "lesson_fb_ai_note": "Note",
+  "lesson_fb_ai_better": "A more accurate way:",
+  "lesson_fb_off_title": "That doesn't answer the question",
+  "lesson_fb_quota": "Today's reviews have run out. We skipped this question without counting it.",
+  "lesson_fix_choose": "Choose the correction",
+  "lesson_fix_pick": "Choose {word}",
+  "lesson_fix_selected": "{word}, selected",
+  "lesson_dialogue": "The conversation",
+  "lesson_dialogue_your_reply": "Your reply goes here",
+  "lesson_reading_step": "Question {step} of {steps} about the text",
+  "lesson_reading_text": "The text",
+  "lesson_reading_listen": "Listen to the text",
+  "lesson_reading_stop": "Stop the text",
+  "lesson_reading_expand": "Show the text on the whole screen",
+  "lesson_reading_close": "Close the text",
+  "lesson_reading_back": "Back to the question",
+  "lesson_speak_type_instead": "Type instead of speaking",
+  "lesson_speak_instead": "Speak instead of typing",
+  "lesson_speak_your_answer": "Your answer",
+  "lesson_speak_said": "Your answer: {text}"
 }

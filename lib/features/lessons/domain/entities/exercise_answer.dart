@@ -99,6 +99,35 @@ final class SpeechDraft extends ExerciseDraft {
   List<Object?> get props => [heard];
 }
 
+/// The word chosen as the wrong one, and its correction once there is one.
+final class CorrectionDraft extends ExerciseDraft {
+  const CorrectionDraft({required this.tokenId, this.replacement});
+
+  final String tokenId;
+  final String? replacement;
+
+  @override
+  bool get isComplete => replacement != null;
+
+  @override
+  List<Object?> get props => [tokenId, replacement];
+}
+
+/// The learner's own answer: what the engine heard, or what they [typed]. Only
+/// the words leave the phone, never a recording (S §7.5).
+final class SpokenDraft extends ExerciseDraft {
+  const SpokenDraft(this.text, {this.typed = false});
+
+  final String text;
+  final bool typed;
+
+  @override
+  bool get isComplete => text.trim().isNotEmpty;
+
+  @override
+  List<Object?> get props => [text, typed];
+}
+
 /// What checking found on the phone: instant, and final only for what the
 /// learner sees. The server marks it again, and its result is the official one.
 sealed class Evaluation extends Equatable {
@@ -221,6 +250,63 @@ final class SpeechEvaluation extends Evaluation {
 
   @override
   List<Object?> get props => [heard, correct];
+}
+
+/// The word and its correction: right only together.
+final class CorrectionEvaluation extends Evaluation {
+  const CorrectionEvaluation({
+    required this.wordRight,
+    required this.correctionRight,
+  });
+
+  final bool wordRight;
+  final bool correctionRight;
+
+  @override
+  bool get correct => wordRight && correctionRight;
+
+  @override
+  List<Object?> get props => [wordRight, correctionRight];
+}
+
+/// The server's AI found the question answered, and has a word on how: [note],
+/// and a [better] way to say it when there is one.
+final class SpokenAnswered extends Evaluation {
+  const SpokenAnswered({required this.note, this.better});
+
+  final String note;
+  final String? better;
+
+  @override
+  bool get correct => true;
+
+  @override
+  List<Object?> get props => [note, better];
+}
+
+/// It heard an answer to something else. Not wrong, and not counted: another
+/// try, or moving on (S §16.2).
+final class SpokenOffTopic extends Evaluation {
+  const SpokenOffTopic({required this.note});
+
+  final String note;
+
+  @override
+  bool get correct => false;
+
+  @override
+  List<Object?> get props => [note];
+}
+
+/// The day's AI allowance has run out: the question is skipped, uncounted.
+final class ReviewQuotaOut extends Evaluation {
+  const ReviewQuotaOut();
+
+  @override
+  bool get correct => false;
+
+  @override
+  List<Object?> get props => const [];
 }
 
 /// An answer checked, on its way to the server. [hinted] makes a right answer

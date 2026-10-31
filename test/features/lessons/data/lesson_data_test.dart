@@ -17,7 +17,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
 import 'package:englizia/features/lessons/domain/services/stable_order.dart';
-import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart' hide Evaluation;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
@@ -50,6 +50,16 @@ class _Remote implements LessonRemoteDataSource {
     if (offline) throw const NetworkException('connectionError');
     reviewed.add(request);
     return reviewSays;
+  }
+
+  @override
+  Future<Evaluation> reviewSpoken(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    if (offline) throw const NetworkException('connectionError');
+    reviewed.add(request);
+    return const SpokenAnswered(note: 'A note.');
   }
 
   @override
@@ -778,6 +788,164 @@ void main() {
     });
   });
 
+  group('the advanced templates', () {
+    final lesson = LessonModel(sampleLessonJson()).toEntity('seed');
+    T first<T extends Exercise>() => lesson.exercises.whereType<T>().first;
+
+    test('a translation takes any of its forms, and no more', () {
+      final exercise = first<TranslationExercise>();
+
+      expect(exercise.arabic, isNotEmpty);
+      expect(
+        evaluate(exercise, const TextDraft('i take the bus to work every day')),
+        const TextEvaluation(correct: true, acceptedIndex: 1),
+      );
+      expect(
+        evaluate(
+          exercise,
+          const TextDraft('I go to work by bus evrey dayss'),
+        ).correct,
+        isFalse,
+      );
+    });
+
+    test('a correction is right with the word and its fix together', () {
+      final exercise = first<ErrorCorrectionExercise>();
+
+      expect(exercise.corrections.map((c) => c.text), contains("doesn't"));
+      expect(
+        evaluate(
+          exercise,
+          const CorrectionDraft(tokenId: 't2', replacement: "doesn't"),
+        ).correct,
+        isTrue,
+      );
+      expect(
+        evaluate(
+          exercise,
+          const CorrectionDraft(tokenId: 't3', replacement: "doesn't"),
+        ).correct,
+        isFalse,
+      );
+      expect(
+        evaluate(
+          exercise,
+          const CorrectionDraft(tokenId: 't2', replacement: 'not'),
+        ).correct,
+        isFalse,
+      );
+      expect(const CorrectionDraft(tokenId: 't2').isComplete, isFalse);
+    });
+
+    test('a correction whose wrong word is not in the sentence is skipped', () {
+      final parsed = _parse(
+        [
+          _question({
+            'template': 'errorCorrection',
+            'prompt': {
+              'tokens': [
+                {'id': 't1', 'text': 'She'},
+              ],
+            },
+            'wrongTokenId': 't9',
+            'correction': 'x',
+          }),
+        ].followedBy([
+          _question({'id': 'ok'}),
+        ]).toList(),
+      );
+
+      expect(parsed.exercises.single.id, 'ok');
+    });
+
+    test('a conversation has one line for the learner', () {
+      final exercise = first<DialogueExercise>();
+
+      expect(exercise.characterName, 'Lina');
+      expect(exercise.lines.where((line) => line.isLearner), hasLength(1));
+      final broken = _parse([
+        _question({
+          'template': 'dialogueCompletion',
+          'character': {'name': 'A'},
+          'lines': [
+            {'speaker': 'character', 'text': 'Hi'},
+          ],
+        }),
+        _question({'id': 'ok'}),
+      ]);
+      expect(broken.exercises.single.id, 'ok');
+    });
+
+    test('a text becomes a step per question, sharing what stays', () {
+      final steps = lesson.exercises.whereType<ReadingExercise>().toList();
+
+      expect(steps.map((s) => s.step), [1, 2, 3, 4]);
+      expect(steps.every((s) => s.steps == 4), isTrue);
+      expect(steps.map((s) => s.stayKey).toSet(), {'q17'});
+      expect(steps.map((s) => s.id).toSet(), hasLength(4));
+      expect(steps.first.answerClipUrl, isNull);
+      expect(steps.first.clipUrl, steps.first.passage.audioUrl);
+    });
+
+    test('questions of the AI only where it is on', () {
+      Map<String, Object?> withAi(bool? on) => {
+        'id': 'les',
+        'version': 1,
+        'aiReviewEnabled': ?on,
+        'exercises': [
+          _question({'id': 'ok'}),
+          _question({
+            'id': 'ai',
+            'template': 'speakAnswer',
+            'prompt': {'en': 'Why?'},
+          }),
+        ],
+      };
+
+      expect(LessonModel(withAi(true)).toEntity('s').exercises, hasLength(2));
+      expect(LessonModel(withAi(false)).toEntity('s').exercises, hasLength(1));
+      expect(LessonModel(withAi(null)).toEntity('s').exercises, hasLength(1));
+    });
+
+    test('what the AI says is read by its outcome', () {
+      expect(
+        spokenReviewFromJson({
+          'outcome': 'answered',
+          'note': 'n',
+          'better': 'b',
+        }),
+        const SpokenAnswered(note: 'n', better: 'b'),
+      );
+      expect(
+        spokenReviewFromJson({'outcome': 'offTopic', 'note': 'n'}),
+        const SpokenOffTopic(note: 'n'),
+      );
+      expect(
+        spokenReviewFromJson({'outcome': 'quotaOut'}),
+        const ReviewQuotaOut(),
+      );
+      expect(
+        () => spokenReviewFromJson({'outcome': 'new'}),
+        throwsFormatException,
+      );
+    });
+
+    test('a spoken answer is sent as its words, never more', () {
+      const attempt = ExerciseAttempt(
+        lessonId: 'les',
+        lessonVersion: 3,
+        questionId: 'q',
+        draft: SpokenDraft('I rest', typed: true),
+        hinted: false,
+      );
+
+      expect(attemptToJson(attempt, 'id')['answer'], {
+        'text': 'I rest',
+        'typed': true,
+      });
+    });
+  });
+
   group('the endpoints', () {
     late FakeHttpAdapter adapter;
     late LessonRemoteDataSourceImpl source;
@@ -801,7 +969,7 @@ void main() {
       final model = await source.getLesson('les');
 
       expect(adapter.requests.single.path, '/api/v1/app/lessons/les');
-      expect(model.toEntity('s').exercises, hasLength(13));
+      expect(model.toEntity('s').exercises, hasLength(21));
     });
 
     test('an answer goes to its lesson, with its attempt id', () async {
@@ -827,6 +995,42 @@ void main() {
     });
 
     Future<void> settle() => Future<void>.delayed(Duration.zero);
+
+    const spoken = ExerciseAttempt(
+      lessonId: 'les',
+      lessonVersion: 3,
+      questionId: 'q18',
+      draft: SpokenDraft('I rest'),
+      hinted: false,
+    );
+
+    test('a spoken answer judged now leaves nothing to send', () async {
+      final result = await repository.reviewSpoken(spoken);
+      await settle();
+
+      expect(result, isA<Ok<Evaluation>>());
+      expect(remote.reviewed.single['answer'], {
+        'text': 'I rest',
+        'typed': false,
+      });
+      expect(remote.sent, isEmpty);
+    });
+
+    test(
+      'a spoken answer the server missed goes later, the same attempt',
+      () async {
+        remote.offline = true;
+        final result = await repository.reviewSpoken(spoken);
+        await settle();
+        expect(result, isA<Err<Evaluation>>());
+
+        remote.offline = false;
+        await repository.sendSaved();
+
+        expect(remote.sent.single['questionId'], 'q18');
+        expect(remote.sent.single['attemptId'], isNotEmpty);
+      },
+    );
 
     List<Object?> unsent() =>
         (jsonDecode(settings.lessonProgress!) as Map)['unsent'] as List;

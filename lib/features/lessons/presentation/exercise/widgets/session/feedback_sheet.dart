@@ -129,7 +129,10 @@ class _FeedbackSheetState extends State<FeedbackSheet>
     final colors = context.colors;
     final evaluation = widget.evaluation;
     final ToneColors tone = switch (evaluation) {
-      ReviewPending() || ReviewLater() => colors.info,
+      ReviewPending() ||
+      ReviewLater() ||
+      SpokenOffTopic() ||
+      ReviewQuotaOut() => colors.info,
       SpeechEvaluation(correct: false) => colors.info,
       _ when evaluation.correct => colors.success,
       _ => colors.error,
@@ -137,7 +140,9 @@ class _FeedbackSheetState extends State<FeedbackSheet>
     final reduce = AppMotion.reduceMotion(context);
     final inset = MediaQuery.paddingOf(context).bottom;
     final waiting = evaluation is ReviewPending;
-    final retrying = evaluation is SpeechEvaluation && !evaluation.correct;
+    final retrying =
+        (evaluation is SpeechEvaluation && !evaluation.correct) ||
+        evaluation is SpokenOffTopic;
     final sheet = ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * FeedbackSheet._maxShare,
@@ -300,7 +305,9 @@ class _Content extends StatelessWidget {
       return _Waiting(
         tone: tone,
         title: 'lesson_fb_reviewing'.tr(),
-        leading: AppSpinner(size: _Mark.size - 8, color: tone.fill),
+        leading: exercise is SpeakAnswerExercise
+            ? const _AiDots()
+            : AppSpinner(size: _Mark.size - 8, color: tone.fill),
       );
     }
     if (evaluation is ReviewLater) {
@@ -320,8 +327,38 @@ class _Content extends StatelessWidget {
         ),
       );
     }
+    if (evaluation is ReviewQuotaOut) {
+      return _Waiting(
+        tone: tone,
+        title: 'lesson_fb_quota'.tr(),
+        leading: Container(
+          width: _Mark.size,
+          height: _Mark.size,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(color: tone.fill, shape: BoxShape.circle),
+          child: Icon(
+            Icons.info_outline_rounded,
+            size: AppSizes.iconSm + AppSpacing.xxs,
+            color: context.colors.surface,
+          ),
+        ),
+      );
+    }
     if (evaluation is SpeechEvaluation && !evaluation.correct) {
-      return _SpeechRetry(tone: tone);
+      return _SpeechRetry(
+        tone: tone,
+        title: 'lesson_fb_try_title'.tr(),
+        body: 'lesson_fb_try_body'.tr(),
+        icon: Icons.mic_rounded,
+      );
+    }
+    if (evaluation is SpokenOffTopic) {
+      return _SpeechRetry(
+        tone: tone,
+        title: 'lesson_fb_off_title'.tr(),
+        body: evaluation.note,
+        icon: Icons.info_outline_rounded,
+      );
     }
     final correct = evaluation.correct;
     final xp = this.xp;
@@ -331,7 +368,9 @@ class _Content extends StatelessWidget {
     final listening = exercise is ListenChooseExercise;
     final parts = correctAnswerParts(exercise);
     final title = correct
-        ? exercise.isSpeech
+        ? exercise is SpeakAnswerExercise
+              ? 'lesson_fb_answered'.tr()
+              : exercise.isSpeech
               ? 'lesson_fb_well_done'.tr()
               : exercise.checksItself
               ? 'lesson_fb_matched'.tr()
@@ -346,7 +385,12 @@ class _Content extends StatelessWidget {
           label: correct
               ? title
               : 'lesson_fb_wrong_said'.tr(
-                  namedArgs: {'answer': parts.map((p) => p.text).join()},
+                  namedArgs: {
+                    'answer': parts
+                        .where((p) => !p.struck)
+                        .map((p) => p.text)
+                        .join(),
+                  },
                 ),
           child: Row(
             children: [
@@ -390,9 +434,17 @@ class _Content extends StatelessWidget {
         ],
         if (other != null) ...[
           SizedBox(height: xp == null ? AppSpacing.sm : AppSpacing.lg),
-          _Caption('lesson_fb_other_form'.tr()),
+          _Caption(
+            exercise is TranslationExercise
+                ? 'lesson_fb_other_translation'.tr()
+                : 'lesson_fb_other_form'.tr(),
+          ),
           const SizedBox(height: AppSpacing.xs),
           _EnglishLine(parts: [AnswerPart(other)]),
+        ],
+        if (evaluation case SpokenAnswered(:final note, :final better)) ...[
+          const SizedBox(height: AppSpacing.md),
+          _AiNote(note: note, better: better),
         ],
         if (!correct && !listening && parts.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.sm),
@@ -434,12 +486,20 @@ class _Content extends StatelessWidget {
   }
 }
 
-/// Not heard well enough: neutral, as speech can't be wrong (S §7.5). No red,
-/// no cross, nothing counted.
+/// Not heard well enough, or an answer to something else: neutral, as speech
+/// can't be wrong (S §7.5). No red, no cross, nothing counted.
 class _SpeechRetry extends StatelessWidget {
-  const _SpeechRetry({required this.tone});
+  const _SpeechRetry({
+    required this.tone,
+    required this.title,
+    required this.body,
+    required this.icon,
+  });
 
   final ToneColors tone;
+  final String title;
+  final String body;
+  final IconData icon;
 
   static const _iconSize = 18.0;
 
@@ -463,7 +523,7 @@ class _SpeechRetry extends StatelessWidget {
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
-                  Icons.mic_rounded,
+                  icon,
                   size: _iconSize,
                   color: context.colors.surface,
                 ),
@@ -471,7 +531,7 @@ class _SpeechRetry extends StatelessWidget {
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
-                  'lesson_fb_try_title'.tr(),
+                  title,
                   style: context.texts.title.copyWith(color: tone.text),
                 ),
               ),
@@ -479,7 +539,7 @@ class _SpeechRetry extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            'lesson_fb_try_body'.tr(),
+            body,
             style: context.texts.body.copyWith(
               color: context.colors.textPrimary,
             ),
@@ -746,6 +806,11 @@ class _EnglishLine extends StatelessWidget {
                               ? TextDecoration.underline
                               : null,
                         )
+                      : part.struck
+                      ? TextStyle(
+                          color: context.colors.textSecondary,
+                          decoration: TextDecoration.lineThrough,
+                        )
                       : null,
                 ),
             ],
@@ -942,6 +1007,136 @@ class _ExplainButton extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Three dots that pulse while the AI judges, still under reduce motion.
+class _AiDots extends StatefulWidget {
+  const _AiDots();
+
+  @override
+  State<_AiDots> createState() => _AiDotsState();
+}
+
+class _AiDotsState extends State<_AiDots> with SingleTickerProviderStateMixin {
+  static const _dot = 7.0;
+  static const _dots = 3;
+  static const _dimmest = .3;
+
+  late final _round = AnimationController(
+    vsync: this,
+    duration: AppMotion.aiDots,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (AppMotion.reduceMotion(context)) {
+      _round.stop();
+    } else if (!_round.isAnimating) {
+      unawaited(_round.repeat());
+    }
+  }
+
+  @override
+  void dispose() {
+    _round.dispose();
+    super.dispose();
+  }
+
+  double _strength(int dot) {
+    final offset =
+        AppMotion.aiDotsOffset.inMilliseconds /
+        AppMotion.aiDots.inMilliseconds *
+        dot;
+    final t = (_round.value - offset) % 1;
+    return _dimmest + (1 - _dimmest) * (1 - (2 * t - 1).abs());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.colors.ai.fill;
+    return ExcludeSemantics(
+      child: AnimatedBuilder(
+        animation: _round,
+        builder: (context, _) => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var i = 0; i < _dots; i++) ...[
+              if (i > 0) const SizedBox(width: AppSpacing.xxs),
+              Container(
+                width: _dot,
+                height: _dot,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: _strength(i)),
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// What the AI has to say: the only violet in these templates, as violet means
+/// AI.
+class _AiNote extends StatelessWidget {
+  const _AiNote({required this.note, required this.better});
+
+  final String note;
+  final String? better;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final texts = context.texts;
+    final better = this.better;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: colors.ai.surface,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.auto_awesome_rounded,
+                size: AppSizes.iconSm,
+                color: colors.ai.text,
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                'lesson_fb_ai_note'.tr(),
+                style: texts.captionStrong.copyWith(color: colors.ai.text),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            note,
+            textDirection: TextDirection.rtl,
+            style: texts.caption.copyWith(color: colors.textPrimary),
+          ),
+          if (better != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _Caption('lesson_fb_ai_better'.tr()),
+            const SizedBox(height: AppSpacing.xxs),
+            _EnglishLine(parts: [AnswerPart(better, strong: true)]),
+          ],
+        ],
       ),
     );
   }

@@ -8,6 +8,7 @@
     "explainEnabled": true,
     "speechPassPercent": 70,
     "typoMinLetters": 5,
+    "aiReviewEnabled": true,
     "exercises": [
       {
         "id": "q1",
@@ -374,6 +375,242 @@
         ],
         "explanation": {
           "ar": "b-a-r-n: أربعة حروف، والصوت a فيها طويل."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q14",
+        "template": "translation",
+        "instructionAr": "ترجم إلى الإنجليزية",
+        "prompt": {
+          "ar": "أذهب إلى العمل بالحافلة كل يوم.",
+          "audio": "https://example.com/mock/lessons/by_bus.mp3"
+        },
+        "accepted": [
+          "I go to work by bus every day.",
+          "I take the bus to work every day.",
+          "Every day I go to work by bus.",
+          "Every day I take the bus to work."
+        ],
+        "typoTolerance": true,
+        "explanation": {
+          "ar": "«بالحافلة» = by bus، و«أذهب» في المضارع البسيط = I go، وevery day تأتي غالبًا في آخر الجملة."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q15",
+        "template": "errorCorrection",
+        "instructionAr": "في الجملة خطأ واحد. اضغط عليه.",
+        "prompt": {
+          "en": "She don't like coffee.",
+          "tokens": [
+            {
+              "id": "t1",
+              "text": "She"
+            },
+            {
+              "id": "t2",
+              "text": "don't"
+            },
+            {
+              "id": "t3",
+              "text": "like"
+            },
+            {
+              "id": "t4",
+              "text": "coffee."
+            }
+          ]
+        },
+        "wrongTokenId": "t2",
+        "correction": "doesn't",
+        "distractors": [
+          {
+            "text": "isn't",
+            "misconception": "be_vs_do"
+          },
+          {
+            "text": "not",
+            "misconception": "negation_form"
+          }
+        ],
+        "explanation": {
+          "ar": "مع he/she/it ننفي بـ doesn't، لا بـ don't."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q16",
+        "template": "dialogueCompletion",
+        "instructionAr": "اختر الرد المناسب",
+        "character": {
+          "name": "Lina"
+        },
+        "lines": [
+          {
+            "speaker": "character",
+            "text": "Are you free on Saturday?"
+          },
+          {
+            "speaker": "student",
+            "blank": true
+          },
+          {
+            "speaker": "character",
+            "text": "Great! Let's meet at ten."
+          }
+        ],
+        "options": [
+          {
+            "id": "a",
+            "text": "Yes, I am. Why?"
+          },
+          {
+            "id": "b",
+            "text": "No, I'm not hungry."
+          },
+          {
+            "id": "c",
+            "text": "I was there yesterday."
+          }
+        ],
+        "answer": "a",
+        "explanation": {
+          "ar": "Lina تسأل إن كنت متفرغًا يوم السبت، وردّها التالي Great يدل على أن الجواب «نعم»."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q17",
+        "template": "reading",
+        "instructionAr": "اقرأ النص ثم أجب",
+        "title": "A trip to Latakia",
+        "passage": "Last summer, Omar's family drove from Damascus to Latakia. The trip took four hours, and they stopped in Homs for lunch. They stayed in a small hotel near the sea. Every morning, Omar and his sister swam before breakfast. On the last day it rained, so they visited the old market and bought sweets for their grandmother.",
+        "audio": "https://example.com/mock/lessons/latakia.mp3",
+        "questions": [
+          {
+            "id": "q17a",
+            "prompt": {
+              "en": "How did the family travel to Latakia?"
+            },
+            "options": [
+              {
+                "id": "a",
+                "text": "By bus"
+              },
+              {
+                "id": "b",
+                "text": "By car"
+              },
+              {
+                "id": "c",
+                "text": "By train"
+              },
+              {
+                "id": "d",
+                "text": "By plane"
+              }
+            ],
+            "answer": "b",
+            "explanation": {
+              "ar": "في النص: Omar's family drove — أي بالسيارة."
+            }
+          },
+          {
+            "id": "q17b",
+            "prompt": {
+              "en": "Where did they stop for lunch?"
+            },
+            "options": [
+              {
+                "id": "a",
+                "text": "In Damascus"
+              },
+              {
+                "id": "b",
+                "text": "At the hotel"
+              },
+              {
+                "id": "c",
+                "text": "In Homs"
+              },
+              {
+                "id": "d",
+                "text": "In Latakia"
+              }
+            ],
+            "answer": "c",
+            "explanation": {
+              "ar": "في النص: they stopped in Homs for lunch."
+            }
+          },
+          {
+            "id": "q17c",
+            "prompt": {
+              "en": "What did Omar do every morning?"
+            },
+            "options": [
+              {
+                "id": "a",
+                "text": "He swam in the sea."
+              },
+              {
+                "id": "b",
+                "text": "He went to the market."
+              },
+              {
+                "id": "c",
+                "text": "He ate sweets."
+              },
+              {
+                "id": "d",
+                "text": "He slept late."
+              }
+            ],
+            "answer": "a",
+            "explanation": {
+              "ar": "في النص: Every morning, Omar and his sister swam before breakfast."
+            }
+          },
+          {
+            "id": "q17d",
+            "prompt": {
+              "en": "Why did they visit the old market?"
+            },
+            "options": [
+              {
+                "id": "a",
+                "text": "It was sunny."
+              },
+              {
+                "id": "b",
+                "text": "It rained."
+              },
+              {
+                "id": "c",
+                "text": "Their hotel was there."
+              },
+              {
+                "id": "d",
+                "text": "Omar was hungry."
+              }
+            ],
+            "answer": "b",
+            "explanation": {
+              "ar": "في النص: On the last day it rained, so they visited the old market."
+            }
+          }
+        ],
+        "reviewOnly": false
+      },
+      {
+        "id": "q18",
+        "template": "speakAnswer",
+        "instructionAr": "أجب عن السؤال بجملة أو جملتين",
+        "prompt": {
+          "en": "What do you usually do on Fridays?",
+          "audio": "https://example.com/mock/lessons/fridays.mp3"
         },
         "reviewOnly": false
       }

@@ -19,4 +19,4 @@ The requirements define 17 exercise templates (S §7.3, server doc §20.6) that 
 - **Placement stays out of the engine.** It has no keys, hints or feedback; it shares only small pieces in core.
 
 ## Consequences
-A new template means a subclass, a body, a parser case, an evaluator case and tests; the compiler points at each `switch`, and other templates' files don't change. Adding a draft family breaks the exhaustive `switch` in `evaluate` and `attemptToJson` on purpose.
+A template with several steps (reading) is flattened into one exercise per step at parsing, so the session knows nothing of it. A new template means a subclass, a body, a parser case, an evaluator case and tests; the compiler points at each `switch`, and other templates' files don't change. Adding a draft family breaks the exhaustive `switch` in `evaluate` and `attemptToJson` on purpose.

@@ -23,11 +23,15 @@ final class LessonModel {
     var broken = 0;
     for (final question in json.readList('exercises') ?? const <Object?>[]) {
       try {
-        if (_exercise(
-              asJsonMap(question),
+        final map = asJsonMap(question);
+        if (map.readString('template') == 'reading') {
+          exercises.addAll(_reading(map, seed));
+        } else if (_exercise(
+              map,
               seed,
               speechPassPercent: json.readInt('speechPassPercent'),
               typoMinLetters: json.readInt('typoMinLetters'),
+              aiReviewEnabled: json.readBool('aiReviewEnabled') ?? false,
             )
             case final exercise?) {
           exercises.add(exercise);
@@ -52,12 +56,14 @@ final class LessonModel {
 }
 
 /// Null for what isn't shown here: a template this version doesn't know, which
-/// the server should have hidden (S §7.3), and review-only questions.
+/// the server should have hidden (S §7.3), review-only questions, and a question
+/// for the AI where the track has it off (S §16.2).
 Exercise? _exercise(
   Map<String, Object?> json,
   String seed, {
   required int? speechPassPercent,
   required int? typoMinLetters,
+  required bool aiReviewEnabled,
 }) {
   if (json.readBool('reviewOnly') ?? false) return null;
   final template = json.readString('template');
@@ -155,6 +161,37 @@ Exercise? _exercise(
       bookReference: bookReference,
       explanation: explanation,
     ),
+    'translation' => TranslationExercise(
+      id: id,
+      instruction: instruction,
+      accepted: _accepted(json),
+      typoMinLetters: _typoMin(json, typoMinLetters),
+      arabic: _required(prompt.readString('ar')),
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+      answerAudioUrl: audio,
+    ),
+    'errorCorrection' => _errorCorrection(
+      json,
+      prompt,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+      audio: audio,
+    ),
+    'speakAnswer' when !aiReviewEnabled => null,
+    'speakAnswer' => SpeakAnswerExercise(
+      id: id,
+      instruction: instruction,
+      ask: _required(prompt.readString('en')),
+      audioUrl: audio,
+      hint: hint,
+      bookReference: bookReference,
+    ),
     _ => _choice(
       template,
       json,
@@ -181,6 +218,10 @@ const _templates = {
   'fillTyped',
   'sentenceOrder',
   'spelling',
+  'translation',
+  'errorCorrection',
+  'dialogueCompletion',
+  'speakAnswer',
 };
 
 T _missing<T>() => throw const FormatException('Exercise: a field is missing');
@@ -324,6 +365,17 @@ ChoiceExercise _choice(
       bookReference: bookReference,
       explanation: explanation,
     ),
+    'dialogueCompletion' => _dialogue(
+      json,
+      id: id,
+      instruction: instruction,
+      options: shown,
+      answer: answer!,
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+      audio: prompt.readString('audio'),
+    ),
     _ => ListenChooseExercise(
       id: id,
       instruction: instruction,
@@ -336,6 +388,137 @@ ChoiceExercise _choice(
       explanation: explanation,
     ),
   };
+}
+
+ErrorCorrectionExercise _errorCorrection(
+  Map<String, Object?> json,
+  Map<String, Object?> prompt, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+  required String? explanation,
+  required String? audio,
+}) {
+  final tokens = [
+    for (final token in prompt.readList('tokens') ?? const <Object?>[])
+      WordChip(
+        id: _required(asJsonMap(token).readString('id')),
+        text: _required(asJsonMap(token).readString('text')),
+      ),
+  ];
+  final wrong = _required(json.readString('wrongTokenId'));
+  if (!tokens.any((token) => token.id == wrong)) {
+    throw const FormatException('Exercise: the wrong word is not in it');
+  }
+  final correction = _required(json.readString('correction'));
+  return ErrorCorrectionExercise(
+    id: id,
+    instruction: instruction,
+    tokens: tokens,
+    wrongTokenId: wrong,
+    correction: correction,
+    corrections: _bank([correction, ..._distractors(json)], key),
+    hint: hint,
+    bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: audio,
+  );
+}
+
+DialogueExercise _dialogue(
+  Map<String, Object?> json, {
+  required String id,
+  required String instruction,
+  required List<ExerciseOption> options,
+  required String answer,
+  required String? hint,
+  required BookReference? bookReference,
+  required String? explanation,
+  required String? audio,
+}) {
+  final character = json.readMap('character');
+  final lines = [
+    for (final line in json.readList('lines') ?? const <Object?>[])
+      asJsonMap(line).readString('speaker') == 'student'
+          ? const DialogueLine.learner()
+          : DialogueLine.character(
+              _required(asJsonMap(line).readString('text')),
+            ),
+  ];
+  if (lines.where((line) => line.isLearner).length != 1) {
+    throw const FormatException('Exercise: not one line for the learner');
+  }
+  return DialogueExercise(
+    id: id,
+    instruction: instruction,
+    options: options,
+    answerId: answer,
+    characterName: _required(character?.readString('name')),
+    characterAvatar: character?.readString('avatar'),
+    lines: lines,
+    hint: hint,
+    bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: audio,
+  );
+}
+
+/// A text with its questions, each one a step of its own in the lesson.
+List<ReadingExercise> _reading(Map<String, Object?> json, String seed) {
+  if (json.readBool('reviewOnly') ?? false) return const [];
+  final passage = ReadingPassage(
+    id: _required(json.readString('id')),
+    // ASSUMPTION(api): server doc §20.6 has `title_ar`; the design's is English.
+    title: _required(json.readString('title')),
+    text: _required(json.readString('passage')),
+    audioUrl: json.readString('audio'),
+  );
+  final questions = json.readList('questions') ?? const <Object?>[];
+  if (questions.isEmpty) throw const FormatException('Reading: no questions');
+  return [
+    for (final (i, question) in questions.indexed)
+      _readingQuestion(
+        asJsonMap(question),
+        seed,
+        passage: passage,
+        instruction: _required(json.readString('instructionAr')),
+        step: i + 1,
+        steps: questions.length,
+      ),
+  ];
+}
+
+ReadingExercise _readingQuestion(
+  Map<String, Object?> json,
+  String seed, {
+  required ReadingPassage passage,
+  required String instruction,
+  required int step,
+  required int steps,
+}) {
+  final id = _required(json.readString('id'));
+  final answer = _required(json.readString('answer'));
+  final options = [
+    for (final option in json.readList('options') ?? const <Object?>[])
+      _option(asJsonMap(option)),
+  ];
+  if (!options.any((option) => option.id == answer)) {
+    throw const FormatException('Exercise: no options, or no right one');
+  }
+  return ReadingExercise(
+    id: id,
+    instruction: instruction,
+    options: stableOrder(options, '$seed:$id'),
+    answerId: answer,
+    passage: passage,
+    ask: _required(json.readMap('prompt')?.readString('en')),
+    step: step,
+    steps: steps,
+    hint: json.readMap('hint')?.readString('ar'),
+    explanation: json.readMap('explanation')?.readString('ar'),
+  );
 }
 
 FillChoicesExercise _fillChoices(
@@ -552,11 +735,28 @@ Map<String, Object?> _answerJson(ExerciseDraft draft) => switch (draft) {
     'heardWords': heard.where((word) => word).length,
     'totalWords': heard.length,
   },
+  CorrectionDraft(:final tokenId, :final replacement) => {
+    'tokenId': tokenId,
+    'replacement': replacement,
+  },
+  SpokenDraft(:final text, :final typed) => {'text': text, 'typed': typed},
 };
 
 /// Whether the server found a reviewed answer right.
 bool reviewFromJson(Map<String, Object?> json) =>
     json.readBool('correct') ?? false;
+
+/// What the server's AI found of the learner's own words.
+Evaluation spokenReviewFromJson(Map<String, Object?> json) =>
+    switch (json.readString('outcome')) {
+      'answered' => SpokenAnswered(
+        note: _required(json.readString('note')),
+        better: json.readString('better'),
+      ),
+      'offTopic' => SpokenOffTopic(note: _required(json.readString('note'))),
+      'quotaOut' => const ReviewQuotaOut(),
+      _ => throw const FormatException('Spoken review: no known outcome'),
+    };
 
 /// What is kept on the phone: each lesson's progress, and the answers not on
 /// the server yet.

@@ -1,5 +1,7 @@
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/dialogue_body.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/error_correction_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/fill_choices_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/fill_typed_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/image_choice_body.dart';
@@ -7,10 +9,14 @@ import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/l
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/listen_write_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/matching_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/multiple_choice_body.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/reading_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/repeat_sentence_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/sentence_order_body.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/speak_answer_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/spelling_body.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/translation_body.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/word_order_body.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/session/passage_card.dart';
 import 'package:flutter/widgets.dart';
 
 /// Each template's question and answers. Exhaustive on purpose: a new template
@@ -71,4 +77,39 @@ Widget exerciseBody(
     answer: answer,
     clip: clip,
   ),
+  final TranslationExercise exercise => TranslationBody(
+    exercise: exercise,
+    answer: answer,
+  ),
+  final ErrorCorrectionExercise exercise => ErrorCorrectionBody(
+    exercise: exercise,
+    answer: answer,
+  ),
+  final DialogueExercise exercise => DialogueBody(
+    exercise: exercise,
+    answer: answer,
+  ),
+  final ReadingExercise exercise => ReadingBody(
+    exercise: exercise,
+    answer: answer,
+  ),
+  final SpeakAnswerExercise exercise => SpeakAnswerBody(
+    exercise: exercise,
+    answer: answer,
+    clip: clip,
+    onSkipSpeech: onSkipSpeech,
+  ),
+};
+
+/// What stays on screen while the question under it scrolls, and how tall it is.
+({Widget child, double height})? exercisePinned(
+  Exercise exercise,
+  BodyClip clip, {
+  required double screenHeight,
+}) => switch (exercise) {
+  final ReadingExercise exercise => (
+    child: PassageCard(exercise: exercise, clip: clip),
+    height: PassageCard.heightOn(screenHeight),
+  ),
+  _ => null,
 };

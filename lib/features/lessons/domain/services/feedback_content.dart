@@ -4,17 +4,26 @@ import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dar
 
 /// A piece of a sentence shown in the feedback; [strong] for what was at stake.
 final class AnswerPart {
-  const AnswerPart(this.text, {this.strong = false, this.underlined = false});
+  const AnswerPart(
+    this.text, {
+    this.strong = false,
+    this.underlined = false,
+    this.struck = false,
+  });
 
   final String text;
   final bool strong;
 
   /// A word corrected.
   final bool underlined;
+
+  /// The word that was wrong, shown next to its correction.
+  final bool struck;
 }
 
 /// The whole right answer, its key parts strong (S §7.2). Empty for a template
-/// with nothing to show, as each pair of a matching was checked in its time.
+/// with nothing to show, as each pair of a matching was checked in its time and
+/// the learner's own words have no one right answer.
 List<AnswerPart> correctAnswerParts(Exercise exercise) => switch (exercise) {
   final MultipleChoiceExercise e => [
     AnswerPart('${e.before} '),
@@ -34,7 +43,9 @@ List<AnswerPart> correctAnswerParts(Exercise exercise) => switch (exercise) {
     ],
   ],
   final WordOrderExercise e => [AnswerPart(e.answer)],
-  MatchingExercise() || RepeatSentenceExercise() => const [],
+  MatchingExercise() ||
+  RepeatSentenceExercise() ||
+  SpeakAnswerExercise() => const [],
   final ListenWriteExercise e => [AnswerPart(e.accepted.first)],
   final FillTypedExercise e => [
     AnswerPart('${e.before} '),
@@ -43,6 +54,20 @@ List<AnswerPart> correctAnswerParts(Exercise exercise) => switch (exercise) {
   ],
   final SentenceOrderExercise e => [AnswerPart(e.sentences.join('\n'))],
   final SpellingExercise e => [AnswerPart(e.word, strong: true)],
+  final TranslationExercise e => [AnswerPart(e.accepted.first)],
+  final ErrorCorrectionExercise e => [
+    for (final (i, token) in e.tokens.indexed) ...[
+      if (i > 0) const AnswerPart(' '),
+      if (token.id == e.wrongTokenId) ...[
+        AnswerPart(token.text, struck: true),
+        const AnswerPart(' '),
+        AnswerPart(e.correction, strong: true),
+      ] else
+        AnswerPart(token.text),
+    ],
+  ],
+  final DialogueExercise e => [AnswerPart(_rightText(e), strong: true)],
+  final ReadingExercise e => [AnswerPart(_rightText(e), strong: true)],
 };
 
 String _rightText(ChoiceExercise exercise) =>

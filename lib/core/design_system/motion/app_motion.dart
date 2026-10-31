@@ -87,6 +87,10 @@ abstract final class AppMotion {
   static const pairsDone = Duration(milliseconds: 400);
   static const stepOutReduced = Duration(milliseconds: 100);
 
+  /// A round of the dots while the AI judges, and how far apart they go.
+  static const aiDots = Duration(milliseconds: 1100);
+  static const aiDotsOffset = Duration(milliseconds: 180);
+
   /// A new part joining a progress bar.
   static const barGrow = Duration(milliseconds: 450);
 

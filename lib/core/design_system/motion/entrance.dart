@@ -25,12 +25,18 @@ class Entrance extends StatelessWidget {
     required this.motion,
     required this.delay,
     required this.child,
+    this.duration = AppMotion.entrance,
+    this.distance = AppMotion.distanceMedium,
     super.key,
   });
 
   final EntranceMotion motion;
   final Duration delay;
   final Widget child;
+
+  /// For something small arriving within a screen, not with it.
+  final Duration duration;
+  final double distance;
 
   /// Starting scale of a popping element (designs).
   static const _popFrom = .82;
@@ -40,18 +46,12 @@ class Entrance extends StatelessWidget {
     if (AppMotion.reduceMotion(context)) return child;
     final arrival = child.animate().fadeIn(
       delay: delay,
-      duration: AppMotion.entrance,
+      duration: duration,
       curve: AppMotion.smoothOut,
     );
     return switch (motion) {
-      EntranceMotion.up => arrival.moveY(
-        begin: AppMotion.distanceMedium,
-        end: 0,
-      ),
-      EntranceMotion.down => arrival.moveY(
-        begin: -AppMotion.distanceMedium,
-        end: 0,
-      ),
+      EntranceMotion.up => arrival.moveY(begin: distance, end: 0),
+      EntranceMotion.down => arrival.moveY(begin: -distance, end: 0),
       EntranceMotion.pop => arrival.scaleXY(
         begin: _popFrom,
         end: 1,

@@ -13,6 +13,11 @@ abstract interface class LessonRepository {
   /// Asks the server to judge what the phone can't: true when it is right.
   Future<Result<bool>> reviewAttempt(ExerciseAttempt attempt, String attemptId);
 
+  /// Asks the server's AI to judge the learner's own words: [SpokenAnswered],
+  /// [SpokenOffTopic] or [ReviewQuotaOut]. When it can't, the answer stays on the
+  /// phone to be judged later, and the failure says so.
+  Future<Result<Evaluation>> reviewSpoken(ExerciseAttempt attempt);
+
   /// Keeps the report on the phone and sends it when it can. Never fails.
   Future<void> saveReport(ExerciseReport report);
 

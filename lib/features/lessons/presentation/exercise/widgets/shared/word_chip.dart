@@ -58,6 +58,7 @@ class WordChipButton extends StatelessWidget {
     required this.semanticLabel,
     required this.onTap,
     this.mark,
+    this.chosen = false,
     super.key,
   });
 
@@ -65,6 +66,9 @@ class WordChipButton extends StatelessWidget {
   final String semanticLabel;
   final VoidCallback? onTap;
   final ChoiceMark? mark;
+
+  /// One of a few to choose from, and this is the one.
+  final bool chosen;
 
   static const _iconSize = 14.0;
 
@@ -86,17 +90,24 @@ class WordChipButton extends StatelessWidget {
           enabled: onTap != null,
           child: Semantics(
             button: true,
+            selected: chosen,
             label: semanticLabel,
             child: ExcludeSemantics(
               child: AnimatedContainer(
                 duration: AppMotion.resolve(context, AppMotion.quick),
                 height: _chipHeight,
                 decoration: BoxDecoration(
-                  color: tone?.surface ?? colors.surface,
+                  color:
+                      tone?.surface ??
+                      (chosen ? colors.primary.surface : colors.surface),
                   borderRadius: radius,
                   border: Border.all(
-                    color: tone?.fill ?? context.scheme.outline,
-                    width: tone == null ? 1 : 2,
+                    color:
+                        tone?.fill ??
+                        (chosen
+                            ? colors.primaryStrong
+                            : context.scheme.outline),
+                    width: tone == null && !chosen ? 1 : 2,
                   ),
                 ),
                 child: Material(
