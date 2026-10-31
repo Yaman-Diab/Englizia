@@ -49,7 +49,7 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 
 ## Session and auth
 
-- Starting or ending a session clears what belongs to the account in `SettingsStorageService` (`clearAccountData`, today the saved placement status and lesson progress), as the next account may be another's.
+- Starting or ending a session clears what belongs to the account in `SettingsStorageService` (`clearAccountData`, today the saved placement status and lesson progress), as the next account may be another's. A guest's upgrade is the same account, so `upgrade` keeps it all, and signing out first gives features the chance to send what they kept (`onLeaving`).
 - `AppSessionController` status: `unknown → signedOut | guest | member` (ADR 10). Tokens carry their `AccountKind`, kept through refresh and secure storage. `bootstrap()` never throws; on first launch after install it clears the keystore (iOS keeps Keychain items after uninstall).
 - `AuthInterceptor` attaches the bearer token, shares **one** refresh among concurrent 401s, retries each request once, and expires the session only when the server rejects the refresh token (offline keeps the session).
 - `TokenRefreshService` uses a separate Dio without the auth interceptor and sets `Authorization` itself.
@@ -81,6 +81,12 @@ Page ─▶ Cubit ─▶ UseCase ─▶ Repository (domain contract)
 - Page transitions come from `AppTheme.pageTransitionsTheme`: Android `AppPageTransitionsBuilder` (fade + 30px slide from the end side, 250ms, in place under reduce motion); iOS/macOS keep the native Cupertino transition with edge-swipe back. Tabs and session entry get their own transitions with those features (ADR 7).
 - `test/core/design_system/theme_test.dart` pins identity values and checks WCAG contrast in light and dark.
 - Fonts: Readex Pro (UI, Arabic + Latin) and Andika (kids) through `google_fonts`, loaded from bundled files in `assets/fonts/` (runtime fetching off). Each weight is its own family, so weights come from roles (`bodyStrong`, `captionStrong`), never `copyWith(fontWeight:)`.
+
+Pieces shared by the placement test and the exercises live in core: `ClipPlayback` (one clip at a time, on `ClipPlayer`), `BlankSentence`, `ClipFailedView`, `ClipProgressRing`, `ListeningWaves`, and `ChoiceSurface`/`ChoiceCheck`, which also carry the marks of a checked answer (`ChoiceMark`).
+
+## Exercises
+
+ADR 11. `ExerciseCubit` runs a lesson's session and knows no template's details: a body reports an `ExerciseDraft`, `evaluate` (pure, in domain) gives an `Evaluation`, and an `ExerciseAttempt` is kept on the phone and sent. `exerciseBody` is one exhaustive `switch` on the sealed `Exercise`; bodies take `BodyAnswer` and `BodyClip` and don't read the cubit. What only draws a question stays in its body. Offline (ADR 12): the repository keeps the last lessons and the answers in preferences, a lesson in progress carries on with its version, and `AnswersSync`, started by `App`, sends what waits. To add a template: a subclass in `domain/entities/exercise.dart`, a case in `LessonModel`, a body and its case in `exerciseBody`, and a draft and evaluation if it answers in a new way.
 
 ## Localization
 

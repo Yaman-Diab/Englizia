@@ -30,6 +30,7 @@ class AccountCubit extends Cubit<AccountState> {
   Future<void> signOut() async {
     if (state.signingOut) return;
     emit(AccountState(status: state.status, signingOut: true));
+    await _session.finishBeforeLeaving();
     await _accounts.logOut();
     // The router leaves the app for the welcome screen.
     await _session.signOut();

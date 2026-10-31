@@ -58,6 +58,10 @@ void main() {
   setUp(() async {
     mockPlatformPlugins();
     await configureDependencies();
+    // The app listens to it from the start, and the plugin has no test side.
+    sl
+      ..unregister<ConnectivityService>()
+      ..registerLazySingleton<ConnectivityService>(FakeConnectivityService.new);
   });
   tearDown(() => sl.reset());
 

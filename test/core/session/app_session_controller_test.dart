@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
@@ -6,8 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/fakes.dart';
 
+late SharedPreferences _prefs;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
+    _prefs = await SharedPreferences.getInstance();
+  });
 
   const tokens = AuthTokens(accessToken: 'a', refreshToken: 'r');
 
@@ -19,6 +28,57 @@ void main() {
     });
     return SettingsStorageService(await SharedPreferences.getInstance());
   }
+
+  test('an upgrade changes the status and keeps the account data', () async {
+    final saved = await settings(launchedBefore: true);
+    await saved.setPlacementStatus('{}');
+    final session = AppSessionController(
+      tokens: FakeTokenStorage(
+        const AuthTokens(
+          accessToken: 'a',
+          refreshToken: 'r',
+          kind: AccountKind.guest,
+        ),
+      ),
+      settings: saved,
+    );
+    await session.bootstrap();
+    expect(session.status, SessionStatus.guest);
+
+    await session.upgrade(tokens);
+
+    expect(session.status, SessionStatus.member);
+    expect(saved.placementStatus, '{}');
+  });
+
+  test('work before leaving runs, and a failure does not stop it', () async {
+    final session = AppSessionController(
+      tokens: FakeTokenStorage(),
+      settings: await settings(launchedBefore: true),
+    );
+    var ran = 0;
+    session
+      ..onLeaving(() async => ran++)
+      ..onLeaving(() async => throw StateError('offline'));
+
+    await session.finishBeforeLeaving();
+
+    expect(ran, 1);
+  });
+
+  testWidgets('work before leaving is not waited on forever', (tester) async {
+    final session = AppSessionController(
+      tokens: FakeTokenStorage(),
+      settings: SettingsStorageService(_prefs),
+    );
+    var finished = false;
+    session.onLeaving(() => Completer<void>().future);
+    unawaited(session.finishBeforeLeaving().then((_) => finished = true));
+
+    await tester.pump(const Duration(seconds: 6));
+
+    expect(finished, isTrue);
+  });
 
   test('a fresh install drops tokens left in the keystore', () async {
     final storage = FakeTokenStorage(tokens);

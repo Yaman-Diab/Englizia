@@ -387,7 +387,7 @@
   "placement_q_grammar": "اختر ما يكمل الجملة",
   "placement_q_reading": "اقرأ النص ثم أجب",
   "placement_q_listening": "استمع ثم أجب",
-  "placement_blank": "فراغ",
+  "question_blank": "فراغ",
   "placement_passage": "نص القراءة",
   "placement_dont_know": "لا أعرف",
   "placement_next": "التالي",
@@ -413,7 +413,7 @@
     "many": "استمعت {} مرة",
     "other": "استمعت {} مرة"
   },
-  "placement_audio_failed": "تعذّر تشغيل الصوت",
+  "audio_failed": "تعذّر تشغيل الصوت",
   "placement_finished_stage_1": "أنهيت المرحلة الأولى",
   "placement_finished_stage_2": "أنهيت المرحلة الثانية",
   "placement_next_stage": "{stage}: {questions}، منها {listening}.",
@@ -497,5 +497,6 @@
   "lesson_exit_body": "تقدّمك محفوظ، وتكمل من السؤال نفسه.",
   "lesson_exit_stay": "أكمل الدرس",
   "lesson_exit_leave": "اخرج",
-  "lesson_complete_title": "أكملت الدرس"
+  "lesson_complete_title": "أكملت الدرس",
+  "lesson_book_ref": "كتاب الطالب، صفحة {page}، تمرين {exercise}"
 }

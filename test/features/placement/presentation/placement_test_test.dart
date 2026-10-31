@@ -818,7 +818,7 @@ void main() {
         await tester.tap(find.byTooltip('placement_play'.tr()));
         await tester.pump();
         await tester.pump();
-        expect(find.text('placement_audio_failed'.tr()), findsOneWidget);
+        expect(find.text('audio_failed'.tr()), findsOneWidget);
         expect(cubit.state.playsLeft, 2);
 
         await tester.tap(find.text('common_retry'.tr()));

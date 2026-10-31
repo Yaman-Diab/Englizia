@@ -290,7 +290,7 @@ GoRouter createAppRouter(AppSessionController session) {
                 if (!upgrading) {
                   return _accountCreated(context, path, account, name: name);
                 }
-                await session.signIn(account);
+                await session.upgrade(account);
                 // Pushed over home, which the guard leaves as it is.
                 if (context.mounted) context.go(AppRoutes.home);
               },

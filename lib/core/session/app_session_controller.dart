@@ -32,6 +32,9 @@ class AppSessionController extends ChangeNotifier {
   final TokenStorage _tokens;
   final SettingsStorageService _settings;
 
+  static const _leavingLimit = Duration(seconds: 5);
+
+  final _leavingTasks = <Future<void> Function()>[];
   SessionStatus _status = SessionStatus.unknown;
   bool _expiring = false;
 
@@ -67,6 +70,30 @@ class AppSessionController extends ChangeNotifier {
     await _settings.clearAccountData();
     _setStatus(_statusOf(tokens));
     return saved;
+  }
+
+  /// The guest's account became a full one (ADR 10). It is the same account, so
+  /// what the phone keeps for it stays, answers not sent yet above all.
+  Future<bool> upgrade(AuthTokens tokens) async {
+    final saved = await _tokens.write(tokens);
+    _setStatus(_statusOf(tokens));
+    return saved;
+  }
+
+  /// Adds work to finish while the session's token still works: sending what
+  /// the phone kept, which leaving would otherwise lose.
+  void onLeaving(Future<void> Function() task) => _leavingTasks.add(task);
+
+  /// Called before the server logout. Waits [_leavingLimit] at most, as signing
+  /// out must not hang on a bad connection.
+  Future<void> finishBeforeLeaving() async {
+    try {
+      await Future.wait([
+        for (final task in _leavingTasks) task(),
+      ]).timeout(_leavingLimit);
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Work before leaving unfinished');
+    }
   }
 
   /// Local sign-out. The auth feature calls the server logout first

@@ -1,123 +1,172 @@
-import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:equatable/equatable.dart';
 
-/// The kinds of question this version shows; the server hides others.
-enum ExerciseKind { multipleChoice, imageChoice, listeningChoice }
-
-final class ExerciseOption extends Equatable {
-  const ExerciseOption({
+/// A published lesson as the app answers it: its version, as an attempt counts
+/// for the version it was answered on (server doc §19.2), and its exercises.
+final class Lesson extends Equatable {
+  const Lesson({
     required this.id,
-    required this.correct,
-    this.text = '',
-    this.imageUrl = '',
-    this.imageAlt,
+    required this.version,
+    required this.exercises,
   });
 
   final String id;
-
-  /// Lessons' keys come with them, so "check" works offline (S §7.1); the
-  /// server marks the answer again when it arrives.
-  final bool correct;
-
-  /// English, except that an image choice has [imageUrl] and [imageAlt] instead.
-  final String text;
-  final String imageUrl;
-  final LocalizedText? imageAlt;
+  final int version;
+  final List<Exercise> exercises;
 
   @override
-  List<Object?> get props => [id, correct, text, imageUrl, imageAlt];
+  List<Object?> get props => [id, version, exercises];
 }
 
-final class ExerciseHint extends Equatable {
-  const ExerciseHint({required this.text, this.term = ''});
+/// Where a question sits in the student's book, on Imaar lessons.
+final class BookReference extends Equatable {
+  const BookReference({required this.page, required this.exercise});
 
-  /// In the app's language, followed by [term].
-  final LocalizedText text;
-
-  /// The English word the hint points at.
-  final String term;
+  final int page;
+  final int exercise;
 
   @override
-  List<Object?> get props => [text, term];
+  List<Object?> get props => [page, exercise];
 }
 
-/// One question of a lesson. Options come in the order to show them, shuffled
-/// for this learner and steady on returning to it.
-final class Exercise extends Equatable {
+/// One question of a lesson. The set of templates is closed (S §7.3), and each
+/// needs its own screen code anyway, so the compiler names every place a new
+/// one must be handled.
+sealed class Exercise extends Equatable {
   const Exercise({
     required this.id,
-    required this.kind,
     required this.instruction,
-    required this.options,
-    this.before = '',
-    this.after = '',
-    this.word = '',
-    this.audioUrl = '',
     this.hint,
     this.bookReference,
   });
 
   final String id;
-  final ExerciseKind kind;
-  final LocalizedText instruction;
-  final List<ExerciseOption> options;
 
-  /// Multiple choice: the sentence around its blank.
+  /// In Arabic in both app languages, as the content has no other (S §7.1).
+  final String instruction;
+
+  /// Arabic, and may name an English word.
+  final String? hint;
+  final BookReference? bookReference;
+
+  /// The clip to load, when the question has one.
+  String? get clipUrl => null;
+
+  /// Plays once by itself on opening (S §7.3).
+  bool get autoplays => false;
+
+  /// A clip that fails is the question's business, so it says so. Elsewhere the
+  /// clip is only an extra, and goes quiet.
+  bool get reportsClipFailure => false;
+
+  @override
+  List<Object?> get props => [id, instruction, hint, bookReference];
+}
+
+final class ExerciseOption extends Equatable {
+  const ExerciseOption({
+    required this.id,
+    this.text = '',
+    this.image = '',
+    this.alt = '',
+  });
+
+  final String id;
+
+  /// English, except that a picture has [image] and its Arabic name [alt].
+  final String text;
+  final String image;
+  final String alt;
+
+  @override
+  List<Object?> get props => [id, text, image, alt];
+}
+
+/// One right option among several, in the order to show them. The key comes
+/// with the lesson so "check" works offline (S §7.1); the server marks the
+/// answer again when it arrives.
+sealed class ChoiceExercise extends Exercise {
+  const ChoiceExercise({
+    required super.id,
+    required super.instruction,
+    required this.options,
+    required this.answerId,
+    super.hint,
+    super.bookReference,
+  });
+
+  final List<ExerciseOption> options;
+  final String answerId;
+
+  @override
+  List<Object?> get props => [...super.props, options, answerId];
+}
+
+/// A sentence with its blank, and the words for it.
+final class MultipleChoiceExercise extends ChoiceExercise {
+  const MultipleChoiceExercise({
+    required super.id,
+    required super.instruction,
+    required super.options,
+    required super.answerId,
+    required this.before,
+    required this.after,
+    super.hint,
+    super.bookReference,
+  });
+
   final String before;
   final String after;
 
-  /// Image choice: the word the pictures are about.
-  final String word;
-  final String audioUrl;
-  final ExerciseHint? hint;
-
-  /// Imaar: where it is in the student's book.
-  final LocalizedText? bookReference;
-
   @override
-  List<Object?> get props => [
-    id,
-    kind,
-    instruction,
-    options,
-    before,
-    after,
-    word,
-    audioUrl,
-    hint,
-    bookReference,
-  ];
+  List<Object?> get props => [...super.props, before, after];
 }
 
-/// An answer checked, on its way to the server. [hinted] makes a right answer
-/// an assisted success, not an independent one (S §7.1).
-final class ExerciseAnswer extends Equatable {
-  const ExerciseAnswer({
-    required this.lessonId,
-    required this.questionId,
-    required this.optionId,
-    required this.hinted,
+/// A word with its sound, and the pictures for it.
+final class ImageChoiceExercise extends ChoiceExercise {
+  const ImageChoiceExercise({
+    required super.id,
+    required super.instruction,
+    required super.options,
+    required super.answerId,
+    required this.word,
+    this.audioUrl,
+    super.hint,
+    super.bookReference,
   });
 
-  final String lessonId;
-  final String questionId;
-  final String optionId;
-  final bool hinted;
+  final String word;
+  final String? audioUrl;
 
   @override
-  List<Object?> get props => [lessonId, questionId, optionId, hinted];
+  String? get clipUrl => audioUrl;
+
+  @override
+  List<Object?> get props => [...super.props, word, audioUrl];
 }
 
-/// Where a lesson's exercises stand on this phone.
-final class ExerciseProgress extends Equatable {
-  const ExerciseProgress({this.position = 0, this.hinted = const {}});
+/// A clip, and the sentences it might have said.
+final class ListenChooseExercise extends ChoiceExercise {
+  const ListenChooseExercise({
+    required super.id,
+    required super.instruction,
+    required super.options,
+    required super.answerId,
+    required this.audioUrl,
+    super.hint,
+    super.bookReference,
+  });
 
-  /// Questions done, which is the one to carry on from.
-  final int position;
-
-  /// Questions whose hint was opened.
-  final Set<String> hinted;
+  final String audioUrl;
 
   @override
-  List<Object?> get props => [position, hinted];
+  String? get clipUrl => audioUrl;
+
+  @override
+  bool get autoplays => true;
+
+  @override
+  bool get reportsClipFailure => true;
+
+  @override
+  List<Object?> get props => [...super.props, audioUrl];
 }

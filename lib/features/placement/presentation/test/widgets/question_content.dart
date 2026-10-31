@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/widgets/blank_sentence.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
@@ -62,7 +63,11 @@ class QuestionContent extends StatelessWidget {
           ),
           if (sentence) ...[
             const SizedBox(height: AppSpacing.md),
-            _Sentence(question: question),
+            BlankSentence(
+              before: question.before,
+              after: question.after,
+              blankColor: colors.textPrimary,
+            ),
           ],
           if (question.kind == PlacementQuestionKind.reading) ...[
             const SizedBox(height: AppSpacing.md),
@@ -95,56 +100,6 @@ class QuestionContent extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxs),
           _DontKnow(selected: state.dontKnow, onTap: cubit.chooseDontKnow),
         ],
-      ),
-    );
-  }
-}
-
-/// The sentence with its blank.
-class _Sentence extends StatelessWidget {
-  const _Sentence({required this.question});
-
-  final PlacementQuestion question;
-
-  static const _blankWidth = 64.0;
-  static const _blankHeight = 26.0;
-  static const _blankStroke = 2.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    return Directionality(
-      textDirection: TextDirection.ltr,
-      child: Text.rich(
-        locale: _english,
-        TextSpan(
-          style: context.texts.reading.copyWith(color: colors.textPrimary),
-          children: [
-            TextSpan(text: question.before),
-            WidgetSpan(
-              alignment: PlaceholderAlignment.middle,
-              child: Semantics(
-                label: 'placement_blank'.tr(),
-                child: Container(
-                  width: _blankWidth,
-                  height: _blankHeight,
-                  margin: const EdgeInsetsDirectional.symmetric(
-                    horizontal: AppSpacing.xs,
-                  ),
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: colors.textPrimary,
-                        width: _blankStroke,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            TextSpan(text: question.after),
-          ],
-        ),
       ),
     );
   }

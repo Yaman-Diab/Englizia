@@ -17,6 +17,7 @@ final class SettingsStorageService {
   static const _placementProgressKey = 'account.placement_progress';
   static const _emailReminderKey = 'account.email_reminder_hidden_until';
   static const _lessonProgressKey = 'account.lesson_progress';
+  static const _lessonCacheKey = 'account.lesson_cache';
 
   final SharedPreferences _prefs;
 
@@ -82,6 +83,13 @@ final class SettingsStorageService {
     await _prefs.setString(_lessonProgressKey, json);
   }
 
+  /// The lessons last opened as they came, as JSON, to open again offline.
+  String? get lessonCache => _prefs.getString(_lessonCacheKey);
+
+  Future<void> setLessonCache(String json) async {
+    await _prefs.setString(_lessonCacheKey, json);
+  }
+
   /// Until when the reminder to confirm the email stays hidden.
   DateTime? get emailReminderHiddenUntil =>
       DateTime.tryParse(_prefs.getString(_emailReminderKey) ?? '');
@@ -98,6 +106,7 @@ final class SettingsStorageService {
       await clearPlacementProgress();
       await _prefs.remove(_emailReminderKey);
       await _prefs.remove(_lessonProgressKey);
+      await _prefs.remove(_lessonCacheKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

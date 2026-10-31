@@ -1,15 +1,17 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
+import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
-import 'package:englizia/features/lessons/presentation/exercise/widgets/answer_card.dart';
+import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,6 +20,17 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../helpers/fake_lesson_repository.dart';
 import '../../../helpers/fakes.dart';
 import '../../../helpers/pump_app.dart';
+
+extension on ExerciseCubit {
+  void select(String id) => updateDraft(ChoiceDraft(id));
+}
+
+extension on ExerciseState {
+  String? get selectedId => switch (draft) {
+    ChoiceDraft(:final optionId) => optionId,
+    null => null,
+  };
+}
 
 /// A player whose load only finishes when told to.
 class _SlowLoadPlayer extends FakeClipPlayer {
@@ -49,7 +62,7 @@ void main() {
   /// Answers and moves on until question [index].
   Future<void> advanceTo(ExerciseCubit cubit, int index) async {
     while (cubit.state.index < index) {
-      cubit.select(cubit.state.question!.options.first.id);
+      cubit.select((cubit.state.question! as ChoiceExercise).options.first.id);
       await cubit.check();
       await cubit.next();
     }
@@ -63,7 +76,7 @@ void main() {
       expect(subject.state.load, LoadStatus.ready);
       expect(subject.state.index, 0);
       expect(subject.state.canCheck, isFalse);
-      expect(subject.state.done, 0);
+      expect(subject.state.position, 0);
       await subject.close();
     });
 
@@ -85,7 +98,7 @@ void main() {
       'carries on from the question it was left on, hints included',
       () async {
         lessons.saved['les'] = const ExerciseProgress(
-          position: 1,
+          done: {'q1'},
           hinted: {'q1'},
         );
         final subject = cubit();
@@ -93,7 +106,7 @@ void main() {
 
         expect(subject.state.index, 1);
         expect(subject.state.hinted, {'q1'});
-        expect(subject.state.done, 1);
+        expect(subject.state.position, 1);
         await subject.close();
       },
     );
@@ -114,7 +127,7 @@ void main() {
       subject.select('o1');
       expect(subject.state.canCheck, isTrue);
       subject.select('o2');
-      expect(subject.state.selected?.text, 'goes');
+      expect(subject.state.selectedId, 'o2');
       await subject.close();
     });
 
@@ -129,14 +142,16 @@ void main() {
 
       expect(subject.state.checked, isTrue);
       expect(subject.state.selectedId, 'o2');
-      expect(lessons.answers, const [
-        ExerciseAnswer(
+      expect(lessons.attempts, const [
+        ExerciseAttempt(
           lessonId: 'les',
+          lessonVersion: FakeLessonRepository.version,
           questionId: 'q1',
-          optionId: 'o2',
+          draft: ChoiceDraft('o2'),
           hinted: false,
         ),
       ]);
+      expect(subject.state.evaluation?.correct, isTrue);
       await subject.close();
     });
 
@@ -147,7 +162,7 @@ void main() {
       await subject.check();
 
       expect(subject.state.checked, isFalse);
-      expect(lessons.answers, isEmpty);
+      expect(lessons.attempts, isEmpty);
       await subject.close();
     });
 
@@ -157,7 +172,7 @@ void main() {
       subject.select('o2');
       await subject.check();
 
-      expect(lessons.saved['les']?.position, 1);
+      expect(lessons.saved['les']?.done, {'q1'});
       await subject.close();
     });
 
@@ -178,7 +193,7 @@ void main() {
 
         subject.select('o2');
         await subject.check();
-        expect(lessons.answers.single.hinted, isTrue);
+        expect(lessons.attempts.single.hinted, isTrue);
         await subject.close();
       },
     );
@@ -205,7 +220,7 @@ void main() {
       await subject.next();
 
       expect(subject.state.index, 1);
-      expect(subject.state.done, 1);
+      expect(subject.state.position, 1);
       expect(subject.state.selectedId, isNull);
       expect(subject.state.checked, isFalse);
       expect(subject.state.hintOpen, isFalse);
@@ -233,9 +248,9 @@ void main() {
       await subject.next();
 
       expect(subject.state.finished, isTrue);
-      expect(subject.state.done, 4);
+      expect(subject.state.position, 4);
       expect(lessons.cleared, 1);
-      expect(lessons.answers, hasLength(4));
+      expect(lessons.attempts, hasLength(4));
       await subject.close();
     });
 
@@ -248,7 +263,7 @@ void main() {
         await advanceTo(subject, 2);
         await pumpEventQueue();
 
-        expect(subject.state.audio, ExerciseAudio.playing);
+        expect(subject.state.audio, ClipStatus.playing);
         expect(player.played, 1);
         expect(player.lastSpeed, 1);
         expect(subject.state.clipLength, player.length);
@@ -261,13 +276,13 @@ void main() {
         await subject.start();
         await advanceTo(subject, 2);
         await pumpEventQueue();
-        expect(subject.state.audio, ExerciseAudio.failed);
+        expect(subject.state.audio, ClipStatus.failed);
 
         subject.select('o1');
         expect(subject.state.canCheck, isTrue);
 
         await subject.togglePlay();
-        expect(subject.state.audio, ExerciseAudio.playing);
+        expect(subject.state.audio, ClipStatus.playing);
         await subject.close();
       });
 
@@ -297,7 +312,7 @@ void main() {
 
         await subject.togglePlay();
 
-        expect(subject.state.audio, ExerciseAudio.idle);
+        expect(subject.state.audio, ClipStatus.idle);
         expect(player.stopped, 1);
         await subject.close();
       });
@@ -308,13 +323,13 @@ void main() {
         await subject.start();
         await advanceTo(subject, 2);
         await pumpEventQueue();
-        expect(subject.state.audio, ExerciseAudio.loading);
+        expect(subject.state.audio, ClipStatus.loading);
 
         await subject.stopAudio();
         slow.gate.complete();
         await pumpEventQueue();
 
-        expect(subject.state.audio, ExerciseAudio.idle);
+        expect(subject.state.audio, ClipStatus.idle);
         expect(slow.played, 0);
         await subject.close();
       });
@@ -328,7 +343,7 @@ void main() {
 
         await subject.check();
 
-        expect(subject.state.audio, ExerciseAudio.idle);
+        expect(subject.state.audio, ClipStatus.idle);
         expect(player.stopped, 1);
         await subject.close();
       });
@@ -341,7 +356,7 @@ void main() {
 
         await subject.togglePlay();
 
-        expect(subject.state.audio, ExerciseAudio.idle);
+        expect(subject.state.audio, ClipStatus.idle);
         await subject.close();
       });
 
@@ -369,14 +384,13 @@ void main() {
         await subject.check();
 
         expect(subject.state.checked, isTrue);
-        expect(lessons.answers, hasLength(1));
+        expect(lessons.attempts, hasLength(1));
         await subject.close();
       });
 
-      test('what was kept is sent on opening and on reconnecting', () async {
+      test('it follows the connection', () async {
         final subject = cubit();
         await subject.start();
-        expect(lessons.sends, 1);
 
         connectivity.online = false;
         await pumpEventQueue();
@@ -385,7 +399,6 @@ void main() {
         connectivity.online = true;
         await pumpEventQueue();
         expect(subject.state.online, isTrue);
-        expect(lessons.sends, 2);
         await subject.close();
       });
     });
@@ -462,7 +475,7 @@ void main() {
 
       await moveTo(tester, subject, 2);
       await tester.pump(const Duration(seconds: 1));
-      expect(subject.state.audio, ExerciseAudio.playing);
+      expect(subject.state.audio, ClipStatus.playing);
       expect(tester.takeException(), isNull);
 
       await moveTo(tester, subject, 3);
@@ -653,7 +666,7 @@ void main() {
       final subject = await pump(tester);
       await moveTo(tester, subject, 2);
 
-      expect(find.text('placement_audio_failed'.tr()), findsOneWidget);
+      expect(find.text('audio_failed'.tr()), findsOneWidget);
       await tester.tap(find.text("I'm going to the market."));
       await tester.pump();
       expect(subject.state.canCheck, isTrue);
@@ -661,7 +674,19 @@ void main() {
       await tester.tap(find.text('common_retry'.tr()));
       await tester.pump();
       await tester.pump();
-      expect(subject.state.audio, ExerciseAudio.playing);
+      expect(subject.state.audio, ClipStatus.playing);
+      await leaveClean(tester, subject);
+    });
+
+    testWidgets('the hint\'s English word stands out', (tester) async {
+      final subject = await pump(tester, locale: const Locale('en'));
+      await subject.toggleHint();
+      await tester.settleEntrance(const Duration(seconds: 1));
+
+      final text = tester.widget<Text>(find.textContaining('she'));
+      final spans = (text.textSpan! as TextSpan).children!.cast<TextSpan>();
+      final word = spans.firstWhere((span) => span.text == 'she');
+      expect(word.locale, const Locale('en'));
       await leaveClean(tester, subject);
     });
 
@@ -689,7 +714,7 @@ void main() {
       await tester.pump();
       await tester.tap(find.byType(AppButton));
       await tester.pump();
-      expect(lessons.answers, hasLength(1));
+      expect(lessons.attempts, hasLength(1));
 
       connectivity.online = true;
       await tester.settleEntrance(const Duration(seconds: 1));
@@ -745,11 +770,11 @@ void main() {
       ) async {
         final subject = await pump(tester);
         await moveTo(tester, subject, 2);
-        expect(subject.state.audio, ExerciseAudio.playing);
+        expect(subject.state.audio, ClipStatus.playing);
 
         await openSheet(tester);
 
-        expect(subject.state.audio, ExerciseAudio.idle);
+        expect(subject.state.audio, ClipStatus.idle);
         expect(find.text('lesson_exit_title'.tr()), findsOneWidget);
         expect(find.text('lesson_exit_body'.tr()), findsOneWidget);
         expect(find.byType(Mascot), findsOneWidget);
@@ -824,7 +849,7 @@ void main() {
       await tester.settleEntrance(const Duration(seconds: 1));
       await moveTo(tester, subject, 2);
 
-      expect(subject.state.audio, ExerciseAudio.playing);
+      expect(subject.state.audio, ClipStatus.playing);
       expect(tester.takeException(), isNull);
       await leaveClean(tester, subject);
     });

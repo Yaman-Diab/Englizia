@@ -46,6 +46,19 @@ void main() {
       expect(cubit.state.status, SessionStatus.signedOut);
     });
 
+    test('work before leaving comes before telling the server', () async {
+      await session.signIn(memberTokens);
+      final order = <String>[];
+      session.onLeaving(() async => order.add('sent ${accounts.logOuts}'));
+      final cubit = AccountCubit(session, accounts);
+      addTearDown(cubit.close);
+
+      await cubit.signOut();
+
+      expect(order, ['sent 0']);
+      expect(accounts.logOuts, 1);
+    });
+
     test('signing out never waits on the server', () async {
       await session.signIn(memberTokens);
       accounts.gate = Completer<void>();
