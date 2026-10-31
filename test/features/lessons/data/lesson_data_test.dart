@@ -15,6 +15,7 @@ import 'package:englizia/features/lessons/data/repositories/lesson_repository_im
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
+import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
 import 'package:englizia/features/lessons/domain/services/stable_order.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -274,6 +275,85 @@ void main() {
       ...changes,
     };
 
+    test('a sentence to repeat needs the panel\'s share', () {
+      final question = {
+        'id': 'r',
+        'template': 'repeatSentence',
+        'instructionAr': 'a',
+        'source': {'text': 'Hi there', 'audio': 'u'},
+      };
+      final without = LessonModel({
+        'id': 'les',
+        'version': 1,
+        'exercises': [
+          question,
+          _question({'id': 'good'}),
+        ],
+      }).toEntity('s');
+      expect(without.exercises.single.id, 'good');
+
+      final with_ = LessonModel({
+        'id': 'les',
+        'version': 1,
+        'speechPassPercent': 60,
+        'exercises': [question],
+      }).toEntity('s');
+      expect(
+        (with_.exercises.single as RepeatSentenceExercise).passPercent,
+        60,
+      );
+    });
+
+    test(
+      'tolerance needs both the question\'s switch and the panel\'s length',
+      () {
+        Map<String, Object?> lesson(bool tolerant, int? length) => {
+          'id': 'les',
+          'version': 1,
+          'typoMinLetters': ?length,
+          'exercises': [
+            {
+              'id': 'w',
+              'template': 'listenWrite',
+              'instructionAr': 'a',
+              'prompt': {'audio': 'u'},
+              'accepted': ['Hello'],
+              'typoTolerance': tolerant,
+            },
+          ],
+        };
+        int? parsed(bool tolerant, int? length) =>
+            (LessonModel(
+                      lesson(tolerant, length),
+                    ).toEntity('s').exercises.single
+                    as ListenWriteExercise)
+                .typoMinLetters;
+
+        expect(parsed(true, 5), 5);
+        expect(parsed(false, 5), isNull);
+        expect(parsed(true, null), isNull);
+      },
+    );
+
+    test('attempts of the produced answers', () {
+      Object? answer(ExerciseDraft draft) => attemptToJson(
+        ExerciseAttempt(
+          lessonId: 'les',
+          lessonVersion: 1,
+          questionId: 'q',
+          draft: draft,
+          hinted: false,
+        ),
+        'a',
+      )['answer'];
+
+      expect(answer(const TextDraft('goes')), {'text': 'goes'});
+      expect(answer(const SpeechDraft([true, false, true])), {
+        'heardWords': 2,
+        'totalWords': 3,
+      });
+    });
+
     test('blanks must fit the sentence', () {
       final parsed = _parse([
         fill({
@@ -438,6 +518,145 @@ void main() {
     });
   });
 
+  group('marking what is typed', () {
+    final write = sampleExercises().whereType<ListenWriteExercise>().first;
+    final fill = sampleExercises().whereType<FillTypedExercise>().first;
+
+    TextEvaluation mark(TypedExercise exercise, String text) =>
+        evaluate(exercise, TextDraft(text)) as TextEvaluation;
+
+    test('case, punctuation and spaces do not matter', () {
+      expect(
+        mark(write, '  WE usually eat dinner, at seven! ').correct,
+        isTrue,
+      );
+    });
+
+    test('an accepted form says which', () {
+      expect(mark(write, 'we usually eat dinner at 7').acceptedIndex, 1);
+    });
+
+    test('one letter out in a long word: right, and which word', () {
+      final result = mark(write, 'We usually eat diner at seven');
+      expect(result.correct, isTrue);
+      expect(result.fixedWord, 3);
+    });
+
+    test('one letter out in a short word is wrong', () {
+      expect(mark(write, 'We usually eet dinner at seven').correct, isFalse);
+    });
+
+    test('two letters out is wrong', () {
+      expect(mark(write, 'We usually eat dinnnner at seven').correct, isFalse);
+    });
+
+    test('with tolerance off, a letter out is wrong', () {
+      expect(mark(fill, 'gose').correct, isFalse);
+      expect(mark(fill, 'GOES').correct, isTrue);
+    });
+
+    test('with no length from the panel, none is tolerated', () {
+      const strict = ListenWriteExercise(
+        id: 'q',
+        instruction: 'a',
+        accepted: ['dinner'],
+        audioUrl: 'u',
+      );
+      expect(mark(strict, 'diner').correct, isFalse);
+    });
+
+    test('a right answer corrected shows the word marked', () {
+      final result = mark(write, 'We usually eat diner at seven');
+      final parts = spellingParts(write, result)!;
+      expect(parts.where((p) => p.underlined).single.text.trim(), 'dinner');
+    });
+
+    test('another accepted form offers the first', () {
+      final result = mark(write, 'we usually eat dinner at 7');
+      expect(otherRightForm(write, null, result), write.accepted.first);
+      expect(
+        otherRightForm(write, null, mark(write, write.accepted.first)),
+        isNull,
+      );
+    });
+  });
+
+  group('what was heard', () {
+    final words = ['Sara', 'feeds', 'the', 'chickens', 'before', 'school.'];
+
+    test('each word heard, whatever its case or punctuation', () {
+      expect(
+        heardWords(words, 'sara feeds the chickens before school'),
+        everyElement(isTrue),
+      );
+    });
+
+    test('a missed word is marked', () {
+      expect(heardWords(words, 'Sara feeds the chickens school'), [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+      ]);
+    });
+
+    test('a word counts as often as it was said', () {
+      expect(heardWords(['the', 'cat', 'the'], 'the cat'), [true, true, false]);
+    });
+
+    test('the panel sets the share', () {
+      const repeat = RepeatSentenceExercise(
+        id: 'q',
+        instruction: 'a',
+        sentence: 'a b c d e f',
+        audioUrl: 'u',
+        passPercent: 70,
+      );
+      SpeechEvaluation mark(List<bool> heard) =>
+          evaluate(repeat, SpeechDraft(heard)) as SpeechEvaluation;
+
+      expect(mark([true, true, true, true, true, false]).correct, isTrue);
+      expect(mark([true, true, true, true, false, false]).correct, isFalse);
+    });
+  });
+
+  group('what is placed', () {
+    final order = sampleExercises().whereType<SentenceOrderExercise>().first;
+    final spelling = sampleExercises().whereType<SpellingExercise>().first;
+
+    test('sentences are right in their own place', () {
+      final chips = [
+        for (final sentence in order.sentences)
+          order.bank.firstWhere((c) => c.text == sentence),
+      ];
+      expect(evaluate(order, SlotsDraft(chips)).correct, isTrue);
+      expect(
+        evaluate(order, SlotsDraft(chips.reversed.toList())),
+        const SlotsEvaluation([false, false, false, false]),
+      );
+    });
+
+    test('spelling has the word\'s letters and two extra', () {
+      expect(spelling.bank.map((c) => c.text).toSet(), {
+        'b',
+        'a',
+        'r',
+        'n',
+        'e',
+        'm',
+      });
+    });
+
+    test('the sentences show as lines in the right answer', () {
+      expect(
+        correctAnswerParts(order).single.text.split('\n'),
+        order.sentences,
+      );
+    });
+  });
+
   group('marking what is built', () {
     final all = sampleExercises();
     final fill = all.whereType<FillChoicesExercise>().first;
@@ -582,7 +801,7 @@ void main() {
       final model = await source.getLesson('les');
 
       expect(adapter.requests.single.path, '/api/v1/app/lessons/les');
-      expect(model.toEntity('s').exercises, hasLength(8));
+      expect(model.toEntity('s').exercises, hasLength(13));
     });
 
     test('an answer goes to its lesson, with its attempt id', () async {

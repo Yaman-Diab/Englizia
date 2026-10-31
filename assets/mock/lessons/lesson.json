@@ -6,6 +6,8 @@
     "version": 1,
     "xpPerAnswer": 10,
     "explainEnabled": true,
+    "speechPassPercent": 70,
+    "typoMinLetters": 5,
     "exercises": [
       {
         "id": "q1",
@@ -287,6 +289,92 @@
             "rightAlt": "حقل"
           }
         ],
+        "reviewOnly": false
+      },
+      {
+        "id": "q9",
+        "template": "repeatSentence",
+        "instructionAr": "استمع ثم قل الجملة",
+        "source": {
+          "text": "Sara feeds the chickens before school.",
+          "audio": "https://example.com/mock/lessons/sara.mp3"
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q10",
+        "template": "listenWrite",
+        "instructionAr": "اكتب ما تسمعه",
+        "prompt": {
+          "audio": "https://example.com/mock/lessons/dinner.mp3",
+          "transcript": "We usually eat dinner at seven."
+        },
+        "accepted": [
+          "We usually eat dinner at seven.",
+          "We usually eat dinner at 7."
+        ],
+        "typoTolerance": true,
+        "explanation": {
+          "ar": "استمع مرة أخرى وانتبه إلى usually: تُكتب بحرفَي l."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q11",
+        "template": "fillTyped",
+        "instructionAr": "اكتب الفعل بالشكل الصحيح",
+        "prompt": {
+          "en": "She ___ to school every day.",
+          "baseWord": "go",
+          "audio": "https://example.com/mock/lessons/she_goes.mp3"
+        },
+        "accepted": [
+          "goes"
+        ],
+        "typoTolerance": false,
+        "hint": {
+          "ar": "انتبه إلى الفاعل she"
+        },
+        "explanation": {
+          "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط، والأفعال المنتهية بـ o نضيف لها es: go ← goes."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q12",
+        "template": "sentenceOrder",
+        "instructionAr": "رتّب الحوار",
+        "prompt": {
+          "audio": "https://example.com/mock/lessons/jacket.mp3"
+        },
+        "sentences": [
+          "Hi, can I help you?",
+          "Yes, I'm looking for a jacket.",
+          "What size do you need?",
+          "Medium, please."
+        ],
+        "explanation": {
+          "ar": "يبدأ الحوار بعرض المساعدة، ثم الطلب، ثم السؤال عن التفاصيل، ثم الجواب."
+        },
+        "reviewOnly": false
+      },
+      {
+        "id": "q13",
+        "template": "spelling",
+        "instructionAr": "اكتب الكلمة",
+        "prompt": {
+          "audio": "https://example.com/mock/lessons/barn.mp3"
+        },
+        "word": "barn",
+        "image": "assets/mock/lessons/barn.svg",
+        "alt": "حظيرة",
+        "distractorLetters": [
+          "e",
+          "m"
+        ],
+        "explanation": {
+          "ar": "b-a-r-n: أربعة حروف، والصوت a فيها طويل."
+        },
         "reviewOnly": false
       }
     ]

@@ -23,7 +23,13 @@ final class LessonModel {
     var broken = 0;
     for (final question in json.readList('exercises') ?? const <Object?>[]) {
       try {
-        if (_exercise(asJsonMap(question), seed) case final exercise?) {
+        if (_exercise(
+              asJsonMap(question),
+              seed,
+              speechPassPercent: json.readInt('speechPassPercent'),
+              typoMinLetters: json.readInt('typoMinLetters'),
+            )
+            case final exercise?) {
           exercises.add(exercise);
         }
       } on FormatException catch (error, stackTrace) {
@@ -47,7 +53,12 @@ final class LessonModel {
 
 /// Null for what isn't shown here: a template this version doesn't know, which
 /// the server should have hidden (S §7.3), and review-only questions.
-Exercise? _exercise(Map<String, Object?> json, String seed) {
+Exercise? _exercise(
+  Map<String, Object?> json,
+  String seed, {
+  required int? speechPassPercent,
+  required int? typoMinLetters,
+}) {
   if (json.readBool('reviewOnly') ?? false) return null;
   final template = json.readString('template');
   if (template == null) throw const FormatException('Exercise: no template');
@@ -94,6 +105,56 @@ Exercise? _exercise(Map<String, Object?> json, String seed) {
       bookReference: bookReference,
       explanation: explanation,
     ),
+    'repeatSentence' => RepeatSentenceExercise(
+      id: id,
+      instruction: instruction,
+      sentence: _required(json.readMap('source')?.readString('text')),
+      audioUrl: _required(json.readMap('source')?.readString('audio')),
+      // The panel's value, or the question can't be judged (S §2 principle 6).
+      passPercent: speechPassPercent ?? _missing<int>(),
+      hint: hint,
+      bookReference: bookReference,
+    ),
+    'listenWrite' => ListenWriteExercise(
+      id: id,
+      instruction: instruction,
+      accepted: _accepted(json),
+      typoMinLetters: _typoMin(json, typoMinLetters),
+      audioUrl: _required(prompt.readString('audio')),
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+    ),
+    'fillTyped' => _fillTyped(
+      json,
+      prompt,
+      id: id,
+      instruction: instruction,
+      typoMinLetters: _typoMin(json, typoMinLetters),
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+    ),
+    'sentenceOrder' => _sentenceOrder(
+      json,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+      audio: audio,
+    ),
+    'spelling' => _spelling(
+      json,
+      prompt,
+      id: id,
+      instruction: instruction,
+      key: key,
+      hint: hint,
+      bookReference: bookReference,
+      explanation: explanation,
+    ),
     _ => _choice(
       template,
       json,
@@ -115,7 +176,110 @@ const _templates = {
   'fillChoices',
   'wordOrder',
   'matching',
+  'repeatSentence',
+  'listenWrite',
+  'fillTyped',
+  'sentenceOrder',
+  'spelling',
 };
+
+T _missing<T>() => throw const FormatException('Exercise: a field is missing');
+
+List<String> _accepted(Map<String, Object?> json) {
+  final accepted = _strings(json.readList('accepted'));
+  if (accepted.isEmpty) {
+    throw const FormatException('Exercise: nothing accepted');
+  }
+  return accepted;
+}
+
+/// Each question says whether a letter's slip is allowed, and the panel how long
+/// a word must be for it (S §7.4).
+int? _typoMin(Map<String, Object?> json, int? minLetters) =>
+    (json.readBool('typoTolerance') ?? false) ? minLetters : null;
+
+FillTypedExercise _fillTyped(
+  Map<String, Object?> json,
+  Map<String, Object?> prompt, {
+  required String id,
+  required String instruction,
+  required int? typoMinLetters,
+  required String? hint,
+  required BookReference? bookReference,
+  required String? explanation,
+}) {
+  final parts = _required(prompt.readString('en')).split(_blank);
+  if (parts.length != 2) {
+    throw const FormatException('Exercise: not one blank in the sentence');
+  }
+  return FillTypedExercise(
+    id: id,
+    instruction: instruction,
+    accepted: _accepted(json),
+    typoMinLetters: typoMinLetters,
+    before: parts.first.trim(),
+    after: parts.last.trim(),
+    baseWord: '(${_required(prompt.readString('baseWord'))})',
+    hint: hint,
+    bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: prompt.readString('audio'),
+  );
+}
+
+SentenceOrderExercise _sentenceOrder(
+  Map<String, Object?> json, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+  required String? explanation,
+  required String? audio,
+}) {
+  final sentences = _strings(json.readList('sentences'));
+  if (sentences.length < 2) {
+    throw const FormatException('Exercise: too few sentences');
+  }
+  return SentenceOrderExercise(
+    id: id,
+    instruction: instruction,
+    sentences: sentences,
+    bank: _bank(sentences, key),
+    hint: hint,
+    bookReference: bookReference,
+    explanation: explanation,
+    answerAudioUrl: audio,
+  );
+}
+
+SpellingExercise _spelling(
+  Map<String, Object?> json,
+  Map<String, Object?> prompt, {
+  required String id,
+  required String instruction,
+  required String key,
+  required String? hint,
+  required BookReference? bookReference,
+  required String? explanation,
+}) {
+  final word = _required(json.readString('word'));
+  return SpellingExercise(
+    id: id,
+    instruction: instruction,
+    word: word,
+    image: _required(json.readString('image')),
+    alt: json.readString('alt') ?? '',
+    audioUrl: prompt.readString('audio'),
+    bank: _bank([
+      ...word.split(''),
+      ..._strings(json.readList('distractorLetters')),
+    ], key),
+    hint: hint,
+    bookReference: bookReference,
+    explanation: explanation,
+  );
+}
 
 ChoiceExercise _choice(
   String template,
@@ -383,6 +547,11 @@ Map<String, Object?> _answerJson(ExerciseDraft draft) => switch (draft) {
     'words': [for (final chip in chips) chip.text],
   },
   PairsDraft(:final mistakes) => {'mistakes': mistakes.toList()},
+  TextDraft(:final text) => {'text': text},
+  SpeechDraft(:final heard) => {
+    'heardWords': heard.where((word) => word).length,
+    'totalWords': heard.length,
+  },
 };
 
 /// Whether the server found a reviewed answer right.

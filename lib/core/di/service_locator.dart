@@ -1,7 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/device_volume.dart';
+import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/audio/sound_player.dart';
+import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/mail/mail_app.dart';
@@ -77,6 +79,8 @@ Future<void> setupCoreDependencies(GetIt sl) async {
             : Duration.zero,
       ),
     )
+    ..registerLazySingleton<SpeechListener>(DeviceSpeechListener.new)
+    ..registerLazySingleton<MicPermission>(() => const PlatformMicPermission())
     ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
     ..registerLazySingleton<MailApp>(() => const PlatformMailApp())
     ..registerFactory(() => SettingsCubit(sl()));

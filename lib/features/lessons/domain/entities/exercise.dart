@@ -79,8 +79,11 @@ sealed class Exercise extends Equatable {
   /// Plays once by itself on opening (S §7.3).
   bool get autoplays => false;
 
-  /// Checked as it goes, with no «تحقق» (S §7.3: matching).
+  /// Checked as it goes, with no «تحقق» (S §7.3: matching, speech).
   bool get checksItself => false;
+
+  /// Said aloud: it can be skipped for this lesson, and can't be wrong (S §7.5).
+  bool get isSpeech => false;
 
   /// A clip that fails is the question's business, so it says so. Elsewhere the
   /// clip is only an extra, and goes quiet.
@@ -362,4 +365,175 @@ final class MatchingExercise extends Exercise {
     wordsShown,
     pictures,
   ];
+}
+
+/// Listen, then say it.
+final class RepeatSentenceExercise extends Exercise {
+  const RepeatSentenceExercise({
+    required super.id,
+    required super.instruction,
+    required this.sentence,
+    required this.audioUrl,
+    required this.passPercent,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String sentence;
+  final String audioUrl;
+
+  /// Of the words heard, from the panel (S §7.3).
+  final int passPercent;
+
+  List<String> get words => sentence.split(' ');
+
+  @override
+  String? get clipUrl => audioUrl;
+
+  @override
+  bool get autoplays => true;
+
+  @override
+  bool get reportsClipFailure => true;
+
+  @override
+  bool get checksItself => true;
+
+  @override
+  bool get isSpeech => true;
+
+  @override
+  List<Object?> get props => [...super.props, sentence, audioUrl, passPercent];
+}
+
+/// An answer typed by the learner, against saved accepted forms (S §7.4).
+sealed class TypedExercise extends Exercise {
+  const TypedExercise({
+    required super.id,
+    required super.instruction,
+    required this.accepted,
+    this.typoMinLetters,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  /// The first is the one shown to a learner who got it wrong.
+  final List<String> accepted;
+
+  /// Words at least this long may have one wrong letter; null accepts none.
+  final int? typoMinLetters;
+
+  @override
+  List<Object?> get props => [...super.props, accepted, typoMinLetters];
+}
+
+/// A clip, and a field to write what it says.
+final class ListenWriteExercise extends TypedExercise {
+  const ListenWriteExercise({
+    required super.id,
+    required super.instruction,
+    required super.accepted,
+    required this.audioUrl,
+    super.typoMinLetters,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String audioUrl;
+
+  @override
+  String? get clipUrl => audioUrl;
+
+  @override
+  bool get autoplays => true;
+
+  @override
+  bool get reportsClipFailure => true;
+
+  @override
+  List<Object?> get props => [...super.props, audioUrl];
+}
+
+/// A sentence with a blank to type in, and its base word in brackets.
+final class FillTypedExercise extends TypedExercise {
+  const FillTypedExercise({
+    required super.id,
+    required super.instruction,
+    required super.accepted,
+    required this.before,
+    required this.after,
+    required this.baseWord,
+    super.typoMinLetters,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String before;
+  final String after;
+  final String baseWord;
+
+  @override
+  List<Object?> get props => [...super.props, before, after, baseWord];
+}
+
+/// Sentences to put in order.
+final class SentenceOrderExercise extends Exercise {
+  const SentenceOrderExercise({
+    required super.id,
+    required super.instruction,
+    required this.sentences,
+    required this.bank,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  /// In the right order.
+  final List<String> sentences;
+
+  /// The same, in the order to show them.
+  final List<WordChip> bank;
+
+  @override
+  List<Object?> get props => [...super.props, sentences, bank];
+}
+
+/// A word's picture and sound, and letters to spell it with.
+final class SpellingExercise extends Exercise {
+  const SpellingExercise({
+    required super.id,
+    required super.instruction,
+    required this.word,
+    required this.image,
+    required this.alt,
+    required this.bank,
+    this.audioUrl,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String word;
+  final String image;
+  final String alt;
+  final String? audioUrl;
+
+  /// The word's letters and the extra ones, in the order to show them.
+  final List<WordChip> bank;
+
+  @override
+  String? get clipUrl => audioUrl;
+
+  @override
+  List<Object?> get props => [...super.props, word, image, alt, audioUrl, bank];
 }

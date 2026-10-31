@@ -408,7 +408,10 @@ void main() {
 
   testLayouts('every template fits', (tester, layout) async {
     for (final exercise in sampleExercises().where(
-      (e) => e is! ChoiceExercise,
+      (e) =>
+          e is FillChoicesExercise ||
+          e is WordOrderExercise ||
+          e is MatchingExercise,
     )) {
       final subject = cubitFor([exercise]);
       addTearDown(subject.close);

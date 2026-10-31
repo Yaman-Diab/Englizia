@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/device_volume.dart';
+import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/audio/sound_player.dart';
+import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
@@ -175,4 +177,65 @@ class FakeSoundPlayer implements SoundPlayer {
 
   @override
   Future<void> play(AppSound sound) async => played.add(sound);
+}
+
+/// Hears what it is told to, when it is told to.
+class FakeSpeechListener implements SpeechListener {
+  /// What it will have understood; null when the phone can't do this.
+  String? says = 'Sara feeds the chickens before school.';
+  var heardSoFar = '';
+  Completer<String?>? _done;
+  void Function(double level)? onLevel;
+  var stops = 0;
+
+  bool get listening => _done != null;
+
+  /// The learner stops talking.
+  void finish() {
+    final done = _done;
+    _done = null;
+    done?.complete(says);
+  }
+
+  @override
+  Future<String?> listen({
+    required Duration silence,
+    required Duration limit,
+    required void Function(double level) onLevel,
+  }) {
+    this.onLevel = onLevel;
+    return (_done = Completer<String?>()).future;
+  }
+
+  @override
+  Future<void> stop() async {
+    stops++;
+    finish();
+  }
+}
+
+class FakeMicPermission implements MicPermission {
+  FakeMicPermission({this.access = MicAccess.granted, this.answer});
+
+  MicAccess access;
+
+  /// What the system prompt ends with.
+  MicAccess? answer;
+  var requests = 0;
+  var settingsOpened = 0;
+
+  @override
+  Future<MicAccess> status() async => access;
+
+  @override
+  Future<MicAccess> request() async {
+    requests++;
+    return access = answer ?? MicAccess.granted;
+  }
+
+  @override
+  Future<bool> openSettings() async {
+    settingsOpened++;
+    return true;
+  }
 }

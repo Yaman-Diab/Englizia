@@ -7,7 +7,7 @@ The requirements define 17 exercise templates (S §7.3, server doc §20.6) that 
 
 ## Decision
 - **`ExerciseCubit` is the engine.** It runs the session: current question, draft, evaluation, hint, progress, clip. There is no engine layer over it, and one cubit per template would repeat all of that (ADR 1).
-- **What goes in the cubit:** whatever the button, the marks or the attempt need, or what outlives the question. What only draws a question stays in its widget (the active blank, a held card, a text controller). Speech will get its own small cubit, like an interactive sheet under ADR 1.
+- **What goes in the cubit:** whatever the button, the marks or the attempt need, or what outlives the question. What only draws a question stays in its widget (the active blank, a held card, a text controller). Speech has its own small cubit, `MicCubit`, like an interactive sheet under ADR 1.
 - **`exerciseBody()` is the renderer:** one exhaustive `switch` on the sealed `Exercise`. No registry or factory: the set of templates is closed, each needs its own code anyway, and a registry loses the compiler's check. "A new track needs no code" is about tracks and content, not templates.
 - **Bodies take props** (`BodyAnswer`, `BodyClip`) and never read the session's cubit, so a concept review (S §11.2) can show them too. A body with no check button asks for the check itself (`onSubmit`, `Exercise.checksItself`).
 - **Word cards fly in one place,** `ChipStage`: it measures a card, lets the answer change, then flies it on its own layer. Nothing outside the stage rebuilds per frame.

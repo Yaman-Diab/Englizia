@@ -46,9 +46,11 @@ The example is `assets/mock/lessons/lesson.json`.
 | `id` | string | The lesson | yes |
 | `version` | int | The published version; an attempt counts for the version it was answered on (server doc §19.2) | yes, sent with each answer |
 | `xpPerAnswer` | int? | What a right answer earns, from the panel's table (v1.0). None before then: the feedback shows no badge. Proposed: the package has no such field | yes |
+| `speechPassPercent` | int | The share of words to hear in `repeatSentence`, after inheritance (server doc §17). Without it such a question is skipped | yes |
+| `typoMinLetters` | int | How long a word must be for a slip of one letter (server doc §10.5). Without it none is accepted | yes |
 | `explainEnabled` | bool | «اشرح لي» is on, by the track's settings and the day's limit (S §16). Proposed | yes |
 | `exercises[].id` | string | Stable question id | yes |
-| `exercises[].template` | string | `multipleChoice`, `imageChoice`, `listenChoose`, `fillChoices`, `wordOrder`, `matching`; the rest of §20.6 as they are built. One the app doesn't know is left out | yes |
+| `exercises[].template` | string | `multipleChoice`, `imageChoice`, `listenChoose`, `fillChoices`, `wordOrder`, `matching`, `repeatSentence`, `listenWrite`, `fillTyped`, `sentenceOrder`, `spelling`; the rest of §20.6 as they are built. One the app doesn't know is left out | yes |
 | `exercises[].instructionAr` | string | The line over the question | yes |
 | `exercises[].instructionArAudio` | string? | Required for kids | not yet |
 | `exercises[].prompt.en` | string | `multipleChoice`: the sentence with one `___`. `fillChoices`: with one `___` per blank. `imageChoice`: the word | yes |
@@ -64,6 +66,13 @@ The example is `assets/mock/lessons/lesson.json`.
 | `exercises[].meaningAr` | string | `wordOrder`: what the guide says | yes |
 | `exercises[].chips` | string[]? | `wordOrder`: the sentence as cards; with none, split by spaces | yes |
 | `exercises[].alternatives` | string[] | `wordOrder`: other right sentences. Compared without case, punctuation or extra spaces | yes |
+| `exercises[].source` | `{text, audio}` | `repeatSentence`: the sentence and its sound. The package may point at a sentence of the lesson (`sentence_id`): the server resolves it | yes |
+| `exercises[].accepted` | string[] | `listenWrite`, `fillTyped`: right answers, compared without case, punctuation or extra spaces (S §7.4). The first is shown to a learner who got it wrong | yes |
+| `exercises[].typoTolerance` | bool | `listenWrite`, `fillTyped`: accept one wrong letter in a long enough word | yes |
+| `exercises[].prompt.baseWord` | string | `fillTyped`: the word in brackets after the blank | yes |
+| `exercises[].sentences` | string[] | `sentenceOrder`: in the right order; the app shuffles them | yes |
+| `exercises[].word`, `.image`, `.alt` | string | `spelling`: the word, its picture and the picture's Arabic name. The package points at the lesson's vocabulary (`word_ref`): the server resolves it. Proposed | yes |
+| `exercises[].distractorLetters` | string[] | `spelling`: the extra letters | yes |
 | `exercises[].kind` | string | `matching`: `text` or `image` | yes |
 | `exercises[].pairs[]` | `{left, right}` or `{left, rightImage, rightAlt}` | `matching`, 3 to 5 pairs. `left` is the English word, unique in its question, and the pair's id. `rightAlt` is the picture's Arabic name for screen readers (server doc §20.6 has no such field: proposed) | yes |
 | `exercises[].hint.ar` | string? | The hint. None hides the button. English words in it are shown strong | yes |
@@ -126,7 +135,7 @@ One checked answer. Safe to repeat: the server ignores an `attemptId` it has see
 | `attemptId` | string | A UUID made on the phone when the answer is checked, the same on every resend |
 | `lessonVersion` | int | The version the learner answered |
 | `questionId` | string | The question |
-| `answer` | object | By way of answering. Choice templates: `{optionId}`. `fillChoices`: `{words}`, one per blank in order. `wordOrder`: `{words}` as placed. `matching`: `{mistakes}`, the pairs with a mistake on the way, each once, for the question's concept (S §7.3) |
+| `answer` | object | By way of answering. Choice templates: `{optionId}`. `fillChoices`: `{words}`, one per blank in order. `wordOrder`: `{words}` as placed. `matching`: `{mistakes}`, the pairs with a mistake on the way, each once, for the question's concept (S §7.3). `listenWrite`, `fillTyped`: `{text}`. `sentenceOrder`, `spelling`: `{words}`, one per place. `repeatSentence`: `{heardWords, totalWords}`, sent only when enough was heard, and never what was said (S §7.5) |
 | `hinted` | bool | The hint was opened on this question: a right answer is an assisted success (S §7.1) |
 
 ### Errors

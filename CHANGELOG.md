@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Exercises to produce the language: repeating a sentence with a real microphone, writing what you hear, typing into a blank with spelling rules, ordering sentences and spelling a word.
 - Feedback after checking: a sheet that rises in place of the button, with the verdict drawing itself, the right answer with its sound and why, another accepted form, what the answer earned, and a way to report a problem.
 - Lesson exercises: one container for multiple choice, picture choice, listening, filling blanks, ordering words and matching, where word cards fly to their place, with progress, hints, a book reference, slower audio, each learner's own steady order of options, leaving and carrying on, lessons that open again offline, and answers that wait on the phone and go out when the connection returns. Runs on mock data, and silently, for now.
 - Project foundation: Clean Architecture skeleton, DI, router with route policies, session bootstrap.

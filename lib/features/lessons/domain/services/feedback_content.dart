@@ -4,10 +4,13 @@ import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dar
 
 /// A piece of a sentence shown in the feedback; [strong] for what was at stake.
 final class AnswerPart {
-  const AnswerPart(this.text, {this.strong = false});
+  const AnswerPart(this.text, {this.strong = false, this.underlined = false});
 
   final String text;
   final bool strong;
+
+  /// A word corrected.
+  final bool underlined;
 }
 
 /// The whole right answer, its key parts strong (S §7.2). Empty for a template
@@ -31,7 +34,15 @@ List<AnswerPart> correctAnswerParts(Exercise exercise) => switch (exercise) {
     ],
   ],
   final WordOrderExercise e => [AnswerPart(e.answer)],
-  MatchingExercise() => const [],
+  MatchingExercise() || RepeatSentenceExercise() => const [],
+  final ListenWriteExercise e => [AnswerPart(e.accepted.first)],
+  final FillTypedExercise e => [
+    AnswerPart('${e.before} '),
+    AnswerPart(e.accepted.first, strong: true),
+    AnswerPart(_startsWithPunctuation(e.after) ? e.after : ' ${e.after}'),
+  ],
+  final SentenceOrderExercise e => [AnswerPart(e.sentences.join('\n'))],
+  final SpellingExercise e => [AnswerPart(e.word, strong: true)],
 };
 
 String _rightText(ChoiceExercise exercise) =>
@@ -59,13 +70,38 @@ List<AnswerPart> heardParts(ListenChooseExercise exercise, String? chosenId) {
   ];
 }
 
-/// Another right way to say it, so the learner knows the order isn't the only
-/// one: the first accepted form other than the one built (S §7.2).
-String? otherRightForm(Exercise exercise, ExerciseDraft? draft) {
+/// Another right way to say it, so the learner knows it isn't the only one: the
+/// first accepted form other than the one given (S §7.2).
+String? otherRightForm(
+  Exercise exercise,
+  ExerciseDraft? draft,
+  Evaluation evaluation,
+) {
+  if (exercise is TypedExercise && evaluation is TextEvaluation) {
+    final at = evaluation.acceptedIndex ?? 0;
+    return at == 0 ? null : exercise.accepted.first;
+  }
   if (exercise is! WordOrderExercise || draft is! SequenceDraft) return null;
   final built = plainWords(draft.chips.map((c) => c.text).join(' '));
   for (final form in [exercise.answer, ...exercise.alternatives]) {
     if (plainWords(form) != built) return form;
   }
   return null;
+}
+
+/// The accepted form with the word the learner misspelled marked, when that is
+/// how it was accepted (S §7.2).
+List<AnswerPart>? spellingParts(Exercise exercise, Evaluation evaluation) {
+  if (exercise is! TypedExercise || evaluation is! TextEvaluation) return null;
+  final fixed = evaluation.fixedWord;
+  if (fixed == null) return null;
+  final words = exercise.accepted[evaluation.acceptedIndex ?? 0].split(' ');
+  return [
+    for (final (i, word) in words.indexed)
+      AnswerPart(
+        i < words.length - 1 ? '$word ' : word,
+        strong: i == fixed,
+        underlined: i == fixed,
+      ),
+  ];
 }

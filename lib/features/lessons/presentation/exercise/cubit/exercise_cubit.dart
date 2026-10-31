@@ -35,6 +35,7 @@ final class ExerciseState extends Equatable {
     this.playCount = 0,
     this.online = true,
     this.finished = false,
+    this.speechOff = false,
   });
 
   final LoadStatus load;
@@ -73,6 +74,9 @@ final class ExerciseState extends Equatable {
   /// The last question is done: the lesson's end follows.
   final bool finished;
 
+  /// «لا أستطيع التحدث الآن»: no more speech questions in this lesson.
+  final bool speechOff;
+
   Exercise? get question => index < questions.length ? questions[index] : null;
 
   bool get hintUsed => hinted.contains(question?.id);
@@ -104,6 +108,7 @@ final class ExerciseState extends Equatable {
     int? playCount,
     bool? online,
     bool? finished,
+    bool? speechOff,
   }) => ExerciseState(
     load: load ?? this.load,
     failure: failure != null ? failure() : this.failure,
@@ -123,6 +128,7 @@ final class ExerciseState extends Equatable {
     playCount: playCount ?? this.playCount,
     online: online ?? this.online,
     finished: finished ?? this.finished,
+    speechOff: speechOff ?? this.speechOff,
   );
 
   @override
@@ -145,6 +151,7 @@ final class ExerciseState extends Equatable {
     playCount,
     online,
     finished,
+    speechOff,
   ];
 }
 
@@ -209,7 +216,9 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   /// The first question from [from] not done yet, or the lesson's end.
   Future<void> _showFrom(int from) async {
     for (var i = from; i < state.questions.length; i++) {
-      if (!state.done.contains(state.questions[i].id)) {
+      final candidate = state.questions[i];
+      if (!state.done.contains(candidate.id) &&
+          !(state.speechOff && candidate.isSpeech)) {
         emit(
           state.copyWith(
             index: i,
@@ -259,6 +268,11 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     if (question == null || draft == null || !state.canCheck) return;
     await stopAudio();
     final found = evaluate(question, draft);
+    // Not heard enough isn't wrong, and isn't done: there is another try.
+    if (found is SpeechEvaluation && !found.correct) {
+      emit(state.copyWith(evaluation: () => found));
+      return;
+    }
     final review = found is SequenceEvaluation && found.needsReview;
     emit(
       state.copyWith(
@@ -295,6 +309,27 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     unawaited(
       _sounds.play(evaluation.correct ? AppSound.correct : AppSound.incorrect),
     );
+  }
+
+  /// «أعد المحاولة» on a sentence not heard well enough.
+  void retrySpeech() =>
+      emit(state.copyWith(draft: () => null, evaluation: () => null));
+
+  /// «تخطَّ»: moves on with nothing counted or sent (S §7.5).
+  Future<void> skipQuestion() async {
+    final question = state.question;
+    if (question == null) return;
+    await stopAudio();
+    emit(state.copyWith(done: {...state.done, question.id}));
+    await _saveProgress();
+    await _showFrom(state.index + 1);
+  }
+
+  /// «لا أستطيع التحدث الآن»: skips the speech questions of this lesson only.
+  Future<void> skipSpeech() async {
+    await stopAudio();
+    emit(state.copyWith(speechOff: true));
+    await _showFrom(state.index + 1);
   }
 
   /// Sends a problem with this question, with the answer given (S §18).
