@@ -13,6 +13,7 @@ class SpeechBubble extends StatelessWidget {
     required this.text,
     this.strong = true,
     this.textDirection,
+    this.style,
     super.key,
   });
 
@@ -23,6 +24,9 @@ class SpeechBubble extends StatelessWidget {
 
   /// For text in a set language, whatever the app's.
   final TextDirection? textDirection;
+
+  /// In place of what [strong] chooses.
+  final TextStyle? style;
 
   static const _radius = 18.0;
   static const _tailSize = 12.0;
@@ -59,11 +63,13 @@ class SpeechBubble extends StatelessWidget {
                     text,
                     key: ValueKey(text),
                     textDirection: textDirection,
-                    style: strong
-                        ? context.texts.bodyStrong
-                        : context.texts.body.copyWith(
-                            color: colors.textPrimary,
-                          ),
+                    style:
+                        style ??
+                        (strong
+                            ? context.texts.bodyStrong
+                            : context.texts.body.copyWith(
+                                color: colors.textPrimary,
+                              )),
                   ),
                 ),
               ),

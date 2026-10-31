@@ -62,17 +62,25 @@ The example is `assets/mock/lessons/lesson.json`.
 | `exercises[].options[].misconception` | string? | The concept a wrong option points to | not yet |
 | `exercises[].answer` | string | The right option's id; `wordOrder`: the right sentence | yes |
 | `exercises[].blanks[]` | `{answer, alternatives[]}` | `fillChoices`: what each blank takes, in order | yes |
-| `exercises[].distractors[]` | `{text, misconception?}` | `fillChoices`, `wordOrder`: the extra cards | yes |
+| `exercises[].distractors[]` | `{text, misconception?}` | `fillChoices`, `wordOrder`: the extra cards; `errorCorrection`: the wrong corrections | yes |
 | `exercises[].meaningAr` | string | `wordOrder`: what the guide says | yes |
 | `exercises[].chips` | string[]? | `wordOrder`: the sentence as cards; with none, split by spaces | yes |
 | `exercises[].alternatives` | string[] | `wordOrder`: other right sentences. Compared without case, punctuation or extra spaces | yes |
 | `exercises[].source` | `{text, audio}` | `repeatSentence`: the sentence and its sound. The package may point at a sentence of the lesson (`sentence_id`): the server resolves it | yes |
-| `exercises[].accepted` | string[] | `listenWrite`, `fillTyped`: right answers, compared without case, punctuation or extra spaces (S §7.4). The first is shown to a learner who got it wrong | yes |
-| `exercises[].typoTolerance` | bool | `listenWrite`, `fillTyped`: accept one wrong letter in a long enough word | yes |
+| `exercises[].accepted` | string[] | `listenWrite`, `fillTyped`, `translation`: right answers, compared without case, punctuation or extra spaces (S §7.4). The first is shown to a learner who got it wrong | yes |
+| `exercises[].typoTolerance` | bool | `listenWrite`, `fillTyped`, `translation`: accept one wrong letter in a long enough word | yes |
 | `exercises[].prompt.baseWord` | string | `fillTyped`: the word in brackets after the blank | yes |
 | `exercises[].sentences` | string[] | `sentenceOrder`: in the right order; the app shuffles them | yes |
 | `exercises[].word`, `.image`, `.alt` | string | `spelling`: the word, its picture and the picture's Arabic name. The package points at the lesson's vocabulary (`word_ref`): the server resolves it. Proposed | yes |
 | `exercises[].distractorLetters` | string[] | `spelling`: the extra letters | yes |
+| `exercises[].prompt.ar` | string | `translation`: the sentence to translate | yes |
+| `exercises[].prompt.tokens[]` | `{id, text}` | `errorCorrection`: the sentence's words, in order | yes |
+| `exercises[].wrongTokenId`, `.correction` | string | `errorCorrection`: the wrong word and what replaces it | yes |
+| `exercises[].character` | `{name, avatar?}` | `dialogueCompletion`: with no avatar the app shows the name's first letter | yes |
+| `exercises[].lines[]` | `{speaker: "character", text}` or `{speaker: "student", blank: true}` | `dialogueCompletion`: the conversation, with one line for the learner | yes |
+| `exercises[].title`, `.passage`, `.audio` | string | `reading`: the text. Server doc §20.6 has `title_ar`, but the design's title is English: proposed, and open | yes |
+| `exercises[].questions[]` | `{id, prompt: {en}, options[], answer, hint?, explanation?}` | `reading`, 2 to 5: each is a step of its own, checked alone. `id` is the `questionId` of its answer, so it must be unique in the lesson | yes |
+| `exercises[].prompt.en`, `.audio` | string | `speakAnswer`: the question and its sound. `criterion`, `modelAnswer` and `watchedConcepts` stay on the server | yes |
 | `exercises[].kind` | string | `matching`: `text` or `image` | yes |
 | `exercises[].pairs[]` | `{left, right}` or `{left, rightImage, rightAlt}` | `matching`, 3 to 5 pairs. `left` is the English word, unique in its question, and the pair's id. `rightAlt` is the picture's Arabic name for screen readers (server doc §20.6 has no such field: proposed) | yes |
 | `exercises[].hint.ar` | string? | The hint. None hides the button. English words in it are shown strong | yes |
@@ -82,10 +90,13 @@ The example is `assets/mock/lessons/lesson.json`.
 | `exercises[].bookRef` | `{page, exercise}`? | Imaar lessons tied to a book exercise | yes |
 | `exercises[].reviewOnly` | bool | For the mistakes bank only: left out of the lesson | yes |
 
+`aiReviewEnabled` (top level, bool) says whether the AI may judge in this lesson, by the track's settings and the learner's age: with it off, or absent, the app leaves out `speakAnswer` questions, uncounted (S §16.2). Proposed.
+
 A question the app can't read is skipped and logged, so it can't leave the learner stuck on the lesson; a lesson with no readable question is a failure with a retry.
 
 **Open with the backend team:**
 - Judging word orders with AI. The design sends some orders to AI, but S §16 and server doc §19.5 list no such use: they accept saved alternatives only (S §7.3). The app does what the design shows; with no `reviewOrders` nothing is ever sent.
+- A reading's title: `title_ar` in the package, English in the design.
 - Whether a question the app skipped still counts towards completing the lesson (it must not).
 - English instructions and hints: the package has only Arabic, so both app languages show Arabic (S §7.1 says "Arabic instructions"), read right to left.
 - The order of options is shuffled on the phone, per installation and question (S §7.1), so the server must send them in any order and needs nothing for this.
@@ -114,6 +125,18 @@ The common errors (`README.md`). With an unknown lesson, `404`.
 
 Asks the server to judge an order in `reviewOrders`, with the same body as an answer, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
 
+## `POST /api/v1/app/lessons/{lessonId}/answers/spoken-review`
+
+The learner's own words on a `speakAnswer` question, judged by the server's AI while they wait, with the same body as an answer. Only the words are sent, never a recording. The app holds no AI key (S §16.3). Proposed.
+
+| `outcome` | With | The app |
+|---|---|---|
+| `answered` | `note`, `better?`, and `misconceptions[]` for the server's own use | Shows the note and the better form, and moves on |
+| `offTopic` | `note` | Neutral: another try or a skip, not counted, and the question stays |
+| `quotaOut` | | Says the day's allowance is over, and moves on, uncounted |
+
+On any failure the learner reads "we'll check it later, and it won't count as wrong", and the answer goes to `/answers` under the same `attemptId` when it can (S §16.3): the server judges it there.
+
 ## `POST /api/v1/app/lessons/{lessonId}/answers`
 
 One checked answer. Safe to repeat: the server ignores an `attemptId` it has seen.
@@ -135,7 +158,7 @@ One checked answer. Safe to repeat: the server ignores an `attemptId` it has see
 | `attemptId` | string | A UUID made on the phone when the answer is checked, the same on every resend |
 | `lessonVersion` | int | The version the learner answered |
 | `questionId` | string | The question |
-| `answer` | object | By way of answering. Choice templates: `{optionId}`. `fillChoices`: `{words}`, one per blank in order. `wordOrder`: `{words}` as placed. `matching`: `{mistakes}`, the pairs with a mistake on the way, each once, for the question's concept (S §7.3). `listenWrite`, `fillTyped`: `{text}`. `sentenceOrder`, `spelling`: `{words}`, one per place. `repeatSentence`: `{heardWords, totalWords}`, sent only when enough was heard, and never what was said (S §7.5) |
+| `answer` | object | By way of answering. Choice templates: `{optionId}`. `fillChoices`: `{words}`, one per blank in order. `wordOrder`: `{words}` as placed. `matching`: `{mistakes}`, the pairs with a mistake on the way, each once, for the question's concept (S §7.3). `listenWrite`, `fillTyped`, `translation`: `{text}`. `errorCorrection`: `{tokenId, replacement}`. `speakAnswer`: `{text, typed}`. `sentenceOrder`, `spelling`: `{words}`, one per place. `repeatSentence`: `{heardWords, totalWords}`, sent only when enough was heard, and never what was said (S §7.5) |
 | `hinted` | bool | The hint was opened on this question: a right answer is an assisted success (S §7.1) |
 
 ### Errors

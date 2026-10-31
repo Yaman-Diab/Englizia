@@ -89,6 +89,10 @@ sealed class Exercise extends Equatable {
   /// clip is only an extra, and goes quiet.
   bool get reportsClipFailure => false;
 
+  /// Questions with the same value share what surrounds them, and only what is
+  /// their own moves from one to the next (S §7.3: a text's questions).
+  String get stayKey => id;
+
   @override
   List<Object?> get props => [
     id,
@@ -536,4 +540,186 @@ final class SpellingExercise extends Exercise {
 
   @override
   List<Object?> get props => [...super.props, word, image, alt, audioUrl, bank];
+}
+
+/// An Arabic sentence to write in English, against the saved translations.
+final class TranslationExercise extends TypedExercise {
+  const TranslationExercise({
+    required super.id,
+    required super.instruction,
+    required super.accepted,
+    required this.arabic,
+    super.typoMinLetters,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String arabic;
+
+  @override
+  List<Object?> get props => [...super.props, arabic];
+}
+
+/// A sentence with one wrong word: find it, then choose its correction.
+final class ErrorCorrectionExercise extends Exercise {
+  const ErrorCorrectionExercise({
+    required super.id,
+    required super.instruction,
+    required this.tokens,
+    required this.wrongTokenId,
+    required this.correction,
+    required this.corrections,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  /// The sentence's words, in order.
+  final List<WordChip> tokens;
+  final String wrongTokenId;
+  final String correction;
+
+  /// [correction] among the wrong ones, in the order to show them.
+  final List<WordChip> corrections;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    tokens,
+    wrongTokenId,
+    correction,
+    corrections,
+  ];
+}
+
+/// A line of a conversation: the character's, or the learner's to fill.
+final class DialogueLine extends Equatable {
+  const DialogueLine.character(this.text) : isLearner = false;
+
+  const DialogueLine.learner() : text = '', isLearner = true;
+
+  final String text;
+  final bool isLearner;
+
+  @override
+  List<Object?> get props => [text, isLearner];
+}
+
+/// A conversation missing the learner's line, and replies to choose it from.
+final class DialogueExercise extends ChoiceExercise {
+  const DialogueExercise({
+    required super.id,
+    required super.instruction,
+    required super.options,
+    required super.answerId,
+    required this.characterName,
+    required this.lines,
+    this.characterAvatar,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String characterName;
+  final String? characterAvatar;
+  final List<DialogueLine> lines;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    characterName,
+    characterAvatar,
+    lines,
+  ];
+}
+
+/// The text its questions are about.
+final class ReadingPassage extends Equatable {
+  const ReadingPassage({
+    required this.id,
+    required this.title,
+    required this.text,
+    this.audioUrl,
+  });
+
+  final String id;
+  final String title;
+  final String text;
+  final String? audioUrl;
+
+  @override
+  List<Object?> get props => [id, title, text, audioUrl];
+}
+
+/// One question about a text. Each is its own step of the lesson, checked alone,
+/// and the text stays still between them (S §7.3).
+final class ReadingExercise extends ChoiceExercise {
+  const ReadingExercise({
+    required super.id,
+    required super.instruction,
+    required super.options,
+    required super.answerId,
+    required this.passage,
+    required this.ask,
+    required this.step,
+    required this.steps,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+  });
+
+  final ReadingPassage passage;
+  final String ask;
+
+  /// Which of the text's questions this is, from 1.
+  final int step;
+  final int steps;
+
+  @override
+  String? get clipUrl => passage.audioUrl;
+
+  /// The whole text isn't the answer: the feedback has nothing to play.
+  @override
+  String? get answerClipUrl => null;
+
+  @override
+  String get stayKey => passage.id;
+
+  @override
+  List<Object?> get props => [...super.props, passage, ask, step, steps];
+}
+
+/// A question to answer in the learner's own words, spoken or typed, judged by
+/// the server's AI (S §16). It checks itself once spoken; typing has «تحقق».
+final class SpeakAnswerExercise extends Exercise {
+  const SpeakAnswerExercise({
+    required super.id,
+    required super.instruction,
+    required this.ask,
+    this.audioUrl,
+    super.hint,
+    super.bookReference,
+  });
+
+  final String ask;
+  final String? audioUrl;
+
+  @override
+  String? get clipUrl => audioUrl;
+
+  @override
+  bool get autoplays => audioUrl != null;
+
+  @override
+  bool get checksItself => true;
+
+  @override
+  bool get isSpeech => true;
+
+  @override
+  List<Object?> get props => [...super.props, ask, audioUrl];
 }

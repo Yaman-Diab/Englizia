@@ -22,6 +22,7 @@ class MicBlock extends StatelessWidget {
     required this.onOpenSettings,
     required this.onSkip,
     this.locked = false,
+    this.onType,
     super.key,
   });
 
@@ -36,6 +37,9 @@ class MicBlock extends StatelessWidget {
   /// The answer is in, so there is nothing to press.
   final bool locked;
 
+  /// Writing the answer instead, where the question allows it.
+  final VoidCallback? onType;
+
   @override
   Widget build(BuildContext context) {
     if (state.phase == MicPhase.denied) {
@@ -43,14 +47,31 @@ class MicBlock extends StatelessWidget {
     }
     final colors = context.colors;
     final listening = state.phase == MicPhase.listening;
+    final canType =
+        state.phase == MicPhase.idle || state.phase == MicPhase.notHeard;
+    final mic = _MicButton(
+      phase: state.phase,
+      levels: levels,
+      onTap: locked ? null : onTap,
+    );
     return Column(
       children: [
         const SizedBox(height: AppSpacing.lg),
-        _MicButton(
-          phase: state.phase,
-          levels: levels,
-          onTap: locked ? null : onTap,
-        ),
+        if (onType case final onType?)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: _KeyboardButton.size + _keyboardGap),
+              mic,
+              const SizedBox(width: _keyboardGap),
+              SizedBox.square(
+                dimension: _KeyboardButton.size,
+                child: canType ? _KeyboardButton(onTap: onType) : null,
+              ),
+            ],
+          )
+        else
+          mic,
         const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
         if (listening)
           _RecordingTime(seconds: state.seconds)
@@ -74,6 +95,29 @@ class MicBlock extends StatelessWidget {
       ],
     );
   }
+}
+
+const _keyboardGap = 28.0;
+
+class _KeyboardButton extends StatelessWidget {
+  const _KeyboardButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  static const size = AppSizes.minTapTarget;
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    onPressed: onTap,
+    tooltip: 'lesson_speak_type_instead'.tr(),
+    color: context.colors.textSecondary,
+    style: IconButton.styleFrom(
+      padding: EdgeInsetsDirectional.zero,
+      fixedSize: const Size.square(size),
+      side: BorderSide(color: context.scheme.outline),
+    ),
+    icon: const Icon(Icons.keyboard_alt_outlined),
+  );
 }
 
 class _MicButton extends StatelessWidget {

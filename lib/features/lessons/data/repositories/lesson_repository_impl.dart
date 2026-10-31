@@ -119,6 +119,19 @@ final class LessonRepositoryImpl implements LessonRepository {
   );
 
   @override
+  Future<Result<Evaluation>> reviewSpoken(ExerciseAttempt attempt) async {
+    final id = SettingsStorageService.randomId();
+    final request = attemptToJson(attempt, id);
+    final result = await guard(
+      () => _remote.reviewSpoken(attempt.lessonId, request),
+    );
+    if (result is Err) {
+      await _enqueue(_answerKind, attempt.lessonId, id, request);
+    }
+    return result;
+  }
+
+  @override
   Future<void> saveReport(ExerciseReport report) async {
     final id = SettingsStorageService.randomId();
     await _enqueue(_reportKind, report.lessonId, id, reportToJson(report, id));

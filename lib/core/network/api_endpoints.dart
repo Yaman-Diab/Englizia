@@ -70,6 +70,9 @@ abstract final class ApiEndpoints {
   static String lessonAnswerReview(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/answers/review';
 
+  static String lessonSpokenReview(String lessonId) =>
+      '/api/v1/app/lessons/$lessonId/answers/spoken-review';
+
   // ASSUMPTION(api): docs/api/lessons.md.
   static String lessonReports(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/reports';

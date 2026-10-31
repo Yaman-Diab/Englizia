@@ -1,0 +1,14 @@
+{
+  "answered": {
+    "outcome": "answered",
+    "note": "إجابتك واضحة وتجيب عن السؤال. بعد usually نستخدم الفعل بصيغته البسيطة: visit لا visiting.",
+    "better": "I usually visit my grandparents on Fridays."
+  },
+  "offTopic": {
+    "outcome": "offTopic",
+    "note": "السؤال عمّا تفعله عادةً يوم الجمعة. جرّب أن تبدأ بـ: On Fridays, I usually…"
+  },
+  "quotaOut": {
+    "outcome": "quotaOut"
+  }
+}

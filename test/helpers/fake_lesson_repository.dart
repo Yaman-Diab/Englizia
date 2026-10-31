@@ -22,9 +22,11 @@ Map<String, Object?> sampleLessonJson() => asJsonMap(
 List<Exercise> sampleExercises() =>
     LessonModel(sampleLessonJson()).toEntity('seed').exercises;
 
-/// Only the choice templates of the example.
-List<Exercise> sampleChoiceExercises() =>
-    sampleExercises().whereType<ChoiceExercise>().toList();
+/// Only the first choice templates of the example.
+List<Exercise> sampleChoiceExercises() => sampleExercises()
+    .whereType<ChoiceExercise>()
+    .where((e) => e is! DialogueExercise && e is! ReadingExercise)
+    .toList();
 
 class FakeLessonRepository implements LessonRepository {
   FakeLessonRepository({List<Exercise>? exercises, this.failure})
@@ -40,6 +42,12 @@ class FakeLessonRepository implements LessonRepository {
 
   /// What the server says of an order it judges.
   Result<bool> review = const Ok(true);
+
+  /// What the server's AI says of the learner's own words.
+  Result<Evaluation> spokenReview = const Ok(
+    SpokenAnswered(note: 'A note.', better: 'A better way.'),
+  );
+  final spokenReviews = <ExerciseAttempt>[];
 
   /// When set, a review waits for it.
   Future<void>? reviewGate;
@@ -69,6 +77,13 @@ class FakeLessonRepository implements LessonRepository {
   Future<String> saveAttempt(ExerciseAttempt attempt) async {
     attempts.add(attempt);
     return 'attempt-${attempts.length}';
+  }
+
+  @override
+  Future<Result<Evaluation>> reviewSpoken(ExerciseAttempt attempt) async {
+    spokenReviews.add(attempt);
+    await reviewGate;
+    return spokenReview;
   }
 
   @override

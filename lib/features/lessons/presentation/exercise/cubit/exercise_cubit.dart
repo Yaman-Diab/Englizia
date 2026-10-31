@@ -85,6 +85,15 @@ final class ExerciseState extends Equatable {
 
   bool get canCheck => (draft?.isComplete ?? false) && !checked;
 
+  /// «تحقق» is under the question. Typing an answer that speaking would check
+  /// by itself brings it back.
+  bool get showsCheck =>
+      !(question?.checksItself ?? false) ||
+      switch (draft) {
+        SpokenDraft(typed: true) => true,
+        _ => false,
+      };
+
   /// How far along the bar: this question counts once moved past, not when it
   /// is merely answered.
   int get position => finished ? questions.length : index;
@@ -267,6 +276,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     final draft = state.draft;
     if (question == null || draft == null || !state.canCheck) return;
     await stopAudio();
+    if (question is SpeakAnswerExercise) return _reviewSpoken(question, draft);
     final found = evaluate(question, draft);
     // Not heard enough isn't wrong, and isn't done: there is another try.
     if (found is SpeechEvaluation && !found.correct) {
@@ -305,13 +315,49 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     if (judged is! ReviewLater) _sayVerdict(judged);
   }
 
+  /// The server's AI judges the learner's own words. Answering something else
+  /// isn't an answer, so the question stays; all else moves on, and an answer it
+  /// couldn't judge now is judged later, and never counts as wrong.
+  Future<void> _reviewSpoken(
+    SpeakAnswerExercise question,
+    ExerciseDraft draft,
+  ) async {
+    emit(state.copyWith(evaluation: () => evaluate(question, draft)));
+    final result = await _lessons.reviewSpoken(
+      ExerciseAttempt(
+        lessonId: lessonId,
+        lessonVersion: state.lessonVersion,
+        questionId: question.id,
+        draft: draft,
+        hinted: state.hintUsed,
+      ),
+    );
+    if (isClosed) return;
+    final judged = switch (result) {
+      Ok(:final value) => value,
+      Err() => const ReviewLater(),
+    };
+    if (judged is SpokenOffTopic) {
+      emit(state.copyWith(evaluation: () => judged));
+      return;
+    }
+    emit(
+      state.copyWith(
+        evaluation: () => judged,
+        done: {...state.done, question.id},
+      ),
+    );
+    if (judged is SpokenAnswered) _sayVerdict(judged);
+    await _saveProgress();
+  }
+
   void _sayVerdict(Evaluation evaluation) {
     unawaited(
       _sounds.play(evaluation.correct ? AppSound.correct : AppSound.incorrect),
     );
   }
 
-  /// «أعد المحاولة» on a sentence not heard well enough.
+  /// «أعد المحاولة» on a sentence not heard well enough, or an answer off topic.
   void retrySpeech() =>
       emit(state.copyWith(draft: () => null, evaluation: () => null));
 

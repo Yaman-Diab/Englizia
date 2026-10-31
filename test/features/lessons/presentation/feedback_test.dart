@@ -57,7 +57,7 @@ void main() {
     ThemeMode themeMode = ThemeMode.light,
     VoidCallback? onExplain,
   }) async {
-    lessons.exercises = [exercise, all.last];
+    lessons.exercises = [exercise, first<SpellingExercise>()];
     final subject = cubit();
     addTearDown(subject.close);
     await tester.pumpLocalized(
@@ -687,7 +687,10 @@ void main() {
   });
 
   testWidgets('under reduce motion it just appears', (tester) async {
-    lessons.exercises = [first<MultipleChoiceExercise>(), all.last];
+    lessons.exercises = [
+      first<MultipleChoiceExercise>(),
+      first<SpellingExercise>(),
+    ];
     final subject = cubit();
     addTearDown(subject.close);
     await tester.pumpLocalized(

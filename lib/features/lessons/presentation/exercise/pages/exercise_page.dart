@@ -48,7 +48,11 @@ class ExercisePage extends StatelessWidget {
   /// A light touch for right, a stronger one for wrong (S §7.2).
   void _feel(Evaluation? evaluation) {
     switch (evaluation) {
-      case null || ReviewPending() || ReviewLater():
+      case null ||
+          ReviewPending() ||
+          ReviewLater() ||
+          SpokenOffTopic() ||
+          ReviewQuotaOut():
         return;
       case _ when evaluation.correct:
         HapticFeedback.lightImpact();
@@ -147,7 +151,7 @@ class ExercisePage extends StatelessWidget {
           Expanded(
             child: SlideSwap(
               child: KeyedSubtree(
-                key: ValueKey(question!.id),
+                key: ValueKey(question!.stayKey),
                 child: _Question(state: state, question: question),
               ),
             ),
@@ -197,7 +201,7 @@ class _Footer extends StatelessWidget {
         onRetry: cubit.retrySpeech,
         onSkip: cubit.skipQuestion,
       );
-    } else if (question.checksItself) {
+    } else if (!state.showsCheck) {
       child = SizedBox(key: const ValueKey('none'), height: inset);
     } else {
       child = Padding(
@@ -241,62 +245,131 @@ class _Question extends StatelessWidget {
   final ExerciseState state;
   final Exercise question;
 
+  static const _padding = AppSpacing.xl;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final cubit = context.read<ExerciseCubit>();
     final reference = question.bookReference;
-    return SingleChildScrollView(
-      padding: const EdgeInsetsDirectional.fromSTEB(
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.xl,
-        AppSpacing.lg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(
-            header: true,
-            child: Text(
-              question.instruction,
-              textDirection: TextDirection.rtl,
-              style: context.texts.bodyStrong.copyWith(
-                color: colors.textPrimary,
-              ),
-            ),
+    final clip = BodyClip(
+      status: state.audio,
+      slow: state.slow,
+      length: state.clipLength,
+      playCount: state.playCount,
+      onToggle: cubit.togglePlay,
+      onSlow: cubit.playSlow,
+      onStop: cubit.stopAudio,
+    );
+    final head = Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Semantics(
+          header: true,
+          child: Text(
+            question.instruction,
+            textDirection: TextDirection.rtl,
+            style: context.texts.bodyStrong.copyWith(color: colors.textPrimary),
           ),
-          if (reference != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: BookBadge(reference: reference),
-            ),
-          ],
-          if (question.hint case final hint?)
-            HintCard(hint: hint, open: state.hintOpen),
-          const SizedBox(height: AppSpacing.lg),
-          exerciseBody(
-            question,
-            BodyAnswer(
-              draft: state.draft,
-              evaluation: state.evaluation,
-              onDraft: cubit.updateDraft,
-              onSubmit: cubit.check,
-            ),
-            BodyClip(
-              status: state.audio,
-              slow: state.slow,
-              length: state.clipLength,
-              playCount: state.playCount,
-              onToggle: cubit.togglePlay,
-              onSlow: cubit.playSlow,
-              onStop: cubit.stopAudio,
-            ),
-            onSkipSpeech: cubit.skipSpeech,
+        ),
+        if (reference != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: BookBadge(reference: reference),
           ),
         ],
+        if (question.hint case final hint?)
+          HintCard(hint: hint, open: state.hintOpen),
+        const SizedBox(height: AppSpacing.lg),
+      ],
+    );
+    final body = exerciseBody(
+      question,
+      BodyAnswer(
+        draft: state.draft,
+        evaluation: state.evaluation,
+        onDraft: cubit.updateDraft,
+        onSubmit: cubit.check,
       ),
+      clip,
+      onSkipSpeech: cubit.skipSpeech,
+    );
+    final pinned = exercisePinned(
+      question,
+      clip,
+      screenHeight: MediaQuery.sizeOf(context).height,
+    );
+    if (pinned == null) {
+      return SingleChildScrollView(
+        padding: const EdgeInsetsDirectional.fromSTEB(
+          _padding,
+          _padding,
+          _padding,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [head, body],
+        ),
+      );
+    }
+    return CustomScrollView(
+      slivers: [
+        SliverPadding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            _padding,
+            _padding,
+            _padding,
+            0,
+          ),
+          sliver: SliverToBoxAdapter(child: head),
+        ),
+        SliverPersistentHeader(
+          pinned: true,
+          delegate: _PinnedPart(child: pinned.child, height: pinned.height),
+        ),
+        SliverPadding(
+          padding: const EdgeInsetsDirectional.fromSTEB(
+            _padding,
+            AppSpacing.lg,
+            _padding,
+            AppSpacing.lg,
+          ),
+          sliver: SliverToBoxAdapter(child: body),
+        ),
+      ],
     );
   }
+}
+
+/// Stays at the top while the question scrolls under it, which its own
+/// background hides.
+class _PinnedPart extends SliverPersistentHeaderDelegate {
+  const _PinnedPart({required this.child, required this.height});
+
+  final Widget child;
+  final double height;
+
+  @override
+  double get minExtent => height;
+
+  @override
+  double get maxExtent => height;
+
+  @override
+  Widget build(BuildContext context, double shrink, bool overlaps) =>
+      ColoredBox(
+        color: context.colors.background,
+        child: Padding(
+          padding: const EdgeInsetsDirectional.symmetric(
+            horizontal: _Question._padding,
+          ),
+          child: child,
+        ),
+      );
+
+  @override
+  bool shouldRebuild(_PinnedPart oldDelegate) =>
+      oldDelegate.child != child || oldDelegate.height != height;
 }
