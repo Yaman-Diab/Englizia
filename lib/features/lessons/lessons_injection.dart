@@ -1,13 +1,20 @@
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/video/video_engine.dart';
+import 'package:englizia/core/video/video_player_engine.dart';
 import 'package:englizia/features/lessons/data/answers_sync.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
+import 'package:englizia/features/lessons/data/datasources/teacher_question_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
+import 'package:englizia/features/lessons/data/repositories/teacher_question_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/lessons/domain/repositories/teacher_question_repository.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
+import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
+import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -20,6 +27,21 @@ void registerLessonDependencies(GetIt sl) {
     )
     ..registerLazySingleton<LessonRepository>(
       () => LessonRepositoryImpl(sl(), settings: sl()),
+    )
+    ..registerLazySingleton<TeacherQuestionRemoteDataSource>(
+      () => AppConfig.isMock
+          ? TeacherQuestionFakeDataSource(rootBundle)
+          : TeacherQuestionRemoteDataSourceImpl(sl()),
+    )
+    ..registerLazySingleton<TeacherQuestionRepository>(
+      () => TeacherQuestionRepositoryImpl(sl()),
+    )
+    ..registerFactory<VideoEngine>(VideoPlayerEngine.new)
+    ..registerFactoryParam<GrammarLessonCubit, String, void>(
+      (lessonId, _) => GrammarLessonCubit(sl(), sl(), sl(), lessonId: lessonId),
+    )
+    ..registerFactoryParam<TeacherQuestionsCubit, String, void>(
+      (lessonId, _) => TeacherQuestionsCubit(sl(), lessonId: lessonId),
     )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactory(() => MicCubit(sl(), sl()))

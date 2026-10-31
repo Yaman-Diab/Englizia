@@ -1,3 +1,4 @@
+import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:equatable/equatable.dart';
 
@@ -11,6 +12,7 @@ final class Lesson extends Equatable {
     this.xpPerAnswer,
     this.explainEnabled = false,
     this.outline = const LessonOutline(),
+    this.grammar,
   });
 
   final String id;
@@ -26,6 +28,9 @@ final class Lesson extends Equatable {
   /// Its place in the unit, for its end.
   final LessonOutline outline;
 
+  /// What a grammar lesson shows before its exercises.
+  final GrammarContent? grammar;
+
   @override
   List<Object?> get props => [
     id,
@@ -34,6 +39,7 @@ final class Lesson extends Equatable {
     xpPerAnswer,
     explainEnabled,
     outline,
+    grammar,
   ];
 }
 

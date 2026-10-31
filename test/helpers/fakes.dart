@@ -11,6 +11,8 @@ import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/token_storage.dart';
+import 'package:englizia/core/video/video_engine.dart';
+import 'package:flutter/widgets.dart';
 
 class FakeTokenStorage implements TokenStorage {
   FakeTokenStorage([this.tokens]);
@@ -237,5 +239,50 @@ class FakeMicPermission implements MicPermission {
   Future<bool> openSettings() async {
     settingsOpened++;
     return true;
+  }
+}
+
+class FakeVideoEngine implements VideoEngine {
+  final _changes = StreamController<VideoSnapshot>.broadcast();
+  final opened = <({String url, Duration from, double speed, bool play})>[];
+  final seeks = <Duration>[];
+  final speeds = <double>[];
+  var plays = 0;
+  var pauses = 0;
+  var disposed = false;
+
+  /// What the player reports.
+  void report(VideoSnapshot snapshot) => _changes.add(snapshot);
+
+  @override
+  Stream<VideoSnapshot> get changes => _changes.stream;
+
+  @override
+  Future<void> open(
+    String url, {
+    Duration from = Duration.zero,
+    double speed = 1,
+    bool play = true,
+  }) async => opened.add((url: url, from: from, speed: speed, play: play));
+
+  @override
+  Future<void> play() async => plays++;
+
+  @override
+  Future<void> pause() async => pauses++;
+
+  @override
+  Future<void> seekTo(Duration position) async => seeks.add(position);
+
+  @override
+  Future<void> setSpeed(double speed) async => speeds.add(speed);
+
+  @override
+  Widget view() => const SizedBox.expand();
+
+  @override
+  Future<void> dispose() async {
+    disposed = true;
+    await _changes.close();
   }
 }

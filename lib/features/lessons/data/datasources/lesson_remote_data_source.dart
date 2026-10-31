@@ -31,6 +31,9 @@ abstract interface class LessonRemoteDataSource {
     Map<String, Object?> request,
   );
 
+  /// [request] comes from `watchToJson`.
+  Future<void> sendWatch(String lessonId, Map<String, Object?> request);
+
   /// [request] comes from `reportToJson`.
   Future<void> sendReport(String lessonId, Map<String, Object?> request);
 }
@@ -88,6 +91,10 @@ final class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
   );
 
   @override
+  Future<void> sendWatch(String lessonId, Map<String, Object?> request) =>
+      _client.post(ApiEndpoints.lessonWatch(lessonId), data: request);
+
+  @override
   Future<void> sendReport(String lessonId, Map<String, Object?> request) =>
       _client.post(ApiEndpoints.lessonReports(lessonId), data: request);
 }
@@ -101,6 +108,8 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
   });
 
   static const asset = 'assets/mock/lessons/lesson.json';
+  static const grammarAsset = 'assets/mock/lessons/grammar.json';
+  static const bookAsset = 'assets/mock/lessons/grammar_book.json';
   static const reviewsAsset = 'assets/mock/lessons/spoken_reviews.json';
   static const resultsAsset = 'assets/mock/lessons/results.json';
 
@@ -120,7 +129,13 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
   @override
   Future<LessonModel> getLesson(String lessonId) async {
     await Future<void>.delayed(latency);
-    final body = jsonDecode(await _bundle.loadString(asset));
+    final body = jsonDecode(
+      await _bundle.loadString(switch (lessonId) {
+        'les_gv' => grammarAsset,
+        'les_book' => bookAsset,
+        _ => asset,
+      }),
+    );
     return LessonModel(asJsonMap(ApiClient.unwrap(body)));
   }
 
@@ -184,6 +199,10 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
       ),
     );
   }
+
+  @override
+  Future<void> sendWatch(String lessonId, Map<String, Object?> request) =>
+      Future<void>.delayed(latency);
 
   @override
   Future<void> sendReport(String lessonId, Map<String, Object?> request) =>

@@ -2,6 +2,7 @@ package com.example.englizia
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -12,6 +13,16 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/mail_app")
             .setMethodCallHandler { call, result ->
                 if (call.method == "open") result.success(openMailApp()) else result.notImplemented()
+            }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/screen_awake")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "set") return@setMethodCallHandler result.notImplemented()
+                if (call.arguments == true) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                }
+                result.success(null)
             }
     }
 

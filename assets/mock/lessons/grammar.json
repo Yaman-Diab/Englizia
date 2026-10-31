@@ -1,0 +1,276 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_gv",
+    "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": true,
+    "speechPassPercent": 70,
+    "typoMinLetters": 5,
+    "aiReviewEnabled": true,
+    "title": "المضارع البسيط",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": false
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "content": {
+      "kind": "grammarVideo",
+      "requiredWatchPercent": 80,
+      "questionsEnabled": true,
+      "teacher": {
+        "name": "الأستاذ"
+      },
+      "video": {
+        "id": "vid_1",
+        "durationSeconds": 634,
+        "sources": [
+          {
+            "quality": "auto",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+          },
+          {
+            "quality": "low",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "sizeMb": 15
+          },
+          {
+            "quality": "medium",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "sizeMb": 35
+          },
+          {
+            "quality": "high",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "sizeMb": 80
+          }
+        ],
+        "captions": [
+          {
+            "fromMs": 0,
+            "toMs": 55000,
+            "ar": "اليوم نتعلّم المضارع البسيط."
+          },
+          {
+            "fromMs": 55000,
+            "toMs": 110000,
+            "ar": "نستخدمه للعادات والحقائق الثابتة."
+          },
+          {
+            "fromMs": 110000,
+            "toMs": 190000,
+            "ar": "مع he وshe وit نضيف s إلى الفعل."
+          },
+          {
+            "fromMs": 190000,
+            "toMs": 270000,
+            "ar": "مثلًا: She works in a hospital."
+          },
+          {
+            "fromMs": 270000,
+            "toMs": 340000,
+            "ar": "وفي النفي نستخدم doesn't مع she."
+          },
+          {
+            "fromMs": 340000,
+            "toMs": 634000,
+            "ar": "لنراجع الأمثلة معًا."
+          }
+        ]
+      },
+      "summary": {
+        "ar": "نستخدم المضارع البسيط للعادات والحقائق. مع he وshe وit نضيف s إلى الفعل.",
+        "table": [
+          {
+            "left": "I / you / we / they",
+            "right": [
+              {
+                "text": "play"
+              }
+            ]
+          },
+          {
+            "left": "he / she / it",
+            "right": [
+              {
+                "text": "play"
+              },
+              {
+                "text": "s",
+                "marked": true
+              }
+            ]
+          }
+        ],
+        "examples": [
+          {
+            "en": [
+              {
+                "text": "She "
+              },
+              {
+                "text": "works",
+                "strong": true
+              },
+              {
+                "text": " in a hospital."
+              }
+            ],
+            "ar": "تعمل في مستشفى.",
+            "audio": "https://example.com/mock/lessons/she_works.mp3"
+          },
+          {
+            "en": [
+              {
+                "text": "They "
+              },
+              {
+                "text": "play",
+                "strong": true
+              },
+              {
+                "text": " football on Fridays."
+              }
+            ],
+            "ar": "يلعبون كرة القدم أيام الجمعة.",
+            "audio": "https://example.com/mock/lessons/they_play.mp3"
+          },
+          {
+            "en": [
+              {
+                "text": "The sun "
+              },
+              {
+                "text": "rises",
+                "strong": true
+              },
+              {
+                "text": " in the east."
+              }
+            ],
+            "ar": "تشرق الشمس من الشرق.",
+            "audio": "https://example.com/mock/lessons/sun_rises.mp3"
+          }
+        ]
+      }
+    },
+    "exercises": [
+      {
+        "id": "q1",
+        "template": "multipleChoice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "prompt": {
+          "en": "She ___ to school every day.",
+          "audio": "https://example.com/mock/lessons/she_goes.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "go"
+          },
+          {
+            "id": "o2",
+            "text": "goes"
+          },
+          {
+            "id": "o3",
+            "text": "going"
+          },
+          {
+            "id": "o4",
+            "text": "gone"
+          }
+        ],
+        "answer": "o2",
+        "hint": {
+          "ar": "انتبه إلى الفاعل she"
+        },
+        "explanation": {
+          "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط."
+        },
+        "concepts": [
+          "c_present_s"
+        ],
+        "bookRef": null,
+        "reviewOnly": false
+      },
+      {
+        "id": "q4",
+        "template": "multipleChoice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "prompt": {
+          "en": "Excuse me, ___ ?",
+          "audio": "https://example.com/mock/lessons/post_office.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "could you tell me where the nearest post office is"
+          },
+          {
+            "id": "o2",
+            "text": "where post office"
+          },
+          {
+            "id": "o3",
+            "text": "post office is where"
+          },
+          {
+            "id": "o4",
+            "text": "you know the post office"
+          }
+        ],
+        "answer": "o1",
+        "bookRef": {
+          "page": 34,
+          "exercise": 2
+        },
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "هذا سؤال غير مباشر: نبدأ بعبارة مهذبة مثل could you tell me، ثم نكمل بترتيب الجملة العادية: الفاعل ثم الفعل.\nلذلك نقول where the nearest post office is، ولا نقول where is the nearest post office كما في السؤال المباشر.\nالخيارات الأخرى تحذف الفعل is أو تخلط الترتيب، فلا تكوّن جملة صحيحة.\nنستخدم السؤال غير المباشر حين نسأل شخصًا لا نعرفه، لأنه ألطف من السؤال المباشر، ويكثر في المحلات والمطارات ومحطات القطار."
+        }
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

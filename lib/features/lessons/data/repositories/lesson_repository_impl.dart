@@ -10,9 +10,11 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
+import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
@@ -34,6 +36,7 @@ final class LessonRepositoryImpl implements LessonRepository {
   static const _answerKind = 'answer';
   static const _reportKind = 'report';
   static const _completionKind = 'completion';
+  static const _watchKind = 'watch';
 
   /// What is on its way, so it goes one at a time and in order.
   Future<void>? _sending;
@@ -162,6 +165,59 @@ final class LessonRepositoryImpl implements LessonRepository {
     return result;
   }
 
+  Map<String, Object?> _watches() {
+    final saved = _settings.videoWatch;
+    if (saved == null) return {};
+    try {
+      return asJsonMap(jsonDecode(saved));
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Saved video watching unreadable');
+      return {};
+    }
+  }
+
+  @override
+  WatchState? savedWatch(String lessonId) {
+    final saved = _watches()[lessonId];
+    return saved == null ? null : watchFromJson(asJsonMap(saved));
+  }
+
+  @override
+  Future<void> saveWatch(String lessonId, WatchState watch) async {
+    final watches = _watches()..[lessonId] = watchToJson(watch);
+    try {
+      await _settings.setVideoWatch(jsonEncode(watches));
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Saving video watching failed');
+    }
+  }
+
+  @override
+  Future<void> sendWatch(
+    String lessonId,
+    int lessonVersion,
+    WatchState watch,
+  ) async {
+    final store = _store();
+    store.unsent.removeWhere(
+      (entry) => entry['kind'] == _watchKind && entry['lessonId'] == lessonId,
+    );
+    await _keep(store);
+    await _enqueue(
+      _watchKind,
+      lessonId,
+      SettingsStorageService.randomId(),
+      watchToJson(watch, lessonVersion: lessonVersion),
+    );
+  }
+
+  @override
+  VideoQuality get videoQuality => videoQualityFromName(_settings.videoQuality);
+
+  @override
+  Future<void> setVideoQuality(VideoQuality quality) =>
+      _settings.setVideoQuality(quality.name);
+
   @override
   Future<void> saveReport(ExerciseReport report) async {
     final id = SettingsStorageService.randomId();
@@ -204,6 +260,7 @@ final class LessonRepositoryImpl implements LessonRepository {
         await switch (first['kind']) {
           _reportKind => _remote.sendReport(lessonId, request),
           _completionKind => _remote.completeLesson(lessonId, request),
+          _watchKind => _remote.sendWatch(lessonId, request),
           _ => _remote.sendAnswer(lessonId, request),
         };
       } on ApiException catch (error, stackTrace) {

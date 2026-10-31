@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Grammar lessons: a video player with captions, speed, quality and full screen, a watched share counted from what really played that opens the exercises, the rule in short with its examples, and private questions to the teacher, whose replies only the learner who asked can see.
 - The end of a lesson: the guide's quiet celebration, points counting up, the first-try count and time, words saved, what to review, the unit's chain with the lesson filling in, and the day's goal and streak, with its moment when the goal is reached. Works offline with what the phone knows.
 - Advanced exercises: translating, correcting a mistake with the correction flying to its word, completing a conversation, reading a text pinned over its questions with a whole-screen view, and speaking an answer, typed if you prefer, judged by the server's AI with a note and a better form.
 - Exercises to produce the language: repeating a sentence with a real microphone, writing what you hear, typing into a blank with spelling rules, ordering sentences and spelling a word.
@@ -44,6 +45,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The placement test's result: the guide climbs a ladder up to your estimated level, then what you can do and how your skills compare, with no numbers. You can start one level lower. Offline, your answers are safe and the result waits.
 - Confirm your email: a quiet reminder that never stops you learning, a sheet to open your mail app, send the link again or correct the address, and a badge with your email. The link confirms it, or says it ran out and offers a new one.
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
+
+### Fixed
+- The line of a unit's chain on the lesson's end was never drawn: it had no height.
 
 ### Changed
 - "I know some English" no longer starts the placement test at once: onboarding goes on, and the test starts after your account is ready. Offline it can't be chosen, and the screen says why.
