@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
@@ -159,8 +160,8 @@ class _SignUpPageState extends State<SignUpPage> {
               expression: expression,
               waving: expression == MascotExpression.welcome,
             ),
-            AnimatedSize(
-              duration: AppMotion.resolve(context, AppMotion.medium),
+            SmoothSize(
+              duration: AppMotion.medium,
               curve: AppMotion.smoothOut,
               alignment: AlignmentDirectional.topCenter,
               child: state.emailTaken

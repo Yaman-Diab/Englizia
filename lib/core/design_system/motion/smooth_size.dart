@@ -10,6 +10,7 @@ class SmoothSize extends StatelessWidget {
     this.duration = AppMotion.fast,
     this.curve = AppMotion.out,
     this.alignment = AlignmentDirectional.topStart,
+    this.clipBehavior = Clip.hardEdge,
     super.key,
   });
 
@@ -18,6 +19,9 @@ class SmoothSize extends StatelessWidget {
   final Curve curve;
   final AlignmentGeometry alignment;
 
+  /// What overflows while it eases: [Clip.none] for a shadow that must show.
+  final Clip clipBehavior;
+
   @override
   Widget build(BuildContext context) => AppMotion.reduceMotion(context)
       ? child
@@ -25,6 +29,7 @@ class SmoothSize extends StatelessWidget {
           duration: duration,
           curve: curve,
           alignment: alignment,
+          clipBehavior: clipBehavior,
           child: child,
         );
 }

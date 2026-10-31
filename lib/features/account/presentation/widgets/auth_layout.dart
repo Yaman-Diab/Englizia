@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:flutter/material.dart';
 
 /// The frame of the account screens (designs "Create Account v2", "Login
@@ -128,8 +129,8 @@ class AuthHeader extends StatelessWidget {
                     style: texts.display.copyWith(color: colors.textPrimary),
                   ),
                 ),
-                AnimatedSize(
-                  duration: duration,
+                SmoothSize(
+                  duration: AppMotion.fast,
                   curve: AppMotion.out,
                   alignment: AlignmentDirectional.topStart,
                   child: compact
@@ -205,8 +206,8 @@ class AuthFooter extends StatelessWidget {
           AppSpacing.xl,
           AppSpacing.sm + AppSpacing.xxs,
         ),
-        child: AnimatedSize(
-          duration: AppMotion.resolve(context, AppMotion.fast),
+        child: SmoothSize(
+          duration: AppMotion.fast,
           curve: AppMotion.smoothOut,
           alignment: AlignmentDirectional.bottomCenter,
           child: Column(

@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/verify_email_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
 import 'package:flutter/material.dart';
@@ -50,8 +51,8 @@ class _VerifyEmailBannerState extends State<VerifyEmailBanner> {
       listener: (_, state) => _follow(state),
       builder: (context, state) {
         final open = _appeared && state.showsReminder;
-        return AnimatedSize(
-          duration: duration,
+        return SmoothSize(
+          duration: AppMotion.fast,
           curve: AppMotion.out,
           alignment: AlignmentDirectional.topStart,
           child: AnimatedOpacity(

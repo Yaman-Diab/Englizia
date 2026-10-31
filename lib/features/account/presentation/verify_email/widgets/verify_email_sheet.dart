@@ -4,6 +4,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/illustrations/mail_scene.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
@@ -126,8 +127,8 @@ class _VerifyEmailSheetState extends State<VerifyEmailSheet> {
                         : _ViewPart(state: state),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  AnimatedSize(
-                    duration: AppMotion.resolve(context, AppMotion.fast),
+                  SmoothSize(
+                    duration: AppMotion.fast,
                     curve: AppMotion.smoothOut,
                     alignment: AlignmentDirectional.bottomCenter,
                     child: _Message(state: state),

@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/speech_bubble.dart';
 import 'package:flutter/material.dart';
@@ -290,8 +291,8 @@ class _Resizing extends StatelessWidget {
   final Clip clip;
 
   @override
-  Widget build(BuildContext context) => AnimatedSize(
-    duration: AppMotion.resolve(context, AppMotion.medium),
+  Widget build(BuildContext context) => SmoothSize(
+    duration: AppMotion.medium,
     curve: AppMotion.smoothOut,
     alignment: AlignmentDirectional.topCenter,
     clipBehavior: clip,

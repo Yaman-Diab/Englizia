@@ -73,6 +73,19 @@ void main() {
     expect(violations, isEmpty);
   });
 
+  test('sizes ease through SmoothSize, which knows about reduce motion', () {
+    final users = [
+      for (final file in Directory('lib').listSync(recursive: true))
+        if (file is File &&
+            file.path.endsWith('.dart') &&
+            !file.path.endsWith('smooth_size.dart') &&
+            file.readAsStringSync().contains('AnimatedSize('))
+          file.path,
+    ];
+
+    expect(users, isEmpty);
+  });
+
   test('lib/ uses directional layout only', () {
     final violations = [
       for (final file in Directory(
