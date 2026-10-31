@@ -175,7 +175,7 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<ExerciseCubit>();
-    final inset = MediaQuery.viewPaddingOf(context).bottom;
+    final inset = MediaQuery.paddingOf(context).bottom;
     final evaluation = state.evaluation;
     final Widget child;
     if (evaluation != null) {
@@ -194,6 +194,8 @@ class _Footer extends StatelessWidget {
         onNext: cubit.next,
         onExplain: onExplain,
         onReport: cubit.report,
+        onRetry: cubit.retrySpeech,
+        onSkip: cubit.skipQuestion,
       );
     } else if (question.checksItself) {
       child = SizedBox(key: const ValueKey('none'), height: inset);
@@ -289,7 +291,9 @@ class _Question extends StatelessWidget {
               playCount: state.playCount,
               onToggle: cubit.togglePlay,
               onSlow: cubit.playSlow,
+              onStop: cubit.stopAudio,
             ),
+            onSkipSpeech: cubit.skipSpeech,
           ),
         ],
       ),

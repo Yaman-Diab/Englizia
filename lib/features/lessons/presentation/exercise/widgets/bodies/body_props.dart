@@ -47,6 +47,7 @@ final class BodyClip {
     required this.playCount,
     required this.onToggle,
     required this.onSlow,
+    required this.onStop,
   });
 
   final ClipStatus status;
@@ -55,4 +56,7 @@ final class BodyClip {
   final int playCount;
   final VoidCallback onToggle;
   final VoidCallback onSlow;
+  final VoidCallback onStop;
+
+  bool get playingSlow => status == ClipStatus.playing && slow;
 }

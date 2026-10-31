@@ -72,6 +72,33 @@ final class PairsDraft extends ExerciseDraft {
   List<Object?> get props => [total, matched, mistakes];
 }
 
+/// What was typed.
+final class TextDraft extends ExerciseDraft {
+  const TextDraft(this.text);
+
+  final String text;
+
+  @override
+  bool get isComplete => text.trim().isNotEmpty;
+
+  @override
+  List<Object?> get props => [text];
+}
+
+/// Which words of the sentence were heard, in order. Only that, as nothing the
+/// learner said is kept (S §7.5).
+final class SpeechDraft extends ExerciseDraft {
+  const SpeechDraft(this.heard);
+
+  final List<bool> heard;
+
+  @override
+  bool get isComplete => true;
+
+  @override
+  List<Object?> get props => [heard];
+}
+
 /// What checking found on the phone: instant, and final only for what the
 /// learner sees. The server marks it again, and its result is the official one.
 sealed class Evaluation extends Equatable {
@@ -162,6 +189,38 @@ final class PairsEvaluation extends Evaluation {
 
   @override
   List<Object?> get props => [mistakes];
+}
+
+/// A typed answer. Right may mean [acceptedIndex], another accepted form, or
+/// [fixedWord], one wrong letter in that word of it, shown corrected.
+final class TextEvaluation extends Evaluation {
+  const TextEvaluation({
+    required this.correct,
+    this.acceptedIndex,
+    this.fixedWord,
+  });
+
+  @override
+  final bool correct;
+  final int? acceptedIndex;
+  final int? fixedWord;
+
+  @override
+  List<Object?> get props => [correct, acceptedIndex, fixedWord];
+}
+
+/// Which words were heard. Short of the panel's share it isn't wrong, only "let's
+/// try again": never counted, and not sent (S §7.5).
+final class SpeechEvaluation extends Evaluation {
+  const SpeechEvaluation({required this.heard, required this.correct});
+
+  final List<bool> heard;
+
+  @override
+  final bool correct;
+
+  @override
+  List<Object?> get props => [heard, correct];
 }
 
 /// An answer checked, on its way to the server. [hinted] makes a right answer

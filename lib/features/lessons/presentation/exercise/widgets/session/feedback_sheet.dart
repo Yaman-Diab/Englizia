@@ -44,6 +44,8 @@ class FeedbackSheet extends StatefulWidget {
     required this.onNext,
     required this.onExplain,
     required this.onReport,
+    required this.onRetry,
+    required this.onSkip,
     super.key,
   });
 
@@ -59,6 +61,10 @@ class FeedbackSheet extends StatefulWidget {
   final VoidCallback onNext;
   final VoidCallback onExplain;
   final ValueChanged<ProblemReason> onReport;
+
+  /// A sentence not heard well enough: try again, or move on uncounted.
+  final VoidCallback onRetry;
+  final VoidCallback onSkip;
 
   static const _maxShare = .6;
 
@@ -93,11 +99,12 @@ class _FeedbackSheetState extends State<FeedbackSheet>
     super.dispose();
   }
 
-  Future<void> _next() async {
+  /// Takes the sheet down, and only then does [then].
+  Future<void> _leave(VoidCallback then) async {
     if (_leaving) return;
     _leaving = true;
     await _rise.reverse().orCancel.catchError((_) {});
-    if (mounted) widget.onNext();
+    if (mounted) then();
   }
 
   Future<void> _report() async {
@@ -123,12 +130,14 @@ class _FeedbackSheetState extends State<FeedbackSheet>
     final evaluation = widget.evaluation;
     final ToneColors tone = switch (evaluation) {
       ReviewPending() || ReviewLater() => colors.info,
+      SpeechEvaluation(correct: false) => colors.info,
       _ when evaluation.correct => colors.success,
       _ => colors.error,
     };
     final reduce = AppMotion.reduceMotion(context);
-    final inset = MediaQuery.viewPaddingOf(context).bottom;
+    final inset = MediaQuery.paddingOf(context).bottom;
     final waiting = evaluation is ReviewPending;
+    final retrying = evaluation is SpeechEvaluation && !evaluation.correct;
     final sheet = ConstrainedBox(
       constraints: BoxConstraints(
         maxHeight: MediaQuery.sizeOf(context).height * FeedbackSheet._maxShare,
@@ -176,6 +185,31 @@ class _FeedbackSheetState extends State<FeedbackSheet>
               ),
               if (waiting)
                 SizedBox(height: AppSpacing.xl + inset)
+              else if (retrying)
+                Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(
+                    AppSpacing.xl,
+                    AppSpacing.lg + AppSpacing.xs,
+                    AppSpacing.xl,
+                    AppSpacing.xs + inset,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      AppButton(
+                        label: 'lesson_fb_try_again'.tr(),
+                        size: AppButtonSize.large,
+                        onPressed: () => _leave(widget.onRetry),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      AppButton(
+                        label: 'lesson_fb_skip'.tr(),
+                        variant: AppButtonVariant.text,
+                        onPressed: () => _leave(widget.onSkip),
+                      ),
+                    ],
+                  ),
+                )
               else
                 DecoratedBox(
                   decoration: BoxDecoration(
@@ -193,7 +227,7 @@ class _FeedbackSheetState extends State<FeedbackSheet>
                     child: AppButton(
                       label: 'lesson_next'.tr(),
                       size: AppButtonSize.large,
-                      onPressed: _next,
+                      onPressed: () => _leave(widget.onNext),
                     ),
                   ),
                 ),
@@ -286,14 +320,20 @@ class _Content extends StatelessWidget {
         ),
       );
     }
+    if (evaluation is SpeechEvaluation && !evaluation.correct) {
+      return _SpeechRetry(tone: tone);
+    }
     final correct = evaluation.correct;
     final xp = this.xp;
-    final other = correct ? otherRightForm(exercise, draft) : null;
+    final other = correct ? otherRightForm(exercise, draft, evaluation) : null;
+    final spelling = correct ? spellingParts(exercise, evaluation) : null;
     final explanation = exercise.explanation;
     final listening = exercise is ListenChooseExercise;
     final parts = correctAnswerParts(exercise);
     final title = correct
-        ? exercise.checksItself
+        ? exercise.isSpeech
+              ? 'lesson_fb_well_done'.tr()
+              : exercise.checksItself
               ? 'lesson_fb_matched'.tr()
               : 'lesson_fb_correct'.tr()
         : 'lesson_fb_wrong'.tr();
@@ -342,6 +382,12 @@ class _Content extends StatelessWidget {
           SizedBox(height: hinted ? AppSpacing.md : AppSpacing.xs),
           _XpBadge(xp: xp),
         ],
+        if (spelling != null) ...[
+          SizedBox(height: xp == null ? AppSpacing.sm : AppSpacing.lg),
+          _Caption('lesson_fb_spelling'.tr()),
+          const SizedBox(height: AppSpacing.xs),
+          _EnglishLine(parts: spelling),
+        ],
         if (other != null) ...[
           SizedBox(height: xp == null ? AppSpacing.sm : AppSpacing.lg),
           _Caption('lesson_fb_other_form'.tr()),
@@ -386,6 +432,62 @@ class _Content extends StatelessWidget {
       ],
     );
   }
+}
+
+/// Not heard well enough: neutral, as speech can't be wrong (S §7.5). No red,
+/// no cross, nothing counted.
+class _SpeechRetry extends StatelessWidget {
+  const _SpeechRetry({required this.tone});
+
+  final ToneColors tone;
+
+  static const _iconSize = 18.0;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+    liveRegion: true,
+    child: Padding(
+      padding: const EdgeInsetsDirectional.only(top: _Content.titleSlack),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: _Mark.size,
+                height: _Mark.size,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: tone.fill,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.mic_rounded,
+                  size: _iconSize,
+                  color: context.colors.surface,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  'lesson_fb_try_title'.tr(),
+                  style: context.texts.title.copyWith(color: tone.text),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'lesson_fb_try_body'.tr(),
+            style: context.texts.body.copyWith(
+              color: context.colors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
 
 /// While the answer is with the server, or waits for it: no judgement yet, so
@@ -638,7 +740,12 @@ class _EnglishLine extends StatelessWidget {
                   text: part.text,
                   // Each weight has its own family (ADR 5).
                   style: part.strong
-                      ? TextStyle(fontFamily: texts.bodyStrong.fontFamily)
+                      ? TextStyle(
+                          fontFamily: texts.bodyStrong.fontFamily,
+                          decoration: part.underlined
+                              ? TextDecoration.underline
+                              : null,
+                        )
                       : null,
                 ),
             ],

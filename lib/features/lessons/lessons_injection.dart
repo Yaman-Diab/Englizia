@@ -5,6 +5,7 @@ import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_so
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
+import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -19,6 +20,7 @@ void registerLessonDependencies(GetIt sl) {
       () => LessonRepositoryImpl(sl(), settings: sl()),
     )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
+    ..registerFactory(() => MicCubit(sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(
       (lessonId, _) =>
           ExerciseCubit(sl(), sl(), sl(), sl(), lessonId: lessonId),
