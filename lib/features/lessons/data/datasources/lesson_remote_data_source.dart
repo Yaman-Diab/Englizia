@@ -34,6 +34,11 @@ abstract interface class LessonRemoteDataSource {
   /// [request] comes from `watchToJson`.
   Future<void> sendWatch(String lessonId, Map<String, Object?> request);
 
+  /// [request] comes from `savedWordToJson`.
+  Future<void> sendWord(String lessonId, Map<String, Object?> request);
+
+  Future<void> sendContentDone(String lessonId, Map<String, Object?> request);
+
   /// [request] comes from `reportToJson`.
   Future<void> sendReport(String lessonId, Map<String, Object?> request);
 }
@@ -91,6 +96,14 @@ final class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
   );
 
   @override
+  Future<void> sendWord(String lessonId, Map<String, Object?> request) =>
+      _client.post(ApiEndpoints.lessonWords(lessonId), data: request);
+
+  @override
+  Future<void> sendContentDone(String lessonId, Map<String, Object?> request) =>
+      _client.post(ApiEndpoints.lessonContentDone(lessonId), data: request);
+
+  @override
   Future<void> sendWatch(String lessonId, Map<String, Object?> request) =>
       _client.post(ApiEndpoints.lessonWatch(lessonId), data: request);
 
@@ -110,6 +123,9 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
   static const asset = 'assets/mock/lessons/lesson.json';
   static const grammarAsset = 'assets/mock/lessons/grammar.json';
   static const bookAsset = 'assets/mock/lessons/grammar_book.json';
+  static const textAsset = 'assets/mock/lessons/interactive_text.json';
+  static const brokenTextAsset =
+      'assets/mock/lessons/interactive_text_broken.json';
   static const reviewsAsset = 'assets/mock/lessons/spoken_reviews.json';
   static const resultsAsset = 'assets/mock/lessons/results.json';
 
@@ -133,6 +149,8 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
       await _bundle.loadString(switch (lessonId) {
         'les_gv' => grammarAsset,
         'les_book' => bookAsset,
+        'les_it' => textAsset,
+        'les_it_broken' => brokenTextAsset,
         _ => asset,
       }),
     );
@@ -199,6 +217,14 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
       ),
     );
   }
+
+  @override
+  Future<void> sendWord(String lessonId, Map<String, Object?> request) =>
+      Future<void>.delayed(latency);
+
+  @override
+  Future<void> sendContentDone(String lessonId, Map<String, Object?> request) =>
+      Future<void>.delayed(latency);
 
   @override
   Future<void> sendWatch(String lessonId, Map<String, Object?> request) =>

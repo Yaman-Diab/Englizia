@@ -11,6 +11,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 /// The contract's example lesson as it came, with each template in it.
@@ -63,6 +64,12 @@ class FakeLessonRepository implements LessonRepository {
   int? xpPerAnswer;
   LessonOutline outline = const LessonOutline();
   GrammarContent? grammar;
+  ReaderContent? reader;
+  ReaderPrefs prefs = const ReaderPrefs();
+  bool tipSeen = true;
+  final savedWordIds = <String>{};
+  final wordsSent = <(SavedWord, bool)>[];
+  var contentDone = 0;
   final watches = <String, WatchState>{};
   final watchesSent = <WatchState>[];
   VideoQuality quality = VideoQuality.auto;
@@ -84,6 +91,7 @@ class FakeLessonRepository implements LessonRepository {
               explainEnabled: explainEnabled,
               outline: outline,
               grammar: grammar,
+              reader: reader,
             ),
           )
         : Err(failure);
@@ -94,6 +102,29 @@ class FakeLessonRepository implements LessonRepository {
     attempts.add(attempt);
     return 'attempt-${attempts.length}';
   }
+
+  @override
+  ReaderPrefs get readerPrefs => prefs;
+
+  @override
+  Future<void> setReaderPrefs(ReaderPrefs prefs) async => this.prefs = prefs;
+
+  @override
+  bool get readerTipSeen => tipSeen;
+
+  @override
+  Future<void> setReaderTipSeen() async => tipSeen = true;
+
+  @override
+  Set<String> savedWords(String lessonId) => savedWordIds;
+
+  @override
+  Future<void> setWordSaved(SavedWord word, {required bool saved}) async =>
+      wordsSent.add((word, saved));
+
+  @override
+  Future<void> sendContentDone(String lessonId, int lessonVersion) async =>
+      contentDone++;
 
   @override
   WatchState? savedWatch(String lessonId) => watches[lessonId];

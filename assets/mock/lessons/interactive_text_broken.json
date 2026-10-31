@@ -1,0 +1,528 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_it_broken",
+    "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": true,
+    "speechPassPercent": 70,
+    "typoMinLetters": 5,
+    "aiReviewEnabled": true,
+    "title": "يوم في المزرعة",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": false
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_gv",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "reader": {
+      "audio": {
+        "url": "https://example.com/mock/lessons/broken.mp3",
+        "durationMs": 58000
+      },
+      "sentences": [
+        {
+          "id": "s0",
+          "words": [
+            {
+              "id": "w0_0",
+              "text": "Sara",
+              "startMs": 300,
+              "endMs": 1340
+            },
+            {
+              "id": "w0_1",
+              "text": "wakes",
+              "startMs": 1340,
+              "endMs": 2521
+            },
+            {
+              "id": "w0_2",
+              "text": "up",
+              "startMs": 2521,
+              "endMs": 3277
+            },
+            {
+              "id": "w0_3",
+              "text": "early",
+              "startMs": 3277,
+              "endMs": 4458,
+              "gloss": "باكرًا"
+            },
+            {
+              "id": "w0_4",
+              "text": "every",
+              "startMs": 4458,
+              "endMs": 5640
+            },
+            {
+              "id": "w0_5",
+              "text": "morning.",
+              "startMs": 5640,
+              "endMs": 7104
+            }
+          ],
+          "ar": "تستيقظ سارة باكرًا كل صباح.",
+          "shadowing": true
+        },
+        {
+          "id": "s1",
+          "words": [
+            {
+              "id": "w1_0",
+              "text": "She",
+              "startMs": 9172,
+              "endMs": 10069
+            },
+            {
+              "id": "w1_1",
+              "text": "has",
+              "startMs": 10069,
+              "endMs": 10967
+            },
+            {
+              "id": "w1_2",
+              "text": "to",
+              "startMs": 10967,
+              "endMs": 11723
+            },
+            {
+              "id": "w1_3",
+              "text": "feed",
+              "startMs": 11723,
+              "endMs": 12763
+            },
+            {
+              "id": "w1_4",
+              "text": "the",
+              "startMs": 12763,
+              "endMs": 13661
+            },
+            {
+              "id": "w1_5",
+              "text": "chickens",
+              "startMs": 13661,
+              "endMs": 15267
+            },
+            {
+              "id": "w1_6",
+              "text": "before",
+              "startMs": 15267,
+              "endMs": 16590
+            },
+            {
+              "id": "w1_7",
+              "text": "school.",
+              "startMs": 16590,
+              "endMs": 17913,
+              "gloss": "المدرسة"
+            }
+          ],
+          "ar": "عليها أن تُطعم الدجاج قبل المدرسة."
+        },
+        {
+          "id": "s2",
+          "words": [
+            {
+              "id": "w2_0",
+              "text": "Her",
+              "startMs": 19981,
+              "endMs": 20878
+            },
+            {
+              "id": "w2_1",
+              "text": "father",
+              "startMs": 20878,
+              "endMs": 22202
+            },
+            {
+              "id": "w2_2",
+              "text": "is",
+              "startMs": 22202,
+              "endMs": 22958
+            },
+            {
+              "id": "w2_3",
+              "text": "already",
+              "startMs": 22958,
+              "endMs": 24422,
+              "gloss": "بالفعل"
+            },
+            {
+              "id": "w2_4",
+              "text": "in",
+              "startMs": 24422,
+              "endMs": 25178
+            },
+            {
+              "id": "w2_5",
+              "text": "the",
+              "startMs": 25178,
+              "endMs": 26076
+            },
+            {
+              "id": "w2_6",
+              "text": "barn.",
+              "startMs": 26076,
+              "endMs": 27116
+            }
+          ],
+          "ar": "والدها في الحظيرة بالفعل.",
+          "image": "assets/mock/lessons/barn.svg",
+          "imageAlt": "حظيرة"
+        },
+        {
+          "id": "s3",
+          "words": [
+            {
+              "id": "w3_0",
+              "text": "The",
+              "startMs": 29183,
+              "endMs": 30081
+            },
+            {
+              "id": "w3_1",
+              "text": "radio",
+              "startMs": 30081,
+              "endMs": 31262
+            },
+            {
+              "id": "w3_2",
+              "text": "is",
+              "startMs": 31262,
+              "endMs": 32018
+            },
+            {
+              "id": "w3_3",
+              "text": "on",
+              "startMs": 32018,
+              "endMs": 32774
+            },
+            {
+              "id": "w3_4",
+              "text": "in",
+              "startMs": 32774,
+              "endMs": 33530
+            },
+            {
+              "id": "w3_5",
+              "text": "the",
+              "startMs": 33530,
+              "endMs": 34428
+            },
+            {
+              "id": "w3_6",
+              "text": "kitchen.",
+              "startMs": 34428,
+              "endMs": 35893,
+              "gloss": "المطبخ"
+            }
+          ],
+          "ar": "المذياع يعمل في المطبخ."
+        },
+        {
+          "id": "s4",
+          "words": [
+            {
+              "id": "w4_0",
+              "text": "\"Please",
+              "startMs": 37960,
+              "endMs": 39283
+            },
+            {
+              "id": "w4_1",
+              "text": "turn",
+              "startMs": 39283,
+              "endMs": 40323
+            },
+            {
+              "id": "w4_2",
+              "text": "it",
+              "startMs": 40323,
+              "endMs": 41079
+            },
+            {
+              "id": "w4_3",
+              "text": "off",
+              "startMs": 41079,
+              "endMs": 41977
+            },
+            {
+              "id": "w4_4",
+              "text": "before",
+              "startMs": 41977,
+              "endMs": 43300
+            },
+            {
+              "id": "w4_5",
+              "text": "you",
+              "startMs": 43300,
+              "endMs": 44198
+            },
+            {
+              "id": "w4_6",
+              "text": "leave,\"",
+              "startMs": 44198,
+              "endMs": 45379
+            },
+            {
+              "id": "w4_7",
+              "text": "says",
+              "startMs": 45379,
+              "endMs": 46418
+            },
+            {
+              "id": "w4_8",
+              "text": "her",
+              "startMs": 46418,
+              "endMs": 47316
+            },
+            {
+              "id": "w4_9",
+              "text": "mother.",
+              "startMs": 47316,
+              "endMs": 48639
+            }
+          ],
+          "ar": "تقول أمها: \"من فضلك أطفئيه قبل أن تغادري.\""
+        },
+        {
+          "id": "s5",
+          "words": [
+            {
+              "id": "w5_0",
+              "text": "Sara",
+              "startMs": 50707,
+              "endMs": 51746
+            },
+            {
+              "id": "w5_1",
+              "text": "leaves",
+              "startMs": 51746,
+              "endMs": 53069
+            },
+            {
+              "id": "w5_2",
+              "text": "the",
+              "startMs": 53069,
+              "endMs": 53967
+            },
+            {
+              "id": "w5_3",
+              "text": "house",
+              "startMs": 53967,
+              "endMs": 55148
+            },
+            {
+              "id": "w5_4",
+              "text": "in",
+              "startMs": 55148,
+              "endMs": 55904
+            },
+            {
+              "id": "w5_5",
+              "text": "a",
+              "startMs": 55904,
+              "endMs": 56519
+            },
+            {
+              "id": "w5_6",
+              "text": "hurry.",
+              "startMs": 56519,
+              "endMs": 57700
+            }
+          ],
+          "ar": "تغادر سارة البيت على عجل.",
+          "shadowing": true
+        }
+      ],
+      "spans": [
+        {
+          "id": "wakeup",
+          "sentenceId": "s0",
+          "wordIds": [
+            "w0_1",
+            "w0_2"
+          ],
+          "kind": "phrasalVerb",
+          "base": "wake up",
+          "ar": "يستيقظ"
+        },
+        {
+          "id": "chickens",
+          "sentenceId": "s1",
+          "wordIds": [
+            "w1_5"
+          ],
+          "kind": "word",
+          "base": "chicken",
+          "ar": "دجاج"
+        },
+        {
+          "id": "barn",
+          "sentenceId": "s2",
+          "wordIds": [
+            "w2_6"
+          ],
+          "kind": "word",
+          "base": "barn",
+          "ar": "حظيرة"
+        },
+        {
+          "id": "turnoff",
+          "sentenceId": "s4",
+          "wordIds": [
+            "w4_1",
+            "w4_3"
+          ],
+          "kind": "phrasalVerb",
+          "base": "turn off",
+          "ar": "يُطفئ",
+          "note": "يأتي الضمير بين الفعل والحرف:",
+          "noteExample": [
+            {
+              "text": "turn ",
+              "strong": true
+            },
+            {
+              "text": "it"
+            },
+            {
+              "text": " off",
+              "strong": true
+            }
+          ]
+        },
+        {
+          "id": "hurry",
+          "sentenceId": "s5",
+          "wordIds": [
+            "w5_4",
+            "w5_5",
+            "w5_6"
+          ],
+          "kind": "idiom",
+          "base": "in a hurry",
+          "ar": "على عجل"
+        }
+      ]
+    },
+    "exercises": [
+      {
+        "id": "q1",
+        "template": "multipleChoice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "prompt": {
+          "en": "She ___ to school every day.",
+          "audio": "https://example.com/mock/lessons/she_goes.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "go"
+          },
+          {
+            "id": "o2",
+            "text": "goes"
+          },
+          {
+            "id": "o3",
+            "text": "going"
+          },
+          {
+            "id": "o4",
+            "text": "gone"
+          }
+        ],
+        "answer": "o2",
+        "hint": {
+          "ar": "انتبه إلى الفاعل she"
+        },
+        "explanation": {
+          "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط."
+        },
+        "concepts": [
+          "c_present_s"
+        ],
+        "bookRef": null,
+        "reviewOnly": false
+      },
+      {
+        "id": "q4",
+        "template": "multipleChoice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "prompt": {
+          "en": "Excuse me, ___ ?",
+          "audio": "https://example.com/mock/lessons/post_office.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "could you tell me where the nearest post office is"
+          },
+          {
+            "id": "o2",
+            "text": "where post office"
+          },
+          {
+            "id": "o3",
+            "text": "post office is where"
+          },
+          {
+            "id": "o4",
+            "text": "you know the post office"
+          }
+        ],
+        "answer": "o1",
+        "bookRef": {
+          "page": 34,
+          "exercise": 2
+        },
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "هذا سؤال غير مباشر: نبدأ بعبارة مهذبة مثل could you tell me، ثم نكمل بترتيب الجملة العادية: الفاعل ثم الفعل.\nلذلك نقول where the nearest post office is، ولا نقول where is the nearest post office كما في السؤال المباشر.\nالخيارات الأخرى تحذف الفعل is أو تخلط الترتيب، فلا تكوّن جملة صحيحة.\nنستخدم السؤال غير المباشر حين نسأل شخصًا لا نعرفه، لأنه ألطف من السؤال المباشر، ويكثر في المحلات والمطارات ومحطات القطار."
+        }
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

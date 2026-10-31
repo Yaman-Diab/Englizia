@@ -3,6 +3,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 
 abstract interface class LessonRepository {
   /// The lesson with its exercises and keys.
@@ -37,6 +38,23 @@ abstract interface class LessonRepository {
   VideoQuality get videoQuality;
 
   Future<void> setVideoQuality(VideoQuality quality);
+
+  ReaderPrefs get readerPrefs;
+
+  Future<void> setReaderPrefs(ReaderPrefs prefs);
+
+  bool get readerTipSeen;
+
+  Future<void> setReaderTipSeen();
+
+  /// Ids of the spans saved from this lesson.
+  Set<String> savedWords(String lessonId);
+
+  /// Keeps it on the phone and tells the server when it can.
+  Future<void> setWordSaved(SavedWord word, {required bool saved});
+
+  /// The lesson's content was finished. Kept and sent like an answer.
+  Future<void> sendContentDone(String lessonId, int lessonVersion);
 
   /// Keeps the report on the phone and sends it when it can. Never fails.
   Future<void> saveReport(ExerciseReport report);

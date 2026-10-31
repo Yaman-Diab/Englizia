@@ -117,6 +117,15 @@ A grammar lesson also has `content`, and `bookRef` for one tied to a book (desig
 | `content.summary` | `{ar, table[], examples[]}` | Required. `table[]`: `{left, right: [part]}`. `examples[]`: `{en: [part], ar, audio?}`. A part is `{text, strong?, marked?}` |
 | `content.watch` | as below | What the server last heard, from any phone |
 
+An interactive text has `reader` (design `Interactive Text`, S §8.2–§8.3). An interactive video will share it, with its video as the time. All proposed.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `reader.audio` | `{url, durationMs}` | The whole text's sound. Required |
+| `reader.sentences[]` | `{id, ar, words[], image?, imageAlt?, speaker?, shadowing?}` | In order. `shadowing`: practised after the text; with none, the text goes on to the exercises |
+| `reader.sentences[].words[]` | `{id, text, startMs, endMs, gloss?}` | Punctuation stuck to its word (`leave.`). `gloss`: its meaning when it is in no span; with none, pressing it shows nothing, as no AI is asked |
+| `reader.spans[]` | `{id, sentenceId, wordIds[], kind, base, ar, note?, noteExample?}` | `kind`: `word`, `phrasalVerb`, `idiom`. Words side by side or not, in one sentence, and no word in two spans. `noteExample[]`: `{text, strong?}`, shown under the note |
+
 `aiReviewEnabled` (top level, bool) says whether the AI may judge in this lesson, by the track's settings and the learner's age: with it off, or absent, the app leaves out `speakAnswer` questions, uncounted (S §16.2). Proposed.
 
 A question the app can't read is skipped and logged, so it can't leave the learner stuck on the lesson; a lesson with no readable question is a failure with a retry.
@@ -151,6 +160,20 @@ The common errors (`README.md`). With an unknown lesson, `404`.
 ## `POST /api/v1/app/lessons/{lessonId}/answers/review`
 
 Asks the server to judge an order in `reviewOrders`, with the same body as an answer, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
+
+## `POST /api/v1/app/lessons/{lessonId}/words`
+
+The star on a span, kept on the phone and sent like an answer. Proposed.
+
+```json
+{ "spanId": "turnoff", "saved": true, "base": "turn off", "kind": "phrasalVerb", "ar": "...", "note": "...", "sentence": { "en": "...", "ar": "..." } }
+```
+
+Saving sends the span whole, so changing it in the panel later doesn't change what was saved (S §8.2). Taking it back sends `{spanId, saved: false}`.
+
+## `POST /api/v1/app/lessons/{lessonId}/content-done`
+
+`{lessonVersion}`, once the end of a text is reached, which is what completes it (S §8.3). Kept on the phone and sent like an answer, and safe to repeat. Proposed.
 
 ## `POST /api/v1/app/lessons/{lessonId}/watch`
 
