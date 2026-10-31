@@ -9,6 +9,50 @@
     "speechPassPercent": 70,
     "typoMinLetters": 5,
     "aiReviewEnabled": true,
+    "title": "يوم في المزرعة",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": false
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
     "exercises": [
       {
         "id": "q1",

@@ -5,7 +5,9 @@ import 'package:englizia/core/network/api_endpoints.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
+import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class LessonRemoteDataSource {
@@ -19,6 +21,12 @@ abstract interface class LessonRemoteDataSource {
 
   /// [request] comes from `attemptToJson`.
   Future<Evaluation> reviewSpoken(
+    String lessonId,
+    Map<String, Object?> request,
+  );
+
+  /// [request] comes from `completionToJson`.
+  Future<LessonResult> completeLesson(
     String lessonId,
     Map<String, Object?> request,
   );
@@ -54,6 +62,19 @@ final class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
   );
 
   @override
+  Future<LessonResult> completeLesson(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async => lessonResultFromJson(
+    asJsonMap(
+      await _client.post(
+        ApiEndpoints.lessonCompletion(lessonId),
+        data: request,
+      ),
+    ),
+  );
+
+  @override
   Future<Evaluation> reviewSpoken(
     String lessonId,
     Map<String, Object?> request,
@@ -81,6 +102,7 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
 
   static const asset = 'assets/mock/lessons/lesson.json';
   static const reviewsAsset = 'assets/mock/lessons/spoken_reviews.json';
+  static const resultsAsset = 'assets/mock/lessons/results.json';
 
   /// How long the mock server takes to judge, as the design's sample does.
   static const reviewLatency = Duration(milliseconds: 1800);
@@ -90,6 +112,10 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
 
   /// Every other review fails, so both ends of it can be seen in mock mode.
   var _reviews = 0;
+
+  /// Each finished lesson shows the next scenario of the design, in turn.
+  var _results = 0;
+  final _completions = <String>{};
 
   @override
   Future<LessonModel> getLesson(String lessonId) async {
@@ -112,6 +138,25 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
     _reviews++;
     if (fails) throw const NetworkException('connectionError');
     return true;
+  }
+
+  /// A scenario marked offline fails once, like a phone with no connection, and
+  /// what was kept for later goes through.
+  @override
+  Future<LessonResult> completeLesson(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    await Future<void>.delayed(latency);
+    final results =
+        jsonDecode(await _bundle.loadString(resultsAsset))! as List<Object?>;
+    final result = asJsonMap(results[_results % results.length]);
+    final repeat = !_completions.add('${request['completionId']}');
+    if (!repeat) _results++;
+    if (repeat || result.readBool('offline') == null) {
+      return lessonResultFromJson(result);
+    }
+    throw const NetworkException('connectionError');
   }
 
   /// Every outcome can be seen in mock mode by what is said or typed: "football"

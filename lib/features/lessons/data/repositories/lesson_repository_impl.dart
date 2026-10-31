@@ -10,8 +10,10 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
+import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 final class LessonRepositoryImpl implements LessonRepository {
@@ -31,9 +33,13 @@ final class LessonRepositoryImpl implements LessonRepository {
 
   static const _answerKind = 'answer';
   static const _reportKind = 'report';
+  static const _completionKind = 'completion';
 
   /// What is on its way, so it goes one at a time and in order.
   Future<void>? _sending;
+
+  /// Each lesson's completion keeps its id through every try.
+  final _completionIds = <String, String>{};
 
   @override
   Future<Result<Lesson>> getLesson(String lessonId) async {
@@ -132,6 +138,31 @@ final class LessonRepositoryImpl implements LessonRepository {
   }
 
   @override
+  Future<Result<LessonResult>> completeLesson(LessonSummary summary) async {
+    final lessonId = summary.lessonId;
+    final id = _completionIds[lessonId] ??= SettingsStorageService.randomId();
+    final request = completionToJson(summary, id);
+    Future<void> keep() async {
+      if (_store().unsent.any((entry) => entry['id'] == id)) return;
+      await _enqueue(_completionKind, lessonId, id, request);
+    }
+
+    await sendSaved();
+    // The server must have the answers first, or its numbers would be wrong.
+    if (_store().unsent.isNotEmpty) {
+      await keep();
+      return const Err(NetworkFailure());
+    }
+    final result = await guard(() => _remote.completeLesson(lessonId, request));
+    if (result is Err) {
+      await keep();
+    } else {
+      _completionIds.remove(lessonId);
+    }
+    return result;
+  }
+
+  @override
   Future<void> saveReport(ExerciseReport report) async {
     final id = SettingsStorageService.randomId();
     await _enqueue(_reportKind, report.lessonId, id, reportToJson(report, id));
@@ -170,9 +201,11 @@ final class LessonRepositoryImpl implements LessonRepository {
       final lessonId = first['lessonId']! as String;
       final request = asJsonMap(first['request']);
       try {
-        await (first['kind'] == _reportKind
-            ? _remote.sendReport(lessonId, request)
-            : _remote.sendAnswer(lessonId, request));
+        await switch (first['kind']) {
+          _reportKind => _remote.sendReport(lessonId, request),
+          _completionKind => _remote.completeLesson(lessonId, request),
+          _ => _remote.sendAnswer(lessonId, request),
+        };
       } on ApiException catch (error, stackTrace) {
         if (!_rejected.contains(error.statusCode)) rethrow;
         AppLogger.error(

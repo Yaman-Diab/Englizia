@@ -31,6 +31,10 @@ abstract final class AppRoutes {
   static const lessonComplete = '/lessons/:lessonId/complete';
   static const lessonExplain = '/lessons/:lessonId/explain';
 
+  /// Screens a lesson's end leads to, not built yet.
+  static const savedWords = '/words';
+  static const unitStart = '/units/next';
+
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
 
   static String completeOf(String lessonId) => '/lessons/$lessonId/complete';

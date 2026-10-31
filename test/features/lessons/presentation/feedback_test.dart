@@ -65,7 +65,7 @@ void main() {
         value: subject,
         child: ExercisePage(
           onExit: () {},
-          onFinished: () {},
+          onFinished: (_) {},
           onExplain: onExplain ?? () {},
         ),
       ),
@@ -203,10 +203,7 @@ void main() {
 
       await answer(tester, subject, 'goes');
 
-      expect(
-        find.text('lesson_fb_xp'.tr(namedArgs: {'xp': '10'})),
-        findsOneWidget,
-      );
+      expect(find.text('xp_gain'.tr(namedArgs: {'xp': '10'})), findsWidgets);
       await leave(tester);
     });
 
@@ -700,7 +697,7 @@ void main() {
           value: subject,
           child: ExercisePage(
             onExit: () {},
-            onFinished: () {},
+            onFinished: (_) {},
             onExplain: () {},
           ),
         ),

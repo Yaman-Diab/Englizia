@@ -87,6 +87,19 @@ abstract final class AppMotion {
   static const pairsDone = Duration(milliseconds: 400);
   static const stepOutReduced = Duration(milliseconds: 100);
 
+  /// A number counting up to its value (`CountUp`), slowing as it lands.
+  static const countUp = Duration(milliseconds: 600);
+  static const countUpCurve = Curves.easeOutCubic;
+
+  /// The star turning once as points land (`XpAmount`).
+  static const xpLanding = Duration(milliseconds: 360);
+
+  /// One number rolling into the next (`RollingNumber`).
+  static const numberRoll = Duration(milliseconds: 320);
+
+  /// Passes its mark a little and comes back: what lands with some life.
+  static const overshoot = Cubic(.3, 1.5, .6, 1);
+
   /// A round of the dots while the AI judges, and how far apart they go.
   static const aiDots = Duration(milliseconds: 1100);
   static const aiDotsOffset = Duration(milliseconds: 180);

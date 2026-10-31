@@ -62,7 +62,11 @@ void main() {
           BlocProvider.value(value: subject),
           BlocProvider.value(value: mic),
         ],
-        child: ExercisePage(onExit: () {}, onFinished: () {}, onExplain: () {}),
+        child: ExercisePage(
+          onExit: () {},
+          onFinished: (_) {},
+          onExplain: () {},
+        ),
       ),
       locale: locale,
       size: size,
@@ -610,7 +614,7 @@ void main() {
           ],
           child: ExercisePage(
             onExit: () {},
-            onFinished: () {},
+            onFinished: (_) {},
             onExplain: () {},
           ),
         ),

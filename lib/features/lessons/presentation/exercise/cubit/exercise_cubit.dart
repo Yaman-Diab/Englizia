@@ -10,6 +10,7 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:equatable/equatable.dart';
@@ -29,6 +30,10 @@ final class ExerciseState extends Equatable {
     this.hintOpen = false,
     this.hinted = const {},
     this.done = const {},
+    this.right = const {},
+    this.uncounted = const {},
+    this.pending = const {},
+    this.outline = const LessonOutline(),
     this.audio = ClipStatus.idle,
     this.slow = false,
     this.clipLength = Duration.zero,
@@ -59,6 +64,16 @@ final class ExerciseState extends Equatable {
 
   /// Questions checked.
   final Set<String> done;
+
+  /// Right at the first attempt.
+  final Set<String> right;
+
+  /// Skipped, so counted neither way (S §7.6).
+  final Set<String> uncounted;
+
+  /// Waiting for the server to judge them.
+  final Set<String> pending;
+  final LessonOutline outline;
   final ClipStatus audio;
 
   /// Playing at the slower speed.
@@ -111,6 +126,10 @@ final class ExerciseState extends Equatable {
     bool? hintOpen,
     Set<String>? hinted,
     Set<String>? done,
+    Set<String>? right,
+    Set<String>? uncounted,
+    Set<String>? pending,
+    LessonOutline? outline,
     ClipStatus? audio,
     bool? slow,
     Duration? clipLength,
@@ -131,6 +150,10 @@ final class ExerciseState extends Equatable {
     hintOpen: hintOpen ?? this.hintOpen,
     hinted: hinted ?? this.hinted,
     done: done ?? this.done,
+    right: right ?? this.right,
+    uncounted: uncounted ?? this.uncounted,
+    pending: pending ?? this.pending,
+    outline: outline ?? this.outline,
     audio: audio ?? this.audio,
     slow: slow ?? this.slow,
     clipLength: clipLength ?? this.clipLength,
@@ -154,6 +177,10 @@ final class ExerciseState extends Equatable {
     hintOpen,
     hinted,
     done,
+    right,
+    uncounted,
+    pending,
+    outline,
     audio,
     slow,
     clipLength,
@@ -188,6 +215,21 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   final SoundPlayer _sounds;
   final String lessonId;
   StreamSubscription<bool>? _connection;
+  final _clock = Stopwatch();
+  var _secondsBefore = 0;
+
+  int get _seconds => _secondsBefore + _clock.elapsed.inSeconds;
+
+  /// What the lesson's end starts from.
+  LessonSummary get summary => LessonSummary(
+    lessonId: lessonId,
+    lessonVersion: state.lessonVersion,
+    rightFirstTime: state.right.length,
+    counted: state.done.length - state.uncounted.length - state.pending.length,
+    pending: state.pending.length,
+    seconds: _seconds,
+    outline: state.outline,
+  );
 
   Future<void> start() async {
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
@@ -205,6 +247,8 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     switch (result) {
       case Ok(value: final lesson):
         final progress = _lessons.progress(lessonId);
+        _secondsBefore = progress.seconds;
+        _clock.start();
         emit(
           state.copyWith(
             load: LoadStatus.ready,
@@ -214,6 +258,10 @@ class ExerciseCubit extends Cubit<ExerciseState> {
             questions: lesson.exercises,
             hinted: progress.hinted,
             done: progress.done,
+            right: progress.right,
+            uncounted: progress.uncounted,
+            pending: progress.pending,
+            outline: lesson.outline,
           ),
         );
         await _showFrom(0);
@@ -288,6 +336,8 @@ class ExerciseCubit extends Cubit<ExerciseState> {
       state.copyWith(
         evaluation: () => review ? const ReviewPending() : found,
         done: {...state.done, question.id},
+        right: _rightAtFirst(found) ? {...state.right, question.id} : null,
+        pending: review ? {...state.pending, question.id} : null,
       ),
     );
     if (!review) _sayVerdict(found);
@@ -311,8 +361,17 @@ class ExerciseCubit extends Cubit<ExerciseState> {
       Ok() => SequenceEvaluation(words: found.words, correct: false),
       Err() => const ReviewLater(),
     };
-    emit(state.copyWith(evaluation: () => judged));
+    emit(
+      state.copyWith(
+        evaluation: () => judged,
+        right: judged.correct ? {...state.right, question.id} : null,
+        pending: judged is ReviewLater
+            ? null
+            : ({...state.pending}..remove(question.id)),
+      ),
+    );
     if (judged is! ReviewLater) _sayVerdict(judged);
+    await _saveProgress();
   }
 
   /// The server's AI judges the learner's own words. Answering something else
@@ -345,11 +404,22 @@ class ExerciseCubit extends Cubit<ExerciseState> {
       state.copyWith(
         evaluation: () => judged,
         done: {...state.done, question.id},
+        right: judged is SpokenAnswered ? {...state.right, question.id} : null,
+        uncounted: judged is ReviewQuotaOut
+            ? {...state.uncounted, question.id}
+            : null,
+        pending: judged is ReviewLater ? {...state.pending, question.id} : null,
       ),
     );
     if (judged is SpokenAnswered) _sayVerdict(judged);
     await _saveProgress();
   }
+
+  /// A matching is right in the end whatever happened on the way.
+  bool _rightAtFirst(Evaluation found) => switch (found) {
+    PairsEvaluation(:final mistakes) => mistakes.isEmpty,
+    _ => found.correct,
+  };
 
   void _sayVerdict(Evaluation evaluation) {
     unawaited(
@@ -366,7 +436,12 @@ class ExerciseCubit extends Cubit<ExerciseState> {
     final question = state.question;
     if (question == null) return;
     await stopAudio();
-    emit(state.copyWith(done: {...state.done, question.id}));
+    emit(
+      state.copyWith(
+        done: {...state.done, question.id},
+        uncounted: {...state.uncounted, question.id},
+      ),
+    );
     await _saveProgress();
     await _showFrom(state.index + 1);
   }
@@ -402,7 +477,14 @@ class ExerciseCubit extends Cubit<ExerciseState> {
 
   Future<void> _saveProgress() => _lessons.saveProgress(
     lessonId,
-    ExerciseProgress(done: state.done, hinted: state.hinted),
+    ExerciseProgress(
+      done: state.done,
+      hinted: state.hinted,
+      right: state.right,
+      uncounted: state.uncounted,
+      pending: state.pending,
+      seconds: _seconds,
+    ),
   );
 
   /// The big button: plays the clip, or stops it.

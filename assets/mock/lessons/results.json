@@ -1,0 +1,570 @@
+[
+  {
+    "scenario": "mid-unit",
+    "xp": 15,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "replay": false
+  },
+  {
+    "scenario": "goal reached",
+    "xp": 15,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 8,
+      "now": 10,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 7
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "replay": false
+  },
+  {
+    "scenario": "no mistakes",
+    "xp": 15,
+    "firstTry": {
+      "right": 6,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "replay": false
+  },
+  {
+    "scenario": "last of the unit",
+    "xp": 15,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": true
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "unitReview"
+    },
+    "replay": false
+  },
+  {
+    "scenario": "last, with no review",
+    "xp": 15,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": true
+        }
+      ]
+    },
+    "next": {
+      "kind": "unit",
+      "unitNumber": 4,
+      "title": "في السوق"
+    },
+    "replay": false
+  },
+  {
+    "scenario": "no connection",
+    "xp": 15,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "replay": false,
+    "offline": true
+  },
+  {
+    "scenario": "waiting for the AI",
+    "xp": 15,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 1,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "replay": false
+  },
+  {
+    "scenario": "done again",
+    "xp": 5,
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "pendingReviews": 0,
+    "wordsSaved": 3,
+    "concepts": [
+      "إضافة s للفعل مع he/she/it"
+    ],
+    "goal": {
+      "before": 5,
+      "now": 7,
+      "target": 10
+    },
+    "streak": {
+      "before": 6,
+      "now": 6
+    },
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "replay": true
+  },
+  {
+    "scenario": "no points or day yet",
+    "firstTry": {
+      "right": 5,
+      "total": 6
+    },
+    "seconds": 420,
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": true
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_mock",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    }
+  }
+]

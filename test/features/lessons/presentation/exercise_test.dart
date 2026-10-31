@@ -9,6 +9,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_card.dart';
@@ -413,7 +414,7 @@ void main() {
       Size size = defaultViewport,
       ThemeMode themeMode = ThemeMode.light,
       VoidCallback? onExit,
-      VoidCallback? onFinished,
+      ValueChanged<LessonSummary>? onFinished,
       VoidCallback? onExplain,
     }) async {
       final subject = cubit();
@@ -423,7 +424,7 @@ void main() {
           value: subject,
           child: ExercisePage(
             onExit: onExit ?? () {},
-            onFinished: onFinished ?? () {},
+            onFinished: onFinished ?? (_) {},
             onExplain: onExplain ?? () {},
           ),
         ),
@@ -499,7 +500,7 @@ void main() {
           value: subject,
           child: ExercisePage(
             onExit: () {},
-            onFinished: () {},
+            onFinished: (_) {},
             onExplain: () {},
           ),
         ),
@@ -756,7 +757,7 @@ void main() {
 
     testWidgets('the end of the lesson says so once', (tester) async {
       var finished = 0;
-      final subject = await pump(tester, onFinished: () => finished++);
+      final subject = await pump(tester, onFinished: (_) => finished++);
       await moveTo(tester, subject, 3);
       subject.select('o1');
       await subject.check();
@@ -852,7 +853,7 @@ void main() {
             value: subject,
             child: ExercisePage(
               onExit: () {},
-              onFinished: () {},
+              onFinished: (_) {},
               onExplain: () {},
             ),
           ),

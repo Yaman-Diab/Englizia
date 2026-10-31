@@ -3,7 +3,9 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/features/lessons/data/answers_sync.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:flutter/services.dart';
@@ -24,6 +26,9 @@ void registerLessonDependencies(GetIt sl) {
     ..registerFactoryParam<ExerciseCubit, String, void>(
       (lessonId, _) =>
           ExerciseCubit(sl(), sl(), sl(), sl(), lessonId: lessonId),
+    )
+    ..registerFactoryParam<LessonCompleteCubit, LessonSummary, void>(
+      (summary, _) => LessonCompleteCubit(sl(), sl(), sl(), summary: summary),
     );
   sl<AppSessionController>().onLeaving(
     () => sl<LessonRepository>().sendSaved(),

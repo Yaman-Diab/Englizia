@@ -90,6 +90,15 @@ The example is `assets/mock/lessons/lesson.json`.
 | `exercises[].bookRef` | `{page, exercise}`? | Imaar lessons tied to a book exercise | yes |
 | `exercises[].reviewOnly` | bool | For the mistakes bank only: left out of the lesson | yes |
 
+The top of a lesson also says where it sits, so its end can show that offline (design `Lesson Complete`). All proposed, and all optional: what is missing isn't shown.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `title` | string | The lesson's name |
+| `alreadyCompleted` | bool | The learner had finished it before |
+| `unit` | `{number, title, lessons: [{id, kind, done}]}` | The unit's chain. `kind`: `vocabulary`, `interactiveVideo`, `grammarVideo`, `interactiveText`, `conversation`, `unitReview` |
+| `next` | `{kind, lessonId?, lessonKind?, title?, unitNumber?}` | What comes after. `kind`: `lesson`, `unitReview`, `unit`. None at the end of a track |
+
 `aiReviewEnabled` (top level, bool) says whether the AI may judge in this lesson, by the track's settings and the learner's age: with it off, or absent, the app leaves out `speakAnswer` questions, uncounted (S §16.2). Proposed.
 
 A question the app can't read is skipped and logged, so it can't leave the learner stuck on the lesson; a lesson with no readable question is a failure with a retry.
@@ -124,6 +133,31 @@ The common errors (`README.md`). With an unknown lesson, `404`.
 ## `POST /api/v1/app/lessons/{lessonId}/answers/review`
 
 Asks the server to judge an order in `reviewOrders`, with the same body as an answer, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
+
+## `POST /api/v1/app/lessons/{lessonId}/complete`
+
+The last question is done. Sent after the lesson's answers, and returns the official numbers (S §7.6). Proposed.
+
+```json
+{ "completionId": "6f1c8f60-0000-4000-8000-000000000002", "lessonVersion": 1, "seconds": 420 }
+```
+
+`completionId` is the same on every try, and a repeat must answer the same numbers. When the server can't be reached the completion waits on the phone with the answers, and goes when it can; the screen shows "counted when online", and the numbers reach the learner later (Home).
+
+| Response field | Type | Meaning |
+|---|---|---|
+| `xp` | int? | Points earned. None: no points shown. A lesson done again follows the server's table |
+| `firstTry` | `{right, total}`? | The first answer of each question, without skipped speech questions. None: as the phone counted |
+| `seconds` | int? | The lesson's time. None: as the phone counted |
+| `pendingReviews` | int? | Questions waiting for AI, not counted as wrong |
+| `wordsSaved` | int? | Words this lesson saved. The list's screen isn't built |
+| `concepts` | string[] | Up to two to review, by their Arabic names from the panel |
+| `goal` | `{before, now, target}`? | Minutes today. `target` from the panel |
+| `streak` | `{before, now}`? | Days in a row |
+| `unit`, `next` | as in the lesson | The chain and what comes next, now that this one is done |
+| `replay` | bool? | Done before: the title says "reviewed" and the chain stays |
+
+Open with the backend team: what counts as completing a lesson with content before its exercises (S §7.6: 80% of a video and so on) is the server's, and needs the watching reported somewhere; no endpoint exists for that.
 
 ## `POST /api/v1/app/lessons/{lessonId}/answers/spoken-review`
 

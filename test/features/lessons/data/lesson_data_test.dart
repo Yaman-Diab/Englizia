@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -11,9 +13,11 @@ import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
+import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
 import 'package:englizia/features/lessons/domain/services/stable_order.dart';
@@ -28,6 +32,7 @@ class _Remote implements LessonRemoteDataSource {
   final sent = <Map<String, Object?>>[];
   final reviewed = <Map<String, Object?>>[];
   final reports = <Map<String, Object?>>[];
+  final completed = <Map<String, Object?>>[];
   final lessons = <String>[];
   var reviewSays = true;
   var offline = false;
@@ -50,6 +55,16 @@ class _Remote implements LessonRemoteDataSource {
     if (offline) throw const NetworkException('connectionError');
     reviewed.add(request);
     return reviewSays;
+  }
+
+  @override
+  Future<LessonResult> completeLesson(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    if (offline) throw const NetworkException('connectionError');
+    completed.add(request);
+    return const LessonResult(xp: 15);
   }
 
   @override
@@ -946,6 +961,79 @@ void main() {
     });
   });
 
+  group('the end of a lesson', () {
+    test('the package has its place in the unit', () {
+      final outline = lessonOutlineFromJson(sampleLessonJson());
+
+      expect(outline.title, isNotEmpty);
+      expect(outline.earnsXp, isTrue);
+      expect(outline.replay, isFalse);
+      expect(outline.unit?.steps, hasLength(6));
+      expect(outline.unit?.doneInARow, 3);
+      expect(outline.next?.kind, NextKind.lesson);
+      expect(outline.next?.lessonKind, LessonKind.grammarVideo);
+    });
+
+    test('a package without it still opens', () {
+      final lesson = _parse([_question({})]);
+
+      expect(lesson.outline, const LessonOutline());
+    });
+
+    test('a broken unit is left out, not the lesson', () {
+      final outline = lessonOutlineFromJson({
+        'unit': {
+          'number': 1,
+          'title': 'a',
+          'lessons': [
+            {'kind': 'vocabulary'},
+          ],
+        },
+      });
+
+      expect(outline.unit, isNull);
+    });
+
+    test('a kind this version does not know is still a step', () {
+      final outline = lessonOutlineFromJson({
+        'unit': {
+          'number': 1,
+          'title': 'a',
+          'lessons': [
+            {'id': 'x', 'kind': 'hologram', 'done': true},
+          ],
+        },
+      });
+
+      expect(outline.unit?.steps.single.kind, LessonKind.other);
+    });
+
+    test('the mock has every scenario of the design, and all parse', () {
+      final results =
+          jsonDecode(File(LessonFakeDataSource.resultsAsset).readAsStringSync())
+              as List<Object?>;
+
+      final parsed = [
+        for (final r in results) lessonResultFromJson(asJsonMap(r)),
+      ];
+      expect(parsed.where((r) => r.goal?.justMet ?? false), hasLength(1));
+      expect(parsed.where((r) => r.replay ?? false), hasLength(1));
+      expect(parsed.where((r) => r.xp == null), hasLength(1));
+      expect(parsed.where((r) => (r.pending ?? 0) > 0), hasLength(1));
+      expect(parsed.map((r) => r.next?.kind).toSet(), {
+        NextKind.lesson,
+        NextKind.unitReview,
+        NextKind.unit,
+      });
+    });
+
+    test('the goal is just met only by the lesson that reached it', () {
+      expect(const DailyGoal(before: 8, now: 10, target: 10).justMet, isTrue);
+      expect(const DailyGoal(before: 10, now: 12, target: 10).justMet, isFalse);
+      expect(const DailyGoal(before: 5, now: 7, target: 10).met, isFalse);
+    });
+  });
+
   group('the endpoints', () {
     late FakeHttpAdapter adapter;
     late LessonRemoteDataSourceImpl source;
@@ -1003,6 +1091,52 @@ void main() {
       draft: SpokenDraft('I rest'),
       hinted: false,
     );
+
+    const finished = LessonSummary(
+      lessonId: 'les',
+      lessonVersion: 3,
+      rightFirstTime: 1,
+      counted: 1,
+      pending: 0,
+      seconds: 60,
+      outline: LessonOutline(),
+    );
+
+    test('completing a lesson sends its answers first', () async {
+      await repository.saveAttempt(_attempt);
+      await settle();
+      remote.sent.clear();
+      remote.offline = true;
+      await repository.saveAttempt(_attempt);
+      await settle();
+      remote.offline = false;
+
+      final result = await repository.completeLesson(finished);
+
+      expect(remote.sent, hasLength(1));
+      expect(result, const Ok(LessonResult(xp: 15)));
+      expect(remote.completed.single['lessonVersion'], 3);
+      expect(remote.completed.single['seconds'], 60);
+    });
+
+    test('with no connection it waits, and goes with its one id', () async {
+      remote.offline = true;
+      final first = await repository.completeLesson(finished);
+      final again = await repository.completeLesson(finished);
+      expect(first, isA<Err<LessonResult>>());
+      expect(again, isA<Err<LessonResult>>());
+
+      remote.offline = false;
+      await repository.sendSaved();
+      await settle();
+
+      expect(remote.completed, hasLength(1), reason: 'kept once');
+      final id = remote.completed.single['completionId'];
+
+      final late = await repository.completeLesson(finished);
+      expect(late, isA<Ok<LessonResult>>());
+      expect(remote.completed.last['completionId'], id);
+    });
 
     test('a spoken answer judged now leaves nothing to send', () async {
       final result = await repository.reviewSpoken(spoken);

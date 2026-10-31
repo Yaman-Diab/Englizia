@@ -181,7 +181,17 @@ enum AppIcon {
     '<circle cx="12" cy="12" r="9"/>'
     '<path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.6"/>'
     '<path d="M12 17.2v.1"/>',
-  );
+  ),
+  // Each kind of lesson has one icon across the app (S §8).
+  lessonVocabulary('<path d="M4 8h11v12H4zM8.5 4H20v12"/>'),
+  lessonInteractiveVideo('<path d="M3 5.5h18v13H3zM10 9.5v5l4.5-2.5z"/>'),
+  lessonInteractiveText('<path d="M5 6h14M5 10h14M5 14h10M5 18h7"/>'),
+  lessonConversation('<path d="M4 5h16v10H10l-4.5 4V15H4z"/>'),
+  lessonGrammarVideo(
+    '<path d="M3 5.5h18v13H3zM7 15l2.2-5.5 2.2 5.5M7.8 13.2h2.8M15 10v4l3-2z"/>',
+  ),
+  lessonReview('<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v3.8h-3.8"/>'),
+  unitFlag('<path d="M6 21V4h11l-2.5 4L17 12H6"/>');
 
   const AppIcon(this._shapes);
 

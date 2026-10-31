@@ -1,5 +1,6 @@
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/services/stable_order.dart';
@@ -51,6 +52,7 @@ final class LessonModel {
       exercises: exercises,
       xpPerAnswer: json.readInt('xpPerAnswer'),
       explainEnabled: json.readBool('explainEnabled') ?? false,
+      outline: lessonOutlineFromJson(json),
     );
   }
 }
@@ -791,6 +793,10 @@ final class LessonStoreModel {
     return ExerciseProgress(
       done: _ids(lesson.readList('done')),
       hinted: _ids(lesson.readList('hinted')),
+      right: _ids(lesson.readList('right')),
+      uncounted: _ids(lesson.readList('uncounted')),
+      pending: _ids(lesson.readList('pending')),
+      seconds: lesson.readInt('seconds') ?? 0,
     );
   }
 
@@ -802,6 +808,10 @@ final class LessonStoreModel {
       lessons[lessonId] = {
         'done': progress.done.toList(),
         'hinted': progress.hinted.toList(),
+        'right': progress.right.toList(),
+        'uncounted': progress.uncounted.toList(),
+        'pending': progress.pending.toList(),
+        'seconds': progress.seconds,
       };
 
   Map<String, Object?> toJson() => {'lessons': lessons, 'unsent': unsent};
