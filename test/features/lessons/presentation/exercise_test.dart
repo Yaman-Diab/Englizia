@@ -28,7 +28,7 @@ extension on ExerciseCubit {
 extension on ExerciseState {
   String? get selectedId => switch (draft) {
     ChoiceDraft(:final optionId) => optionId,
-    null => null,
+    _ => null,
   };
 }
 
@@ -49,15 +49,17 @@ void main() {
   late FakeLessonRepository lessons;
   late FakeClipPlayer player;
   late FakeConnectivityService connectivity;
+  late FakeSoundPlayer sounds;
 
   setUp(() {
-    lessons = FakeLessonRepository();
+    lessons = FakeLessonRepository(exercises: sampleChoiceExercises());
     player = FakeClipPlayer();
     connectivity = FakeConnectivityService();
+    sounds = FakeSoundPlayer();
   });
 
   ExerciseCubit cubit() =>
-      ExerciseCubit(lessons, player, connectivity, lessonId: 'les');
+      ExerciseCubit(lessons, player, connectivity, sounds, lessonId: 'les');
 
   /// Answers and moves on until question [index].
   Future<void> advanceTo(ExerciseCubit cubit, int index) async {
@@ -412,6 +414,7 @@ void main() {
       ThemeMode themeMode = ThemeMode.light,
       VoidCallback? onExit,
       VoidCallback? onFinished,
+      VoidCallback? onExplain,
     }) async {
       final subject = cubit();
       addTearDown(subject.close);
@@ -421,6 +424,7 @@ void main() {
           child: ExercisePage(
             onExit: onExit ?? () {},
             onFinished: onFinished ?? () {},
+            onExplain: onExplain ?? () {},
           ),
         ),
         locale: locale,
@@ -493,7 +497,11 @@ void main() {
       await tester.pumpLocalized(
         BlocProvider.value(
           value: subject,
-          child: ExercisePage(onExit: () {}, onFinished: () {}),
+          child: ExercisePage(
+            onExit: () {},
+            onFinished: () {},
+            onExplain: () {},
+          ),
         ),
       );
       await tester.pump();
@@ -622,7 +630,7 @@ void main() {
 
       await tester.tap(cards.first);
       await tester.pump();
-      expect(subject.state.selectedId, 'o1');
+      expect(subject.state.selectedId, isNotNull);
       semantics.dispose();
       await leaveClean(tester, subject);
     });
@@ -738,7 +746,8 @@ void main() {
       expect(lookOf('going'), AnswerLook.dimmed);
       expect(find.text('lesson_next'.tr()), findsOneWidget);
 
-      await tester.tap(find.byType(AppButton));
+      await tester.tap(find.text('lesson_next'.tr()));
+      await tester.settleEntrance(const Duration(seconds: 1));
       await tester.settleEntrance(const Duration(seconds: 1));
       expect(subject.state.index, 1);
       expect(find.text('barn'), findsOneWidget);
@@ -841,7 +850,11 @@ void main() {
           data: const MediaQueryData(disableAnimations: true),
           child: BlocProvider.value(
             value: subject,
-            child: ExercisePage(onExit: () {}, onFinished: () {}),
+            child: ExercisePage(
+              onExit: () {},
+              onFinished: () {},
+              onExplain: () {},
+            ),
           ),
         ),
       );

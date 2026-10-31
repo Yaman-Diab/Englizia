@@ -7,7 +7,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
-import 'package:englizia/features/onboarding/presentation/widgets/speech_bubble.dart';
+import 'package:englizia/core/design_system/widgets/speech_bubble.dart';
 import 'package:flutter/material.dart';
 
 /// The shared layout of every onboarding question (design "Onboarding

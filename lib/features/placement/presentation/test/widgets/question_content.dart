@@ -1,7 +1,6 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
-import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/blank_sentence.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
@@ -245,7 +244,7 @@ class _Option extends StatelessWidget {
           ),
           child: Row(
             children: [
-              _RadioMark(selected: selected),
+              ChoiceRadio(selected: selected),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Text(
@@ -266,47 +265,6 @@ class _Option extends StatelessWidget {
 
 /// A ring whose dot pops in when chosen. Selection is blue only: nothing here
 /// says right or wrong.
-class _RadioMark extends StatelessWidget {
-  const _RadioMark({required this.selected});
-
-  final bool selected;
-
-  static const _size = 20.0;
-  static const _dot = 10.0;
-  static const _stroke = 2.0;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final duration = AppMotion.resolve(context, AppMotion.quick);
-    return AnimatedContainer(
-      duration: duration,
-      width: _size,
-      height: _size,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: selected ? colors.selection : colors.border,
-          width: _stroke,
-        ),
-      ),
-      child: AnimatedScale(
-        scale: selected ? 1 : 0,
-        duration: duration,
-        curve: AppMotion.bounce,
-        child: Container(
-          width: _dot,
-          height: _dot,
-          decoration: BoxDecoration(
-            color: colors.selection,
-            shape: BoxShape.circle,
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// «لا أعرف»: a choice like the others, dashed until chosen.
 class _DontKnow extends StatelessWidget {

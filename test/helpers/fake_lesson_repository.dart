@@ -18,61 +18,13 @@ Map<String, Object?> sampleLessonJson() => asJsonMap(
   ),
 );
 
-/// The example's questions, each with its options in the order written, which
-/// the app's own order would otherwise hide from a test.
-List<Exercise> sampleExercises() {
-  final lesson = LessonModel(sampleLessonJson()).toEntity('seed');
-  final written = {
-    for (final q in sampleLessonJson().readList('exercises')!)
-      asJsonMap(q).readString('id'): [
-        for (final o in asJsonMap(q).readList('options')!)
-          asJsonMap(o).readString('id'),
-      ],
-  };
-  return [
-    for (final exercise in lesson.exercises)
-      _inOrder(exercise, written[exercise.id]!),
-  ];
-}
+/// The example's questions.
+List<Exercise> sampleExercises() =>
+    LessonModel(sampleLessonJson()).toEntity('seed').exercises;
 
-Exercise _inOrder(Exercise exercise, List<String?> ids) {
-  final options = switch (exercise) {
-    final ChoiceExercise e => [
-      for (final id in ids) e.options.firstWhere((o) => o.id == id),
-    ],
-  };
-  return switch (exercise) {
-    final MultipleChoiceExercise e => MultipleChoiceExercise(
-      id: e.id,
-      instruction: e.instruction,
-      options: options,
-      answerId: e.answerId,
-      before: e.before,
-      after: e.after,
-      hint: e.hint,
-      bookReference: e.bookReference,
-    ),
-    final ImageChoiceExercise e => ImageChoiceExercise(
-      id: e.id,
-      instruction: e.instruction,
-      options: options,
-      answerId: e.answerId,
-      word: e.word,
-      audioUrl: e.audioUrl,
-      hint: e.hint,
-      bookReference: e.bookReference,
-    ),
-    final ListenChooseExercise e => ListenChooseExercise(
-      id: e.id,
-      instruction: e.instruction,
-      options: options,
-      answerId: e.answerId,
-      audioUrl: e.audioUrl,
-      hint: e.hint,
-      bookReference: e.bookReference,
-    ),
-  };
-}
+/// Only the choice templates of the example.
+List<Exercise> sampleChoiceExercises() =>
+    sampleExercises().whereType<ChoiceExercise>().toList();
 
 class FakeLessonRepository implements LessonRepository {
   FakeLessonRepository({List<Exercise>? exercises, this.failure})
@@ -83,6 +35,16 @@ class FakeLessonRepository implements LessonRepository {
   List<Exercise> exercises;
   Failure? failure;
   final attempts = <ExerciseAttempt>[];
+  final reviews = <String>[];
+  final reports = <ExerciseReport>[];
+
+  /// What the server says of an order it judges.
+  Result<bool> review = const Ok(true);
+
+  /// When set, a review waits for it.
+  Future<void>? reviewGate;
+  int? xpPerAnswer;
+  bool explainEnabled = false;
   final saved = <String, ExerciseProgress>{};
   var sends = 0;
   var cleared = 0;
@@ -91,13 +53,36 @@ class FakeLessonRepository implements LessonRepository {
   Future<Result<Lesson>> getLesson(String lessonId) async {
     final failure = this.failure;
     return failure == null
-        ? Ok(Lesson(id: lessonId, version: version, exercises: exercises))
+        ? Ok(
+            Lesson(
+              id: lessonId,
+              version: version,
+              exercises: exercises,
+              xpPerAnswer: xpPerAnswer,
+              explainEnabled: explainEnabled,
+            ),
+          )
         : Err(failure);
   }
 
   @override
-  Future<void> saveAttempt(ExerciseAttempt attempt) async =>
-      attempts.add(attempt);
+  Future<String> saveAttempt(ExerciseAttempt attempt) async {
+    attempts.add(attempt);
+    return 'attempt-${attempts.length}';
+  }
+
+  @override
+  Future<Result<bool>> reviewAttempt(
+    ExerciseAttempt attempt,
+    String attemptId,
+  ) async {
+    reviews.add(attemptId);
+    await reviewGate;
+    return review;
+  }
+
+  @override
+  Future<void> saveReport(ExerciseReport report) async => reports.add(report);
 
   @override
   Future<void> sendSaved() async => sends++;

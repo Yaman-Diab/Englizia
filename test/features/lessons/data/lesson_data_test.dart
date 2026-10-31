@@ -25,7 +25,10 @@ import '../../../helpers/fakes.dart';
 
 class _Remote implements LessonRemoteDataSource {
   final sent = <Map<String, Object?>>[];
+  final reviewed = <Map<String, Object?>>[];
+  final reports = <Map<String, Object?>>[];
   final lessons = <String>[];
+  var reviewSays = true;
   var offline = false;
   ApiException? failWith;
   ApiException? refuseOnce;
@@ -36,6 +39,22 @@ class _Remote implements LessonRemoteDataSource {
     if (offline) throw const NetworkException('connectionError');
     if (failWith case final error?) throw error;
     return LessonModel(lesson);
+  }
+
+  @override
+  Future<bool> reviewAnswer(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    if (offline) throw const NetworkException('connectionError');
+    reviewed.add(request);
+    return reviewSays;
+  }
+
+  @override
+  Future<void> sendReport(String lessonId, Map<String, Object?> request) async {
+    if (offline) throw const NetworkException('connectionError');
+    reports.add(request);
   }
 
   @override
@@ -92,6 +111,10 @@ void main() {
       expect(lesson.exercises[1], isA<ImageChoiceExercise>());
       expect(lesson.exercises[2], isA<ListenChooseExercise>());
       expect(lesson.exercises[3], isA<MultipleChoiceExercise>());
+      expect(lesson.exercises[4], isA<FillChoicesExercise>());
+      expect(lesson.exercises[5], isA<WordOrderExercise>());
+      expect(lesson.exercises[6], isA<MatchingExercise>());
+      expect(lesson.exercises[7], isA<MatchingExercise>());
     });
 
     test('carries the sentence, its hint and its key', () {
@@ -116,10 +139,66 @@ void main() {
 
     test('says where a question is in the book', () {
       expect(
-        lesson.exercises.last.bookReference,
+        lesson.exercises[3].bookReference,
         const BookReference(page: 34, exercise: 2),
       );
       expect(lesson.exercises.first.bookReference, isNull);
+    });
+
+    test('a sentence with blanks has its words, the extra ones too', () {
+      final fill = lesson.exercises[4] as FillChoicesExercise;
+      expect(fill.segments, ['If it', 'tomorrow, we', 'stay at home.']);
+      expect(fill.blanks.map((b) => b.answer), ['rains', 'will']);
+      expect(fill.bank.map((c) => c.text).toSet(), {
+        'rains',
+        'will',
+        'rained',
+        'would',
+        'is',
+      });
+    });
+
+    test('word order has its cards, shuffled, and its other forms', () {
+      final order = lesson.exercises[5] as WordOrderExercise;
+      expect(order.meaning, isNotEmpty);
+      expect(order.answerWords, hasLength(6));
+      expect(order.bank, hasLength(7));
+      expect(order.alternatives, hasLength(1));
+    });
+
+    test('matching checks itself, in two shuffled columns', () {
+      final text = lesson.exercises[6] as MatchingExercise;
+      final pictures = lesson.exercises[7] as MatchingExercise;
+      expect(text.checksItself, isTrue);
+      expect(text.pictures, isFalse);
+      expect(text.pairs.first.meaning, isNotEmpty);
+      expect(text.meaningsShown.toSet(), text.pairs.toSet());
+      expect(text.wordsShown.toSet(), text.pairs.toSet());
+      expect(pictures.pictures, isTrue);
+      expect(pictures.pairs.first.image, endsWith('.svg'));
+      expect(pictures.pairs.first.alt, isNotEmpty);
+    });
+
+    test('carries what the feedback needs', () {
+      final first = lesson.exercises.first;
+      expect(first.explanation, isNotEmpty);
+      expect(first.answerClipUrl, contains('she_goes'));
+      expect(lesson.exercises[2].answerClipUrl, contains('market'));
+      expect(
+        (lesson.exercises[2] as ListenChooseExercise).transcript,
+        isNotEmpty,
+      );
+      expect(lesson.xpPerAnswer, 10);
+      expect(lesson.explainEnabled, isTrue);
+      final order = lesson.exercises[5] as WordOrderExercise;
+      expect(order.reviewable, hasLength(1));
+      expect(order.answerClipUrl, contains('sara'));
+    });
+
+    test('with no XP or AI from the server, there are none', () {
+      final plain = _parse([_question({})]);
+      expect(plain.xpPerAnswer, isNull);
+      expect(plain.explainEnabled, isFalse);
     });
 
     test('a listening question plays by itself, and reports a failure', () {
@@ -182,6 +261,104 @@ void main() {
         expect(parsed.exercises.single.id, 'good');
       });
     }
+
+    Map<String, Object?> fill(Map<String, Object?> changes) => {
+      'id': 'f',
+      'template': 'fillChoices',
+      'instructionAr': 'a',
+      'prompt': {'en': 'One ___ two ___.'},
+      'blanks': [
+        {'answer': 'x'},
+        {'answer': 'y'},
+      ],
+      ...changes,
+    };
+
+    test('blanks must fit the sentence', () {
+      final parsed = _parse([
+        fill({
+          'blanks': [
+            {'answer': 'x'},
+          ],
+        }),
+        fill({'id': 'good'}),
+      ]);
+      expect(parsed.exercises.single.id, 'good');
+    });
+
+    test('word order splits by word when it has no cards', () {
+      final parsed = _parse([
+        {
+          'id': 'o',
+          'template': 'wordOrder',
+          'instructionAr': 'a',
+          'meaningAr': 'b',
+          'answer': 'He runs fast',
+        },
+      ]);
+      final order = parsed.exercises.single as WordOrderExercise;
+      expect(order.answerWords, ['He', 'runs', 'fast']);
+    });
+
+    test('matching needs its words different', () {
+      final parsed = _parse([
+        {
+          'id': 'm',
+          'template': 'matching',
+          'instructionAr': 'a',
+          'pairs': [
+            {'left': 'x', 'right': '1'},
+            {'left': 'x', 'right': '2'},
+          ],
+        },
+        _question({'id': 'good'}),
+      ]);
+      expect(parsed.exercises.single.id, 'good');
+    });
+
+    test('attempts of the new templates say their words', () {
+      const one = WordChip(id: 'c0', text: 'rains');
+      const attempt = ExerciseAttempt(
+        lessonId: 'les',
+        lessonVersion: 3,
+        questionId: 'q',
+        draft: SlotsDraft([one, null]),
+        hinted: false,
+      );
+      expect(attemptToJson(attempt, 'a')['answer'], {
+        'words': ['rains', null],
+      });
+      expect(
+        attemptToJson(
+          const ExerciseAttempt(
+            lessonId: 'les',
+            lessonVersion: 3,
+            questionId: 'q',
+            draft: SequenceDraft([one], needed: 1),
+            hinted: false,
+          ),
+          'a',
+        )['answer'],
+        {
+          'words': ['rains'],
+        },
+      );
+      expect(
+        attemptToJson(
+          const ExerciseAttempt(
+            lessonId: 'les',
+            lessonVersion: 3,
+            questionId: 'q',
+            draft: PairsDraft(total: 2, mistakes: {'x'}),
+            hinted: false,
+          ),
+          'a',
+        )['answer'],
+        {
+          'mistakes': ['x'],
+        },
+      );
+    });
 
     test('nothing readable at all is a format error', () {
       expect(
@@ -261,6 +438,127 @@ void main() {
     });
   });
 
+  group('marking what is built', () {
+    final all = sampleExercises();
+    final fill = all.whereType<FillChoicesExercise>().first;
+    final order = all.whereType<WordOrderExercise>().first;
+
+    WordChip chip(List<WordChip> bank, String text) =>
+        bank.firstWhere((c) => c.text == text);
+
+    SequenceDraft sequence(List<String> words) => SequenceDraft([
+      for (final word in words) chip(order.bank, word),
+    ], needed: order.answerWords.length);
+
+    test('each blank has its own verdict', () {
+      final result = evaluate(
+        fill,
+        SlotsDraft([chip(fill.bank, 'rains'), chip(fill.bank, 'would')]),
+      );
+      expect(result, const SlotsEvaluation([true, false]));
+      expect(result.correct, isFalse);
+    });
+
+    test('all blanks right is correct', () {
+      expect(
+        evaluate(
+          fill,
+          SlotsDraft([chip(fill.bank, 'rains'), chip(fill.bank, 'will')]),
+        ).correct,
+        isTrue,
+      );
+    });
+
+    test('a blank takes its alternatives', () {
+      const blank = FillBlank(answer: 'big', alternatives: ['large']);
+      expect(blank.accepts('large'), isTrue);
+      expect(blank.accepts('tall'), isFalse);
+    });
+
+    test('the right order is correct, whatever its punctuation', () {
+      expect(
+        evaluate(
+          order,
+          sequence(['Sara', 'feeds', 'the', 'chickens', 'before', 'school']),
+        ).correct,
+        isTrue,
+      );
+    });
+
+    test('another accepted order is correct, all its words too', () {
+      final result = evaluate(
+        order,
+        sequence(['before', 'school', 'Sara', 'feeds', 'the', 'chickens']),
+      );
+      expect(result.correct, isTrue);
+      expect((result as SequenceEvaluation).words, everyElement(isTrue));
+    });
+
+    test('a wrong order marks what is out of place', () {
+      final result = evaluate(
+        order,
+        sequence(['Sara', 'feeds', 'chickens', 'the', 'before', 'school']),
+      );
+      expect(result.correct, isFalse);
+      expect((result as SequenceEvaluation).words, [
+        true,
+        true,
+        false,
+        false,
+        true,
+        true,
+      ]);
+    });
+
+    test('an order the server judges asks for it', () {
+      final result = evaluate(
+        order,
+        sequence(['the', 'chickens', 'Sara', 'feeds', 'before', 'school']),
+      );
+      expect((result as SequenceEvaluation).needsReview, isTrue);
+      expect(result.correct, isFalse);
+    });
+
+    test('a plain wrong order does not', () {
+      final result = evaluate(
+        order,
+        sequence(['Sara', 'feeds', 'chickens', 'the', 'before', 'school']),
+      );
+      expect((result as SequenceEvaluation).needsReview, isFalse);
+    });
+
+    test('an extra word is wrong', () {
+      final result = evaluate(
+        order,
+        sequence([
+          'Sara',
+          'feeds',
+          'the',
+          'chickens',
+          'before',
+          'school',
+          'eats',
+        ]),
+      );
+      expect(result.correct, isFalse);
+      expect((result as SequenceEvaluation).words.last, isFalse);
+    });
+
+    test('text is compared with no case, punctuation or extra spaces', () {
+      expect(plainWords('  It\u2019s,  HERE! '), "it's here");
+    });
+
+    test('a finished matching is correct, and keeps its mistakes', () {
+      final matching = all.whereType<MatchingExercise>().first;
+      final result = evaluate(
+        matching,
+        const PairsDraft(total: 5, mistakes: {'cow'}),
+      );
+      expect(result.correct, isTrue);
+      expect((result as PairsEvaluation).mistakes, {'cow'});
+    });
+  });
+
   group('the endpoints', () {
     late FakeHttpAdapter adapter;
     late LessonRemoteDataSourceImpl source;
@@ -284,7 +582,7 @@ void main() {
       final model = await source.getLesson('les');
 
       expect(adapter.requests.single.path, '/api/v1/app/lessons/les');
-      expect(model.toEntity('s').exercises, hasLength(4));
+      expect(model.toEntity('s').exercises, hasLength(8));
     });
 
     test('an answer goes to its lesson, with its attempt id', () async {
@@ -549,6 +847,68 @@ void main() {
         await settings.clearAccountData();
 
         expect(settings.lessonCache, isNull);
+      });
+    });
+
+    group('judging and reporting', () {
+      const report = ExerciseReport(
+        lessonId: 'les',
+        lessonVersion: 3,
+        questionId: 'q1',
+        reason: ProblemReason.alsoRight,
+        draft: ChoiceDraft('o2'),
+      );
+
+      test('a review goes with the attempt\'s own id', () async {
+        remote.offline = true;
+        final id = await repository.saveAttempt(_attempt);
+        remote.offline = false;
+
+        final result = await repository.reviewAttempt(_attempt, id);
+
+        expect((result as Ok<bool>).value, isTrue);
+        expect(remote.reviewed.single['attemptId'], id);
+      });
+
+      test('the server may say it is wrong', () async {
+        remote.reviewSays = false;
+
+        final result = await repository.reviewAttempt(_attempt, 'a');
+
+        expect((result as Ok<bool>).value, isFalse);
+      });
+
+      test('no connection for a review is a failure', () async {
+        remote.offline = true;
+
+        expect(await repository.reviewAttempt(_attempt, 'a'), isA<Err<bool>>());
+      });
+
+      test('a report goes with its context', () async {
+        await repository.saveReport(report);
+        await repository.sendSaved();
+
+        expect(remote.reports.single, containsPair('reason', 'alsoRight'));
+        expect(remote.reports.single, containsPair('lessonVersion', 3));
+        expect(remote.reports.single, containsPair('questionId', 'q1'));
+        expect(remote.reports.single['answer'], {'optionId': 'o2'});
+        expect(remote.reports.single['reportId'], isNotEmpty);
+        expect(remote.sent, isEmpty);
+      });
+
+      test('offline it waits, in order with the answers', () async {
+        remote.offline = true;
+        await repository.saveAttempt(_attempt);
+        await repository.saveReport(report);
+        await settle();
+        expect(unsent(), hasLength(2));
+
+        remote.offline = false;
+        await repository.sendSaved();
+
+        expect(remote.sent, hasLength(1));
+        expect(remote.reports, hasLength(1));
+        expect(unsent(), isEmpty);
       });
     });
 

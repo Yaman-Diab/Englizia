@@ -124,3 +124,11 @@ abstract final class MailSceneEntrance {
   static const letter = Duration(milliseconds: 380);
   static const guide = Duration(milliseconds: 580);
 }
+
+/// The verdict on the feedback sheet, once the sheet is on its way up: the
+/// circle, its stroke, then what the answer earned.
+abstract final class FeedbackEntrance {
+  static const circle = Duration(milliseconds: 120);
+  static const stroke = Duration(milliseconds: 270);
+  static const reward = Duration(milliseconds: 520);
+}

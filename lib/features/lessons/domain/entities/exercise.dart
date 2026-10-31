@@ -7,14 +7,28 @@ final class Lesson extends Equatable {
     required this.id,
     required this.version,
     required this.exercises,
+    this.xpPerAnswer,
+    this.explainEnabled = false,
   });
 
   final String id;
   final int version;
   final List<Exercise> exercises;
 
+  /// What a right answer earns, from the panel (v1.0). With none, no badge.
+  final int? xpPerAnswer;
+
+  /// «اشرح لي» is on: by the track's settings and the day's limit.
+  final bool explainEnabled;
+
   @override
-  List<Object?> get props => [id, version, exercises];
+  List<Object?> get props => [
+    id,
+    version,
+    exercises,
+    xpPerAnswer,
+    explainEnabled,
+  ];
 }
 
 /// Where a question sits in the student's book, on Imaar lessons.
@@ -37,6 +51,8 @@ sealed class Exercise extends Equatable {
     required this.instruction,
     this.hint,
     this.bookReference,
+    this.explanation,
+    this.answerAudioUrl,
   });
 
   final String id;
@@ -48,18 +64,37 @@ sealed class Exercise extends Equatable {
   final String? hint;
   final BookReference? bookReference;
 
+  /// Why, shown after a wrong answer: Arabic, a paragraph per line.
+  final String? explanation;
+
+  /// The right sentence said, for the feedback.
+  final String? answerAudioUrl;
+
   /// The clip to load, when the question has one.
   String? get clipUrl => null;
 
+  /// The clip the feedback plays.
+  String? get answerClipUrl => answerAudioUrl ?? clipUrl;
+
   /// Plays once by itself on opening (S §7.3).
   bool get autoplays => false;
+
+  /// Checked as it goes, with no «تحقق» (S §7.3: matching).
+  bool get checksItself => false;
 
   /// A clip that fails is the question's business, so it says so. Elsewhere the
   /// clip is only an extra, and goes quiet.
   bool get reportsClipFailure => false;
 
   @override
-  List<Object?> get props => [id, instruction, hint, bookReference];
+  List<Object?> get props => [
+    id,
+    instruction,
+    hint,
+    bookReference,
+    explanation,
+    answerAudioUrl,
+  ];
 }
 
 final class ExerciseOption extends Equatable {
@@ -92,6 +127,8 @@ sealed class ChoiceExercise extends Exercise {
     required this.answerId,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final List<ExerciseOption> options;
@@ -112,6 +149,8 @@ final class MultipleChoiceExercise extends ChoiceExercise {
     required this.after,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String before;
@@ -132,6 +171,8 @@ final class ImageChoiceExercise extends ChoiceExercise {
     this.audioUrl,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String word;
@@ -152,11 +193,17 @@ final class ListenChooseExercise extends ChoiceExercise {
     required super.options,
     required super.answerId,
     required this.audioUrl,
+    this.transcript,
     super.hint,
     super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
   });
 
   final String audioUrl;
+
+  /// What the clip says, shown after a wrong answer.
+  final String? transcript;
 
   @override
   String? get clipUrl => audioUrl;
@@ -168,5 +215,151 @@ final class ListenChooseExercise extends ChoiceExercise {
   bool get reportsClipFailure => true;
 
   @override
-  List<Object?> get props => [...super.props, audioUrl];
+  List<Object?> get props => [...super.props, audioUrl, transcript];
+}
+
+/// A word card of a bank. Its [id] tells apart two cards with the same word.
+final class WordChip extends Equatable {
+  const WordChip({required this.id, required this.text});
+
+  final String id;
+  final String text;
+
+  @override
+  List<Object?> get props => [id, text];
+}
+
+final class FillBlank extends Equatable {
+  const FillBlank({required this.answer, this.alternatives = const []});
+
+  final String answer;
+  final List<String> alternatives;
+
+  bool accepts(String word) => word == answer || alternatives.contains(word);
+
+  @override
+  List<Object?> get props => [answer, alternatives];
+}
+
+/// A sentence with blanks, and word cards with some extra among them.
+final class FillChoicesExercise extends Exercise {
+  const FillChoicesExercise({
+    required super.id,
+    required super.instruction,
+    required this.segments,
+    required this.blanks,
+    required this.bank,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  /// The sentence around the blanks: one more than [blanks].
+  final List<String> segments;
+  final List<FillBlank> blanks;
+
+  /// In the order to show them.
+  final List<WordChip> bank;
+
+  @override
+  List<Object?> get props => [...super.props, segments, blanks, bank];
+}
+
+/// The meaning in Arabic, and word cards to build the English with.
+final class WordOrderExercise extends Exercise {
+  const WordOrderExercise({
+    required super.id,
+    required super.instruction,
+    required this.meaning,
+    required this.answer,
+    required this.answerWords,
+    required this.bank,
+    this.alternatives = const [],
+    this.reviewable = const [],
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final String meaning;
+  final String answer;
+
+  /// [answer] as cards, in order.
+  final List<String> answerWords;
+
+  /// Other orders that are right too.
+  final List<String> alternatives;
+
+  /// Orders not known to be right or wrong: the server judges them.
+  final List<String> reviewable;
+
+  /// In the order to show them.
+  final List<WordChip> bank;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    meaning,
+    answer,
+    answerWords,
+    alternatives,
+    reviewable,
+    bank,
+  ];
+}
+
+/// A word and what it goes with: a [meaning], or a picture with its name.
+final class MatchPair extends Equatable {
+  const MatchPair({
+    required this.id,
+    this.meaning = '',
+    this.image = '',
+    this.alt = '',
+  });
+
+  /// The English word, which is unique in its question.
+  final String id;
+  final String meaning;
+  final String image;
+  final String alt;
+
+  @override
+  List<Object?> get props => [id, meaning, image, alt];
+}
+
+/// Pairs to put together, in two columns shuffled apart.
+final class MatchingExercise extends Exercise {
+  const MatchingExercise({
+    required super.id,
+    required super.instruction,
+    required this.pairs,
+    required this.meaningsShown,
+    required this.wordsShown,
+    required this.pictures,
+    super.hint,
+    super.bookReference,
+    super.explanation,
+    super.answerAudioUrl,
+  });
+
+  final List<MatchPair> pairs;
+  final List<MatchPair> meaningsShown;
+  final List<MatchPair> wordsShown;
+
+  /// A word goes with a picture.
+  final bool pictures;
+
+  @override
+  bool get checksItself => true;
+
+  @override
+  List<Object?> get props => [
+    ...super.props,
+    pairs,
+    meaningsShown,
+    wordsShown,
+    pictures,
+  ];
 }

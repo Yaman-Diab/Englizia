@@ -538,9 +538,15 @@ GoRouter createAppRouter(AppSessionController session) {
                   context.canPop() ? context.pop() : context.go(AppRoutes.home),
               onFinished: () =>
                   context.pushReplacement(AppRoutes.completeOf(lessonId)),
+              onExplain: () => context.push(AppRoutes.explainOf(lessonId)),
             ),
           );
         },
+      ),
+      // "Explain it to me" has no design yet.
+      GoRoute(
+        path: AppRoutes.lessonExplain,
+        builder: (_, _) => PendingPage(title: 'lesson_fb_explain'.tr()),
       ),
       // "Lesson complete" is not built yet.
       GoRoute(

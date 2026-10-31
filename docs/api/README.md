@@ -84,6 +84,8 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, version, exercises}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}/answers/review` | POST | as an answer | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}/reports` | POST | `{reportId, lessonVersion, questionId, reason, answer?}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/answers` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/placement/status` | GET | — | `{state, stage?, question?, lastLevel?, daysSinceResult?, daysUntilRetake?}` ([placement.md](placement.md)) | proposed, mock |

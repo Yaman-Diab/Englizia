@@ -1,8 +1,7 @@
-import 'dart:ui' show PathMetric;
-
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/widgets/dashed_border.dart';
 import 'package:flutter/material.dart';
 
 enum ChoiceShape {
@@ -92,10 +91,7 @@ class ChoiceSurface extends StatelessWidget {
       child: InkWell(onTap: onTap, child: content),
     );
     if (dashed) {
-      content = CustomPaint(
-        foregroundPainter: _DashedBorderPainter(color: outline, radius: radius),
-        child: content,
-      );
+      content = DashedBorder(color: outline, radius: radius, child: content);
     }
     return MergeSemantics(
       child: Semantics(
@@ -176,35 +172,45 @@ class ChoiceCheck extends StatelessWidget {
   }
 }
 
-class _DashedBorderPainter extends CustomPainter {
-  const _DashedBorderPainter({required this.color, required this.radius});
+/// The mark of one choice among several: a ring, with a dot when [selected].
+class ChoiceRadio extends StatelessWidget {
+  const ChoiceRadio({required this.selected, super.key});
 
-  final Color color;
-  final double radius;
+  final bool selected;
 
-  static const _dash = 6.0;
-  static const _gap = 4.0;
+  static const _size = 20.0;
+  static const _dot = 10.0;
+  static const _stroke = 2.0;
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final border = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          (Offset.zero & size).deflate(.5),
-          Radius.circular(radius),
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final duration = AppMotion.resolve(context, AppMotion.quick);
+    return AnimatedContainer(
+      duration: duration,
+      width: _size,
+      height: _size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? colors.selection : colors.border,
+          width: _stroke,
         ),
-      );
-    final paint = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke;
-    for (final PathMetric metric in border.computeMetrics()) {
-      for (var d = 0.0; d < metric.length; d += _dash + _gap) {
-        canvas.drawPath(metric.extractPath(d, d + _dash), paint);
-      }
-    }
+      ),
+      child: AnimatedScale(
+        scale: selected ? 1 : 0,
+        duration: duration,
+        curve: AppMotion.bounce,
+        child: Container(
+          width: _dot,
+          height: _dot,
+          decoration: BoxDecoration(
+            color: colors.selection,
+            shape: BoxShape.circle,
+          ),
+        ),
+      ),
+    );
   }
-
-  @override
-  bool shouldRepaint(_DashedBorderPainter old) =>
-      old.color != color || old.radius != radius;
 }

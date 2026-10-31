@@ -6,6 +6,7 @@ import 'package:englizia/app/app.dart';
 import 'package:englizia/app/di.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
+import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/di/service_locator.dart';
@@ -484,12 +485,37 @@ void main() {
       await tester.tap(find.byType(AppButton));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      await tester.tap(find.byType(AppButton));
+      await tester.tap(find.text('lesson_next'.tr()));
       await tester.pump();
-      await tester.pump(const Duration(seconds: 1));
+      // The sheet goes down, then the question moves on, then the route.
+      for (var i = 0; i < 4; i++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
 
       expect(find.byType(ExercisePage), findsNothing);
       expect(find.text('lesson_complete_title'.tr()), findsWidgets);
+    });
+
+    testWidgets('«اشرح لي» opens over the lesson, and comes back', (
+      tester,
+    ) async {
+      (sl<LessonRepository>() as FakeLessonRepository).explainEnabled = true;
+      tester.setViewport(defaultViewport);
+      await boot(tester);
+      await open(tester);
+
+      await tester.tap(find.text('go'));
+      await tester.pump();
+      await tester.tap(find.byType(AppButton));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.tap(find.text('lesson_fb_explain'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.byType(PendingPage), findsOneWidget);
     });
 
     testWidgets('with no session, it sends to welcome', (tester) async {

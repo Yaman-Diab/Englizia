@@ -9,7 +9,8 @@ The requirements define 17 exercise templates (S §7.3, server doc §20.6) that 
 - **`ExerciseCubit` is the engine.** It runs the session: current question, draft, evaluation, hint, progress, clip. There is no engine layer over it, and one cubit per template would repeat all of that (ADR 1).
 - **What goes in the cubit:** whatever the button, the marks or the attempt need, or what outlives the question. What only draws a question stays in its widget (the active blank, a held card, a text controller). Speech will get its own small cubit, like an interactive sheet under ADR 1.
 - **`exerciseBody()` is the renderer:** one exhaustive `switch` on the sealed `Exercise`. No registry or factory: the set of templates is closed, each needs its own code anyway, and a registry loses the compiler's check. "A new track needs no code" is about tracks and content, not templates.
-- **Bodies take props** (`BodyAnswer`, `BodyClip`) and never read the session's cubit, so a concept review (S §11.2) can show them too.
+- **Bodies take props** (`BodyAnswer`, `BodyClip`) and never read the session's cubit, so a concept review (S §11.2) can show them too. A body with no check button asks for the check itself (`onSubmit`, `Exercise.checksItself`).
+- **Word cards fly in one place,** `ChipStage`: it measures a card, lets the answer change, then flies it on its own layer. Nothing outside the stage rebuilds per frame.
 - **Sealed `Exercise`, one class per template; sealed `ExerciseDraft` and `Evaluation`, one class per way of answering.** About seven drafts will cover the 17 templates (choice, slots, sequence, pairs, text, speech, error correction). Only what a built template uses exists; the rest is added with its template.
 - **`evaluate()` is a pure function in domain,** for instant feedback offline (S §7.1). The server marks again and its result is the official one (S §2). The learner's screen doesn't change if they differ; completion and points follow the server.
 - **The order of options is the phone's:** `stableOrder` by installation and question. The lesson is cached and the same for everyone, and chips are split on the phone, so the server can't do it.
@@ -18,4 +19,4 @@ The requirements define 17 exercise templates (S §7.3, server doc §20.6) that 
 - **Placement stays out of the engine.** It has no keys, hints or feedback; it shares only small pieces in core.
 
 ## Consequences
-A new template means a subclass, a body, a parser case, an evaluator case and tests; the compiler points at each `switch`, and other templates' files don't change. The container assumes a check button until matching arrives, which adds the first template that checks itself. Adding a draft family breaks the exhaustive `switch` in `evaluate` and `attemptToJson` on purpose.
+A new template means a subclass, a body, a parser case, an evaluator case and tests; the compiler points at each `switch`, and other templates' files don't change. Adding a draft family breaks the exhaustive `switch` in `evaluate` and `attemptToJson` on purpose.

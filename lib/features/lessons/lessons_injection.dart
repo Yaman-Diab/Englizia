@@ -20,7 +20,8 @@ void registerLessonDependencies(GetIt sl) {
     )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(
-      (lessonId, _) => ExerciseCubit(sl(), sl(), sl(), lessonId: lessonId),
+      (lessonId, _) =>
+          ExerciseCubit(sl(), sl(), sl(), sl(), lessonId: lessonId),
     );
   sl<AppSessionController>().onLeaving(
     () => sl<LessonRepository>().sendSaved(),

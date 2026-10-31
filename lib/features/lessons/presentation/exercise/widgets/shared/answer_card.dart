@@ -2,6 +2,8 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
+import 'package:englizia/core/design_system/motion/pulse.dart';
+import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
@@ -37,10 +39,15 @@ class AnswerCard extends StatelessWidget {
     required this.child,
     required this.radius,
     this.semanticLabel,
+    this.shake,
     super.key,
   });
 
   final AnswerLook look;
+
+  /// Shakes when this changes, for a card that may be wrong more than once; by
+  /// default, when it turns wrong.
+  final Object? shake;
 
   /// Null once the answer is in.
   final VoidCallback? onTap;
@@ -51,20 +58,28 @@ class AnswerCard extends StatelessWidget {
   final String? semanticLabel;
 
   static const _dimmed = .5;
+  static const _pop = .03;
 
   @override
-  Widget build(BuildContext context) => PressScale(
-    enabled: onTap != null,
-    child: AnimatedOpacity(
-      opacity: look == AnswerLook.dimmed ? _dimmed : 1,
-      duration: AppMotion.resolve(context, AppMotion.quick),
-      child: ChoiceSurface(
-        selected: look == AnswerLook.selected || look == AnswerLook.wrong,
-        mark: look.mark,
-        radius: radius,
-        semanticLabel: semanticLabel,
-        onTap: onTap,
-        child: child,
+  Widget build(BuildContext context) => Shake(
+    trigger: shake ?? look == AnswerLook.wrong,
+    child: Pulse(
+      trigger: look == AnswerLook.correct,
+      growth: _pop,
+      child: PressScale(
+        enabled: onTap != null,
+        child: AnimatedOpacity(
+          opacity: look == AnswerLook.dimmed ? _dimmed : 1,
+          duration: AppMotion.resolve(context, AppMotion.quick),
+          child: ChoiceSurface(
+            selected: look == AnswerLook.selected || look == AnswerLook.wrong,
+            mark: look.mark,
+            radius: radius,
+            semanticLabel: semanticLabel,
+            onTap: onTap,
+            child: child,
+          ),
+        ),
       ),
     ),
   );
