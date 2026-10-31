@@ -273,6 +273,8 @@ class _SaidBubble extends StatelessWidget {
                             Entrance(
                               motion: EntranceMotion.up,
                               delay: SpokenEntrance.word(i),
+                              duration: AppMotion.quick,
+                              distance: AppMotion.distanceMicro,
                               child: Text(
                                 word,
                                 locale: const Locale('en'),

@@ -76,6 +76,8 @@ class _DialogueBodyState extends State<DialogueBody> {
                   Entrance(
                     motion: EntranceMotion.up,
                     delay: DialogueEntrance.line(i),
+                    duration: AppMotion.fast,
+                    distance: AppMotion.distanceBase,
                     child: line.isLearner
                         ? _LearnerBubble(stage: stage, text: _chosenText)
                         : _CharacterBubble(

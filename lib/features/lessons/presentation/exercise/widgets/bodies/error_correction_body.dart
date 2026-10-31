@@ -113,6 +113,8 @@ class _ErrorCorrectionBodyState extends State<ErrorCorrectionBody> {
             Entrance(
               motion: EntranceMotion.down,
               delay: Duration.zero,
+              duration: AppMotion.closeUp,
+              distance: AppMotion.distanceSmall,
               child: _CorrectionCard(
                 stage: stage,
                 chips: exercise.corrections,
