@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/motion/listening_motion.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
@@ -304,8 +305,8 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
         AppSpacing.xl,
         AppSpacing.xs,
       ),
-      child: AnimatedSize(
-        duration: AppMotion.resolve(context, AppMotion.fast),
+      child: SmoothSize(
+        duration: AppMotion.fast,
         curve: AppMotion.smoothOut,
         alignment: AlignmentDirectional.bottomCenter,
         child: Column(

@@ -369,7 +369,14 @@ final class ExerciseReport extends Equatable {
 /// Where a lesson's exercises stand on this phone. By question, not position,
 /// so a newer version of the lesson or a hidden question can't misplace it.
 final class ExerciseProgress extends Equatable {
-  const ExerciseProgress({this.done = const {}, this.hinted = const {}});
+  const ExerciseProgress({
+    this.done = const {},
+    this.hinted = const {},
+    this.right = const {},
+    this.uncounted = const {},
+    this.pending = const {},
+    this.seconds = 0,
+  });
 
   /// Questions checked: the learner carries on from the first one left.
   final Set<String> done;
@@ -377,8 +384,20 @@ final class ExerciseProgress extends Equatable {
   /// Questions whose hint was opened.
   final Set<String> hinted;
 
+  /// Right at the first attempt.
+  final Set<String> right;
+
+  /// Skipped, so counted neither way (S §7.6).
+  final Set<String> uncounted;
+
+  /// Waiting for the server to judge them.
+  final Set<String> pending;
+
+  /// Time spent on the lesson so far.
+  final int seconds;
+
   bool get isEmpty => done.isEmpty && hinted.isEmpty;
 
   @override
-  List<Object?> get props => [done, hinted];
+  List<Object?> get props => [done, hinted, right, uncounted, pending, seconds];
 }

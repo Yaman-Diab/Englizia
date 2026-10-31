@@ -3,6 +3,7 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:flutter/material.dart';
 
@@ -135,8 +136,8 @@ class HintCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return AnimatedSize(
-      duration: AppMotion.resolve(context, AppMotion.fast),
+    return SmoothSize(
+      duration: AppMotion.fast,
       curve: AppMotion.out,
       alignment: AlignmentDirectional.topStart,
       child: !open

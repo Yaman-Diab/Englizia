@@ -152,3 +152,28 @@ abstract final class SpokenEntrance {
   /// When the last of [words] has had its turn and the judging can start.
   static Duration settled(int words) => word(words) + toCheck;
 }
+
+/// The end of a lesson, under two seconds: the circle, the guide's hop, the badge
+/// and its check, the title, the rest, and then the chain. What comes from the
+/// server starts at [xp] or when it arrives, whichever is later, and goes by the
+/// `*AfterData` steps from there.
+abstract final class LessonCompleteEntrance {
+  static const guide = Duration(milliseconds: 220);
+  static const badge = Duration(milliseconds: 320);
+  static const check = Duration(milliseconds: 480);
+  static const title = Duration(milliseconds: 600);
+  static const body = Duration(milliseconds: 720);
+  static const xp = Duration(milliseconds: 800);
+  static const chainNode = Duration(milliseconds: 900);
+  static const chainLine = Duration(milliseconds: 1100);
+
+  static const ringAfterData = Duration(milliseconds: 200);
+
+  /// Reaching the goal is worth bringing the card into view for, once the card
+  /// has opened its place.
+  static const scrollAfterData = Duration(milliseconds: 300);
+  static const goalAfterData = Duration(milliseconds: 700);
+  static const flameAfterData = Duration(milliseconds: 720);
+  static const rollAfterData = Duration(milliseconds: 800);
+  static const metAfterData = Duration(milliseconds: 960);
+}

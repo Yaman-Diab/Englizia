@@ -52,7 +52,7 @@ void main() {
           value: subject,
           child: ExercisePage(
             onExit: () {},
-            onFinished: () {},
+            onFinished: (_) {},
             onExplain: () {},
           ),
         ),
@@ -420,7 +420,7 @@ void main() {
           value: subject,
           child: ExercisePage(
             onExit: () {},
-            onFinished: () {},
+            onFinished: (_) {},
             onExplain: () {},
           ),
         ),

@@ -1,3 +1,4 @@
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:equatable/equatable.dart';
 
 /// A published lesson as the app answers it: its version, as an attempt counts
@@ -9,6 +10,7 @@ final class Lesson extends Equatable {
     required this.exercises,
     this.xpPerAnswer,
     this.explainEnabled = false,
+    this.outline = const LessonOutline(),
   });
 
   final String id;
@@ -21,6 +23,9 @@ final class Lesson extends Equatable {
   /// «اشرح لي» is on: by the track's settings and the day's limit.
   final bool explainEnabled;
 
+  /// Its place in the unit, for its end.
+  final LessonOutline outline;
+
   @override
   List<Object?> get props => [
     id,
@@ -28,6 +33,7 @@ final class Lesson extends Equatable {
     exercises,
     xpPerAnswer,
     explainEnabled,
+    outline,
   ];
 }
 

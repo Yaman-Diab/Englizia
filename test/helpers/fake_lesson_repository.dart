@@ -9,6 +9,7 @@ import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_so
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 /// The contract's example lesson as it came, with each template in it.
@@ -49,9 +50,17 @@ class FakeLessonRepository implements LessonRepository {
   );
   final spokenReviews = <ExerciseAttempt>[];
 
+  /// What the server says when a lesson is completed.
+  Result<LessonResult> completion = const Ok(LessonResult(xp: 15));
+  final completions = <LessonSummary>[];
+
+  /// When set, completing a lesson waits for it.
+  Future<void>? completionGate;
+
   /// When set, a review waits for it.
   Future<void>? reviewGate;
   int? xpPerAnswer;
+  LessonOutline outline = const LessonOutline();
   bool explainEnabled = false;
   final saved = <String, ExerciseProgress>{};
   var sends = 0;
@@ -68,6 +77,7 @@ class FakeLessonRepository implements LessonRepository {
               exercises: exercises,
               xpPerAnswer: xpPerAnswer,
               explainEnabled: explainEnabled,
+              outline: outline,
             ),
           )
         : Err(failure);
@@ -77,6 +87,13 @@ class FakeLessonRepository implements LessonRepository {
   Future<String> saveAttempt(ExerciseAttempt attempt) async {
     attempts.add(attempt);
     return 'attempt-${attempts.length}';
+  }
+
+  @override
+  Future<Result<LessonResult>> completeLesson(LessonSummary summary) async {
+    completions.add(summary);
+    await completionGate;
+    return completion;
   }
 
   @override

@@ -1,6 +1,7 @@
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 
 abstract interface class LessonRepository {
   /// The lesson with its exercises and keys.
@@ -17,6 +18,11 @@ abstract interface class LessonRepository {
   /// [SpokenOffTopic] or [ReviewQuotaOut]. When it can't, the answer stays on the
   /// phone to be judged later, and the failure says so.
   Future<Result<Evaluation>> reviewSpoken(ExerciseAttempt attempt);
+
+  /// Tells the server the lesson is done, once it has the answers, and returns
+  /// its official numbers. When it can't be reached the completion stays on the
+  /// phone with the answers, and the failure says so.
+  Future<Result<LessonResult>> completeLesson(LessonSummary summary);
 
   /// Keeps the report on the phone and sends it when it can. Never fails.
   Future<void> saveReport(ExerciseReport report);

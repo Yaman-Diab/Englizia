@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
@@ -210,8 +211,8 @@ class _SignInPageState extends State<SignInPage> {
                 ),
               ),
             ),
-            AnimatedSize(
-              duration: duration,
+            SmoothSize(
+              duration: AppMotion.fast,
               curve: AppMotion.out,
               alignment: AlignmentDirectional.topCenter,
               child: switch (state) {

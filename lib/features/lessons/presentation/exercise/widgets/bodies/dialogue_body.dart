@@ -4,6 +4,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
@@ -280,8 +281,8 @@ class _LearnerBubble extends StatelessWidget {
         alignment: AlignmentDirectional.centerEnd,
         child: Align(
           alignment: AlignmentDirectional.centerEnd,
-          child: AnimatedSize(
-            duration: AppMotion.resolve(context, AppMotion.closeUp),
+          child: SmoothSize(
+            duration: AppMotion.closeUp,
             curve: AppMotion.out,
             alignment: AlignmentDirectional.centerEnd,
             child: stage.slot(

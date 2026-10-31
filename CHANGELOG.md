@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- The end of a lesson: the guide's quiet celebration, points counting up, the first-try count and time, words saved, what to review, the unit's chain with the lesson filling in, and the day's goal and streak, with its moment when the goal is reached. Works offline with what the phone knows.
 - Advanced exercises: translating, correcting a mistake with the correction flying to its word, completing a conversation, reading a text pinned over its questions with a whole-screen view, and speaking an answer, typed if you prefer, judged by the server's AI with a note and a better form.
 - Exercises to produce the language: repeating a sentence with a real microphone, writing what you hear, typing into a blank with spelling rules, ordering sentences and spelling a word.
 - Feedback after checking: a sheet that rises in place of the button, with the verdict drawing itself, the right answer with its sound and why, another accepted form, what the answer earned, and a way to report a problem.

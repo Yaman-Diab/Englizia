@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/slide_swap.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
@@ -12,6 +13,7 @@ import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/exercise_body.dart';
@@ -37,7 +39,7 @@ class ExercisePage extends StatelessWidget {
   final VoidCallback onExit;
 
   /// The last question is done.
-  final VoidCallback onFinished;
+  final ValueChanged<LessonSummary> onFinished;
 
   /// «اشرح لي».
   final VoidCallback onExplain;
@@ -85,7 +87,8 @@ class ExercisePage extends StatelessWidget {
     listeners: [
       BlocListener<ExerciseCubit, ExerciseState>(
         listenWhen: (before, now) => now.finished && !before.finished,
-        listener: (_, _) => onFinished(),
+        listener: (context, _) =>
+            onFinished(context.read<ExerciseCubit>().summary),
       ),
       BlocListener<ExerciseCubit, ExerciseState>(
         listenWhen: (before, now) => before.evaluation != now.evaluation,
@@ -118,8 +121,8 @@ class ExercisePage extends StatelessWidget {
                     onHint: context.read<ExerciseCubit>().toggleHint,
                   ),
                 ),
-                AnimatedSize(
-                  duration: AppMotion.resolve(context, AppMotion.fast),
+                SmoothSize(
+                  duration: AppMotion.fast,
                   curve: AppMotion.out,
                   alignment: AlignmentDirectional.topStart,
                   child: state.online

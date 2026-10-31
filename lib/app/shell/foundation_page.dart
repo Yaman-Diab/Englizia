@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
 import 'package:englizia/features/account/presentation/account/widgets/account_card.dart';
@@ -13,6 +14,9 @@ import 'package:englizia/features/account/presentation/verify_email/cubit/verify
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_banner.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_row.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -127,6 +131,29 @@ class FoundationPage extends StatelessWidget {
                   onPressed: () =>
                       context.push(AppRoutes.exercisesOf('les_mock')),
                   child: Text('foundation_try_exercises'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                // Without answering a whole lesson: a new scenario on each press.
+                OutlinedButton(
+                  onPressed: () async {
+                    final lesson = await sl<LessonRepository>().getLesson(
+                      'les_mock',
+                    );
+                    if (lesson is! Ok<Lesson> || !context.mounted) return;
+                    await context.push(
+                      AppRoutes.completeOf('les_mock'),
+                      extra: LessonSummary(
+                        lessonId: 'les_mock',
+                        lessonVersion: lesson.value.version,
+                        rightFirstTime: 5,
+                        counted: 6,
+                        pending: 0,
+                        seconds: 420,
+                        outline: lesson.value.outline,
+                      ),
+                    );
+                  },
+                  child: Text('foundation_try_complete'.tr()),
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],

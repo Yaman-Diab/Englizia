@@ -9,8 +9,10 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
+import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/design_system/widgets/xp_amount.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
@@ -155,8 +157,8 @@ class _FeedbackSheetState extends State<FeedbackSheet>
             top: Radius.circular(AppRadius.xl),
           ),
         ),
-        child: AnimatedSize(
-          duration: AppMotion.resolve(context, AppMotion.fast),
+        child: SmoothSize(
+          duration: AppMotion.fast,
           curve: AppMotion.out,
           alignment: AlignmentDirectional.bottomStart,
           child: Column(
@@ -739,14 +741,12 @@ class _XpBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.star_rounded, size: _iconSize, color: colors.reward.fill),
-          const SizedBox(width: AppSpacing.xs),
-          Text(
-            'lesson_fb_xp'.tr(namedArgs: {'xp': '$xp'}),
-            textDirection: TextDirection.ltr,
-            style: context.texts.captionStrong.copyWith(
-              color: colors.reward.text,
-            ),
+          XpAmount(
+            xp: xp,
+            style: context.texts.captionStrong,
+            starSize: _iconSize,
+            delay: FeedbackEntrance.reward,
+            duration: AppMotion.sheetIn,
           ),
         ],
       ),

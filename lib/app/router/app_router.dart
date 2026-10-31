@@ -26,6 +26,9 @@ import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_pag
 import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
+import 'package:englizia/features/lessons/presentation/complete/pages/lesson_complete_page.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
@@ -542,8 +545,10 @@ GoRouter createAppRouter(AppSessionController session) {
             child: ExercisePage(
               onExit: () =>
                   context.canPop() ? context.pop() : context.go(AppRoutes.home),
-              onFinished: () =>
-                  context.pushReplacement(AppRoutes.completeOf(lessonId)),
+              onFinished: (summary) => context.pushReplacement(
+                AppRoutes.completeOf(lessonId),
+                extra: summary,
+              ),
               onExplain: () => context.push(AppRoutes.explainOf(lessonId)),
             ),
           );
@@ -554,10 +559,36 @@ GoRouter createAppRouter(AppSessionController session) {
         path: AppRoutes.lessonExplain,
         builder: (_, _) => PendingPage(title: 'lesson_fb_explain'.tr()),
       ),
-      // "Lesson complete" is not built yet.
       GoRoute(
         path: AppRoutes.lessonComplete,
-        builder: (_, _) => PendingPage(title: 'lesson_complete_title'.tr()),
+        // Only a lesson that has just ended has anything to show.
+        redirect: (_, state) =>
+            state.extra is LessonSummary ? null : AppRoutes.home,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              sl<LessonCompleteCubit>(param1: state.extra! as LessonSummary)
+                ..start(),
+          child: LessonCompletePage(
+            onNext: (next) => switch (next.lessonId) {
+              final lessonId? => context.pushReplacement(
+                AppRoutes.exercisesOf(lessonId),
+              ),
+              null => context.push(AppRoutes.unitStart),
+            },
+            // The unit's screen isn't built yet.
+            onBack: () => context.go(AppRoutes.home),
+            onWords: () => context.push(AppRoutes.savedWords),
+          ),
+        ),
+      ),
+      // The learner's words, a unit's review and the next unit have no design yet.
+      GoRoute(
+        path: AppRoutes.savedWords,
+        builder: (_, _) => PendingPage(title: 'lesson_done_show_words'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.unitStart,
+        builder: (_, _) => PendingPage(title: 'lesson_done_next_unit'.tr()),
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,
