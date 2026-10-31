@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/entrance.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/account_button.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/notice_card.dart';
@@ -356,6 +358,20 @@ void main() {
       await tester.tap(find.text('common_retry'.tr()));
       await settle(tester);
       expect(signedIn, [memberTokens]);
+    });
+
+    testWidgets('forgot arrives after the fields, not before them', (
+      tester,
+    ) async {
+      await pumpPage(tester);
+
+      final entrance = tester.widget<Entrance>(
+        find.ancestor(
+          of: find.text('sign_in_forgot'.tr()),
+          matching: find.byType(Entrance),
+        ),
+      );
+      expect(entrance.delay, FormEntrance.field(3));
     });
 
     testWidgets('forgot hands on the email; the switch opens sign-up', (
