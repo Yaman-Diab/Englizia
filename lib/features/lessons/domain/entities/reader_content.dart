@@ -1,4 +1,5 @@
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:equatable/equatable.dart';
 
 /// A word of a sentence, its punctuation stuck to it: nothing else is tappable or
@@ -108,17 +109,46 @@ final class ReaderSpan extends Equatable {
 /// Where a moment of the sound falls.
 typedef ReaderPlace = ({int sentence, int? word});
 
-/// The text and sound of a reader. An interactive video shares all of this, with
-/// its video as the time (S §8.2).
+/// What an interactive video adds to its text (S §8.4).
+final class ReaderVideo extends Equatable {
+  const ReaderVideo({
+    required this.video,
+    required this.requiredPercent,
+    this.defaultSpeed = 1,
+    this.savedWatch,
+  });
+
+  final LessonVideo video;
+
+  /// Of the video really watched, from the panel.
+  final int requiredPercent;
+
+  /// From the panel: slower for kids.
+  final double defaultSpeed;
+
+  /// As the server last heard, from any phone.
+  final WatchState? savedWatch;
+
+  @override
+  List<Object?> get props => [video, requiredPercent, defaultSpeed, savedWatch];
+}
+
+/// The text and media of a reader: an interactive text with its sound, and an
+/// interactive video with its video as the time (S §8.2).
 final class ReaderContent extends Equatable {
   const ReaderContent({
-    required this.audioUrl,
     required this.duration,
     required this.sentences,
+    this.audioUrl = '',
+    this.video,
     this.spans = const [],
   });
 
+  /// A text's sound.
   final String audioUrl;
+
+  /// A video's: then there is no [audioUrl].
+  final ReaderVideo? video;
   final Duration duration;
   final List<ReaderSentence> sentences;
   final List<ReaderSpan> spans;
@@ -151,11 +181,28 @@ final class ReaderContent extends Equatable {
   }
 
   @override
-  List<Object?> get props => [audioUrl, duration, sentences, spans];
+  List<Object?> get props => [audioUrl, video, duration, sentences, spans];
 }
 
-/// How the text shows (S §8.3).
-enum ReaderMode { onTap, below, arabicFirst, arabicOnly, listening }
+/// How the text shows (S §8.3, §8.4).
+enum ReaderMode {
+  onTap,
+  below,
+  currentTranslated,
+  englishOnly,
+  arabicFirst,
+  arabicOnly,
+  listening;
+
+  static const forText = [onTap, below, arabicFirst, arabicOnly, listening];
+  static const forVideo = [
+    currentTranslated,
+    arabicFirst,
+    arabicOnly,
+    englishOnly,
+    listening,
+  ];
+}
 
 enum ReaderTextSize { small, medium, large }
 
@@ -163,25 +210,29 @@ final class ReaderPrefs extends Equatable {
   const ReaderPrefs({
     this.size = ReaderTextSize.medium,
     this.mode = ReaderMode.onTap,
+    this.videoMode = ReaderMode.currentTranslated,
     this.stopEachSentence = false,
   });
 
   final ReaderTextSize size;
   final ReaderMode mode;
+  final ReaderMode videoMode;
   final bool stopEachSentence;
 
   ReaderPrefs copyWith({
     ReaderTextSize? size,
     ReaderMode? mode,
+    ReaderMode? videoMode,
     bool? stopEachSentence,
   }) => ReaderPrefs(
     size: size ?? this.size,
     mode: mode ?? this.mode,
+    videoMode: videoMode ?? this.videoMode,
     stopEachSentence: stopEachSentence ?? this.stopEachSentence,
   );
 
   @override
-  List<Object?> get props => [size, mode, stopEachSentence];
+  List<Object?> get props => [size, mode, videoMode, stopEachSentence];
 }
 
 /// A span kept in the learner's word bank, whole: changing it in the panel later
@@ -191,12 +242,16 @@ final class SavedWord extends Equatable {
     required this.lessonId,
     required this.span,
     required this.sentence,
+    this.videoId,
   });
 
   final String lessonId;
   final ReaderSpan span;
   final ReaderSentence sentence;
 
+  /// With a video, the sentence's timing finds its moment again (S §8.4).
+  final String? videoId;
+
   @override
-  List<Object?> get props => [lessonId, span, sentence];
+  List<Object?> get props => [lessonId, span, sentence, videoId];
 }

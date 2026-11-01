@@ -780,6 +780,18 @@
   "reader_saved_show": "اعرض",
   "reader_back_to_current": "الجملة الحالية",
   "reader_tip": "اضغط على جملة لتسمعها أو تترجمها، وعلى الكلمات المنقّطة لتعرف معناها.",
+  "reader_mode_current": "الإنجليزي وترجمة الجملة الحالية",
+  "reader_mode_current_detail": "الافتراضي في الفيديو",
+  "reader_mode_english_only": "الإنجليزي فقط",
+  "reader_mode_bars_detail": "بلا نص، والجمل أشرطة",
+  "reader_again": "أعد الجملة",
+  "reader_back_to_clip": "المقطع الحالي",
+  "reader_saved_with_time": "حُفظت في بنك الكلمات مع توقيتها",
+  "reader_end_clip": "أنهيت المقطع",
+  "reader_next": "التالية",
+  "reader_panel_show": "أظهر لوحة النص",
+  "reader_panel_hide": "أخفِ لوحة النص",
+  "reader_panel": "النص",
   "reader_tip_ok": "فهمت",
   "reader_audio_failed": "تعذّر تحميل الصوت، ويمكنك القراءة الآن",
   "reader_retry": "إعادة المحاولة",
@@ -793,6 +805,7 @@
   "reader_continue_exercises": "متابعة: التمارين",
   "foundation_try_text": "جرّب النص التفاعلي",
   "foundation_try_text_broken": "جرّب نصًا تعذّر صوته",
+  "foundation_try_video": "جرّب الفيديو التفاعلي",
   "reader_end_sentences": {
     "zero": "لا جمل",
     "one": "جملة واحدة",
@@ -808,6 +821,22 @@
     "few": "حفظت {} كلمات",
     "many": "حفظت {} كلمة",
     "other": "حفظت {} كلمة"
+  },
+  "reader_end_saved_phrases": {
+    "zero": "لم تحفظ شيئًا",
+    "one": "حفظت تعبيرًا واحدًا",
+    "two": "حفظت تعبيرين",
+    "few": "حفظت {} تعابير",
+    "many": "حفظت {} تعبيرًا",
+    "other": "حفظت {} تعبيرًا"
+  },
+  "reader_end_marked_phrases": {
+    "zero": "لا تعابير معلّمة",
+    "one": "تعبير واحد معلّم",
+    "two": "تعبيران معلّمان",
+    "few": "{} تعابير معلّمة",
+    "many": "{} تعبيرًا معلّمًا",
+    "other": "{} تعبيرًا معلّمًا"
   },
   "reader_end_marked": {
     "zero": "لا كلمات معلّمة",

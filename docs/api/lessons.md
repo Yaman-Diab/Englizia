@@ -117,12 +117,16 @@ A grammar lesson also has `content`, and `bookRef` for one tied to a book (desig
 | `content.summary` | `{ar, table[], examples[]}` | Required. `table[]`: `{left, right: [part]}`. `examples[]`: `{en: [part], ar, audio?}`. A part is `{text, strong?, marked?}` |
 | `content.watch` | as below | What the server last heard, from any phone |
 
-An interactive text has `reader` (design `Interactive Text`, S §8.2–§8.3). An interactive video will share it, with its video as the time. All proposed.
+An interactive text and an interactive video both have `reader` (designs `Interactive Text`, `Interactive Video`, S §8.2–§8.4): the same sentences and spans, with a sound or a video as the time. All proposed.
 
 | Field | Type | Meaning |
 |---|---|---|
-| `reader.audio` | `{url, durationMs}` | The whole text's sound. Required |
-| `reader.sentences[]` | `{id, ar, words[], image?, imageAlt?, speaker?, shadowing?}` | In order. `shadowing`: practised after the text; with none, the text goes on to the exercises |
+| `reader.audio` | `{url, durationMs}` | A text's whole sound. Required with no `video` |
+| `reader.video` | `{id, durationSeconds, sources[], cover?}` | A video, as in a grammar lesson: replacing it means a new `id`. The word timings are in this video's time |
+| `reader.requiredWatchPercent` | int | With `video`: how much really watched completes it, from the panel (default 80, S §7.6). Required |
+| `reader.defaultSpeed` | number | With `video`: the speed it opens at, from the panel, as 0.75 for kids. Default 1 |
+| `reader.watch` | `{videoId, positionSeconds, watched[]}` | With `video`: as the server last heard, from any phone |
+| `reader.sentences[]` | `{id, ar, words[], image?, imageAlt?, speaker?, shadowing?}` | In order. `speaker`: shown above the sentence, in every way of showing it. `shadowing`: practised after the text; with none, the text goes on to the exercises |
 | `reader.sentences[].words[]` | `{id, text, startMs, endMs, gloss?}` | Punctuation stuck to its word (`leave.`). `gloss`: its meaning when it is in no span; with none, pressing it shows nothing, as no AI is asked |
 | `reader.spans[]` | `{id, sentenceId, wordIds[], kind, base, ar, note?, noteExample?}` | `kind`: `word`, `phrasalVerb`, `idiom`. Words side by side or not, in one sentence, and no word in two spans. `noteExample[]`: `{text, strong?}`, shown under the note |
 
@@ -169,7 +173,7 @@ The star on a span, kept on the phone and sent like an answer. Proposed.
 { "spanId": "turnoff", "saved": true, "base": "turn off", "kind": "phrasalVerb", "ar": "...", "note": "...", "sentence": { "en": "...", "ar": "..." } }
 ```
 
-Saving sends the span whole, so changing it in the panel later doesn't change what was saved (S §8.2). Taking it back sends `{spanId, saved: false}`.
+Saving sends the span whole, so changing it in the panel later doesn't change what was saved (S §8.2). From a video, `sentence` also has `videoId`, `startMs` and `endMs`, the moment to find it again (S §8.4). Taking it back sends `{spanId, saved: false}`.
 
 ## `POST /api/v1/app/lessons/{lessonId}/content-done`
 
@@ -183,7 +187,7 @@ How much of the video was really watched, kept on the phone and sent like an ans
 { "videoId": "vid_1", "lessonVersion": 1, "positionSeconds": 134, "watched": [[0, 120], [200, 214]] }
 ```
 
-`watched` is `[from, to)` in seconds, counted from what played: moving the bar adds nothing. The server should take the union, and decide completion from it (S §7.6).
+Both a grammar lesson and an interactive video send it. `watched` is `[from, to)` in seconds, counted from what played: moving the bar adds nothing. The server should take the union, and decide completion from it (S §7.6).
 
 ## `GET /api/v1/app/lessons/{lessonId}/questions`
 

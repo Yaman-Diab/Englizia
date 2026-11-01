@@ -1,4 +1,4 @@
-import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 
 /// The seconds of a video really watched: dragging to the end counts for nothing
 /// (S §8.1), and watching a part twice counts once.

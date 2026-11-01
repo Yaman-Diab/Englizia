@@ -1,5 +1,6 @@
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 
@@ -19,8 +20,8 @@ Duration _ms(int? value) => Duration(
       value ?? (throw const FormatException('Reader: a time is missing')),
 );
 
-/// From an interactive text's package. Null when it has none, or can't be read:
-/// the page says so and offers to try again.
+/// From an interactive text's or video's package. Null when it has none, or can't
+/// be read: the page says so and offers to try again.
 ReaderContent? readerFromJson(Map<String, Object?> lesson) {
   final json = lesson.readMap('reader');
   if (json == null) return null;
@@ -32,10 +33,12 @@ ReaderContent? readerFromJson(Map<String, Object?> lesson) {
     if (sentences.isEmpty) {
       throw const FormatException('Reader: no sentences');
     }
-    final audio = asJsonMap(json['audio']);
+    final video = _video(json);
+    final audio = video == null ? asJsonMap(json['audio']) : null;
     return ReaderContent(
-      audioUrl: _required(audio.readString('url')),
-      duration: _ms(audio.readInt('durationMs')),
+      audioUrl: audio == null ? '' : _required(audio.readString('url')),
+      video: video,
+      duration: video?.video.duration ?? _ms(audio?.readInt('durationMs')),
       sentences: sentences,
       spans: [
         for (final span in json.readList('spans') ?? const <Object?>[])
@@ -46,6 +49,22 @@ ReaderContent? readerFromJson(Map<String, Object?> lesson) {
     AppLogger.error(error, stackTrace, 'Reader content unreadable');
     return null;
   }
+}
+
+ReaderVideo? _video(Map<String, Object?> json) {
+  final video = json.readMap('video');
+  if (video == null) return null;
+  return ReaderVideo(
+    video: lessonVideoFromJson(video),
+    requiredPercent:
+        json.readInt('requiredWatchPercent') ??
+        (throw const FormatException('Reader: no watching required')),
+    defaultSpeed: json.readDouble('defaultSpeed') ?? 1,
+    savedWatch: switch (json.readMap('watch')) {
+      final watch? => watchFromJson(watch),
+      null => null,
+    },
+  );
 }
 
 ReaderSentence _sentence(Map<String, Object?> json) {
@@ -105,12 +124,17 @@ ReaderPrefs readerPrefsFromJson(Map<String, Object?> json) => ReaderPrefs(
     (mode) => mode.name == json.readString('mode'),
     orElse: () => ReaderMode.onTap,
   ),
+  videoMode: ReaderMode.values.firstWhere(
+    (mode) => mode.name == json.readString('videoMode'),
+    orElse: () => ReaderMode.currentTranslated,
+  ),
   stopEachSentence: json.readBool('stopEachSentence') ?? false,
 );
 
 Map<String, Object?> readerPrefsToJson(ReaderPrefs prefs) => {
   'size': prefs.size.name,
   'mode': prefs.mode.name,
+  'videoMode': prefs.videoMode.name,
   'stopEachSentence': prefs.stopEachSentence,
 };
 
@@ -123,6 +147,14 @@ Map<String, Object?> savedWordToJson(SavedWord word, {required bool saved}) => {
     'kind': word.span.kind.name,
     'ar': word.span.arabic,
     'note': ?word.span.note,
-    'sentence': {'en': word.sentence.english, 'ar': word.sentence.arabic},
+    'sentence': {
+      'en': word.sentence.english,
+      'ar': word.sentence.arabic,
+      if (word.videoId case final videoId?) ...{
+        'videoId': videoId,
+        'startMs': word.sentence.start.inMilliseconds,
+        'endMs': word.sentence.end.inMilliseconds,
+      },
+    },
   },
 };

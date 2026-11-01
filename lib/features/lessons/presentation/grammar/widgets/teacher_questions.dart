@@ -7,7 +7,7 @@ import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
-import 'package:englizia/features/lessons/presentation/grammar/widgets/grammar_player.dart';
+import 'package:englizia/features/lessons/presentation/video/lesson_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
