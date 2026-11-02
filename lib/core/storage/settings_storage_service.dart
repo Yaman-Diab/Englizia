@@ -23,6 +23,8 @@ final class SettingsStorageService {
   static const _readerPrefsKey = 'settings.reader_prefs';
   static const _readerTipKey = 'settings.reader_tip_seen';
   static const _savedWordsKey = 'account.saved_words';
+  static const _wordBankKey = 'account.word_bank';
+  static const _wordBankOutboxKey = 'account.word_bank_outbox';
 
   final SharedPreferences _prefs;
 
@@ -138,6 +140,20 @@ final class SettingsStorageService {
     await _prefs.setString(_savedWordsKey, json);
   }
 
+  /// The learner's word bank as last seen, so «تدرّب» opens offline.
+  String? get wordBank => _prefs.getString(_wordBankKey);
+
+  Future<void> setWordBank(String json) async {
+    await _prefs.setString(_wordBankKey, json);
+  }
+
+  /// Reviews and deletions not yet sent, oldest first, as JSON.
+  String? get wordBankOutbox => _prefs.getString(_wordBankOutboxKey);
+
+  Future<void> setWordBankOutbox(String json) async {
+    await _prefs.setString(_wordBankOutboxKey, json);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -149,6 +165,8 @@ final class SettingsStorageService {
       await _prefs.remove(_lessonCacheKey);
       await _prefs.remove(_videoWatchKey);
       await _prefs.remove(_savedWordsKey);
+      await _prefs.remove(_wordBankKey);
+      await _prefs.remove(_wordBankOutboxKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

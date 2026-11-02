@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- The «تدرّب» tab: the word bank with how firmly each word is kept, a review that turns each card and moves it between five boxes, offline too, and «كلماتي» to search, filter and remove words; and the tabs' bar.
 - Shadowing: a lesson's chosen sentences said after the model, with it, or with the text hidden, the words heard and doing better each try, and the try and the model drawn side by side.
 - Vocabulary lesson: stacked cards with each word said as it shows, its kind, meaning and an example marked as it is said, the translation on request, a star to save it, dragging between cards, and the lesson's words together before the exercises.
 - Interactive video: the video with a reader under it instead of captions, who speaks, five ways of showing the text, going to any sentence, cards that stop the picture, words saved with their moment, a side panel when the phone is turned, and how much was really watched.

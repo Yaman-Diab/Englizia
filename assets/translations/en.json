@@ -743,6 +743,101 @@
   "shadow_next_sentence": "Next sentence",
   "shadow_to_exercises": "Go on to the exercises",
   "shadow_video_frame": "A frame from the clip",
+  "tab_learn": "Learn",
+  "tab_practice": "Practice",
+  "tab_talk": "Talk",
+  "tab_me": "Me",
+  "tab_with_badge": "{tab}, {count} to review",
+  "practice_title": "Practice",
+  "practice_subtitle": "Today's review keeps what you learned",
+  "practice_bank": "Word bank",
+  "practice_strength": "How well you know them",
+  "practice_strength_said": "How well you know them: {a} in the first box, {b} in the second, {c} in the third, {d} in the fourth, {e} in the fifth",
+  "practice_box_day": "1 day",
+  "practice_box_days": "3 days",
+  "practice_strength_hint": "The further right a word goes, the better you remember it",
+  "practice_review": "Review words",
+  "practice_none_due": "No words to review today. The next review is tomorrow",
+  "practice_review_anyway": "Review anyway",
+  "practice_all_words": "All my words",
+  "practice_new": "Save words with the star during lessons to see them here",
+  "practice_concepts_title": "Concepts to strengthen",
+  "practice_sentences_title": "Practise saying your saved sentences",
+  "practice_end_review": "End the review",
+  "practice_progress": "Review progress",
+  "practice_counter": "{at} of {of}",
+  "practice_tap_meaning": "Tap to see the meaning",
+  "practice_listen": "Listen",
+  "practice_listen_sentence": "Listen to the sentence",
+  "practice_from": "From: {title}",
+  "practice_watch_clip": "Watch the clip",
+  "practice_soon": "Coming soon",
+  "practice_flip": "Turn the card",
+  "practice_again": "I didn't know it",
+  "practice_known": "I knew it",
+  "practice_finish": "Done",
+  "practice_card_said": "{word}, {kind}, {meaning}",
+  "practice_card_said_plain": "{word}, {meaning}",
+  "practice_kind_noun": "Noun",
+  "practice_kind_verb": "Verb",
+  "practice_kind_adjective": "Adjective",
+  "practice_kind_adverb": "Adverb",
+  "practice_kind_phrase": "Phrase",
+  "practice_kind_phrasal": "Phrasal verb",
+  "practice_kind_idiom": "Idiom",
+  "practice_kind_word": "Word",
+  "practice_my_words": "My words",
+  "practice_search": "Search",
+  "practice_search_hint": "Search in English or Arabic",
+  "practice_search_close": "Close search",
+  "practice_filter": "Filter",
+  "practice_filter_all": "All",
+  "practice_filter_due": "Due today",
+  "practice_filter_learning": "Learning",
+  "practice_filter_firm": "Known well",
+  "practice_no_results": "No results",
+  "practice_row_said": "{word}, {meaning}, box {box} of 5",
+  "practice_delete": "Remove from the word bank",
+  "practice_delete_title": "Remove {word} from your words?",
+  "practice_delete_body": "It leaves your reviews, and you can save it again with the star.",
+  "practice_cancel": "Cancel",
+  "practice_delete_confirm": "Remove",
+  "practice_words_count": {
+    "one": "{} word",
+    "other": "{} words"
+  },
+  "practice_due": {
+    "one": "{} word to review today",
+    "other": "{} words to review today"
+  },
+  "practice_none_due_in": {
+    "one": "No words to review today. The next review is tomorrow",
+    "other": "No words to review today. The next review is in {} days"
+  },
+  "practice_concepts": {
+    "one": "{} concept to strengthen today",
+    "other": "{} concepts to strengthen today"
+  },
+  "practice_sentences": {
+    "one": "{} sentence",
+    "other": "{} sentences"
+  },
+  "practice_see_in": {
+    "one": "You'll see it tomorrow",
+    "other": "You'll see it in {} days"
+  },
+  "practice_done": {
+    "one": "You reviewed {} word",
+    "other": "You reviewed {} words"
+  },
+  "practice_done_up": {
+    "one": "{} moved to a later box",
+    "other": "{} moved to a later box"
+  },
+  "practice_done_again": {
+    "one": "{} comes back tomorrow",
+    "other": "{} come back tomorrow"
+  },
   "reader_tip_ok": "Got it",
   "reader_audio_failed": "The sound couldn't load. You can read for now",
   "reader_retry": "Try again",
@@ -758,6 +853,7 @@
   "foundation_try_text_broken": "Try a text whose sound fails",
   "foundation_try_video": "Try the interactive video",
   "foundation_try_vocabulary": "Try the vocabulary lesson",
+  "foundation_try_practice": "Try the Practice tab",
   "reader_end_sentences": {
     "one": "1 sentence",
     "other": "{} sentences"

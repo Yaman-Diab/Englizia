@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
+import 'package:englizia/core/design_system/widgets/letter_panel.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/presentation/widgets/karaoke_text.dart';
 import 'package:englizia/features/lessons/presentation/widgets/save_star.dart';
@@ -264,7 +265,7 @@ class _Picture extends StatelessWidget {
     final url = word.imageUrl;
     return ExcludeSemantics(
       child: url == null
-          ? VocabLetter(word: word.word)
+          ? LetterPanel(word: word.word)
           : ColoredBox(
               // ASSUMPTION(design): ILLU_BG is temporary in the design; the
               // neutral tile is its colour in both themes.
@@ -275,38 +276,10 @@ class _Picture extends StatelessWidget {
                       fit: BoxFit.cover,
                       loadingBuilder: (_, image, progress) =>
                           progress == null ? image : const VocabSkeleton(),
-                      errorBuilder: (_, _, _) => VocabLetter(word: word.word),
+                      errorBuilder: (_, _, _) => LetterPanel(word: word.word),
                     )
                   : SvgPicture.asset(url),
             ),
-    );
-  }
-}
-
-/// A word with no picture: its first letter, large.
-class VocabLetter extends StatelessWidget {
-  const VocabLetter({required this.word, this.size = 96, super.key});
-
-  final String word;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final display = context.texts.display;
-    return ColoredBox(
-      color: colors.primary.surface,
-      child: Center(
-        child: Text(
-          word.characters.first,
-          textDirection: TextDirection.ltr,
-          style: display.copyWith(
-            fontSize: display.fontSize! * size / 28,
-            height: 1,
-            color: colors.primary.fill,
-          ),
-        ),
-      ),
     );
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/design_system/widgets/letter_panel.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/state/load_status.dart';
@@ -390,7 +391,7 @@ void main() {
       await settle(tester);
 
       expect(
-        find.descendant(of: top(), matching: find.byType(VocabLetter)),
+        find.descendant(of: top(), matching: find.byType(LetterPanel)),
         findsOneWidget,
       );
       await leave(tester);

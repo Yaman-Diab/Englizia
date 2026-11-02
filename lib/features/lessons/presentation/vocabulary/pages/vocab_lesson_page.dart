@@ -8,10 +8,11 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
+import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
+import 'package:englizia/core/design_system/widgets/letter_panel.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
-import 'package:englizia/features/lessons/presentation/exercise/widgets/session/exercise_top_bar.dart';
 import 'package:englizia/features/lessons/presentation/reader/widgets/reader_controls.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/widgets/vocab_card.dart';
@@ -511,7 +512,7 @@ class _ReviewTile extends StatelessWidget {
                         fit: StackFit.expand,
                         children: [
                           if (url == null)
-                            VocabLetter(word: word.word, size: _letter)
+                            LetterPanel(word: word.word, size: _letter)
                           else
                             ColoredBox(
                               color: colors.tiles.neutral.background,
@@ -519,7 +520,7 @@ class _ReviewTile extends StatelessWidget {
                                   ? Image.network(
                                       url,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (_, _, _) => VocabLetter(
+                                      errorBuilder: (_, _, _) => LetterPanel(
                                         word: word.word,
                                         size: _letter,
                                       ),

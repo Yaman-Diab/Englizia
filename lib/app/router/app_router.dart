@@ -4,6 +4,7 @@ import 'package:englizia/app/router/route_policies.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
+import 'package:englizia/app/shell/tab_shell.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -75,6 +76,12 @@ import 'package:englizia/features/placement/presentation/result/cubit/placement_
 import 'package:englizia/features/placement/presentation/result/pages/placement_result_page.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
 import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
+import 'package:englizia/features/practice/presentation/practice/cubit/practice_cubit.dart';
+import 'package:englizia/features/practice/presentation/practice/pages/practice_page.dart';
+import 'package:englizia/features/practice/presentation/review/cubit/review_cubit.dart';
+import 'package:englizia/features/practice/presentation/review/pages/review_page.dart';
+import 'package:englizia/features/practice/presentation/words/cubit/my_words_cubit.dart';
+import 'package:englizia/features/practice/presentation/words/pages/my_words_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
@@ -701,7 +708,56 @@ GoRouter createAppRouter(AppSessionController session) {
       // The learner's words, a unit's review and the next unit have no design yet.
       GoRoute(
         path: AppRoutes.savedWords,
-        builder: (_, _) => PendingPage(title: 'lesson_done_show_words'.tr()),
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<MyWordsCubit>()..start(),
+          child: MyWordsPage(onBack: () => _back(context)),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.practice,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<PracticeCubit>()..start(),
+          child: BlocSelector<PracticeCubit, PracticeState, int>(
+            selector: (state) => state.badge,
+            builder: (context, badge) => TabShell(
+              current: AppTab.practice,
+              badges: {AppTab.practice: badge},
+              onSelect: (tab) => _openTab(context, tab),
+              child: PracticePage(
+                onReview: () => context.push<void>(AppRoutes.practiceReview),
+                onWords: () => context.push<void>(AppRoutes.savedWords),
+                // Concepts to strengthen (S §11) have no design yet.
+                onConcepts: () => context.push(AppRoutes.practiceConcepts),
+                // Saving sentences, and shadowing them from here, aren't sent.
+                onSentences: () => context.push(AppRoutes.practiceSentences),
+              ),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.practiceReview,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<ReviewCubit>()..start(),
+          child: ReviewPage(onExit: () => _back(context)),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.practiceConcepts,
+        builder: (_, _) => PendingPage(title: 'practice_concepts_title'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.practiceSentences,
+        builder: (_, _) => PendingPage(title: 'practice_sentences_title'.tr()),
+      ),
+      // «تحدّث» and «أنا» have no design yet.
+      GoRoute(
+        path: AppRoutes.talk,
+        builder: (_, _) => PendingPage(title: 'tab_talk'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.me,
+        builder: (_, _) => PendingPage(title: 'tab_me'.tr()),
       ),
       GoRoute(
         path: AppRoutes.unitStart,
@@ -790,4 +846,15 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.level => AppRoutes.onboardingLevel,
   OnboardingStep.reminder => AppRoutes.onboardingReminder,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,
+};
+
+void _back(BuildContext context) =>
+    context.canPop() ? context.pop() : context.go(AppRoutes.home);
+
+/// The tabs' bar: «تعلّم» is the temporary home for now.
+void _openTab(BuildContext context, AppTab tab) => switch (tab) {
+  AppTab.learn => context.go(AppRoutes.home),
+  AppTab.practice => context.go(AppRoutes.practice),
+  AppTab.talk => context.go(AppRoutes.talk),
+  AppTab.me => context.go(AppRoutes.me),
 };

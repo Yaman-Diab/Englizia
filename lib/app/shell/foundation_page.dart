@@ -188,6 +188,11 @@ class FoundationPage extends StatelessWidget {
                       context.push(AppRoutes.vocabularyOf('les_voc')),
                   child: Text('foundation_try_vocabulary'.tr()),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton(
+                  onPressed: () => context.push(AppRoutes.practice),
+                  child: Text('foundation_try_practice'.tr()),
+                ),
                 const SizedBox(height: AppSpacing.lg),
               ],
               // Here until «أنا» has its account section.
