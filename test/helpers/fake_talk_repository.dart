@@ -28,11 +28,26 @@ TalkHome mockTalkHome() => TalkHomeModel(
 /// The design's scenario: Jake and the fragile box.
 Scenario mockScenario() => ScenarioModel(_scenarioJson()).toEntity();
 
+/// The written one: Sami at the market, a sentence to repeat then two choices.
+Scenario mockWrittenScenario() =>
+    ScenarioModel(_scenarioJson('sc_how_much')).toEntity();
+
 /// Jake's replies, turn by turn.
 List<TalkReply> mockReplies() => [
   for (final reply in _scenarioJson().readList('replies')!)
     TalkReplyModel(asJsonMap(reply)).toEntity(),
 ];
+
+/// The notes of the design's summary.
+TalkNotes mockNotes() => TalkNotesModel(
+  asJsonMap(
+    ApiClient.unwrap(
+      jsonDecode(
+        File('test/fixtures/api/talk_notes_ok.json').readAsStringSync(),
+      ),
+    ),
+  ),
+).toEntity();
 
 class FakeTalkRepository implements TalkRepository {
   FakeTalkRepository({TalkHome? home, Scenario? scenario})
@@ -49,8 +64,12 @@ class FakeTalkRepository implements TalkRepository {
 
   /// How many turns fail before one gets through.
   var failingTurns = 0;
+
+  /// The notes' answers in turn; the last one stays.
+  List<Result<TalkNotes>> notesAnswers = [Ok(mockNotes())];
+  var notesAsked = 0;
   final said = <(int, String, SaidVia)>[];
-  final ended = <String>[];
+  final ended = <(String, Set<String>)>[];
   var starts = 0;
 
   @override
@@ -72,7 +91,7 @@ class FakeTalkRepository implements TalkRepository {
   Future<Result<String>> start(String scenarioId) async {
     if (startFailure case final failure?) return Err(failure);
     starts++;
-    return const Ok('conv_1');
+    return Ok('conv_$starts');
   }
 
   @override
@@ -92,5 +111,12 @@ class FakeTalkRepository implements TalkRepository {
   }
 
   @override
-  Future<void> end(String conversationId) async => ended.add(conversationId);
+  Future<void> end(
+    String conversationId, {
+    required Set<String> tasksDone,
+  }) async => ended.add((conversationId, tasksDone));
+
+  @override
+  Future<Result<TalkNotes>> notes(String conversationId) async =>
+      notesAnswers[(notesAsked++).clamp(0, notesAnswers.length - 1)];
 }

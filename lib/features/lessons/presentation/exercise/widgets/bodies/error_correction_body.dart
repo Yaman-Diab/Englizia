@@ -7,12 +7,12 @@ import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
+import 'package:englizia/core/design_system/widgets/word_line.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/chip_stage.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_chip.dart';
-import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

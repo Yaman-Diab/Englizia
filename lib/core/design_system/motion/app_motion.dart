@@ -130,6 +130,11 @@ abstract final class AppMotion {
   static const taskTickDelay = Duration(milliseconds: 420);
   static const taskCountDelay = Duration(milliseconds: 900);
 
+  /// A summary's done tasks are marked one after another, this far apart; a
+  /// chosen reply flies from its card into the conversation.
+  static const summaryMarkStep = Duration(milliseconds: 150);
+  static const replyFlight = Duration(milliseconds: 380);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 

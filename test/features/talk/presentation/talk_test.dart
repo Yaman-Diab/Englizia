@@ -1,11 +1,13 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';
 import 'package:englizia/features/talk/presentation/conversation/pages/conversation_page.dart';
 import 'package:englizia/features/talk/presentation/conversation/widgets/chat_parts.dart';
+import 'package:englizia/features/talk/presentation/conversation/widgets/summary_view.dart';
 import 'package:englizia/features/talk/presentation/talk/cubit/talk_cubit.dart';
 import 'package:englizia/features/talk/presentation/talk/pages/talk_page.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +20,9 @@ import '../../../helpers/pump_app.dart';
 
 /// Every clip in these tests plays this long.
 const _clip = Duration(seconds: 1);
+
+/// A written conversation's pauses, and the wait before notes are asked again.
+const _hold = Duration(milliseconds: 100);
 
 void main() {
   setUpAll(initLocalizationForTests);
@@ -201,6 +206,10 @@ void main() {
         player,
         scenarioId: 'sc_fragile_box',
         introDelay: Duration.zero,
+        heardHold: _hold,
+        replyDelay: _hold,
+        notesRetry: _hold,
+        notesTries: 2,
       );
       addTearDown(subject.close);
       return subject;
@@ -320,12 +329,137 @@ void main() {
       expect(subject.state.startFailure, isA<RateLimitFailure>());
     });
 
-    test('ending tells the server', () async {
+    test('ending tells the server what was done', () async {
       final subject = await chatting();
 
-      subject.end();
+      subject.finish();
 
-      expect(talk.ended, ['conv_1']);
+      expect(talk.ended.single.$1, 'conv_1');
+      expect(subject.state.stage, TalkStage.summary);
+    });
+
+    Future<ConversationCubit> saidOneLine() async {
+      final subject = await chatting();
+      subject.sendTyped('Careful, please!');
+      await Future<void>.delayed(Duration.zero);
+      await heard();
+      return subject;
+    }
+
+    test('the summary: the notes come once they are made', () async {
+      talk.notesAnswers = [
+        const Ok(TalkNotes(status: NotesStatus.pending)),
+        Ok(mockNotes()),
+      ];
+      final subject = await saidOneLine();
+
+      subject.finish();
+      expect(subject.state.notes!.status, NotesStatus.pending);
+      await Future<void>.delayed(_hold * 3);
+
+      expect(subject.state.notes!.status, NotesStatus.ready);
+      expect(subject.state.notes!.notes, hasLength(2));
+    });
+
+    test('notes that never come, or can\'t be reached, come later', () async {
+      talk.notesAnswers = [const Ok(TalkNotes(status: NotesStatus.pending))];
+      final waiting = await saidOneLine();
+      waiting.finish();
+      await Future<void>.delayed(_hold * 4);
+      expect(waiting.state.notes!.status, NotesStatus.failed);
+
+      talk.notesAnswers = [const Err(NetworkFailure())];
+      final offline = await saidOneLine();
+      offline.finish();
+      await Future<void>.delayed(Duration.zero);
+      expect(offline.state.notes!.status, NotesStatus.failed);
+    });
+
+    test('nothing said: no notes to wait for', () async {
+      final subject = await chatting();
+
+      subject.finish();
+
+      expect(subject.state.notes, isNull);
+      expect(talk.notesAsked, 0);
+    });
+
+    test('again: an AI one goes back to its intro', () async {
+      final subject = await saidOneLine();
+      subject.finish();
+
+      await subject.restart();
+
+      expect(subject.state.stage, TalkStage.intro);
+      expect(subject.state.messages, isEmpty);
+      expect(subject.state.tasksDone, isEmpty);
+    });
+
+    group('written', () {
+      setUp(() => talk.scenario = mockWrittenScenario());
+
+      test('repeating: the words heard show, then the sentence goes, and '
+          'the character answers', () async {
+        final subject = await chatting();
+        expect(subject.state.turnsLeft, 3);
+        expect(subject.state.scriptTurn, isA<RepeatTurn>());
+
+        subject.heard('how much is this');
+        expect(subject.state.phase, TalkPhase.heard);
+        expect(subject.state.heard, [true, true, true, true, false]);
+
+        await Future<void>.delayed(_hold * 1.5);
+        expect(subject.state.phase, TalkPhase.sent);
+        expect(
+          subject.state.messages.last.line.english,
+          'How much is this bag?',
+        );
+        expect(subject.state.messages.last.via, SaidVia.mic);
+
+        await Future<void>.delayed(_hold * 1.5);
+        expect(subject.state.messages.last.line.english, 'It\'s ten dollars.');
+        expect(subject.state.tasksDone, {'t_price'});
+        expect(subject.state.turnsLeft, 2);
+        expect(talk.said, isEmpty);
+        expect(subject.sendTyped('Hi'), isFalse);
+      });
+
+      Future<void> next(ConversationCubit subject) async {
+        await Future<void>.delayed(_hold * 1.5);
+        await heard();
+      }
+
+      test('a reply that doesn\'t fit does no task; the script\'s end ends '
+          'it', () async {
+        final subject = await chatting();
+        subject.heard('How much is this bag?');
+        await Future<void>.delayed(_hold * 1.5);
+        await next(subject);
+
+        subject.choose(1);
+        await next(subject);
+        expect(subject.state.messages.last.line.english, startsWith('Sorry'));
+        expect(subject.state.tasksDone, {'t_price'});
+
+        subject.choose(0);
+        await next(subject);
+        expect(subject.state.tasksDone, {'t_price', 't_bye'});
+        expect(subject.state.phase, TalkPhase.ended);
+
+        subject.finish();
+        expect(subject.state.notes, isNull);
+        expect(talk.ended.single.$2, {'t_price', 't_bye'});
+      });
+
+      test('again: it starts at once', () async {
+        final subject = await chatting();
+        subject.finish();
+
+        await subject.restart();
+
+        expect(subject.state.stage, TalkStage.chat);
+        expect(talk.starts, 2);
+      });
     });
 
     late FakeSpeechListener listener;
@@ -335,7 +469,7 @@ void main() {
       Locale locale = const Locale('ar'),
       Size size = defaultViewport,
       ThemeMode themeMode = ThemeMode.light,
-      VoidCallback? onSummary,
+      VoidCallback? onClose,
     }) async {
       listener = FakeSpeechListener()..says = 'Jake, this box is very fragile.';
       final subject = cubit();
@@ -347,10 +481,7 @@ void main() {
             BlocProvider.value(value: subject),
             BlocProvider.value(value: mic),
           ],
-          child: ConversationPage(
-            onClose: () {},
-            onSummary: onSummary ?? () {},
-          ),
+          child: ConversationPage(onClose: onClose ?? () {}),
         ),
         locale: locale,
         size: size,
@@ -418,24 +549,154 @@ void main() {
       expect(find.text(mockScenario().opening.arabic), findsOneWidget);
     });
 
-    testWidgets('ending asks first, then goes to the summary', (tester) async {
-      var summaries = 0;
-      await pump(tester, onSummary: () => summaries++);
+    /// «اعرض المحادثة كاملة» is under the notes.
+    Future<void> openFull(WidgetTester tester) async {
+      final link = find.text('talk_show_full'.tr());
+      await tester.scrollUntilVisible(
+        link,
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(link);
+    }
+
+    String summaryTitle() =>
+        'talk_summary_title'.tr(namedArgs: {'name': 'Jake'});
+
+    testWidgets('ending asks first, then the summary', (tester) async {
+      await pump(tester);
       await startChat(tester);
 
       await tester.tap(find.byTooltip('talk_end_label'.tr()));
       await settle(tester);
       await tester.tap(find.text('talk_keep_on'.tr()));
       await settle(tester);
-      expect(summaries, 0);
+      expect(find.text(summaryTitle()), findsNothing);
 
       await tester.tap(find.byTooltip('talk_end_label'.tr()));
       await settle(tester);
       await tester.tap(find.text('talk_end_now'.tr()));
       await settle(tester);
 
-      expect(summaries, 1);
-      expect(talk.ended, ['conv_1']);
+      expect(find.text(summaryTitle()), findsOneWidget);
+      expect(talk.ended.single.$1, 'conv_1');
+    });
+
+    Future<ConversationCubit> summary(
+      WidgetTester tester, {
+      Locale locale = const Locale('ar'),
+      Size size = defaultViewport,
+      ThemeMode themeMode = ThemeMode.light,
+      VoidCallback? onClose,
+    }) async {
+      final subject = await pump(
+        tester,
+        locale: locale,
+        size: size,
+        themeMode: themeMode,
+        onClose: onClose,
+      );
+      await startChat(tester);
+      for (final line in [
+        'Jake, this box is very fragile, you put it slow.',
+        'Can you put it in kitchen?',
+      ]) {
+        subject.sendTyped(line);
+        await settle(tester);
+      }
+      subject.finish();
+      await settle(tester);
+      return subject;
+    }
+
+    testWidgets('the summary: tasks, better ways to say, and what is left '
+        'leads', (tester) async {
+      var closed = 0;
+      await summary(tester, onClose: () => closed++);
+
+      expect(
+        find.text('talk_done_of'.tr(namedArgs: {'done': '2', 'total': '3'})),
+        findsOneWidget,
+      );
+      expect(find.byType(BetterCard), findsNWidgets(2));
+      expect(find.text('الصفة والظرف: slow و slowly'), findsOneWidget);
+      expect(find.text('talk_added_concepts'.tr()), findsOneWidget);
+      final retry = tester.getTopLeft(find.text('talk_retry'.tr()));
+      final done = tester.getTopLeft(find.text('talk_finished'.tr()));
+      expect(retry.dx, greaterThan(done.dx));
+
+      await tester.tap(find.text('talk_finished'.tr()));
+      expect(closed, 1);
+    });
+
+    testWidgets('nothing to say better: it says so', (tester) async {
+      talk.notesAnswers = [const Ok(TalkNotes(status: NotesStatus.ready))];
+      await summary(tester);
+
+      expect(find.text('talk_all_clear'.tr()), findsOneWidget);
+      expect(find.text('talk_better'.tr()), findsNothing);
+    });
+
+    testWidgets('notes being made, then not made', (tester) async {
+      talk.notesAnswers = [const Ok(TalkNotes(status: NotesStatus.pending))];
+      final subject = await pump(tester);
+      await startChat(tester);
+      subject.sendTyped('Careful, please!');
+      await settle(tester);
+      subject.finish();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.text('talk_notes_pending'.tr()), findsOneWidget);
+      await settle(tester);
+      expect(find.text('talk_notes_later'.tr()), findsOneWidget);
+    });
+
+    testWidgets('the whole conversation: a dotted line opens its better form', (
+      tester,
+    ) async {
+      await summary(tester);
+
+      await openFull(tester);
+      await settle(tester);
+      expect(find.text('talk_full_title'.tr()), findsOneWidget);
+      expect(find.text('talk_better_form'.tr()), findsNothing);
+
+      await tester.tap(find.text('Can you put it in kitchen?'));
+      await settle(tester);
+      expect(find.text('talk_better_form'.tr()), findsOneWidget);
+
+      await tester.tap(find.byTooltip('common_back'.tr()));
+      await settle(tester);
+      expect(find.text(summaryTitle()), findsOneWidget);
+    });
+
+    testWidgets('written: repeat, then choose a reply that flies in', (
+      tester,
+    ) async {
+      talk.scenario = mockWrittenScenario();
+      await pump(tester);
+      await startChat(tester);
+      expect(find.byType(RepeatCard), findsOneWidget);
+      expect(find.text('talk_kind_written'.tr()), findsOneWidget);
+
+      listener.says = 'How much is this bag';
+      await tester.tap(find.bySemanticsLabel('talk_say_sentence'.tr()));
+      await tester.pump();
+      listener.finish();
+      await tester.pump();
+      expect(
+        find.text('talk_heard'.plural(5, namedArgs: {'heard': '5'})),
+        findsOneWidget,
+      );
+      await settle(tester);
+
+      expect(find.byType(ChooseCards), findsOneWidget);
+      await tester.tap(find.text('I\'ll take it, please.'));
+      await tester.pump();
+      expect(find.byType(FlyIn), findsOneWidget);
+      await settle(tester);
+      expect(find.text('Great choice! Here you are.'), findsOneWidget);
     });
 
     testLayouts('every stage fits', (tester, layout) async {
@@ -464,6 +725,42 @@ void main() {
       }
       await settle(tester);
       expect(find.byType(ChatEnded), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      await tester.tap(find.text('talk_summary'.tr()));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      await openFull(tester);
+      await settle(tester);
+      await tester.tap(find.text('Line 1'));
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+    });
+
+    testLayouts('a written conversation and its summary fit', (
+      tester,
+      layout,
+    ) async {
+      talk.scenario = mockWrittenScenario();
+      final subject = await pump(
+        tester,
+        locale: layout.locale,
+        size: layout.size,
+        themeMode: layout.themeMode,
+      );
+      await startChat(tester);
+      subject.heard('How much is this');
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      await settle(tester);
+      expect(tester.takeException(), isNull);
+      subject.choose(1);
+      await settle(tester);
+      subject.choose(1);
+      await settle(tester);
+      expect(find.byType(ChatEnded), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      subject.finish();
+      await settle(tester);
       expect(tester.takeException(), isNull);
     });
   });

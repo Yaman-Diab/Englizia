@@ -46,8 +46,6 @@ abstract final class AppRoutes {
   static const practiceSentences = '/practice/sentences';
   static const talk = '/talk';
   static const talkScenario = '/talk/scenarios/:scenarioId';
-  static const talkWritten = '/talk/written';
-  static const talkSummary = '/talk/summary';
   static const me = '/me';
   static const unitStart = '/units/next';
 

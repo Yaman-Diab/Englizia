@@ -5,6 +5,7 @@ import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/listening_motion.dart';
@@ -17,23 +18,19 @@ import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';
 import 'package:englizia/features/talk/presentation/conversation/widgets/chat_parts.dart';
+import 'package:englizia/features/talk/presentation/conversation/widgets/summary_view.dart';
 import 'package:englizia/features/talk/presentation/widgets/talk_parts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// A scenario's intro, then the conversation (requirements v3.0 §8.6, design
-/// "Talk"). The summary follows on [onSummary], whether it ended by itself or
-/// the learner ended it.
+/// A scenario's intro, the conversation, then its summary (requirements v3.0
+/// §8.6, designs "Talk" and "Talk Summary"). [onClose] leaves, from the intro
+/// or with «انتهيت».
 class ConversationPage extends StatelessWidget {
-  const ConversationPage({
-    required this.onClose,
-    required this.onSummary,
-    super.key,
-  });
+  const ConversationPage({required this.onClose, super.key});
 
   final VoidCallback onClose;
-  final VoidCallback onSummary;
 
   @override
   Widget build(BuildContext context) =>
@@ -63,7 +60,8 @@ class ConversationPage extends StatelessWidget {
             ),
           ),
           TalkStage.intro => _Intro(onClose: onClose),
-          TalkStage.chat => _Chat(onSummary: onSummary),
+          TalkStage.chat => const _Chat(),
+          TalkStage.summary => SummaryView(onDone: onClose),
         },
       );
 }
@@ -134,7 +132,9 @@ class _Intro extends StatelessWidget {
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                    color: colors.ai.text,
+                                    color: scenario.kind == TalkKind.ai
+                                        ? colors.ai.text
+                                        : colors.primary.text,
                                     width: 2,
                                   ),
                                 ),
@@ -378,9 +378,7 @@ class _Tasks extends StatelessWidget {
 }
 
 class _Chat extends StatefulWidget {
-  const _Chat({required this.onSummary});
-
-  final VoidCallback onSummary;
+  const _Chat();
 
   @override
   State<_Chat> createState() => _ChatState();
@@ -406,6 +404,9 @@ class _ChatState extends State<_Chat> {
   var _rolledFrom = 0;
   var _seenDone = <String>{};
   Timer? _panelTimer;
+
+  /// Where the reply just chosen flies from.
+  Rect? _flyFrom;
 
   @override
   void dispose() {
@@ -517,8 +518,13 @@ class _ChatState extends State<_Chat> {
 
   void _finish() {
     _mic.reset();
-    _cubit.end();
-    widget.onSummary();
+    _cubit.finish();
+  }
+
+  void _choose(int index, Rect from) {
+    if (_cubit.state.phase != TalkPhase.turn) return;
+    setState(() => _flyFrom = from);
+    _cubit.choose(index);
   }
 
   @override
@@ -618,10 +624,17 @@ class _ChatState extends State<_Chat> {
             icon: const Icon(Icons.close_rounded),
           ),
           const SizedBox(width: AppSpacing.xs),
-          _SpeakingAvatar(
-            character: scenario.character,
-            speaking: state.speaking,
-          ),
+          if (state.written)
+            CharacterAvatar(
+              character: scenario.character,
+              size: _SpeakingAvatar.size,
+              kind: TalkKind.written,
+            )
+          else
+            _SpeakingAvatar(
+              character: scenario.character,
+              speaking: state.speaking,
+            ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Column(
@@ -638,13 +651,24 @@ class _ChatState extends State<_Chat> {
                 ),
                 Row(
                   children: [
-                    const AiSpark(size: 12),
+                    if (state.written)
+                      AppIconView(
+                        AppIcon.scriptPage,
+                        size: AppSizes.iconSm * .75,
+                        color: colors.textSecondary,
+                      )
+                    else
+                      const AiSpark(size: 12),
                     const SizedBox(width: AppSpacing.xs),
                     Flexible(
                       child: Text(
-                        'talk_kind_ai'.tr(),
+                        state.written
+                            ? 'talk_kind_written'.tr()
+                            : 'talk_kind_ai'.tr(),
                         style: texts.caption.copyWith(
-                          color: colors.ai.text,
+                          color: state.written
+                              ? colors.textSecondary
+                              : colors.ai.text,
                           fontSize: texts.caption.fontSize! * .85,
                           height: 16 / 11,
                         ),
@@ -741,7 +765,9 @@ class _ChatState extends State<_Chat> {
                   if (index > 0) const SizedBox(height: AppSpacing.md),
                   KeyedSubtree(
                     key: ValueKey(index),
-                    child: bubbleEntrance(
+                    child: _arrival(
+                      index == state.messages.length - 1 &&
+                          message.via == SaidVia.choice,
                       message.mine
                           ? MineBubble(
                               text: message.line.english,
@@ -751,6 +777,7 @@ class _ChatState extends State<_Chat> {
                           : CharacterBubble(
                               line: message.line,
                               character: scenario.character,
+                              kind: scenario.kind,
                               showAvatar:
                                   index == 0 || state.messages[index - 1].mine,
                               translated: state.translated.contains(index),
@@ -787,6 +814,13 @@ class _ChatState extends State<_Chat> {
     );
   }
 
+  /// A bubble grows in; a reply chosen from its card flies in from it.
+  Widget _arrival(bool chosen, Widget bubble) {
+    final from = _flyFrom;
+    if (chosen && from != null) return FlyIn(from: from, child: bubble);
+    return bubbleEntrance(bubble);
+  }
+
   Widget _bottom(BuildContext context, ConversationState state) {
     final colors = context.colors;
     final scenario = state.scenario!;
@@ -819,15 +853,17 @@ class _ChatState extends State<_Chat> {
                     distance: AppSpacing.lg,
                     child: Suggestions(
                       lines: state.suggestions,
-                      onPlay: _cubit.playSuggestion,
+                      onPlay: _cubit.playLine,
                     ),
                   ),
                 if (ended)
                   ChatEnded(
                     taskCount: scenario.tasks.length,
-                    allDone: state.allDone,
+                    done: state.tasksDone.length,
                     onSummary: _finish,
                   )
+                else if (state.written)
+                  _scripted(state, recording)
                 else if (_typing)
                   TypeBar(
                     controller: _typed,
@@ -840,11 +876,56 @@ class _ChatState extends State<_Chat> {
                     recording: recording,
                     onMic: _tapMic,
                     onKeyboard: _useKeyboard,
+                    label: 'talk_speak'.tr(),
                   ),
               ],
             );
           },
         ),
+      ),
+    );
+  }
+
+  /// A written conversation's turn: dimmed while the character speaks or
+  /// answers, and out of sight while a chosen reply flies from it.
+  Widget _scripted(ConversationState state, bool recording) {
+    final flying = state.phase == TalkPhase.sent && _flyFrom != null;
+    final dimmed =
+        state.phase == TalkPhase.speaking || state.phase == TalkPhase.sent;
+    return IgnorePointer(
+      ignoring: state.phase != TalkPhase.turn,
+      child: AnimatedOpacity(
+        opacity: flying
+            ? 0
+            : dimmed
+            ? .45
+            : 1,
+        duration: AppMotion.resolve(context, AppMotion.closeUp),
+        child: switch (state.scriptTurn) {
+          RepeatTurn(:final sentence) => Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              RepeatCard(
+                sentence: sentence,
+                heard: state.heard,
+                listening: recording,
+                onListen: () => _cubit.playLine(sentence),
+              ),
+              MicBar(
+                recording: recording,
+                onMic: _tapMic,
+                label: 'talk_say_sentence'.tr(),
+              ),
+            ],
+          ),
+          ChooseTurn(:final options) => ChooseCards(
+            options: options,
+            onChoose: _choose,
+            onListen: _cubit.playLine,
+          ),
+          null => const SizedBox.shrink(),
+        },
       ),
     );
   }
@@ -857,12 +938,12 @@ class _SpeakingAvatar extends StatelessWidget {
   final TalkCharacter character;
   final bool speaking;
 
-  static const _size = 36.0;
+  static const size = 36.0;
   static const _ringGap = 3.0;
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
-    dimension: _size,
+    dimension: size,
     child: Stack(
       alignment: Alignment.center,
       clipBehavior: Clip.none,
@@ -888,7 +969,7 @@ class _SpeakingAvatar extends StatelessWidget {
             ),
           ),
         ),
-        CharacterAvatar(character: character, size: _size, kind: TalkKind.ai),
+        CharacterAvatar(character: character, size: size, kind: TalkKind.ai),
       ],
     ),
   );

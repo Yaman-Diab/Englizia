@@ -74,6 +74,25 @@ What a conversation starts from.
 | `opening` | The character's fixed first line, with its voice, so every conversation starts the same way at once |
 | `suggestions[]` | «جرّب أن تقول» for the first turn: 1 to 3, each with its voice. Pressing one only plays it |
 | any `audioUrl` | The character's voice, in its scenario's voice. Absent or failing, the text shows alone |
+| `script[]` | A written conversation's turns, in order (absent for an AI one). It runs on the phone, with no request per turn |
+
+A written conversation's `script`:
+
+```json
+[
+  { "kind": "repeat", "sentence": { "en": "How much is this bag?", "audioUrl": "…" }, "reply": { "en": "It's ten dollars.", "ar": "ثمنها عشرة دولارات.", "audioUrl": "…" }, "taskId": "t_price" },
+  { "kind": "choose", "options": [
+    { "said": { "en": "I'll take it, please.", "audioUrl": "…" }, "reply": { "en": "Great choice! Here you are.", "ar": "…", "audioUrl": "…" }, "taskId": "t_buy" },
+    { "said": { "en": "It's too expensive.", "audioUrl": "…" }, "reply": { "en": "Sorry, that's the price. Anything else?", "ar": "…", "audioUrl": "…" } }
+  ] }
+]
+```
+
+| Field | Meaning |
+|---|---|
+| `kind: repeat` | «ردّد»: the sentence with its voice. The words heard show, with no score, and any attempt counts (§8.6) |
+| `kind: choose` | «اختر ردك»: 2 or 3 replies, each with its voice, in the order to show. The character answers each with its own `reply` |
+| `taskId` | The task a turn or a reply does. A reply that doesn't fit the scene has none |
 
 ## `POST /api/v1/app/talk/conversations`
 
@@ -85,7 +104,7 @@ What a conversation starts from.
 { "turnId": "…", "text": "Jake, this box is very fragile.", "via": "mic" }
 ```
 
-`via` is `mic` or `keyboard`. `turnId` stays the same when a failed turn is sent again («إعادة المحاولة»), so the server counts it once.
+`via` is `mic` or `keyboard` (a written conversation's `choice` never comes here). `turnId` stays the same when a failed turn is sent again («إعادة المحاولة»), so the server counts it once.
 
 ```json
 {
@@ -109,4 +128,31 @@ A failure leaves the conversation going: «تعذّر الرد» with «إعاد
 
 ## `POST /api/v1/app/talk/conversations/{conversationId}/end`
 
-The learner ended it («أنهِ الآن»), or it ended and they went on to the summary. The summary's contract comes with its design.
+The learner ended it («أنهِ الآن»), or it ended and they went on to the summary: `{ "tasksDone": ["t_price"] }`. A written conversation's tasks are known only to the phone, so this is how the server learns them and updates `bestDone`.
+
+## `GET /api/v1/app/talk/conversations/{conversationId}/notes`
+
+An AI conversation's notes for the summary, asked for once it ends. The tasks never wait for them.
+
+```json
+{
+  "status": "ready",
+  "notes": [
+    {
+      "turn": 1,
+      "said": "Can you put it in kitchen?",
+      "better": { "before": "Can you put it in ", "fix": "the", "after": " kitchen?" },
+      "audioUrl": "https://cdn.example.com/talk/better_1.mp3",
+      "concept": { "id": "c_articles", "ar": "أداة التعريف: the" }
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `status` | `ready`, `pending` (still being made: «نجهّز ملاحظاتك…», asked again every few seconds) or `failed` («سنضيف ملاحظاتك لاحقًا، ولن تُحسب أي إجابة خطأ»). The app shows the same when it can't be reached, or after a few tries |
+| `notes[]` | «لتقول أفضل», at most three, the server's choice. None while `ready` is «كلامك كان واضحًا في هذه المحادثة» |
+| `turn` | Which of the learner's lines, from 0, so the whole conversation can mark it |
+| `better` | The better form, its corrected part apart so it can be underlined |
+| `concept` | Its concept, which the server adds to the concepts to strengthen ([concepts.md](concepts.md)) |

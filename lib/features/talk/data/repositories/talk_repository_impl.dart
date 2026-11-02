@@ -85,10 +85,19 @@ final class TalkRepositoryImpl implements TalkRepository {
   }
 
   @override
-  Future<void> end(String conversationId) async {
-    final result = await guard(() => _remote.end(conversationId));
+  Future<void> end(
+    String conversationId, {
+    required Set<String> tasksDone,
+  }) async {
+    final result = await guard(
+      () => _remote.end(conversationId, talkEndToJson(tasksDone)),
+    );
     if (result case Err(:final failure)) {
       AppLogger.info('Ending a conversation failed: $failure');
     }
   }
+
+  @override
+  Future<Result<TalkNotes>> notes(String conversationId) =>
+      guard(() async => (await _remote.notes(conversationId)).toEntity());
 }

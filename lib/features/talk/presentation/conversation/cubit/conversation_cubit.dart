@@ -4,22 +4,30 @@ import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/text/plain_words.dart';
 import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/domain/repositories/talk_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-enum TalkStage { loading, failed, intro, chat }
+enum TalkStage { loading, failed, intro, chat, summary }
 
 enum TalkPhase {
   /// The character's voice plays.
   speaking,
 
-  /// The learner's turn: speak, type or try a suggestion.
+  /// The learner's turn: speak, type, try a suggestion, or in a written
+  /// conversation repeat the sentence or choose a reply.
   turn,
 
   /// What the learner said, to send or say again.
   draft,
+
+  /// «ردّد»: the words heard show for a moment, then the sentence goes.
+  heard,
+
+  /// A written conversation's line is sent, and the character answers next.
+  sent,
 
   /// The character thinks.
   thinking,
@@ -62,6 +70,9 @@ final class ConversationState extends Equatable {
     this.suggestions = const [],
     this.translated = const {},
     this.speaking = false,
+    this.turn = 0,
+    this.heard,
+    this.notes,
   });
 
   final TalkStage stage;
@@ -86,8 +97,27 @@ final class ConversationState extends Equatable {
   /// The character's voice plays, so its ring pulses.
   final bool speaking;
 
+  /// The learner's lines answered so far, which is also a written
+  /// conversation's turn.
+  final int turn;
+
+  /// «ردّد»: which of the sentence's words were heard.
+  final List<bool>? heard;
+
+  /// An AI conversation's notes for the summary; null when there are none to
+  /// wait for.
+  final TalkNotes? notes;
+
+  bool get written => scenario?.kind == TalkKind.written;
+
   bool get allDone =>
       scenario != null && tasksDone.length >= scenario!.tasks.length;
+
+  /// A written conversation's turn now, while there is one.
+  ScriptTurn? get scriptTurn {
+    final script = scenario?.script ?? const [];
+    return written && turn < script.length ? script[turn] : null;
+  }
 
   ConversationState copyWith({
     TalkStage? stage,
@@ -103,6 +133,9 @@ final class ConversationState extends Equatable {
     List<TalkLine>? suggestions,
     Set<int>? translated,
     bool? speaking,
+    int? turn,
+    List<bool>? Function()? heard,
+    TalkNotes? Function()? notes,
   }) => ConversationState(
     stage: stage ?? this.stage,
     failure: failure != null ? failure() : this.failure,
@@ -117,6 +150,9 @@ final class ConversationState extends Equatable {
     suggestions: suggestions ?? this.suggestions,
     translated: translated ?? this.translated,
     speaking: speaking ?? this.speaking,
+    turn: turn ?? this.turn,
+    heard: heard != null ? heard() : this.heard,
+    notes: notes != null ? notes() : this.notes,
   );
 
   @override
@@ -134,19 +170,27 @@ final class ConversationState extends Equatable {
     suggestions,
     translated,
     speaking,
+    turn,
+    heard,
+    notes,
   ];
 }
 
-/// A conversation with a character (requirements v3.0 §8.6, design "Talk"): its
-/// intro, then turns until the tasks are done, the turns run out or the
-/// learner ends it. Nothing is corrected on the way: the server keeps the notes
-/// for the summary.
+/// A conversation with a character (requirements v3.0 §8.6, designs "Talk" and
+/// "Talk Summary"): its intro, then turns until the tasks are done, the turns
+/// run out or the learner ends it, then its summary. An AI conversation asks
+/// the server for each answer; a written one follows its script on the phone.
+/// Nothing is corrected on the way: the server keeps the notes for the summary.
 class ConversationCubit extends Cubit<ConversationState> {
   ConversationCubit(
     this._talk,
     ClipPlayer player, {
     required this.scenarioId,
     this.introDelay = const Duration(milliseconds: 400),
+    this.heardHold = const Duration(milliseconds: 1600),
+    this.replyDelay = const Duration(milliseconds: 700),
+    this.notesRetry = const Duration(seconds: 3),
+    this.notesTries = 5,
   }) : _playback = ClipPlayback(player),
        super(const ConversationState());
 
@@ -157,11 +201,20 @@ class ConversationCubit extends Cubit<ConversationState> {
   /// The intro plays by itself once the screen is up.
   final Duration introDelay;
 
-  String? _conversationId;
+  /// ASSUMPTION(design): how long «ردّد»'s words heard stay before the
+  /// sentence goes, and the wait before a written conversation's answer.
+  final Duration heardHold;
+  final Duration replyDelay;
 
-  /// Lines the server has answered, which numbers the next turn.
-  var _turn = 0;
+  /// While the notes are being made, they are asked for again this often, up
+  /// to [notesTries] times; then they come «later».
+  final Duration notesRetry;
+  final int notesTries;
+
+  String? _conversationId;
   Timer? _introTimer;
+  Timer? _scriptTimer;
+  Timer? _notesTimer;
 
   /// What happens when the line playing ends, or is cut short.
   void Function()? _afterLine;
@@ -172,14 +225,7 @@ class ConversationCubit extends Cubit<ConversationState> {
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
-        emit(
-          state.copyWith(
-            stage: TalkStage.intro,
-            scenario: value,
-            turnsLeft: value.maxTurns,
-            suggestions: value.suggestions,
-          ),
-        );
+        emit(state.copyWith(stage: TalkStage.intro, scenario: value));
         _introTimer = Timer(introDelay, playIntro);
       case Err(:final failure):
         emit(state.copyWith(stage: TalkStage.failed, failure: () => failure));
@@ -191,10 +237,10 @@ class ConversationCubit extends Cubit<ConversationState> {
     unawaited(_play(state.scenario!.intro.audioUrl));
   }
 
-  /// «ابدأ المحادثة»: counts against today's AI conversations, then the
+  /// «ابدأ المحادثة»: an AI conversation counts against today's, then the
   /// character opens with its fixed line.
   Future<void> begin() async {
-    if (state.starting || state.stage != TalkStage.intro) return;
+    if (state.starting) return;
     _introTimer?.cancel();
     _stopLine();
     emit(state.copyWith(starting: true, startFailure: () => null));
@@ -203,24 +249,45 @@ class ConversationCubit extends Cubit<ConversationState> {
     switch (result) {
       case Ok(:final value):
         _conversationId = value;
-        final opening = state.scenario!.opening;
+        final scenario = state.scenario!;
         emit(
-          state.copyWith(
+          ConversationState(
             stage: TalkStage.chat,
-            starting: false,
-            messages: [TalkMessage.character(opening)],
-            phase: TalkPhase.speaking,
+            scenario: scenario,
+            messages: [TalkMessage.character(scenario.opening)],
+            turnsLeft: scenario.kind == TalkKind.written
+                ? scenario.script.length
+                : scenario.maxTurns,
+            suggestions: scenario.suggestions,
           ),
         );
-        await _speak(opening);
+        await _speak(scenario.opening);
       case Err(:final failure):
         emit(state.copyWith(starting: false, startFailure: () => failure));
     }
   }
 
-  /// What the microphone understood, to read before sending.
+  /// What the microphone understood: a draft to read before sending, or in a
+  /// written conversation the sentence's words heard.
   void heard(String text) {
     if (state.phase != TalkPhase.turn || text.trim().isEmpty) return;
+    if (state.scriptTurn case RepeatTurn(
+      :final sentence,
+      :final reply,
+      :final taskId,
+    )) {
+      emit(
+        state.copyWith(
+          phase: TalkPhase.heard,
+          heard: () => heardWords(sentence.english.split(' '), text),
+        ),
+      );
+      _scriptTimer = Timer(
+        heardHold,
+        () => _sendScripted(sentence.english, SaidVia.mic, reply, taskId),
+      );
+      return;
+    }
     emit(state.copyWith(phase: TalkPhase.draft, draft: text.trim()));
   }
 
@@ -237,9 +304,50 @@ class ConversationCubit extends Cubit<ConversationState> {
 
   /// Sends what the learner typed; false when it isn't their turn.
   bool sendTyped(String text) {
-    if (state.phase != TalkPhase.turn || text.trim().isEmpty) return false;
+    if (state.phase != TalkPhase.turn || text.trim().isEmpty || state.written) {
+      return false;
+    }
     unawaited(_send(text.trim(), SaidVia.keyboard));
     return true;
+  }
+
+  /// «اختر ردك»: the reply goes, and the character answers it its way.
+  void choose(int index) {
+    if (state.phase != TalkPhase.turn) return;
+    if (state.scriptTurn case ChooseTurn(:final options)) {
+      final option = options[index];
+      _sendScripted(
+        option.said.english,
+        SaidVia.choice,
+        option.reply,
+        option.taskId,
+      );
+    }
+  }
+
+  void _sendScripted(String text, SaidVia via, TalkLine reply, String? taskId) {
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        messages: [...state.messages, TalkMessage.mine(text, via)],
+        phase: TalkPhase.sent,
+        heard: () => null,
+      ),
+    );
+    _scriptTimer = Timer(replyDelay, () {
+      if (isClosed) return;
+      final turn = state.turn + 1;
+      emit(
+        state.copyWith(
+          messages: [...state.messages, TalkMessage.character(reply)],
+          tasksDone: {...state.tasksDone, ?taskId},
+          turn: turn,
+          turnsLeft: state.scenario!.script.length - turn,
+          phase: TalkPhase.speaking,
+        ),
+      );
+      unawaited(_speak(reply));
+    });
   }
 
   Future<void> _send(String text, SaidVia via) async {
@@ -264,20 +372,20 @@ class ConversationCubit extends Cubit<ConversationState> {
     final mine = state.messages.lastWhere((message) => message.mine);
     final result = await _talk.say(
       _conversationId!,
-      turn: _turn,
+      turn: state.turn,
       text: mine.line.english,
       via: mine.via!,
     );
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
-        _turn++;
         emit(
           state.copyWith(
             messages: [...state.messages, TalkMessage.character(value.line)],
             tasksDone: value.tasksDone,
             turnsLeft: value.turnsLeft,
             suggestions: value.suggestions,
+            turn: state.turn + 1,
             phase: TalkPhase.speaking,
           ),
         );
@@ -297,14 +405,67 @@ class ConversationCubit extends Cubit<ConversationState> {
   Future<void> replay(int index) =>
       _play(state.messages[index].line.audioUrl, character: true);
 
-  /// «جرّب أن تقول»: only heard; the learner says it themselves.
-  Future<void> playSuggestion(TalkLine line) => _play(line.audioUrl);
+  /// A suggestion, a written reply or a sentence to repeat: only heard.
+  Future<void> playLine(TalkLine line) => _play(line.audioUrl);
 
-  /// «أنهِ الآن», or on to the summary once it has ended.
-  void end() {
+  /// The better way to say a line.
+  Future<void> playBetter(BetterSaying better) => _play(better.audioUrl);
+
+  /// «أنهِ الآن», or «الملخص» once it has ended: the tasks done go to the
+  /// server, and an AI conversation's notes are asked for.
+  void finish() {
     _introTimer?.cancel();
+    _scriptTimer?.cancel();
     _stopLine();
-    if (_conversationId case final id?) unawaited(_talk.end(id));
+    if (_conversationId case final id?) {
+      unawaited(_talk.end(id, tasksDone: state.tasksDone));
+    }
+    final waitForNotes =
+        !state.written && state.messages.any((message) => message.mine);
+    emit(
+      state.copyWith(
+        stage: TalkStage.summary,
+        notes: () =>
+            waitForNotes ? const TalkNotes(status: NotesStatus.pending) : null,
+      ),
+    );
+    if (waitForNotes) unawaited(_loadNotes(1));
+  }
+
+  Future<void> _loadNotes(int attempt) async {
+    final result = await _talk.notes(_conversationId!);
+    if (isClosed || state.stage != TalkStage.summary) return;
+    switch (result) {
+      case Ok(value: TalkNotes(status: NotesStatus.pending)):
+        if (attempt < notesTries) {
+          _notesTimer = Timer(notesRetry, () => _loadNotes(attempt + 1));
+        } else {
+          emit(
+            state.copyWith(
+              notes: () => const TalkNotes(status: NotesStatus.failed),
+            ),
+          );
+        }
+      case Ok(:final value):
+        emit(state.copyWith(notes: () => value));
+      case Err():
+        emit(
+          state.copyWith(
+            notes: () => const TalkNotes(status: NotesStatus.failed),
+          ),
+        );
+    }
+  }
+
+  /// «أعد المحاولة»: an AI conversation goes back to its intro, as it counts
+  /// against the day's; a written one starts again at once.
+  Future<void> restart() async {
+    _notesTimer?.cancel();
+    _stopLine();
+    _conversationId = null;
+    final scenario = state.scenario!;
+    emit(ConversationState(stage: TalkStage.intro, scenario: scenario));
+    if (scenario.kind == TalkKind.written) await begin();
   }
 
   Future<void> _speak(TalkLine line) =>
@@ -342,6 +503,8 @@ class ConversationCubit extends Cubit<ConversationState> {
   @override
   Future<void> close() {
     _introTimer?.cancel();
+    _scriptTimer?.cancel();
+    _notesTimer?.cancel();
     _afterLine = null;
     _playback.stop();
     return super.close();

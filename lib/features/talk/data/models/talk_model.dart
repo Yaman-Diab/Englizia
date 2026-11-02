@@ -98,7 +98,69 @@ final class ScenarioModel {
     maxTurns: json.readInt('maxTurns') ?? _defaultTurns,
     opening: _line(json.readMap('opening') ?? const {}),
     suggestions: _suggestions(json.readList('suggestions')),
+    script: [
+      for (final turn in json.readList('script') ?? const <Object?>[])
+        _turn(asJsonMap(turn)),
+    ],
   );
+
+  static ScriptTurn _turn(Map<String, Object?> json) =>
+      switch (json.readString('kind')) {
+        'choose' => ChooseTurn([
+          for (final option in json.readList('options') ?? const <Object?>[])
+            ScriptOption(
+              said: _line(asJsonMap(option).readMap('said') ?? const {}),
+              reply: _line(asJsonMap(option).readMap('reply') ?? const {}),
+              taskId: asJsonMap(option).readString('taskId'),
+            ),
+        ]),
+        _ => RepeatTurn(
+          sentence: _line(json.readMap('sentence') ?? const {}),
+          reply: _line(json.readMap('reply') ?? const {}),
+          taskId: json.readString('taskId'),
+        ),
+      };
+}
+
+/// `GET /api/v1/app/talk/conversations/{id}/notes`.
+final class TalkNotesModel {
+  const TalkNotesModel(this.json);
+
+  final Map<String, Object?> json;
+
+  /// The panel's limit for «لتقول أفضل» (S §8.6).
+  static const _most = 3;
+
+  /// A note that can't be read is left out.
+  TalkNotes toEntity() => TalkNotes(
+    status: switch (json.readString('status')) {
+      'ready' => NotesStatus.ready,
+      'failed' => NotesStatus.failed,
+      _ => NotesStatus.pending,
+    },
+    notes: [
+      for (final note in json.readList('notes') ?? const <Object?>[])
+        ?_note(asJsonMap(note)),
+    ].take(_most).toList(),
+  );
+
+  static BetterSaying? _note(Map<String, Object?> json) {
+    try {
+      final better = json.readMap('better') ?? const {};
+      return BetterSaying(
+        turn: json.readInt('turn') ?? 0,
+        said: _required(json.readString('said')),
+        before: better.readString('before') ?? '',
+        fix: _required(better.readString('fix')),
+        after: better.readString('after') ?? '',
+        concept: _required(json.readMap('concept')?.readString('ar')),
+        audioUrl: json.readString('audioUrl'),
+      );
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'A note is unreadable');
+      return null;
+    }
+  }
 }
 
 /// The answer to `POST /api/v1/app/talk/conversations/{id}/turns`.
@@ -133,5 +195,10 @@ Map<String, Object?> talkTurnToJson({
   'via': switch (via) {
     SaidVia.mic => 'mic',
     SaidVia.keyboard => 'keyboard',
+    SaidVia.choice => 'choice',
   },
+};
+
+Map<String, Object?> talkEndToJson(Set<String> tasksDone) => {
+  'tasksDone': [...tasksDone],
 };

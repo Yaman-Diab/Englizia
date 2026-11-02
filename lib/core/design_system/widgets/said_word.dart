@@ -1,7 +1,7 @@
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
-import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_line.dart';
+import 'package:englizia/core/design_system/widgets/word_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 

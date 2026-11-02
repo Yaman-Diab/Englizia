@@ -22,6 +22,10 @@ abstract interface class TalkRepository {
     required SaidVia via,
   });
 
-  /// The learner ended it, or it ended by itself.
-  Future<void> end(String conversationId);
+  /// The learner ended it, or it ended by itself, with the tasks done: a
+  /// written conversation's are known only to the phone.
+  Future<void> end(String conversationId, {required Set<String> tasksDone});
+
+  /// An AI conversation's notes for the summary, which may still be coming.
+  Future<Result<TalkNotes>> notes(String conversationId);
 }

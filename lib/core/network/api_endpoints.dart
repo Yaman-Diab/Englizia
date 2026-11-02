@@ -108,6 +108,9 @@ abstract final class ApiEndpoints {
   static String talkEnd(String conversationId) =>
       '/api/v1/app/talk/conversations/$conversationId/end';
 
+  static String talkNotes(String conversationId) =>
+      '/api/v1/app/talk/conversations/$conversationId/notes';
+
   static String lessonWatch(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/watch';
 

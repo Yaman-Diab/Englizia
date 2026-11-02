@@ -86,7 +86,6 @@ import 'package:englizia/features/practice/presentation/review/cubit/review_cubi
 import 'package:englizia/features/practice/presentation/review/pages/review_page.dart';
 import 'package:englizia/features/practice/presentation/words/cubit/my_words_cubit.dart';
 import 'package:englizia/features/practice/presentation/words/pages/my_words_page.dart';
-import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';
 import 'package:englizia/features/talk/presentation/conversation/pages/conversation_page.dart';
 import 'package:englizia/features/talk/presentation/talk/cubit/talk_cubit.dart';
@@ -794,13 +793,8 @@ GoRouter createAppRouter(AppSessionController session) {
             current: AppTab.talk,
             onSelect: (tab) => _openTab(context, tab),
             child: TalkPage(
-              onOpen: (scenario) => switch (scenario.kind) {
-                TalkKind.ai => context.push<void>(
-                  AppRoutes.talkScenarioOf(scenario.id),
-                ),
-                // A written conversation's screens have no design yet.
-                TalkKind.written => context.push<void>(AppRoutes.talkWritten),
-              },
+              onOpen: (scenario) =>
+                  context.push<void>(AppRoutes.talkScenarioOf(scenario.id)),
             ),
           ),
         ),
@@ -816,20 +810,8 @@ GoRouter createAppRouter(AppSessionController session) {
             ),
             BlocProvider(create: (_) => sl<MicCubit>()),
           ],
-          child: ConversationPage(
-            onClose: () => _back(context),
-            // The summary has its own design, not sent yet.
-            onSummary: () => context.pushReplacement(AppRoutes.talkSummary),
-          ),
+          child: ConversationPage(onClose: () => _back(context)),
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.talkWritten,
-        builder: (_, _) => PendingPage(title: 'talk_kind_written'.tr()),
-      ),
-      GoRoute(
-        path: AppRoutes.talkSummary,
-        builder: (_, _) => PendingPage(title: 'talk_summary'.tr()),
       ),
       // «أنا» has no design yet.
       GoRoute(

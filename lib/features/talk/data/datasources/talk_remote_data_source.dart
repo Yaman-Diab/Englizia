@@ -19,7 +19,9 @@ abstract interface class TalkRemoteDataSource {
     Map<String, Object?> request,
   );
 
-  Future<void> end(String conversationId);
+  Future<void> end(String conversationId, Map<String, Object?> request);
+
+  Future<TalkNotesModel> notes(String conversationId);
 }
 
 final class TalkRemoteDataSourceImpl implements TalkRemoteDataSource {
@@ -51,13 +53,19 @@ final class TalkRemoteDataSourceImpl implements TalkRemoteDataSource {
   );
 
   @override
-  Future<void> end(String conversationId) =>
-      _client.post(ApiEndpoints.talkEnd(conversationId));
+  Future<void> end(String conversationId, Map<String, Object?> request) =>
+      _client.post(ApiEndpoints.talkEnd(conversationId), data: request);
+
+  @override
+  Future<TalkNotesModel> notes(String conversationId) async => TalkNotesModel(
+    asJsonMap(await _client.get(ApiEndpoints.talkNotes(conversationId))),
+  );
 }
 
 /// Mock mode (`env/mock.json`): the contract's example from the bundled assets
 /// the tests also use, with each scenario's replies in order. The second turn
-/// fails once, so «تعذّر الرد» can be seen. Deleted once the endpoints are
+/// fails once, so «تعذّر الرد» can be seen, and the notes are still being made
+/// the first time they are asked for. Deleted once the endpoints are
 /// confirmed.
 final class TalkFakeDataSource implements TalkRemoteDataSource {
   TalkFakeDataSource(
@@ -77,6 +85,8 @@ final class TalkFakeDataSource implements TalkRemoteDataSource {
   final Duration replyLatency;
 
   final _turns = <String, int>{};
+  final _said = <String, List<String>>{};
+  final _notesAsked = <String>{};
   final _scenarioOf = <String, String>{};
   var _failed = false;
 
@@ -110,6 +120,7 @@ final class TalkFakeDataSource implements TalkRemoteDataSource {
     final id = request.readString('conversationId')!;
     _scenarioOf[id] = request.readString('scenarioId')!;
     _turns[id] = 0;
+    _said[id] = [];
   }
 
   @override
@@ -127,11 +138,37 @@ final class TalkFakeDataSource implements TalkRemoteDataSource {
       _scenarioOf[conversationId] ?? '',
     )).readList('replies')!;
     _turns[conversationId] = turn + 1;
+    _said[conversationId]?.add(request.readString('text') ?? '');
     return TalkReplyModel(
       asJsonMap(replies[turn.clamp(0, replies.length - 1)]),
     );
   }
 
   @override
-  Future<void> end(String conversationId) => Future<void>.delayed(latency);
+  Future<void> end(String conversationId, Map<String, Object?> request) =>
+      Future<void>.delayed(latency);
+
+  /// The scenario's sample notes, on the lines the learner said.
+  @override
+  Future<TalkNotesModel> notes(String conversationId) async {
+    await Future<void>.delayed(latency);
+    if (_notesAsked.add(conversationId)) {
+      return const TalkNotesModel({'status': 'pending'});
+    }
+    final said = _said[conversationId] ?? const [];
+    final samples = (await _scenario(
+      _scenarioOf[conversationId] ?? '',
+    )).readList('notes');
+    return TalkNotesModel({
+      'status': 'ready',
+      'notes': [
+        for (final sample in samples ?? const <Object?>[])
+          if (asJsonMap(sample).readInt('turn')! < said.length)
+            {
+              ...asJsonMap(sample),
+              'said': said[asJsonMap(sample).readInt('turn')!],
+            },
+      ],
+    });
+  }
 }

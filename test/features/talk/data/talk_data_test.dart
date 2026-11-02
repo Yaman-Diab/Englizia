@@ -29,6 +29,7 @@ class _Remote implements TalkRemoteDataSource {
   bool offline = false;
   final started = <Map<String, Object?>>[];
   final turns = <Map<String, Object?>>[];
+  final ended = <Map<String, Object?>>[];
 
   void _reach() {
     if (offline) throw const NetworkException('connectionError');
@@ -63,7 +64,16 @@ class _Remote implements TalkRemoteDataSource {
   }
 
   @override
-  Future<void> end(String conversationId) async => _reach();
+  Future<void> end(String conversationId, Map<String, Object?> request) async {
+    _reach();
+    ended.add(request);
+  }
+
+  @override
+  Future<TalkNotesModel> notes(String conversationId) async {
+    _reach();
+    return TalkNotesModel(_data('talk_notes_ok'));
+  }
 }
 
 void main() {
@@ -121,6 +131,59 @@ void main() {
       expect(reply.turnsLeft, 6);
     });
 
+    test(
+      'a written scenario\'s script: a sentence, then replies to choose',
+      () {
+        final json = asJsonMap(
+          asJsonMap(
+            jsonDecode(
+              File(TalkFakeDataSource.scenariosAsset).readAsStringSync(),
+            ),
+          )['sc_how_much'],
+        );
+
+        final scenario = ScenarioModel(json).toEntity();
+
+        expect(scenario.kind, TalkKind.written);
+        final repeat = scenario.script.first as RepeatTurn;
+        expect(repeat.sentence.english, 'How much is this bag?');
+        expect(repeat.taskId, 't_price');
+        final choose = scenario.script[1] as ChooseTurn;
+        expect(choose.options, hasLength(3));
+        expect(choose.options.first.taskId, 't_buy');
+        expect(choose.options[1].taskId, isNull);
+      },
+    );
+
+    test('the notes: what was said, the better form and its concept', () {
+      final notes = TalkNotesModel(_data('talk_notes_ok')).toEntity();
+
+      expect(notes.status, NotesStatus.ready);
+      expect(notes.notes, hasLength(2));
+      final first = notes.notes.first;
+      expect(first.turn, 0);
+      expect(first.fix, 'Please put it down slowly.');
+      expect(
+        first.sentence,
+        'Jake, this box is very fragile. Please put it down slowly.',
+      );
+      expect(first.concept, isNotEmpty);
+    });
+
+    test('no more than three notes, and still coming when unknown', () {
+      final json = _data('talk_notes_ok');
+      final note = asJsonMap(json.readList('notes')!.first);
+
+      final many = TalkNotesModel({
+        'status': 'ready',
+        'notes': [note, note, note, note],
+      }).toEntity();
+      final waiting = const TalkNotesModel({'status': 'making'}).toEntity();
+
+      expect(many.notes, hasLength(3));
+      expect(waiting.status, NotesStatus.pending);
+    });
+
     test('a turn goes with its id and how it was said', () {
       expect(talkTurnToJson(turnId: 't1', text: 'Hi', via: SaidVia.keyboard), {
         'turnId': 't1',
@@ -141,6 +204,7 @@ void main() {
               'talk_scenario_ok',
             ),
             '/api/v1/app/talk/conversations/c1/turns' => _body('talk_turn_ok'),
+            '/api/v1/app/talk/conversations/c1/notes' => _body('talk_notes_ok'),
             _ => {'statusCode': 200},
           },
         ),
@@ -156,15 +220,18 @@ void main() {
       await remote.getScenario('sc_fragile_box');
       await remote.start({'conversationId': 'c1'});
       final reply = await remote.say('c1', {'turnId': 't1'});
-      await remote.end('c1');
+      await remote.end('c1', {'tasksDone': <String>[]});
+      final notes = await remote.notes('c1');
 
       expect(reply.toEntity().tasksDone, isNotEmpty);
+      expect(notes.toEntity().notes, hasLength(2));
       expect(adapter.requests.map((r) => '${r.method} ${r.path}'), [
         'GET /api/v1/app/talk',
         'GET /api/v1/app/talk/scenarios/sc_fragile_box',
         'POST /api/v1/app/talk/conversations',
         'POST /api/v1/app/talk/conversations/c1/turns',
         'POST /api/v1/app/talk/conversations/c1/end',
+        'GET /api/v1/app/talk/conversations/c1/notes',
       ]);
     });
   });
@@ -219,6 +286,22 @@ void main() {
       final ids = remote.turns.map((t) => t['turnId']).toList();
       expect(ids[0], ids[1]);
       expect(ids[2], isNot(ids[0]));
+    });
+
+    test('ending sends the tasks done', () async {
+      await repository().end('c1', tasksDone: {'t_price'});
+
+      expect(remote.ended.single, {
+        'tasksDone': ['t_price'],
+      });
+    });
+
+    test('the notes can\'t be reached: it says so', () async {
+      remote.offline = true;
+
+      final result = await repository().notes('c1');
+
+      expect((result as Err<TalkNotes>).failure, isA<NetworkFailure>());
     });
 
     test('signing out forgets them', () async {

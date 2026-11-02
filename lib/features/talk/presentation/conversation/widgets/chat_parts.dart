@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/listening_motion.dart';
 import 'package:englizia/core/design_system/widgets/ai_dots.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
+import 'package:englizia/core/design_system/widgets/said_word.dart';
 import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/presentation/widgets/talk_parts.dart';
 import 'package:flutter/material.dart';
@@ -15,17 +16,17 @@ import 'package:flutter_animate/flutter_animate.dart';
 /// A bubble's corners: round, but for the one on its speaker's side.
 const _bubbleRadius = 20.0;
 const _bubbleCorner = 6.0;
-const _bubblePadding = EdgeInsetsDirectional.symmetric(
+const bubblePadding = EdgeInsetsDirectional.symmetric(
   horizontal: AppSpacing.md + AppSpacing.xxs,
   vertical: AppSpacing.sm + AppSpacing.xxs,
 );
-const _characterCorners = BorderRadiusDirectional.only(
+const characterCorners = BorderRadiusDirectional.only(
   topStart: Radius.circular(_bubbleCorner),
   topEnd: Radius.circular(_bubbleRadius),
   bottomStart: Radius.circular(_bubbleRadius),
   bottomEnd: Radius.circular(_bubbleRadius),
 );
-const _mineCorners = BorderRadiusDirectional.only(
+const mineCorners = BorderRadiusDirectional.only(
   topStart: Radius.circular(_bubbleRadius),
   topEnd: Radius.circular(_bubbleCorner),
   bottomStart: Radius.circular(_bubbleRadius),
@@ -100,11 +101,15 @@ class CharacterBubble extends StatelessWidget {
     required this.maxWidth,
     required this.onReplay,
     required this.onTranslate,
+    this.kind = TalkKind.ai,
     super.key,
   });
 
   final TalkLine line;
   final TalkCharacter character;
+
+  /// A written conversation's bubbles have no violet: no AI is in it.
+  final TalkKind kind;
 
   /// Only the first bubble of the character's turn has its picture.
   final bool showAvatar;
@@ -130,7 +135,7 @@ class CharacterBubble extends StatelessWidget {
               child: CharacterAvatar(
                 character: character,
                 size: chatAvatar,
-                kind: TalkKind.ai,
+                kind: kind,
               ),
             ),
             const SizedBox(width: AppSpacing.sm),
@@ -139,10 +144,15 @@ class CharacterBubble extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Container(
-                    padding: _bubblePadding,
+                    padding: bubblePadding,
                     decoration: BoxDecoration(
-                      color: colors.ai.surface,
-                      borderRadius: _characterCorners,
+                      color: kind == TalkKind.ai
+                          ? colors.ai.surface
+                          : colors.surface,
+                      border: kind == TalkKind.ai
+                          ? null
+                          : Border.all(color: colors.border),
+                      borderRadius: characterCorners,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -235,26 +245,30 @@ class MineBubble extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
             Container(
-              padding: _bubblePadding,
+              padding: bubblePadding,
               decoration: BoxDecoration(
                 color: colors.primary.surface,
-                borderRadius: _mineCorners,
+                borderRadius: mineCorners,
               ),
               child: _english(context, text),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            Semantics(
-              container: true,
-              label: via == SaidVia.mic ? 'talk_said'.tr() : 'talk_typed'.tr(),
-              excludeSemantics: true,
-              child: Icon(
-                via == SaidVia.mic
-                    ? Icons.mic_none_rounded
-                    : Icons.keyboard_alt_outlined,
-                size: AppSizes.iconSm * .875,
-                color: colors.textSecondary,
+            if (via != SaidVia.choice) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Semantics(
+                container: true,
+                label: via == SaidVia.mic
+                    ? 'talk_said'.tr()
+                    : 'talk_typed'.tr(),
+                excludeSemantics: true,
+                child: Icon(
+                  via == SaidVia.mic
+                      ? Icons.mic_none_rounded
+                      : Icons.keyboard_alt_outlined,
+                  size: AppSizes.iconSm * .875,
+                  color: colors.textSecondary,
+                ),
               ),
-            ),
+            ],
           ],
         ),
       ),
@@ -294,7 +308,7 @@ class ThinkingBubble extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: context.colors.ai.surface,
-              borderRadius: _characterCorners,
+              borderRadius: characterCorners,
             ),
             child: const AiDots(dot: _dot),
           ),
@@ -390,10 +404,10 @@ class DraftBubble extends StatelessWidget {
               radius: _bubbleRadius,
               width: 1.5,
               child: Container(
-                padding: _bubblePadding,
+                padding: bubblePadding,
                 decoration: BoxDecoration(
                   color: colors.surface,
-                  borderRadius: _mineCorners,
+                  borderRadius: mineCorners,
                 ),
                 child: _english(context, text),
               ),
@@ -626,24 +640,32 @@ class Suggestions extends StatelessWidget {
   }
 }
 
-/// The conversation is over: every task done, or the turns used up.
+/// The conversation is over: every task done, in green, or the turns used
+/// up, with what was done.
 class ChatEnded extends StatelessWidget {
   const ChatEnded({
     required this.taskCount,
-    required this.allDone,
+    required this.done,
     required this.onSummary,
     super.key,
   });
 
   final int taskCount;
-  final bool allDone;
+  final int done;
   final VoidCallback onSummary;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final allDone = done >= taskCount;
     final title = !allDone
-        ? 'talk_turns_over'.tr()
+        ? 'talk_ended_some'.tr(
+            namedArgs: {
+              'done': 'talk_done_of'.tr(
+                namedArgs: {'done': '$done', 'total': '$taskCount'},
+              ),
+            },
+          )
         : switch (taskCount) {
             2 => 'talk_all_done_2'.tr(),
             4 => 'talk_all_done_4'.tr(),
@@ -663,22 +685,25 @@ class ChatEnded extends StatelessWidget {
           vertical: AppSpacing.md,
         ),
         decoration: BoxDecoration(
-          color: colors.success.surface,
+          color: allDone ? colors.success.surface : colors.surface,
+          border: allDone ? null : Border.all(color: colors.border),
           borderRadius: BorderRadius.circular(AppRadius.lg),
         ),
         child: Row(
           children: [
-            Icon(
-              Icons.check_circle_rounded,
-              size: AppSizes.iconMd - AppSpacing.xxs,
-              color: colors.success.fill,
-            ),
-            const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
+            if (allDone) ...[
+              Icon(
+                Icons.check_circle_rounded,
+                size: AppSizes.iconMd - AppSpacing.xxs,
+                color: colors.success.fill,
+              ),
+              const SizedBox(width: AppSpacing.sm + AppSpacing.xxs),
+            ],
             Expanded(
               child: Text(
                 title,
                 style: context.texts.captionStrong.copyWith(
-                  color: colors.success.text,
+                  color: allDone ? colors.success.text : colors.textPrimary,
                   fontSize: context.texts.body.fontSize! * .875,
                 ),
               ),
@@ -695,18 +720,21 @@ class ChatEnded extends StatelessWidget {
   }
 }
 
-/// The big microphone, its ring while it records, and the keyboard instead.
+/// The big microphone, its ring while it records, and the keyboard instead
+/// where typing is allowed.
 class MicBar extends StatelessWidget {
   const MicBar({
     required this.recording,
     required this.onMic,
-    required this.onKeyboard,
+    required this.label,
+    this.onKeyboard,
     super.key,
   });
 
   final bool recording;
   final VoidCallback onMic;
-  final VoidCallback onKeyboard;
+  final String label;
+  final VoidCallback? onKeyboard;
 
   static const _height = 96.0;
   static const _mic = 72.0;
@@ -740,7 +768,7 @@ class MicBar extends StatelessWidget {
                 Semantics(
                   button: true,
                   toggled: recording,
-                  label: 'talk_speak'.tr(),
+                  label: label,
                   excludeSemantics: true,
                   child: GestureDetector(
                     onTap: onMic,
@@ -768,26 +796,27 @@ class MicBar extends StatelessWidget {
               ],
             ),
           ),
-          Align(
-            alignment: AlignmentDirectional.centerEnd,
-            child: Padding(
-              padding: const EdgeInsetsDirectional.only(
-                end: AppSpacing.xl - AppSpacing.xs,
-              ),
-              child: IconButton(
-                onPressed: onKeyboard,
-                tooltip: 'talk_type_instead'.tr(),
-                style: IconButton.styleFrom(
-                  fixedSize: const Size.square(_keyboard),
-                  backgroundColor: colors.surface,
-                  foregroundColor: colors.textSecondary,
-                  side: BorderSide(color: colors.border),
+          if (onKeyboard != null)
+            Align(
+              alignment: AlignmentDirectional.centerEnd,
+              child: Padding(
+                padding: const EdgeInsetsDirectional.only(
+                  end: AppSpacing.xl - AppSpacing.xs,
                 ),
-                iconSize: AppSizes.iconMd - AppSpacing.xxs,
-                icon: const Icon(Icons.keyboard_alt_outlined),
+                child: IconButton(
+                  onPressed: onKeyboard,
+                  tooltip: 'talk_type_instead'.tr(),
+                  style: IconButton.styleFrom(
+                    fixedSize: const Size.square(_keyboard),
+                    backgroundColor: colors.surface,
+                    foregroundColor: colors.textSecondary,
+                    side: BorderSide(color: colors.border),
+                  ),
+                  iconSize: AppSizes.iconMd - AppSpacing.xxs,
+                  icon: const Icon(Icons.keyboard_alt_outlined),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -919,3 +948,342 @@ Widget bubbleEntrance(Widget child) => Entrance(
   duration: AppMotion.bubbleIn,
   child: child,
 );
+
+/// «ردّد»: the sentence with its voice, and once said, the words heard as in
+/// shadowing. There is no score: any attempt counts (S §8.6).
+class RepeatCard extends StatelessWidget {
+  const RepeatCard({
+    required this.sentence,
+    required this.heard,
+    required this.listening,
+    required this.onListen,
+    super.key,
+  });
+
+  final TalkLine sentence;
+
+  /// Which words were heard, once said.
+  final List<bool>? heard;
+  final bool listening;
+  final VoidCallback onListen;
+
+  static const _speaker = 40.0;
+  static const _statusHeight = 22.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final texts = context.texts;
+    final words = sentence.english.split(' ');
+    final heard = this.heard;
+    final status = texts.caption.copyWith(color: colors.textSecondary);
+    final strong = texts.captionStrong.copyWith(color: colors.textPrimary);
+    return Container(
+      margin: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.xs,
+        AppSpacing.lg,
+        0,
+      ),
+      padding: const EdgeInsetsDirectional.fromSTEB(
+        AppSpacing.lg,
+        AppSpacing.md,
+        AppSpacing.md,
+        AppSpacing.md,
+      ),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border.all(color: colors.border),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            'talk_repeat'.tr(),
+            style: texts.captionStrong.copyWith(
+              color: colors.textSecondary,
+              fontSize: texts.caption.fontSize! * .92,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs + AppSpacing.xxs),
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Semantics(
+                    label: sentence.english,
+                    excludeSemantics: true,
+                    child: Wrap(
+                      spacing: AppSpacing.xs + AppSpacing.xxs,
+                      children: [
+                        for (final (index, word) in words.indexed)
+                          SaidWord(
+                            word: word,
+                            index: index,
+                            heard: heard?[index],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (sentence.audioUrl != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  IconButton(
+                    onPressed: onListen,
+                    tooltip: 'lesson_fb_listen_sentence'.tr(),
+                    style: IconButton.styleFrom(
+                      fixedSize: const Size.square(_speaker),
+                      minimumSize: const Size.square(_speaker),
+                      backgroundColor: colors.info.fill,
+                      foregroundColor: colors.surface,
+                    ),
+                    iconSize: AppSizes.iconSm + AppSpacing.xxs,
+                    icon: const Icon(Icons.volume_up_rounded),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs + AppSpacing.xxs),
+          Semantics(
+            liveRegion: true,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: _statusHeight),
+              child: Row(
+                children: [
+                  if (heard != null) ...[
+                    AppIconView(
+                      AppIcon.soundBars,
+                      size: AppSizes.iconSm + AppSpacing.xxs,
+                      color: colors.textSecondary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs + AppSpacing.xxs),
+                  ],
+                  Flexible(
+                    child: Text(
+                      heard != null
+                          ? 'talk_heard'.plural(
+                              heard.length,
+                              namedArgs: {
+                                'heard': '${heard.where((w) => w).length}',
+                              },
+                            )
+                          : listening
+                          ? 'talk_listening'.tr()
+                          : 'talk_repeat_press'.tr(),
+                      style: heard != null
+                          ? strong
+                          : listening
+                          ? strong.copyWith(color: colors.primary.text)
+                          : status,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// «اختر ردك»: each reply on a card with its voice. Where the card is goes
+/// with the choice, so the reply can fly from it.
+class ChooseCards extends StatelessWidget {
+  const ChooseCards({
+    required this.options,
+    required this.onChoose,
+    required this.onListen,
+    super.key,
+  });
+
+  final List<ScriptOption> options;
+
+  /// The reply chosen, and where its card is on screen.
+  final void Function(int index, Rect from) onChoose;
+  final ValueChanged<TalkLine> onListen;
+
+  static const _minHeight = 56.0;
+  static const _speaker = 40.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final texts = context.texts;
+    return Padding(
+      padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(
+              horizontal: AppSpacing.xl - AppSpacing.xs,
+            ),
+            child: Text(
+              'talk_choose'.tr(),
+              style: texts.caption.copyWith(
+                color: colors.textSecondary,
+                fontSize: texts.caption.fontSize! * .92,
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xs + AppSpacing.xxs),
+          for (final (index, option) in options.indexed)
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                AppSpacing.lg,
+                0,
+                AppSpacing.lg,
+                AppSpacing.sm,
+              ),
+              child: Builder(
+                builder: (card) => Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: Material(
+                    color: colors.surface,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      side: BorderSide(color: colors.border),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: _minHeight),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                final box =
+                                    card.findRenderObject()! as RenderBox;
+                                onChoose(
+                                  index,
+                                  box.localToGlobal(Offset.zero) & box.size,
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsetsDirectional.fromSTEB(
+                                  AppSpacing.md + AppSpacing.xxs,
+                                  AppSpacing.md,
+                                  AppSpacing.sm,
+                                  AppSpacing.md,
+                                ),
+                                child: Text(
+                                  option.said.english,
+                                  textAlign: TextAlign.start,
+                                  style: texts.body.copyWith(
+                                    color: colors.textPrimary,
+                                    height: 24 / 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          if (option.said.audioUrl != null)
+                            Padding(
+                              padding: const EdgeInsetsDirectional.only(
+                                end: AppSpacing.sm,
+                              ),
+                              child: IconButton(
+                                onPressed: () => onListen(option.said),
+                                tooltip: 'reader_listen_to'.tr(
+                                  namedArgs: {'text': option.said.english},
+                                ),
+                                style: IconButton.styleFrom(
+                                  fixedSize: const Size.square(_speaker),
+                                  minimumSize: const Size.square(_speaker),
+                                  backgroundColor: colors.info.surface,
+                                  foregroundColor: colors.info.fill,
+                                ),
+                                iconSize: AppSizes.iconSm + AppSpacing.xxs,
+                                icon: const Icon(Icons.volume_up_rounded),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A chosen reply flying from its card ([from], on screen) into its place in
+/// the conversation, drawn above everything so nothing clips it. In place at
+/// once under reduce motion.
+class FlyIn extends StatefulWidget {
+  const FlyIn({required this.from, required this.child, super.key});
+
+  final Rect from;
+  final Widget child;
+
+  @override
+  State<FlyIn> createState() => _FlyInState();
+}
+
+class _FlyInState extends State<FlyIn> with SingleTickerProviderStateMixin {
+  late final _flight = AnimationController(
+    vsync: this,
+    duration: AppMotion.replyFlight,
+  );
+  OverlayEntry? _copy;
+  var _landed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _fly());
+  }
+
+  Future<void> _fly() async {
+    if (!mounted) return;
+    final box = context.findRenderObject() as RenderBox?;
+    if (AppMotion.reduceMotion(context) || box == null || !box.hasSize) {
+      return setState(() => _landed = true);
+    }
+    final to = box.localToGlobal(Offset.zero) & box.size;
+    final start = Rect.fromLTWH(
+      widget.from.left,
+      widget.from.top,
+      to.width,
+      to.height,
+    );
+    final copy = _copy = OverlayEntry(
+      builder: (_) => AnimatedBuilder(
+        animation: _flight,
+        builder: (_, child) => Positioned.fromRect(
+          rect: Rect.lerp(
+            start,
+            to,
+            AppMotion.smoothOut.transform(_flight.value),
+          )!,
+          child: child!,
+        ),
+        child: IgnorePointer(child: widget.child),
+      ),
+    );
+    Overlay.of(context).insert(copy);
+    await _flight.forward();
+    _copy?.remove();
+    _copy = null;
+    if (mounted) setState(() => _landed = true);
+  }
+
+  @override
+  void dispose() {
+    _copy?.remove();
+    _flight.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      Opacity(opacity: _landed ? 1 : 0, child: widget.child);
+}

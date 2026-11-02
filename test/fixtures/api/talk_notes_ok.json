@@ -1,0 +1,23 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "status": "ready",
+    "notes": [
+      {
+        "turn": 0,
+        "said": "Jake, this box is very fragile, you put it slow.",
+        "better": { "before": "Jake, this box is very fragile. ", "fix": "Please put it down slowly.", "after": "" },
+        "audioUrl": "https://cdn.example.com/talk/better_0.mp3",
+        "concept": { "id": "c_adverbs", "ar": "الصفة والظرف: slow و slowly" }
+      },
+      {
+        "turn": 1,
+        "said": "Can you put it in kitchen?",
+        "better": { "before": "Can you put it in ", "fix": "the", "after": " kitchen?" },
+        "audioUrl": "https://cdn.example.com/talk/better_1.mp3",
+        "concept": { "id": "c_articles", "ar": "أداة التعريف: the" }
+      }
+    ]
+  }
+}
