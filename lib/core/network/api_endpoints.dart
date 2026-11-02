@@ -79,6 +79,14 @@ abstract final class ApiEndpoints {
   static String lessonShadowing(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/shadowing';
 
+  // ASSUMPTION(api): docs/api/practice.md.
+  static const wordBank = '/api/v1/app/word-bank';
+
+  static const wordBankReviews = '/api/v1/app/word-bank/reviews';
+
+  static String wordBankWord(String wordId) =>
+      '/api/v1/app/word-bank/words/$wordId';
+
   static String lessonWatch(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/watch';
 

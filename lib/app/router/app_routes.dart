@@ -38,6 +38,12 @@ abstract final class AppRoutes {
 
   /// Screens a lesson's end leads to, not built yet.
   static const savedWords = '/words';
+  static const practice = '/practice';
+  static const practiceReview = '/practice/review';
+  static const practiceConcepts = '/practice/concepts';
+  static const practiceSentences = '/practice/sentences';
+  static const talk = '/talk';
+  static const me = '/me';
   static const unitStart = '/units/next';
 
   static String grammarOf(String lessonId) => '/lessons/$lessonId/grammar';

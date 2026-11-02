@@ -3,6 +3,7 @@ import 'package:englizia/features/account/account_injection.dart';
 import 'package:englizia/features/lessons/lessons_injection.dart';
 import 'package:englizia/features/onboarding/onboarding_injection.dart';
 import 'package:englizia/features/placement/placement_injection.dart';
+import 'package:englizia/features/practice/practice_injection.dart';
 import 'package:englizia/features/settings/settings_injection.dart';
 import 'package:englizia/features/tracks/tracks_injection.dart';
 
@@ -17,4 +18,5 @@ Future<void> configureDependencies() async {
   registerSettingsDependencies(sl);
   registerAccountDependencies(sl);
   registerOnboardingDependencies(sl);
+  registerPracticeDependencies(sl);
 }

@@ -1,0 +1,278 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "_note": "ASSUMPTION(api): a proposed response, not a real one (docs/api/practice.md)",
+    "sessionSize": 12,
+    "conceptsDue": 3,
+    "savedSentences": 9,
+    "words": [
+      {
+        "id": "bw_chicken",
+        "base": "chicken",
+        "kind": "noun",
+        "ar": "دجاجة",
+        "sentence": {
+          "en": "The chickens are in the garden.",
+          "ar": "الدجاج في الحديقة.",
+          "highlight": [
+            1
+          ],
+          "audio": "https://cdn.example.com/practice/chicken_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/chicken.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 2,
+        "dueAt": "2026-11-02T00:00:00.000"
+      },
+      {
+        "id": "bw_feed",
+        "base": "feed",
+        "kind": "verb",
+        "ar": "يُطعم",
+        "sentence": {
+          "en": "Sara feeds the chickens every morning.",
+          "ar": "تُطعم سارة الدجاج كل صباح.",
+          "highlight": [
+            1
+          ],
+          "audio": "https://cdn.example.com/practice/feed_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/feed.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 1,
+        "dueAt": "2026-11-02T00:00:00.000"
+      },
+      {
+        "id": "bw_field",
+        "base": "field",
+        "kind": "noun",
+        "ar": "حقل",
+        "sentence": {
+          "en": "My grandfather works in the field.",
+          "ar": "يعمل جدي في الحقل.",
+          "highlight": [
+            5
+          ],
+          "audio": "https://cdn.example.com/practice/field_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/field.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 4,
+        "dueAt": "2026-11-01T00:00:00.000"
+      },
+      {
+        "id": "bw_barn",
+        "base": "barn",
+        "kind": "noun",
+        "ar": "حظيرة",
+        "sentence": {
+          "en": "Her father is already in the barn.",
+          "ar": "والدها في الحظيرة بالفعل.",
+          "highlight": [
+            6
+          ],
+          "audio": "https://cdn.example.com/practice/barn_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/barn.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 3,
+        "dueAt": "2026-11-02T00:00:00.000"
+      },
+      {
+        "id": "bw_pick_out",
+        "base": "pick out",
+        "kind": "phrasalVerb",
+        "ar": "ينتقي",
+        "sentence": {
+          "en": "I'll pick out the best ones for you.",
+          "ar": "سأنتقي لك أفضلها.",
+          "highlight": [
+            1,
+            2
+          ],
+          "audio": "https://cdn.example.com/practice/pick_out_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/pick_out.mp3",
+        "source": {
+          "lessonId": "les_iv",
+          "title": "في السوق"
+        },
+        "box": 2,
+        "dueAt": "2026-11-00T00:00:00.000",
+        "video": {
+          "videoId": "vid_market_v1",
+          "startMs": 30300
+        }
+      },
+      {
+        "id": "bw_early",
+        "base": "early",
+        "kind": "adverb",
+        "ar": "باكرًا",
+        "sentence": {
+          "en": "We wake up early on the farm.",
+          "ar": "نستيقظ باكرًا في المزرعة.",
+          "highlight": [
+            3
+          ],
+          "audio": "https://cdn.example.com/practice/early_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/early.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 1,
+        "dueAt": "2026-11-02T00:00:00.000"
+      },
+      {
+        "id": "bw_busy",
+        "base": "busy",
+        "kind": "adjective",
+        "ar": "مشغول",
+        "sentence": {
+          "en": "The farmer is very busy today.",
+          "ar": "المزارع مشغول جدًا اليوم.",
+          "highlight": [
+            4
+          ],
+          "audio": "https://cdn.example.com/practice/busy_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/busy.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 2,
+        "dueAt": "2026-11-02T00:00:00.000"
+      },
+      {
+        "id": "bw_wake_up",
+        "base": "wake up",
+        "kind": "phrasalVerb",
+        "ar": "يستيقظ",
+        "sentence": {
+          "en": "Sara wakes up early every morning.",
+          "ar": "تستيقظ سارة باكرًا كل صباح.",
+          "highlight": [
+            1,
+            2
+          ],
+          "audio": "https://cdn.example.com/practice/wake_up_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/wake_up.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 1,
+        "dueAt": "2026-11-01T00:00:00.000"
+      },
+      {
+        "id": "bw_how_much",
+        "base": "How much",
+        "kind": "idiom",
+        "ar": "بكم",
+        "sentence": {
+          "en": "How much are these tomatoes?",
+          "ar": "بكم هذه البندورة؟",
+          "highlight": [
+            0,
+            1
+          ],
+          "audio": "https://cdn.example.com/practice/how_much_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/how_much.mp3",
+        "source": {
+          "lessonId": "les_iv",
+          "title": "في السوق"
+        },
+        "box": 3,
+        "dueAt": "2026-11-02T00:00:00.000",
+        "video": {
+          "videoId": "vid_market_v1",
+          "startMs": 1200
+        }
+      },
+      {
+        "id": "bw_turn_off",
+        "base": "turn off",
+        "kind": "phrasalVerb",
+        "ar": "يُطفئ",
+        "sentence": {
+          "en": "Please turn it off before you leave.",
+          "ar": "من فضلك أطفئه قبل أن تغادر.",
+          "highlight": [
+            1,
+            3
+          ],
+          "audio": "https://cdn.example.com/practice/turn_off_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/turn_off.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 1,
+        "dueAt": "2026-11-05T00:00:00.000"
+      },
+      {
+        "id": "bw_in_a_hurry",
+        "base": "in a hurry",
+        "kind": "phrase",
+        "ar": "على عجل",
+        "sentence": {
+          "en": "Sara leaves the house in a hurry.",
+          "ar": "تغادر سارة البيت على عجل.",
+          "highlight": [
+            4,
+            5,
+            6
+          ],
+          "audio": "https://cdn.example.com/practice/in_a_hurry_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/in_a_hurry.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 2,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "bw_basket",
+        "base": "basket",
+        "kind": "noun",
+        "ar": "سلة",
+        "sentence": {
+          "en": "She puts the eggs in a basket.",
+          "ar": "تضع البيض في سلة.",
+          "highlight": [
+            5
+          ],
+          "audio": "https://cdn.example.com/practice/basket_sentence.mp3"
+        },
+        "audio": "https://cdn.example.com/practice/basket.mp3",
+        "source": {
+          "lessonId": "les_it",
+          "title": "يوم في المزرعة"
+        },
+        "box": 5,
+        "dueAt": "2026-11-16T00:00:00.000"
+      }
+    ]
+  }
+}
