@@ -30,6 +30,10 @@ import 'package:englizia/features/account/presentation/verify_email/widgets/veri
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/complete/pages/lesson_complete_page.dart';
+import 'package:englizia/features/lessons/presentation/concepts/cubit/concept_session_cubit.dart';
+import 'package:englizia/features/lessons/presentation/concepts/cubit/concepts_cubit.dart';
+import 'package:englizia/features/lessons/presentation/concepts/pages/concept_session_page.dart';
+import 'package:englizia/features/lessons/presentation/concepts/pages/concepts_page.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
@@ -726,8 +730,8 @@ GoRouter createAppRouter(AppSessionController session) {
               child: PracticePage(
                 onReview: () => context.push<void>(AppRoutes.practiceReview),
                 onWords: () => context.push<void>(AppRoutes.savedWords),
-                // Concepts to strengthen (S §11) have no design yet.
-                onConcepts: () => context.push(AppRoutes.practiceConcepts),
+                onConcepts: () =>
+                    context.push<void>(AppRoutes.practiceConcepts),
                 // Saving sentences, and shadowing them from here, aren't sent.
                 onSentences: () => context.push(AppRoutes.practiceSentences),
               ),
@@ -744,7 +748,34 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.practiceConcepts,
-        builder: (_, _) => PendingPage(title: 'practice_concepts_title'.tr()),
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<ConceptsCubit>()..start(),
+          child: ConceptsPage(
+            onBack: () => _back(context),
+            onStart: () async =>
+                await context.push<Set<String>>(
+                  AppRoutes.practiceConceptSession,
+                ) ??
+                const {},
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.practiceConceptSession,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<ConceptSessionCubit>()..start(),
+          child: ConceptSessionPage(
+            onExit: (mastered) => context.canPop()
+                ? context.pop(mastered)
+                : context.go(AppRoutes.practice),
+            // «اشرح لي» has no design yet, as in a lesson.
+            onExplain: () => context.push(AppRoutes.conceptExplain),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.conceptExplain,
+        builder: (_, _) => PendingPage(title: 'lesson_fb_explain'.tr()),
       ),
       GoRoute(
         path: AppRoutes.practiceSentences,

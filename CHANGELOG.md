@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Concepts to strengthen: the concepts a learner got wrong, each brought back at five spaced stations with a new question, until it is mastered, with nothing red and no count of mistakes.
 - The «تدرّب» tab: the word bank with how firmly each word is kept, a review that turns each card and moves it between five boxes, offline too, and «كلماتي» to search, filter and remove words; and the tabs' bar.
 - Shadowing: a lesson's chosen sentences said after the model, with it, or with the text hidden, the words heard and doing better each try, and the try and the model drawn side by side.
 - Vocabulary lesson: stacked cards with each word said as it shows, its kind, meaning and an example marked as it is said, the translation on request, a star to save it, dragging between cards, and the lesson's words together before the exercises.

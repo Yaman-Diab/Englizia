@@ -4,14 +4,19 @@ import 'package:englizia/core/video/silent_audio_engine.dart';
 import 'package:englizia/core/video/video_engine.dart';
 import 'package:englizia/core/video/video_player_engine.dart';
 import 'package:englizia/features/lessons/data/answers_sync.dart';
+import 'package:englizia/features/lessons/data/datasources/concept_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/datasources/teacher_question_remote_data_source.dart';
+import 'package:englizia/features/lessons/data/repositories/concept_repository_impl.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/data/repositories/teacher_question_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/repositories/concept_repository.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/domain/repositories/teacher_question_repository.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
+import 'package:englizia/features/lessons/presentation/concepts/cubit/concept_session_cubit.dart';
+import 'package:englizia/features/lessons/presentation/concepts/cubit/concepts_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
@@ -70,6 +75,16 @@ void registerLessonDependencies(GetIt sl) {
         lessonId: lessonId,
       ),
     )
+    ..registerLazySingleton<ConceptRemoteDataSource>(
+      () => AppConfig.isMock
+          ? ConceptFakeDataSource(rootBundle)
+          : ConceptRemoteDataSourceImpl(sl()),
+    )
+    ..registerLazySingleton<ConceptRepository>(
+      () => ConceptRepositoryImpl(sl(), sl()),
+    )
+    ..registerFactory(() => ConceptsCubit(sl()))
+    ..registerFactory(() => ConceptSessionCubit(sl(), sl()))
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactory(() => MicCubit(sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(

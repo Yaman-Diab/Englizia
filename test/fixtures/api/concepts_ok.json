@@ -1,0 +1,202 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "_note": "ASSUMPTION(api): a proposed response, not a real one (docs/api/concepts.md)",
+    "due": [
+      {
+        "id": "c_present_s",
+        "ar": "إضافة s للفعل مع he/she/it",
+        "en": "Present simple: third person -s",
+        "why": "مع he وshe وit نضيف s إلى الفعل في المضارع البسيط.",
+        "example": [
+          {
+            "text": "She "
+          },
+          {
+            "text": "goes",
+            "strong": true
+          },
+          {
+            "text": " to school."
+          }
+        ],
+        "wrong": {
+          "answer": "She go to school every day.",
+          "lessonTitle": "يوم في المزرعة"
+        },
+        "stations": 0,
+        "repeats": 3,
+        "explainEnabled": true,
+        "question": {
+          "id": "cq_plays",
+          "template": "fillTyped",
+          "instructionAr": "اكتب الفعل بالشكل الصحيح",
+          "prompt": {
+            "en": "My brother ___ football on Fridays.",
+            "baseWord": "play"
+          },
+          "accepted": [
+            "plays"
+          ],
+          "typoTolerance": false,
+          "explanation": {
+            "ar": "مع he وshe وit نضيف s إلى الفعل: play ← plays."
+          }
+        }
+      },
+      {
+        "id": "c_doesnt",
+        "ar": "النفي بـ doesn't مع he/she/it",
+        "en": "Negative: doesn't + verb",
+        "why": "مع he وshe وit ننفي بـ doesn't، والفعل بعدها بلا s.",
+        "example": [
+          {
+            "text": "He "
+          },
+          {
+            "text": "doesn't like",
+            "strong": true
+          },
+          {
+            "text": " tea."
+          }
+        ],
+        "wrong": {
+          "answer": "She don't like coffee.",
+          "lessonTitle": "يوم في المزرعة"
+        },
+        "stations": 4,
+        "repeats": 1,
+        "lastRightAt": "2026-10-03T09:00:00Z",
+        "explainEnabled": true,
+        "question": {
+          "id": "cq_doesnt",
+          "template": "multipleChoice",
+          "instructionAr": "اختر ما يكمل الجملة",
+          "prompt": {
+            "en": "Sara ___ milk."
+          },
+          "options": [
+            {
+              "id": "o1",
+              "text": "don't like"
+            },
+            {
+              "id": "o2",
+              "text": "doesn't like"
+            },
+            {
+              "id": "o3",
+              "text": "doesn't likes"
+            }
+          ],
+          "answer": "o2",
+          "explanation": {
+            "ar": "مع she ننفي بـ doesn't، والفعل بعدها بلا s."
+          }
+        }
+      },
+      {
+        "id": "c_first_conditional",
+        "ar": "الشرط الأول: if + مضارع",
+        "en": "First conditional: if + present",
+        "why": "بعد if نستخدم المضارع البسيط، وفي الجواب will + الفعل.",
+        "example": [
+          {
+            "text": "If it "
+          },
+          {
+            "text": "rains",
+            "strong": true
+          },
+          {
+            "text": ", we will stay home."
+          }
+        ],
+        "wrong": {
+          "answer": "If it will rain, we stay home.",
+          "lessonTitle": "في السوق"
+        },
+        "stations": 3,
+        "repeats": 2,
+        "lastRightAt": "2026-10-26T09:00:00Z",
+        "explainEnabled": true,
+        "question": {
+          "id": "cq_rains",
+          "template": "fillChoices",
+          "instructionAr": "أكمل الجملة",
+          "prompt": {
+            "en": "If it ___ tomorrow, we will stay home."
+          },
+          "blanks": [
+            {
+              "answer": "rains",
+              "alternatives": []
+            }
+          ],
+          "distractors": [
+            {
+              "text": "will rain"
+            },
+            {
+              "text": "rained"
+            }
+          ],
+          "explanation": {
+            "ar": "بعد if نستخدم المضارع البسيط."
+          }
+        }
+      }
+    ],
+    "later": [
+      {
+        "id": "c_plural_s",
+        "ar": "الجمع بإضافة s",
+        "dueAt": "2026-11-05T00:00:00"
+      },
+      {
+        "id": "c_there_is",
+        "ar": "there is / there are",
+        "dueAt": "2026-11-08T00:00:00"
+      }
+    ],
+    "mastered": [
+      {
+        "id": "c_m0",
+        "ar": "أداة التعريف the",
+        "en": "The article"
+      },
+      {
+        "id": "c_m1",
+        "ar": "a وan",
+        "en": "A or an"
+      },
+      {
+        "id": "c_m2",
+        "ar": "ضمائر الفاعل",
+        "en": "Subject pronouns"
+      },
+      {
+        "id": "c_m3",
+        "ar": "am وis وare",
+        "en": "Be: am, is, are"
+      },
+      {
+        "id": "c_m4",
+        "ar": "الملكية بـ 's",
+        "en": "Possessive 's"
+      },
+      {
+        "id": "c_m5",
+        "ar": "this وthat",
+        "en": "This and that"
+      },
+      {
+        "id": "c_m6",
+        "ar": "أسئلة yes/no",
+        "en": "Yes/no questions"
+      }
+    ]
+  }
+}

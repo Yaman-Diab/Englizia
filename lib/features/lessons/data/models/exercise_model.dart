@@ -63,6 +63,20 @@ final class LessonModel {
   }
 }
 
+/// One question outside a lesson, as a concept's (S §11.1): only templates that
+/// mark themselves, so none needs the speech or the AI settings.
+Exercise? exerciseFromJson(
+  Map<String, Object?> json, {
+  required String seed,
+  int? typoMinLetters,
+}) => _exercise(
+  json,
+  seed,
+  speechPassPercent: null,
+  typoMinLetters: typoMinLetters,
+  aiReviewEnabled: false,
+);
+
 /// Null for what isn't shown here: a template this version doesn't know, which
 /// the server should have hidden (S §7.3), review-only questions, and a question
 /// for the AI where the track has it off (S §16.2).

@@ -25,6 +25,8 @@ final class SettingsStorageService {
   static const _savedWordsKey = 'account.saved_words';
   static const _wordBankKey = 'account.word_bank';
   static const _wordBankOutboxKey = 'account.word_bank_outbox';
+  static const _conceptsKey = 'account.concepts';
+  static const _conceptsOutboxKey = 'account.concepts_outbox';
 
   final SharedPreferences _prefs;
 
@@ -154,6 +156,20 @@ final class SettingsStorageService {
     await _prefs.setString(_wordBankOutboxKey, json);
   }
 
+  /// Concepts to strengthen as last received, with today's questions.
+  String? get concepts => _prefs.getString(_conceptsKey);
+
+  Future<void> setConcepts(String json) async {
+    await _prefs.setString(_conceptsKey, json);
+  }
+
+  /// Concept answers and reports not yet sent, oldest first, as JSON.
+  String? get conceptsOutbox => _prefs.getString(_conceptsOutboxKey);
+
+  Future<void> setConceptsOutbox(String json) async {
+    await _prefs.setString(_conceptsOutboxKey, json);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -167,6 +183,8 @@ final class SettingsStorageService {
       await _prefs.remove(_savedWordsKey);
       await _prefs.remove(_wordBankKey);
       await _prefs.remove(_wordBankOutboxKey);
+      await _prefs.remove(_conceptsKey);
+      await _prefs.remove(_conceptsOutboxKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

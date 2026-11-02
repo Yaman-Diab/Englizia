@@ -27,7 +27,7 @@ class PracticePage extends StatelessWidget {
 
   final Future<void> Function() onReview;
   final Future<void> Function() onWords;
-  final VoidCallback onConcepts;
+  final Future<void> Function() onConcepts;
   final VoidCallback onSentences;
 
   @override
@@ -66,7 +66,7 @@ class PracticePage extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               _MoreCard(
                 bank: state.bank!,
-                onConcepts: onConcepts,
+                onConcepts: () => thenRefresh(onConcepts),
                 onSentences: onSentences,
               ),
             ],

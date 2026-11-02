@@ -761,7 +761,6 @@
   "practice_review_anyway": "Review anyway",
   "practice_all_words": "All my words",
   "practice_new": "Save words with the star during lessons to see them here",
-  "practice_concepts_title": "Concepts to strengthen",
   "practice_sentences_title": "Practise saying your saved sentences",
   "practice_end_review": "End the review",
   "practice_progress": "Review progress",
@@ -837,6 +836,52 @@
   "practice_done_again": {
     "one": "{} comes back tomorrow",
     "other": "{} come back tomorrow"
+  },
+  "concept_title": "Concepts to strengthen",
+  "concept_how": "You master a concept by answering right at five spaced stations: after a day, then 3 days, then 7, 14 and 30. Each time with a new question.",
+  "concept_due_today": "Due today",
+  "concept_none_today": "No concepts to strengthen today",
+  "concept_none_yet": "When you get something wrong in a lesson, we bring the concept back here with a new question until you master it.",
+  "concept_later": "Later · {n}",
+  "concept_in": "In {days}",
+  "concept_start": "Start strengthening ({n})",
+  "concept_stations_said": "{n} of 5 stations to mastery",
+  "concept_end": "End",
+  "concept_progress": "Strengthening progress",
+  "concept_counter": "{at} of {of}",
+  "concept_right_before": "You answered right {days} ago",
+  "concept_where_wrong": "Where you went wrong",
+  "concept_wrong_said": "Your earlier answer: {answer}",
+  "concept_from": "From: {title}",
+  "concept_station_of": "Station {n} of 5",
+  "concept_try": "Try a new question",
+  "concept_mastered_one": "You mastered this concept",
+  "concept_well_done": "Well done",
+  "concept_next_station": "The next station is in {days}",
+  "concept_start_over": "We start the cycle again tomorrow",
+  "concept_start_over_detail": "With a new question on the same concept.",
+  "concept_back_in": "We come back to it in {days}",
+  "concept_back_detail": "It went back two stations only, and your progress before them is kept.",
+  "concept_next": "Next concept",
+  "concept_done_mastered": "Mastered: {n}",
+  "concept_done_step": "Moved on: {n}",
+  "concept_done_again": "Back tomorrow: {n}",
+  "concept_finish": "Done",
+  "concept_days": {
+    "one": "a day",
+    "other": "{} days"
+  },
+  "concept_repeats": {
+    "one": "Once",
+    "other": "Came up {} times"
+  },
+  "concept_mastered": {
+    "one": "You mastered {} concept",
+    "other": "You mastered {} concepts"
+  },
+  "concept_done": {
+    "one": "You reviewed {} concept",
+    "other": "You reviewed {} concepts"
   },
   "reader_tip_ok": "Got it",
   "reader_audio_failed": "The sound couldn't load. You can read for now",

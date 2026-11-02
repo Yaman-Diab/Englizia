@@ -63,6 +63,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
 | [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
+| [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
@@ -87,6 +88,9 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, version, exercises}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/answers/review` | POST | as an answer | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/words` | POST | `{spanId or wordId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed |
+| `/api/v1/app/concepts` | GET | — | today's concepts with their new questions, those later and those mastered ([concepts.md](concepts.md)) | proposed |
+| `/api/v1/app/concepts/answers` | POST | `{answerId, conceptId, questionId, correct, answeredAt}` | none; safe to repeat | proposed |
+| `/api/v1/app/concepts/reports` | POST | `{reportId, conceptId, questionId, reason}` | none; safe to repeat | proposed |
 | `/api/v1/app/word-bank` | GET | — | the bank, its words and their boxes ([practice.md](practice.md)) | proposed |
 | `/api/v1/app/word-bank/reviews` | POST | `{reviewId, wordId, known, reviewedAt}` | none; safe to repeat | proposed |
 | `/api/v1/app/word-bank/words/{wordId}` | DELETE | — | none; safe to repeat | proposed |
