@@ -117,6 +117,13 @@ A grammar lesson also has `content`, and `bookRef` for one tied to a book (desig
 | `content.summary` | `{ar, table[], examples[]}` | Required. `table[]`: `{left, right: [part]}`. `examples[]`: `{en: [part], ar, audio?}`. A part is `{text, strong?, marked?}` |
 | `content.watch` | as below | What the server last heard, from any phone |
 
+A vocabulary lesson has `vocabulary` (design `Vocab Lesson`, S §8.5): its cards, browsed before its exercises. All proposed.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `vocabulary.words[]` | `{id, word, pos?, ar, image?, audio?, example}` | In order. `pos`: `noun`, `verb`, `adjective`, `adverb`, `phrase`; another shows no badge. With no `image` the card shows the word's first letter. `audio` is said once as the card shows |
+| `…example` | `{tokens[], ar, audio?, highlight[]}` | `tokens[]`: `{id, text, startMs?, endMs?}`, punctuation stuck to its word. `highlight`: the ids of the tokens that are the word, several for a phrase. With no times, the mark follows the sound by the tokens' letters |
+
 An interactive text and an interactive video both have `reader` (designs `Interactive Text`, `Interactive Video`, S §8.2–§8.4): the same sentences and spans, with a sound or a video as the time. All proposed.
 
 | Field | Type | Meaning |
@@ -167,7 +174,7 @@ Asks the server to judge an order in `reviewOrders`, with the same body as an an
 
 ## `POST /api/v1/app/lessons/{lessonId}/words`
 
-The star on a span, kept on the phone and sent like an answer. Proposed.
+The star on a span or a vocabulary card, kept on the phone and sent like an answer. Proposed.
 
 ```json
 { "spanId": "turnoff", "saved": true, "base": "turn off", "kind": "phrasalVerb", "ar": "...", "note": "...", "sentence": { "en": "...", "ar": "..." } }
@@ -175,9 +182,11 @@ The star on a span, kept on the phone and sent like an answer. Proposed.
 
 Saving sends the span whole, so changing it in the panel later doesn't change what was saved (S §8.2). From a video, `sentence` also has `videoId`, `startMs` and `endMs`, the moment to find it again (S §8.4). Taking it back sends `{spanId, saved: false}`.
 
+A vocabulary card sends `wordId` instead of `spanId`, with `base` its word, `kind` its `pos`, and `sentence` its example; taking it back sends `{wordId, saved: false}`.
+
 ## `POST /api/v1/app/lessons/{lessonId}/content-done`
 
-`{lessonVersion}`, once the end of a text is reached, which is what completes it (S §8.3). Kept on the phone and sent like an answer, and safe to repeat. Proposed.
+`{lessonVersion}`, once the end of a text is reached or the last vocabulary card passed, which is what completes them (S §8.3, §8.5). Kept on the phone and sent like an answer, and safe to repeat. Proposed.
 
 ## `POST /api/v1/app/lessons/{lessonId}/watch`
 

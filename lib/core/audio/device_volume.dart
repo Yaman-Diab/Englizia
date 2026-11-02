@@ -15,8 +15,8 @@ abstract interface class DeviceVolume {
 /// The phone's own media volume, through `volume_controller`.
 ///
 /// The plugin keeps one listener for the whole app, so only one stream
-/// listener should be active at a time (the kids' welcome is the only
-/// one). It never fails the caller: when the volume cannot be read the
+/// listener should be active at a time: the kids' welcome and a vocabulary
+/// lesson never show together. It never fails the caller: when the volume cannot be read the
 /// phone is taken as audible, so a child is never blocked by a plugin error.
 final class PlatformDeviceVolume implements DeviceVolume {
   PlatformDeviceVolume([VolumeController? controller])

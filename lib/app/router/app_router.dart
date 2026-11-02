@@ -39,6 +39,8 @@ import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_video_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/pages/interactive_text_page.dart';
 import 'package:englizia/features/lessons/presentation/reader/pages/interactive_video_page.dart';
+import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
+import 'package:englizia/features/lessons/presentation/vocabulary/pages/vocab_lesson_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -596,6 +598,22 @@ GoRouter createAppRouter(AppSessionController session) {
           );
         },
       ),
+      GoRoute(
+        path: AppRoutes.lessonVocabulary,
+        builder: (context, state) {
+          final lessonId = state.pathParameters['lessonId']!;
+          return BlocProvider(
+            create: (_) => sl<VocabLessonCubit>(param1: lessonId)..start(),
+            child: VocabLessonPage(
+              onExit: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
+              onStartExercises: () =>
+                  context.pushReplacement(AppRoutes.exercisesOf(lessonId)),
+              onShowWords: () => context.push(AppRoutes.savedWords),
+            ),
+          );
+        },
+      ),
       // Practising saying the sentences has no design yet.
       GoRoute(
         path: AppRoutes.lessonShadowing,
@@ -648,6 +666,8 @@ GoRouter createAppRouter(AppSessionController session) {
               final lessonId?
                   when next.lessonKind == LessonKind.interactiveVideo =>
                 context.pushReplacement(AppRoutes.videoOf(lessonId)),
+              final lessonId? when next.lessonKind == LessonKind.vocabulary =>
+                context.pushReplacement(AppRoutes.vocabularyOf(lessonId)),
               final lessonId? => context.pushReplacement(
                 AppRoutes.exercisesOf(lessonId),
               ),

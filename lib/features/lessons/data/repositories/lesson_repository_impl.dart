@@ -13,11 +13,13 @@ import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
+import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
+import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 final class LessonRepositoryImpl implements LessonRepository {
@@ -265,10 +267,34 @@ final class LessonRepositoryImpl implements LessonRepository {
   };
 
   @override
-  Future<void> setWordSaved(SavedWord word, {required bool saved}) async {
-    final ids = savedWords(word.lessonId);
-    saved ? ids.add(word.span.id) : ids.remove(word.span.id);
-    final all = _savedWords()..[word.lessonId] = ids.toList();
+  Future<void> setWordSaved(SavedWord word, {required bool saved}) => _keepWord(
+    word.lessonId,
+    word.span.id,
+    savedWordToJson(word, saved: saved),
+    saved: saved,
+  );
+
+  @override
+  Future<void> setVocabSaved(
+    String lessonId,
+    VocabWord word, {
+    required bool saved,
+  }) => _keepWord(
+    lessonId,
+    word.id,
+    vocabWordToJson(word, saved: saved),
+    saved: saved,
+  );
+
+  Future<void> _keepWord(
+    String lessonId,
+    String id,
+    Map<String, Object?> request, {
+    required bool saved,
+  }) async {
+    final ids = savedWords(lessonId);
+    saved ? ids.add(id) : ids.remove(id);
+    final all = _savedWords()..[lessonId] = ids.toList();
     try {
       await _settings.setSavedWords(jsonEncode(all));
     } catch (error, stackTrace) {
@@ -276,9 +302,9 @@ final class LessonRepositoryImpl implements LessonRepository {
     }
     await _enqueue(
       _wordKind,
-      word.lessonId,
+      lessonId,
       SettingsStorageService.randomId(),
-      savedWordToJson(word, saved: saved),
+      request,
     );
   }
 

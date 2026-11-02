@@ -85,7 +85,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, version, exercises}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/answers/review` | POST | as an answer | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
-| `/api/v1/app/lessons/{id}/words` | POST | `{spanId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed |
+| `/api/v1/app/lessons/{id}/words` | POST | `{spanId or wordId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed |
 | `/api/v1/app/lessons/{id}/content-done` | POST | `{lessonVersion}` | none; safe to repeat | proposed |
 | `/api/v1/app/lessons/{id}/watch` | POST | `{videoId, lessonVersion, positionSeconds, watched}` | none; only the latest counts | proposed |
 | `/api/v1/app/lessons/{id}/questions` | GET | — | **Only the caller's** questions and replies ([lessons.md](lessons.md), ADR 14) | proposed |
