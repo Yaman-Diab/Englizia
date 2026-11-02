@@ -1,0 +1,31 @@
+{
+  "statusCode": 200,
+  "data": [
+    {
+      "questionId": "q_mine_1",
+      "text": "متى نستخدم does بدل do في السؤال؟",
+      "askedAt": "2026-11-01T08:00:00Z",
+      "videoSeconds": 134,
+      "reply": {
+        "name": "الأستاذ",
+        "role": "teacher",
+        "text": "مع he وshe وit نقول Does she work here? والفعل بعد does يبقى بلا s."
+      }
+    },
+    {
+      "questionId": "q_mine_2",
+      "text": "هل نضيف s إذا كان الفاعل اسمًا مثل Omar؟",
+      "askedAt": "2026-10-31T09:00:00Z"
+    },
+    {
+      "questionId": "q_mine_3",
+      "text": "لماذا نقول watches وليس watchs؟",
+      "askedAt": "2026-10-29T09:00:00Z",
+      "reply": {
+        "name": "الإدارة",
+        "role": "admin",
+        "text": "الأفعال المنتهية بـ ch وsh وx وo نضيف لها es: watches، goes."
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@ import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_so
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
@@ -61,6 +62,10 @@ class FakeLessonRepository implements LessonRepository {
   Future<void>? reviewGate;
   int? xpPerAnswer;
   LessonOutline outline = const LessonOutline();
+  GrammarContent? grammar;
+  final watches = <String, WatchState>{};
+  final watchesSent = <WatchState>[];
+  VideoQuality quality = VideoQuality.auto;
   bool explainEnabled = false;
   final saved = <String, ExerciseProgress>{};
   var sends = 0;
@@ -78,6 +83,7 @@ class FakeLessonRepository implements LessonRepository {
               xpPerAnswer: xpPerAnswer,
               explainEnabled: explainEnabled,
               outline: outline,
+              grammar: grammar,
             ),
           )
         : Err(failure);
@@ -88,6 +94,27 @@ class FakeLessonRepository implements LessonRepository {
     attempts.add(attempt);
     return 'attempt-${attempts.length}';
   }
+
+  @override
+  WatchState? savedWatch(String lessonId) => watches[lessonId];
+
+  @override
+  Future<void> saveWatch(String lessonId, WatchState watch) async =>
+      watches[lessonId] = watch;
+
+  @override
+  Future<void> sendWatch(
+    String lessonId,
+    int lessonVersion,
+    WatchState watch,
+  ) async => watchesSent.add(watch);
+
+  @override
+  VideoQuality get videoQuality => quality;
+
+  @override
+  Future<void> setVideoQuality(VideoQuality quality) async =>
+      this.quality = quality;
 
   @override
   Future<Result<LessonResult>> completeLesson(LessonSummary summary) async {

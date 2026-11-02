@@ -27,6 +27,7 @@ abstract final class AppRoutes {
   static const newPassword = '/reset-password';
   static const passwordChanged = '/reset-password/done';
 
+  static const lessonGrammar = '/lessons/:lessonId/grammar';
   static const lessonExercises = '/lessons/:lessonId/exercises';
   static const lessonComplete = '/lessons/:lessonId/complete';
   static const lessonExplain = '/lessons/:lessonId/explain';
@@ -34,6 +35,8 @@ abstract final class AppRoutes {
   /// Screens a lesson's end leads to, not built yet.
   static const savedWords = '/words';
   static const unitStart = '/units/next';
+
+  static String grammarOf(String lessonId) => '/lessons/$lessonId/grammar';
 
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
 

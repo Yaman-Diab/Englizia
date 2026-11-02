@@ -22,5 +22,16 @@ import UIKit
       }
       UIApplication.shared.open(mail) { opened in result(opened) }
     }
+    FlutterMethodChannel(
+      name: "englizia/screen_awake",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    ).setMethodCallHandler { call, result in
+      guard call.method == "set", let on = call.arguments as? Bool else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      UIApplication.shared.isIdleTimerDisabled = on
+      result(nil)
+    }
   }
 }

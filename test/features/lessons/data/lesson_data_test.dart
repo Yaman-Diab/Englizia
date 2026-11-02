@@ -13,11 +13,14 @@ import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
+import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
 import 'package:englizia/features/lessons/domain/services/stable_order.dart';
@@ -33,6 +36,7 @@ class _Remote implements LessonRemoteDataSource {
   final reviewed = <Map<String, Object?>>[];
   final reports = <Map<String, Object?>>[];
   final completed = <Map<String, Object?>>[];
+  final watched = <Map<String, Object?>>[];
   final lessons = <String>[];
   var reviewSays = true;
   var offline = false;
@@ -55,6 +59,12 @@ class _Remote implements LessonRemoteDataSource {
     if (offline) throw const NetworkException('connectionError');
     reviewed.add(request);
     return reviewSays;
+  }
+
+  @override
+  Future<void> sendWatch(String lessonId, Map<String, Object?> request) async {
+    if (offline) throw const NetworkException('connectionError');
+    watched.add(request);
   }
 
   @override
@@ -961,6 +971,117 @@ void main() {
     });
   });
 
+  group('a grammar lesson', () {
+    Map<String, Object?> asset(String path) =>
+        asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
+
+    test('the mock has its video, rule and questions on', () {
+      final grammar = LessonModel(
+        asset(LessonFakeDataSource.grammarAsset),
+      ).toEntity('s').grammar!;
+
+      expect(grammar.requiredPercent, 80);
+      expect(grammar.questionsEnabled, isTrue);
+      expect(grammar.teacherName, isNotEmpty);
+      expect(grammar.video?.sources, hasLength(4));
+      expect(grammar.video?.captions, isNotEmpty);
+      expect(grammar.summary.rows.last.right.last.marked, isTrue);
+      expect(grammar.summary.examples.first.english, startsWith('She works'));
+    });
+
+    test('with no video it has the book, and no questions', () {
+      final grammar = LessonModel(
+        asset(LessonFakeDataSource.bookAsset),
+      ).toEntity('s').grammar!;
+
+      expect(grammar.video, isNull);
+      expect(grammar.bookPage, 34);
+      expect(grammar.questionsEnabled, isFalse);
+    });
+
+    test('other lessons have none, and a broken one costs only itself', () {
+      expect(_parse([_question({})]).grammar, isNull);
+
+      final broken = LessonModel({
+        'id': 'les',
+        'version': 1,
+        'content': {
+          'requiredWatchPercent': 80,
+          'summary': {'ar': 'a'},
+          'video': {'id': 'v', 'durationSeconds': 10, 'sources': <Object?>[]},
+        },
+        'exercises': [_question({})],
+      }).toEntity('s');
+      expect(broken.grammar, isNull);
+      expect(broken.exercises, hasLength(1));
+    });
+
+    test('a required share has to come from the server', () {
+      final lesson = LessonModel({
+        'id': 'les',
+        'version': 1,
+        'content': {
+          'summary': {'ar': 'a'},
+        },
+        'exercises': [_question({})],
+      }).toEntity('s');
+
+      expect(lesson.grammar, isNull);
+    });
+
+    test('a video finds its source, and captions their time', () {
+      const video = GrammarVideo(
+        id: 'v',
+        duration: Duration(seconds: 10),
+        sources: [
+          VideoSource(quality: VideoQuality.auto, url: 'a'),
+          VideoSource(quality: VideoQuality.low, url: 'l'),
+        ],
+        captions: [
+          VideoCaption(
+            from: Duration(seconds: 1),
+            to: Duration(seconds: 2),
+            text: 'x',
+          ),
+        ],
+      );
+
+      expect(video.urlFor(VideoQuality.low), 'l');
+      expect(video.urlFor(VideoQuality.high), 'a');
+      expect(video.captionAt(const Duration(seconds: 1)), 'x');
+      expect(video.captionAt(const Duration(seconds: 2)), isNull);
+    });
+
+    test('watching goes to and from its form', () {
+      const watch = WatchState(
+        videoId: 'v',
+        positionSeconds: 12,
+        ranges: [(0, 5), (8, 12)],
+      );
+
+      expect(watchFromJson(watchToJson(watch)), watch);
+      expect(watchToJson(watch, lessonVersion: 3)['lessonVersion'], 3);
+    });
+
+    test('questions are read with their answers and sent as little', () {
+      final question = questionFromJson({
+        'questionId': 'q',
+        'text': 't',
+        'askedAt': '2026-11-01T08:00:00Z',
+        'videoSeconds': 134,
+        'reply': {'name': 'n', 'role': 'admin', 'text': 'r'},
+      });
+
+      expect(question.videoPosition, const Duration(seconds: 134));
+      expect(question.reply?.role, ReplierRole.admin);
+      expect(questionToJson(question), {
+        'questionId': 'q',
+        'text': 't',
+        'videoSeconds': 134,
+      });
+    });
+  });
+
   group('the end of a lesson', () {
     test('the package has its place in the unit', () {
       final outline = lessonOutlineFromJson(sampleLessonJson());
@@ -1100,6 +1221,52 @@ void main() {
       pending: 0,
       seconds: 60,
       outline: LessonOutline(),
+    );
+
+    const watch = WatchState(
+      videoId: 'v',
+      positionSeconds: 5,
+      ranges: [(0, 5)],
+    );
+
+    test('watching stays on the phone for its video', () async {
+      expect(repository.savedWatch('les'), isNull);
+
+      await repository.saveWatch('les', watch);
+
+      expect(repository.savedWatch('les'), watch);
+      expect(repository.savedWatch('other'), isNull);
+    });
+
+    test('only the latest watching goes, once it can', () async {
+      remote.offline = true;
+      await repository.sendWatch('les', 3, watch);
+      await settle();
+      await repository.sendWatch(
+        'les',
+        3,
+        const WatchState(videoId: 'v', positionSeconds: 9, ranges: [(0, 9)]),
+      );
+      await settle();
+
+      remote.offline = false;
+      await repository.sendSaved();
+      await settle();
+
+      expect(remote.watched, hasLength(1));
+      expect(remote.watched.single['positionSeconds'], 9);
+      expect(remote.watched.single['lessonVersion'], 3);
+    });
+
+    test(
+      'the quality chosen is remembered, and is automatic at first',
+      () async {
+        expect(repository.videoQuality, VideoQuality.auto);
+
+        await repository.setVideoQuality(VideoQuality.low);
+
+        expect(repository.videoQuality, VideoQuality.low);
+      },
     );
 
     test('completing a lesson sends its answers first', () async {

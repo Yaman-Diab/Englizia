@@ -111,6 +111,7 @@ class UnitChain extends StatelessWidget {
                     builder: (_, value) => Align(
                       alignment: AlignmentDirectional.centerStart,
                       child: FractionallySizedBox(
+                        heightFactor: 1,
                         widthFactor: from + (to - from) * value,
                         child: ColoredBox(color: colors.success.fill),
                       ),

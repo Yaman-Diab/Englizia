@@ -99,6 +99,24 @@ The top of a lesson also says where it sits, so its end can show that offline (d
 | `unit` | `{number, title, lessons: [{id, kind, done}]}` | The unit's chain. `kind`: `vocabulary`, `interactiveVideo`, `grammarVideo`, `interactiveText`, `conversation`, `unitReview` |
 | `next` | `{kind, lessonId?, lessonKind?, title?, unitNumber?}` | What comes after. `kind`: `lesson`, `unitReview`, `unit`. None at the end of a track |
 
+A grammar lesson also has `content`, and `bookRef` for one tied to a book (design `Grammar Video`, S §8.1). All proposed.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `content.kind` | string | `grammarVideo` |
+| `content.requiredWatchPercent` | int | Of the video really watched, from the panel. Required |
+| `content.exercisesOpen` | bool | The server lets the learner on without watching, as when the video is gone for good (S §8.1) |
+| `content.questionsEnabled` | bool | By track, level and lesson; never for kids |
+| `content.teacher` | `{name, avatar?}` | |
+| `content.video` | object? | None: a lesson with no video, whose exercises are open from the start |
+| `content.video.id` | string | Changes when the video is replaced: the learner starts it over |
+| `content.video.durationSeconds` | int | |
+| `content.video.cover` | string? | |
+| `content.video.sources[]` | `{quality, url, sizeMb?}` | `quality`: `auto`, `low`, `medium`, `high`. HLS or MP4; the app reopens at the same place when it changes |
+| `content.video.captions[]` | `{fromMs, toMs, ar}` | The panel's VTT file, already read, so the phone has no parser to keep |
+| `content.summary` | `{ar, table[], examples[]}` | Required. `table[]`: `{left, right: [part]}`. `examples[]`: `{en: [part], ar, audio?}`. A part is `{text, strong?, marked?}` |
+| `content.watch` | as below | What the server last heard, from any phone |
+
 `aiReviewEnabled` (top level, bool) says whether the AI may judge in this lesson, by the track's settings and the learner's age: with it off, or absent, the app leaves out `speakAnswer` questions, uncounted (S §16.2). Proposed.
 
 A question the app can't read is skipped and logged, so it can't leave the learner stuck on the lesson; a lesson with no readable question is a failure with a retry.
@@ -133,6 +151,40 @@ The common errors (`README.md`). With an unknown lesson, `404`.
 ## `POST /api/v1/app/lessons/{lessonId}/answers/review`
 
 Asks the server to judge an order in `reviewOrders`, with the same body as an answer, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
+
+## `POST /api/v1/app/lessons/{lessonId}/watch`
+
+How much of the video was really watched, kept on the phone and sent like an answer. Only the latest counts, so a newer one replaces any still waiting. Proposed.
+
+```json
+{ "videoId": "vid_1", "lessonVersion": 1, "positionSeconds": 134, "watched": [[0, 120], [200, 214]] }
+```
+
+`watched` is `[from, to)` in seconds, counted from what played: moving the bar adds nothing. The server should take the union, and decide completion from it (S §7.6).
+
+## `GET /api/v1/app/lessons/{lessonId}/questions`
+
+**Only the caller's own questions on this lesson, and the replies to them, newest first. The server must enforce this: no other learner's question may ever appear in this response (ADR 14).** Proposed.
+
+```json
+[
+  {
+    "questionId": "6f1c8f60-0000-4000-8000-000000000003",
+    "text": "...",
+    "askedAt": "2026-11-01T08:00:00Z",
+    "videoSeconds": 134,
+    "reply": { "name": "...", "role": "teacher", "text": "..." }
+  }
+]
+```
+
+`role` is `teacher` or `admin`. `videoSeconds` and `reply` are optional.
+
+## `POST /api/v1/app/lessons/{lessonId}/questions`
+
+`{questionId, text, videoSeconds?}`, and answers with the question as above, including `askedAt`. `questionId` is made on the phone and the same on every try, so a repeat keeps one question. A reply should notify only this learner (S §17). Proposed.
+
+Open with the backend team: the panel's questions page (SV §9.1) was designed around public questions; moderation by report and block no longer applies, as nothing is shown to other learners.
 
 ## `POST /api/v1/app/lessons/{lessonId}/complete`
 

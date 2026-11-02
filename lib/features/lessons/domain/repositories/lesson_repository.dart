@@ -1,6 +1,7 @@
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 
 abstract interface class LessonRepository {
@@ -23,6 +24,19 @@ abstract interface class LessonRepository {
   /// its official numbers. When it can't be reached the completion stays on the
   /// phone with the answers, and the failure says so.
   Future<Result<LessonResult>> completeLesson(LessonSummary summary);
+
+  /// How far this phone watched the lesson's video.
+  WatchState? savedWatch(String lessonId);
+
+  Future<void> saveWatch(String lessonId, WatchState watch);
+
+  /// Tells the server when it can. Only the latest counts, so it replaces any
+  /// earlier one still waiting.
+  Future<void> sendWatch(String lessonId, int lessonVersion, WatchState watch);
+
+  VideoQuality get videoQuality;
+
+  Future<void> setVideoQuality(VideoQuality quality);
 
   /// Keeps the report on the phone and sends it when it can. Never fails.
   Future<void> saveReport(ExerciseReport report);

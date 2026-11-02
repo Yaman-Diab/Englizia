@@ -18,6 +18,8 @@ final class SettingsStorageService {
   static const _emailReminderKey = 'account.email_reminder_hidden_until';
   static const _lessonProgressKey = 'account.lesson_progress';
   static const _lessonCacheKey = 'account.lesson_cache';
+  static const _videoWatchKey = 'account.video_watch';
+  static const _videoQualityKey = 'settings.video_quality';
 
   final SharedPreferences _prefs;
 
@@ -98,6 +100,20 @@ final class SettingsStorageService {
     await _prefs.setString(_emailReminderKey, until.toUtc().toIso8601String());
   }
 
+  /// How far each lesson's video was watched on this phone, as JSON.
+  String? get videoWatch => _prefs.getString(_videoWatchKey);
+
+  Future<void> setVideoWatch(String json) async {
+    await _prefs.setString(_videoWatchKey, json);
+  }
+
+  /// The quality the learner chose, for every video (S §8.1).
+  String? get videoQuality => _prefs.getString(_videoQualityKey);
+
+  Future<void> setVideoQuality(String name) async {
+    await _prefs.setString(_videoQualityKey, name);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -107,6 +123,7 @@ final class SettingsStorageService {
       await _prefs.remove(_emailReminderKey);
       await _prefs.remove(_lessonProgressKey);
       await _prefs.remove(_lessonCacheKey);
+      await _prefs.remove(_videoWatchKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

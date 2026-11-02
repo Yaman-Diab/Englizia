@@ -11,6 +11,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/complete/pages/lesson_complete_page.dart';
+import 'package:englizia/features/lessons/presentation/complete/widgets/unit_chain.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -397,6 +398,21 @@ void main() {
       await pump(tester);
 
       expect(find.text('lesson_done_replayed'.tr()), findsOneWidget);
+    });
+
+    testWidgets('the line reaches as far as the chain has come', (
+      tester,
+    ) async {
+      lessons.completion = const Ok(LessonResult(xp: 15));
+      await pump(tester);
+
+      final fill = find.byWidgetPredicate(
+        (widget) => widget is FractionallySizedBox && widget.heightFactor == 1,
+      );
+      final track = tester.getSize(find.byType(UnitChain)).width;
+      final size = tester.getSize(fill);
+      expect(size.height, greaterThan(0), reason: 'a line with no height');
+      expect(size.width, greaterThan(track / 3));
     });
 
     test('this lesson counts as done before the server says so', () {

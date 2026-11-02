@@ -53,6 +53,17 @@ final class ReaderColors {
   Color get captionArabic => AppPalette.yellow300;
   Color get captionBackground => AppPalette.captionScrim;
 
+  /// The player is black in any theme.
+  Color get videoBackground => AppPalette.black;
+  Color get onVideo => AppPalette.white;
+  Color get videoBoard => const Color(0xFF10151F);
+  Color get videoCard => const Color(0xEB10151F);
+  Color get videoDim => AppPalette.black.withValues(alpha: .4);
+  Color get videoChip => AppPalette.black.withValues(alpha: .72);
+  Color get videoTrack => AppPalette.white.withValues(alpha: .2);
+  Color get videoBuffered => AppPalette.white.withValues(alpha: .4);
+  Color get videoRipple => AppPalette.white.withValues(alpha: .18);
+
   static ReaderColors lerp(
     ReaderColors a,
     ReaderColors b,
