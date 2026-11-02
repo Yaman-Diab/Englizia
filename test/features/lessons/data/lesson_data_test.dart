@@ -19,8 +19,8 @@ import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
-import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
@@ -1094,6 +1094,101 @@ void main() {
     });
   });
 
+  group('an interactive video', () {
+    Map<String, Object?> asset(String path) =>
+        asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
+    final json = asset(LessonFakeDataSource.videoAsset);
+    final content = readerFromJson(json)!;
+
+    test('the mock has its video, speakers, timings and spans', () {
+      final video = content.video!;
+      expect(content.audioUrl, isEmpty);
+      expect(content.duration, const Duration(seconds: 80));
+      expect(video.video.sources, hasLength(4));
+      expect(video.requiredPercent, 80);
+      expect(video.defaultSpeed, 1);
+      expect(content.sentences, hasLength(6));
+      expect(content.sentences.first.speaker, 'Omar');
+      expect(content.spans, hasLength(4));
+      expect(content.hasShadowing, isTrue);
+      var last = Duration.zero;
+      for (final sentence in content.sentences) {
+        for (final word in sentence.words) {
+          expect(word.start, greaterThanOrEqualTo(last));
+          last = word.end;
+        }
+      }
+      expect(last, lessThan(content.duration));
+    });
+
+    test('a span\'s words may have others between them', () {
+      final span = content.spans.firstWhere((s) => s.id == 'wrapup');
+      expect(span.wordIds, ['s4w3', 's4w5']);
+      expect(span.noteExample, isNotEmpty);
+    });
+
+    test('the panel\'s speed and the watch so far are read', () {
+      final reader = asJsonMap(json['reader']);
+      final parsed = readerFromJson({
+        'reader': {
+          ...reader,
+          'defaultSpeed': .75,
+          'watch': {
+            'videoId': 'vid',
+            'positionSeconds': 9,
+            'watched': [
+              [0, 9],
+            ],
+          },
+        },
+      })!;
+      expect(parsed.video!.defaultSpeed, .75);
+      expect(parsed.video!.savedWatch?.positionSeconds, 9);
+    });
+
+    test('with no share to watch, it can\'t be read', () {
+      final reader = {...asJsonMap(json['reader'])}
+        ..remove('requiredWatchPercent');
+      expect(readerFromJson({'reader': reader}), isNull);
+    });
+
+    test('a saved word keeps its moment in the video', () {
+      final word = SavedWord(
+        lessonId: 'les',
+        span: content.spans.first,
+        sentence: content.sentences.first,
+        videoId: 'vid',
+      );
+      final sentence = asJsonMap(
+        savedWordToJson(word, saved: true)['sentence'],
+      );
+      expect(sentence['videoId'], 'vid');
+      expect(sentence['startMs'], content.sentences.first.start.inMilliseconds);
+      expect(sentence['endMs'], content.sentences.first.end.inMilliseconds);
+    });
+
+    test('a text\'s saved word has no moment', () {
+      final word = SavedWord(
+        lessonId: 'les',
+        span: content.spans.first,
+        sentence: content.sentences.first,
+      );
+      final sentence = asJsonMap(
+        savedWordToJson(word, saved: true)['sentence'],
+      );
+      expect(sentence.containsKey('startMs'), isFalse);
+    });
+
+    test('its way of showing is kept with a text\'s', () {
+      const prefs = ReaderPrefs(videoMode: ReaderMode.englishOnly);
+      expect(readerPrefsFromJson(readerPrefsToJson(prefs)), prefs);
+      expect(
+        readerPrefsFromJson(const {}).videoMode,
+        ReaderMode.currentTranslated,
+      );
+    });
+  });
+
   group('a grammar lesson', () {
     Map<String, Object?> asset(String path) =>
         asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
@@ -1153,7 +1248,7 @@ void main() {
     });
 
     test('a video finds its source, and captions their time', () {
-      const video = GrammarVideo(
+      const video = LessonVideo(
         id: 'v',
         duration: Duration(seconds: 10),
         sources: [

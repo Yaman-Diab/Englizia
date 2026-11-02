@@ -1,6 +1,7 @@
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
 
 // ASSUMPTION(api): this whole file is proposed (docs/api/lessons.md).
@@ -29,7 +30,7 @@ GrammarContent? grammarFromJson(Map<String, Object?> lesson) {
     return GrammarContent(
       summary: _summary(asJsonMap(json['summary'])),
       requiredPercent: _requiredInt(json.readInt('requiredWatchPercent')),
-      video: video == null ? null : _video(video),
+      video: video == null ? null : lessonVideoFromJson(video),
       teacherName: teacher?.readString('name'),
       teacherAvatar: teacher?.readString('avatar'),
       bookPage: lesson.readMap('bookRef')?.readInt('page'),
@@ -46,7 +47,8 @@ GrammarContent? grammarFromJson(Map<String, Object?> lesson) {
   }
 }
 
-GrammarVideo _video(Map<String, Object?> json) {
+/// A lesson's video, in a grammar lesson or an interactive video.
+LessonVideo lessonVideoFromJson(Map<String, Object?> json) {
   final sources = [
     for (final source in json.readList('sources') ?? const <Object?>[])
       if (_qualities[asJsonMap(source).readString('quality')]
@@ -57,8 +59,8 @@ GrammarVideo _video(Map<String, Object?> json) {
           sizeMb: asJsonMap(source).readInt('sizeMb'),
         ),
   ];
-  if (sources.isEmpty) throw const FormatException('Grammar: no video source');
-  return GrammarVideo(
+  if (sources.isEmpty) throw const FormatException('Video: no source');
+  return LessonVideo(
     id: _required(json.readString('id')),
     duration: Duration(seconds: _requiredInt(json.readInt('durationSeconds'))),
     coverUrl: json.readString('cover'),

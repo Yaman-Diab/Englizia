@@ -679,6 +679,18 @@
   "reader_saved_show": "Show",
   "reader_back_to_current": "Current sentence",
   "reader_tip": "Press a sentence to hear or translate it, and a dotted word to learn its meaning.",
+  "reader_mode_current": "English, with the current sentence translated",
+  "reader_mode_current_detail": "The default in a video",
+  "reader_mode_english_only": "English only",
+  "reader_mode_bars_detail": "No text: the sentences are bars",
+  "reader_again": "Say it again",
+  "reader_back_to_clip": "Current sentence",
+  "reader_saved_with_time": "Saved to your word bank with its moment",
+  "reader_end_clip": "You finished the clip",
+  "reader_next": "Next",
+  "reader_panel_show": "Show the text panel",
+  "reader_panel_hide": "Hide the text panel",
+  "reader_panel": "Text",
   "reader_tip_ok": "Got it",
   "reader_audio_failed": "The sound couldn't load. You can read for now",
   "reader_retry": "Try again",
@@ -692,6 +704,7 @@
   "reader_continue_exercises": "Continue: the exercises",
   "foundation_try_text": "Try the interactive text",
   "foundation_try_text_broken": "Try a text whose sound fails",
+  "foundation_try_video": "Try the interactive video",
   "reader_end_sentences": {
     "one": "1 sentence",
     "other": "{} sentences"
@@ -699,6 +712,14 @@
   "reader_end_saved": {
     "one": "1 word saved",
     "other": "{} words saved"
+  },
+  "reader_end_saved_phrases": {
+    "one": "{} phrase saved",
+    "other": "{} phrases saved"
+  },
+  "reader_end_marked_phrases": {
+    "one": "{} marked phrase",
+    "other": "{} marked phrases"
   },
   "reader_end_marked": {
     "one": "1 marked word",

@@ -5,6 +5,7 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/core/video/video_engine.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
 import 'package:englizia/features/lessons/domain/repositories/teacher_question_repository.dart';
 import 'package:englizia/features/lessons/domain/services/watch_progress.dart';
@@ -12,6 +13,8 @@ import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_les
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/pages/grammar_lesson_page.dart';
 import 'package:englizia/features/lessons/presentation/grammar/widgets/grammar_player.dart';
+import 'package:englizia/features/lessons/presentation/video/lesson_player.dart';
+import 'package:englizia/features/lessons/presentation/video/player_contract.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,7 +42,7 @@ const _summary = RuleSummary(
   ],
 );
 
-const _video = GrammarVideo(
+const _video = LessonVideo(
   id: 'v1',
   duration: Duration(seconds: 100),
   sources: [

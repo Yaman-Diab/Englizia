@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Interactive video: the video with a reader under it instead of captions, who speaks, five ways of showing the text, going to any sentence, cards that stop the picture, words saved with their moment, a side panel when the phone is turned, and how much was really watched.
 - Interactive text: a reader that follows the sound word by word, five ways of showing the text, cards for marked words and phrases with their sound and a star to save them, and display settings kept on the phone.
 - Grammar lessons: a video player with captions, speed, quality and full screen, a watched share counted from what really played that opens the exercises, the rule in short with its examples, and private questions to the teacher, whose replies only the learner who asked can see.
 - The end of a lesson: the guide's quiet celebration, points counting up, the first-try count and time, words saved, what to review, the unit's chain with the lesson filling in, and the day's goal and streak, with its moment when the goal is reached. Works offline with what the phone knows.

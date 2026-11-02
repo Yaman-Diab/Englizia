@@ -7,7 +7,7 @@ import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_line.dart';
-import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
+import 'package:englizia/features/lessons/presentation/reader/cubit/reader_cubit.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -49,9 +49,13 @@ final class SentenceView extends Equatable {
     required this.selection,
     required this.mode,
     required this.size,
+    this.dim = false,
   });
 
   final bool current;
+
+  /// A video's other sentences, around the one it is at.
+  final bool dim;
   final int? saidWord;
 
   /// How long the word said lasts, for the mark to slide along it.
@@ -72,6 +76,7 @@ final class SentenceView extends Equatable {
     selection,
     mode,
     size,
+    dim,
   ];
 }
 
@@ -87,6 +92,8 @@ class ReaderSentenceBlock extends StatefulWidget {
     required this.onListen,
     required this.onToggleTranslation,
     required this.onReveal,
+    this.video = false,
+    this.compact = false,
     super.key,
   });
 
@@ -103,13 +110,25 @@ class ReaderSentenceBlock extends StatefulWidget {
   final VoidCallback onToggleTranslation;
   final VoidCallback onReveal;
 
+  /// Under a video: its sentences can't be revealed while practising listening, and
+  /// the tool says the sentence again in the video.
+  final bool video;
+
+  /// Beside a video: only to read along, with no tools.
+  final bool compact;
+
   @override
   State<ReaderSentenceBlock> createState() => _ReaderSentenceBlockState();
 }
 
 class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
+  static const _sameLine = 4.0;
+
   final _stage = GlobalKey();
   Rect? _said;
+
+  /// The mark changed lines, so it goes there at once and doesn't cross the text.
+  bool _saidJumped = false;
   ({Offset from, Offset to})? _arc;
 
   @override
@@ -145,6 +164,11 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
     final arc = _measureArc();
     if (said != _said || arc != _arc) {
       setState(() {
+        final before = _said;
+        _saidJumped =
+            before != null &&
+            said != null &&
+            (before.top - said.top).abs() > _sameLine;
         _said = said;
         _arc = arc;
       });
@@ -166,7 +190,9 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
     }
     final a = _rectOf(indices.first);
     final b = _rectOf(indices.last);
-    if (a == null || b == null || (a.top - b.top).abs() > 4) return null;
+    if (a == null || b == null || (a.top - b.top).abs() > _sameLine) {
+      return null;
+    }
     return (from: a.topCenter, to: b.topCenter);
   }
 
@@ -178,9 +204,16 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
     final sentence = widget.sentence;
     final hidden = mode == ReaderMode.listening && !view.revealed;
     final image = sentence.imageUrl;
+    final speaker = sentence.speaker;
+    final translation =
+        (mode == ReaderMode.onTap && view.open) ||
+        mode == ReaderMode.below ||
+        (mode == ReaderMode.currentTranslated && view.current && view.open);
     return Semantics(
       container: true,
-      label: sentence.english,
+      label: speaker == null
+          ? sentence.english
+          : '$speaker: ${sentence.english}',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: widget.onTapSentence,
@@ -197,11 +230,12 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (speaker != null) _Speaker(name: speaker),
               if (mode == ReaderMode.arabicFirst ||
                   mode == ReaderMode.arabicOnly) ...[
                 _Arabic(
                   text: sentence.arabic,
-                  strong: mode == ReaderMode.arabicOnly,
+                  strong: mode == ReaderMode.arabicOnly && !view.dim,
                 ),
                 if (mode == ReaderMode.arabicFirst)
                   const SizedBox(height: AppSpacing.sm),
@@ -211,7 +245,7 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   english: sentence.english,
                   current: view.current,
                   size: view.size,
-                  onReveal: widget.onReveal,
+                  onReveal: widget.video ? null : widget.onReveal,
                 )
               else if (mode != ReaderMode.arabicOnly)
                 _words(context),
@@ -239,13 +273,17 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   ),
                 ),
               ],
-              if (mode == ReaderMode.onTap || mode == ReaderMode.below)
+              if (mode == ReaderMode.onTap ||
+                  mode == ReaderMode.below ||
+                  mode == ReaderMode.currentTranslated)
                 SmoothSize(
-                  child: view.open || mode == ReaderMode.below
+                  child: translation
                       ? _Translation(text: sentence.arabic)
                       : const SizedBox(width: double.infinity),
                 ),
-              if (view.current && mode != ReaderMode.listening)
+              if (view.current &&
+                  mode != ReaderMode.listening &&
+                  !widget.compact)
                 Entrance(
                   key: ValueKey('tools:${widget.index}'),
                   motion: EntranceMotion.down,
@@ -253,7 +291,10 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   duration: AppMotion.fast,
                   distance: AppMotion.distanceMicro,
                   child: _Tools(
-                    showsTranslation: mode == ReaderMode.onTap,
+                    showsTranslation:
+                        mode == ReaderMode.onTap ||
+                        mode == ReaderMode.currentTranslated,
+                    video: widget.video,
                     open: view.open,
                     onListen: widget.onListen,
                     onToggle: widget.onToggleTranslation,
@@ -270,68 +311,86 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
     final view = widget.view;
     final colors = context.colors;
     final style = readerTextStyle(context, view.size);
+    final ink = view.dim ? colors.textSecondary : style.color!;
     final selection = view.selection;
     final said = _said;
     final arc = _arc;
-    final space = (style.fontSize ?? 20) * .28;
+    final space =
+        MediaQuery.textScalerOf(context).scale(style.fontSize ?? 20) * .28;
     final words = widget.sentence.words;
     return Directionality(
       textDirection: TextDirection.ltr,
-      child: Stack(
-        key: _stage,
-        clipBehavior: Clip.none,
-        children: [
-          if (said != null)
-            AnimatedPositionedDirectional(
-              duration: AppMotion.resolve(context, view.saidFor),
-              curve: AppMotion.linear,
-              start: said.left - AppSpacing.xs,
-              top: said.top,
-              width: said.width + AppSpacing.sm,
-              height: said.height,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: colors.reader.karaokeBackground,
-                  borderRadius: BorderRadius.circular(AppSpacing.sm - 2),
-                ),
-              ),
-            ),
-          Wrap(
-            spacing: space,
+      child: NotificationListener<SizeChangedLayoutNotification>(
+        // Turning the phone moves the words under the mark.
+        onNotification: (_) {
+          _measureLater();
+          return true;
+        },
+        child: SizeChangedLayoutNotifier(
+          child: Stack(
+            key: _stage,
+            clipBehavior: Clip.none,
             children: [
-              for (final (i, word) in words.indexed)
-                _Word(
-                  key: widget.keys.word(widget.index, i),
-                  text: word.text,
-                  style: style,
-                  span: widget.content.spanOf(widget.sentence, word),
-                  selected:
-                      selection != null &&
-                      (selection.span?.wordIds.contains(word.id) ??
-                          selection.word == i),
-                  said: view.current && view.saidWord == i,
-                  onTap: () => widget.onTapWord(i),
-                ),
-            ],
-          ),
-          if (arc != null)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: TimedValue(
-                  delay: Duration.zero,
-                  duration: AppMotion.fast,
-                  builder: (context, value) => CustomPaint(
-                    painter: _ArcPainter(
-                      from: arc.from,
-                      to: arc.to,
-                      progress: value,
-                      color: colors.reader.selectedWord,
+              if (said != null)
+                AnimatedPositionedDirectional(
+                  duration: _saidJumped
+                      ? Duration.zero
+                      : AppMotion.resolve(context, view.saidFor),
+                  curve: AppMotion.linear,
+                  start: said.left - AppSpacing.xs,
+                  top: said.top,
+                  width: said.width + AppSpacing.sm,
+                  height: said.height,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: colors.reader.karaokeBackground,
+                      borderRadius: BorderRadius.circular(AppSpacing.sm - 2),
                     ),
                   ),
                 ),
+              TweenAnimationBuilder<Color?>(
+                tween: ColorTween(end: ink),
+                duration: AppMotion.resolve(context, AppMotion.fast),
+                curve: AppMotion.out,
+                builder: (context, color, _) => Wrap(
+                  spacing: space,
+                  children: [
+                    for (final (i, word) in words.indexed)
+                      _Word(
+                        key: widget.keys.word(widget.index, i),
+                        text: word.text,
+                        style: style.copyWith(color: color),
+                        span: widget.content.spanOf(widget.sentence, word),
+                        selected:
+                            selection != null &&
+                            (selection.span?.wordIds.contains(word.id) ??
+                                selection.word == i),
+                        said: view.current && view.saidWord == i,
+                        onTap: () => widget.onTapWord(i),
+                      ),
+                  ],
+                ),
               ),
-            ),
-        ],
+              if (arc != null)
+                Positioned.fill(
+                  child: IgnorePointer(
+                    child: TimedValue(
+                      delay: Duration.zero,
+                      duration: AppMotion.fast,
+                      builder: (context, value) => CustomPaint(
+                        painter: _ArcPainter(
+                          from: arc.from,
+                          to: arc.to,
+                          progress: value,
+                          color: colors.reader.selectedWord,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -454,6 +513,27 @@ class _ArcPainter extends CustomPainter {
       oldDelegate.color != color;
 }
 
+/// Who says it, above the sentence in every way of showing it (S §8.4).
+class _Speaker extends StatelessWidget {
+  const _Speaker({required this.name});
+
+  final String name;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsetsDirectional.only(bottom: AppSpacing.xxs),
+    child: Text(
+      name,
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.start,
+      locale: const Locale('en'),
+      style: context.texts.captionStrong.copyWith(
+        color: context.colors.textSecondary,
+      ),
+    ),
+  );
+}
+
 class _Arabic extends StatelessWidget {
   const _Arabic({required this.text, required this.strong});
 
@@ -499,7 +579,7 @@ class _HiddenLines extends StatelessWidget {
   final String english;
   final bool current;
   final ReaderTextSize size;
-  final VoidCallback onReveal;
+  final VoidCallback? onReveal;
 
   static const _height = 14.0;
 
@@ -547,13 +627,14 @@ class _HiddenLines extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
             ],
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: TextButton(
-                onPressed: onReveal,
-                child: Text('reader_reveal'.tr()),
+            if (onReveal case final onReveal?)
+              Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton(
+                  onPressed: onReveal,
+                  child: Text('reader_reveal'.tr()),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -564,12 +645,14 @@ class _HiddenLines extends StatelessWidget {
 class _Tools extends StatelessWidget {
   const _Tools({
     required this.showsTranslation,
+    required this.video,
     required this.open,
     required this.onListen,
     required this.onToggle,
   });
 
   final bool showsTranslation;
+  final bool video;
   final bool open;
   final VoidCallback onListen;
   final VoidCallback onToggle;
@@ -579,12 +662,19 @@ class _Tools extends StatelessWidget {
     padding: const EdgeInsetsDirectional.only(top: AppSpacing.xs),
     child: Row(
       children: [
-        _Tool(
-          icon: Icons.volume_up_outlined,
-          label: 'reader_listen'.tr(),
-          semantics: 'reader_listen_sentence'.tr(),
-          onTap: onListen,
-        ),
+        if (video)
+          _Tool(
+            icon: Icons.replay_rounded,
+            label: 'reader_again'.tr(),
+            onTap: onListen,
+          )
+        else
+          _Tool(
+            icon: Icons.volume_up_outlined,
+            label: 'reader_listen'.tr(),
+            semantics: 'reader_listen_sentence'.tr(),
+            onTap: onListen,
+          ),
         if (showsTranslation) ...[
           const SizedBox(width: AppSpacing.xs),
           _Tool(

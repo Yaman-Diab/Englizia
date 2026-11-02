@@ -15,6 +15,8 @@ import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_les
 import 'package:englizia/features/lessons/presentation/grammar/widgets/grammar_player.dart';
 import 'package:englizia/features/lessons/presentation/grammar/widgets/rule_summary_card.dart';
 import 'package:englizia/features/lessons/presentation/grammar/widgets/teacher_questions.dart';
+import 'package:englizia/features/lessons/presentation/video/lesson_player.dart';
+import 'package:englizia/features/lessons/presentation/video/video_fullscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -64,28 +66,14 @@ class _GrammarLessonPageState extends State<GrammarLessonPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _scroll.dispose();
-    if (_fullscreen) unawaited(_systemUi(fullscreen: false));
+    if (_fullscreen) unawaited(setVideoFullscreen(fullscreen: false));
     super.dispose();
-  }
-
-  Future<void> _systemUi({required bool fullscreen}) async {
-    await SystemChrome.setPreferredOrientations(
-      fullscreen
-          ? const [
-              DeviceOrientation.landscapeLeft,
-              DeviceOrientation.landscapeRight,
-            ]
-          : const [DeviceOrientation.portraitUp],
-    );
-    await SystemChrome.setEnabledSystemUIMode(
-      fullscreen ? SystemUiMode.immersiveSticky : SystemUiMode.edgeToEdge,
-    );
   }
 
   void _toggleFullscreen() {
     final to = !_fullscreen;
     setState(() => _fullscreen = to);
-    unawaited(_systemUi(fullscreen: to));
+    unawaited(setVideoFullscreen(fullscreen: to));
   }
 
   bool _followScroll(ScrollMetrics metrics) {

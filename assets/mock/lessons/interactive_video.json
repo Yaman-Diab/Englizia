@@ -1,0 +1,531 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_iv",
+    "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": true,
+    "speechPassPercent": 70,
+    "typoMinLetters": 5,
+    "aiReviewEnabled": true,
+    "title": "في السوق",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": false
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_gv",
+      "lessonKind": "grammarVideo",
+      "title": "Present simple"
+    },
+    "reader": {
+      "video": {
+        "id": "vid_market_v1",
+        "durationSeconds": 80,
+        "sources": [
+          {
+            "quality": "auto",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
+          },
+          {
+            "quality": "low",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "sizeMb": 4
+          },
+          {
+            "quality": "medium",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "sizeMb": 9
+          },
+          {
+            "quality": "high",
+            "url": "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8",
+            "sizeMb": 18
+          }
+        ]
+      },
+      "requiredWatchPercent": 80,
+      "defaultSpeed": 1,
+      "sentences": [
+        {
+          "id": "s0",
+          "ar": "صباح الخير! بكم هذه البندورة؟",
+          "speaker": "Omar",
+          "shadowing": false,
+          "words": [
+            {
+              "id": "s0w0",
+              "text": "Good",
+              "startMs": 1200,
+              "endMs": 2361
+            },
+            {
+              "id": "s0w1",
+              "text": "morning!",
+              "startMs": 2361,
+              "endMs": 3989
+            },
+            {
+              "id": "s0w2",
+              "text": "How",
+              "startMs": 3989,
+              "endMs": 4995
+            },
+            {
+              "id": "s0w3",
+              "text": "much",
+              "startMs": 4995,
+              "endMs": 6156
+            },
+            {
+              "id": "s0w4",
+              "text": "are",
+              "startMs": 6156,
+              "endMs": 7162
+            },
+            {
+              "id": "s0w5",
+              "text": "these",
+              "startMs": 7162,
+              "endMs": 8479
+            },
+            {
+              "id": "s0w6",
+              "text": "tomatoes?",
+              "startMs": 8479,
+              "endMs": 10263,
+              "gloss": "بندورة"
+            }
+          ]
+        },
+        {
+          "id": "s1",
+          "ar": "الكيلو بألفين.",
+          "speaker": "Seller",
+          "shadowing": true,
+          "words": [
+            {
+              "id": "s1w0",
+              "text": "They're",
+              "startMs": 15052,
+              "endMs": 16524
+            },
+            {
+              "id": "s1w1",
+              "text": "two",
+              "startMs": 16524,
+              "endMs": 17530
+            },
+            {
+              "id": "s1w2",
+              "text": "thousand",
+              "startMs": 17530,
+              "endMs": 19314
+            },
+            {
+              "id": "s1w3",
+              "text": "a",
+              "startMs": 19314,
+              "endMs": 20008
+            },
+            {
+              "id": "s1w4",
+              "text": "kilo.",
+              "startMs": 20008,
+              "endMs": 21169,
+              "gloss": "كيلو"
+            }
+          ]
+        },
+        {
+          "id": "s2",
+          "ar": "هل تعطيني سعرًا أفضل؟",
+          "speaker": "Omar",
+          "shadowing": false,
+          "words": [
+            {
+              "id": "s2w0",
+              "text": "Can",
+              "startMs": 25958,
+              "endMs": 26964
+            },
+            {
+              "id": "s2w1",
+              "text": "you",
+              "startMs": 26964,
+              "endMs": 27969
+            },
+            {
+              "id": "s2w2",
+              "text": "give",
+              "startMs": 27969,
+              "endMs": 29131
+            },
+            {
+              "id": "s2w3",
+              "text": "me",
+              "startMs": 29131,
+              "endMs": 29981
+            },
+            {
+              "id": "s2w4",
+              "text": "a",
+              "startMs": 29981,
+              "endMs": 30675
+            },
+            {
+              "id": "s2w5",
+              "text": "better",
+              "startMs": 30675,
+              "endMs": 32147
+            },
+            {
+              "id": "s2w6",
+              "text": "price?",
+              "startMs": 32147,
+              "endMs": 33464,
+              "gloss": "سعر"
+            }
+          ]
+        },
+        {
+          "id": "s3",
+          "ar": "حسنًا، سأنتقي لك أفضلها.",
+          "speaker": "Seller",
+          "shadowing": true,
+          "words": [
+            {
+              "id": "s3w0",
+              "text": "Fine.",
+              "startMs": 38253,
+              "endMs": 39414
+            },
+            {
+              "id": "s3w1",
+              "text": "I'll",
+              "startMs": 39414,
+              "endMs": 40420
+            },
+            {
+              "id": "s3w2",
+              "text": "pick",
+              "startMs": 40420,
+              "endMs": 41581
+            },
+            {
+              "id": "s3w3",
+              "text": "out",
+              "startMs": 41581,
+              "endMs": 42587
+            },
+            {
+              "id": "s3w4",
+              "text": "the",
+              "startMs": 42587,
+              "endMs": 43593
+            },
+            {
+              "id": "s3w5",
+              "text": "best",
+              "startMs": 43593,
+              "endMs": 44754
+            },
+            {
+              "id": "s3w6",
+              "text": "ones",
+              "startMs": 44754,
+              "endMs": 45915
+            },
+            {
+              "id": "s3w7",
+              "text": "for",
+              "startMs": 45915,
+              "endMs": 46921
+            },
+            {
+              "id": "s3w8",
+              "text": "you.",
+              "startMs": 46921,
+              "endMs": 47926
+            }
+          ]
+        },
+        {
+          "id": "s4",
+          "ar": "رائع، هل تلفّها لي من فضلك؟",
+          "speaker": "Omar",
+          "shadowing": false,
+          "words": [
+            {
+              "id": "s4w0",
+              "text": "Great,",
+              "startMs": 52715,
+              "endMs": 54032
+            },
+            {
+              "id": "s4w1",
+              "text": "can",
+              "startMs": 54032,
+              "endMs": 55038
+            },
+            {
+              "id": "s4w2",
+              "text": "you",
+              "startMs": 55038,
+              "endMs": 56043
+            },
+            {
+              "id": "s4w3",
+              "text": "wrap",
+              "startMs": 56043,
+              "endMs": 57205
+            },
+            {
+              "id": "s4w4",
+              "text": "them",
+              "startMs": 57205,
+              "endMs": 58366
+            },
+            {
+              "id": "s4w5",
+              "text": "up,",
+              "startMs": 58366,
+              "endMs": 59216
+            },
+            {
+              "id": "s4w6",
+              "text": "please?",
+              "startMs": 59216,
+              "endMs": 60689
+            }
+          ]
+        },
+        {
+          "id": "s5",
+          "ar": "تفضّل. نهارك سعيد!",
+          "speaker": "Seller",
+          "shadowing": false,
+          "words": [
+            {
+              "id": "s5w0",
+              "text": "Here",
+              "startMs": 65477,
+              "endMs": 66639
+            },
+            {
+              "id": "s5w1",
+              "text": "you",
+              "startMs": 66639,
+              "endMs": 67644
+            },
+            {
+              "id": "s5w2",
+              "text": "go.",
+              "startMs": 67644,
+              "endMs": 68494
+            },
+            {
+              "id": "s5w3",
+              "text": "Have",
+              "startMs": 68494,
+              "endMs": 69656
+            },
+            {
+              "id": "s5w4",
+              "text": "a",
+              "startMs": 69656,
+              "endMs": 70350
+            },
+            {
+              "id": "s5w5",
+              "text": "nice",
+              "startMs": 70350,
+              "endMs": 71511
+            },
+            {
+              "id": "s5w6",
+              "text": "day!",
+              "startMs": 71511,
+              "endMs": 72517
+            }
+          ]
+        }
+      ],
+      "spans": [
+        {
+          "id": "howmuch",
+          "sentenceId": "s0",
+          "wordIds": [
+            "s0w2",
+            "s0w3"
+          ],
+          "kind": "idiom",
+          "base": "How much",
+          "ar": "بكم"
+        },
+        {
+          "id": "pickout",
+          "sentenceId": "s3",
+          "wordIds": [
+            "s3w2",
+            "s3w3"
+          ],
+          "kind": "phrasalVerb",
+          "base": "pick out",
+          "ar": "ينتقي"
+        },
+        {
+          "id": "wrapup",
+          "sentenceId": "s4",
+          "wordIds": [
+            "s4w3",
+            "s4w5"
+          ],
+          "kind": "phrasalVerb",
+          "base": "wrap up",
+          "ar": "يلفّ",
+          "note": "يأتي الضمير بين الفعل والحرف:",
+          "noteExample": [
+            {
+              "text": "wrap ",
+              "strong": true
+            },
+            {
+              "text": "them"
+            },
+            {
+              "text": " up",
+              "strong": true
+            }
+          ]
+        },
+        {
+          "id": "hereyougo",
+          "sentenceId": "s5",
+          "wordIds": [
+            "s5w0",
+            "s5w1",
+            "s5w2"
+          ],
+          "kind": "idiom",
+          "base": "Here you go",
+          "ar": "تفضّل"
+        }
+      ]
+    },
+    "exercises": [
+      {
+        "id": "q1",
+        "template": "multipleChoice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "prompt": {
+          "en": "She ___ to school every day.",
+          "audio": "https://example.com/mock/lessons/she_goes.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "go"
+          },
+          {
+            "id": "o2",
+            "text": "goes"
+          },
+          {
+            "id": "o3",
+            "text": "going"
+          },
+          {
+            "id": "o4",
+            "text": "gone"
+          }
+        ],
+        "answer": "o2",
+        "hint": {
+          "ar": "انتبه إلى الفاعل she"
+        },
+        "explanation": {
+          "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط."
+        },
+        "concepts": [
+          "c_present_s"
+        ],
+        "bookRef": null,
+        "reviewOnly": false
+      },
+      {
+        "id": "q4",
+        "template": "multipleChoice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "prompt": {
+          "en": "Excuse me, ___ ?",
+          "audio": "https://example.com/mock/lessons/post_office.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "could you tell me where the nearest post office is"
+          },
+          {
+            "id": "o2",
+            "text": "where post office"
+          },
+          {
+            "id": "o3",
+            "text": "post office is where"
+          },
+          {
+            "id": "o4",
+            "text": "you know the post office"
+          }
+        ],
+        "answer": "o1",
+        "bookRef": {
+          "page": 34,
+          "exercise": 2
+        },
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "هذا سؤال غير مباشر: نبدأ بعبارة مهذبة مثل could you tell me، ثم نكمل بترتيب الجملة العادية: الفاعل ثم الفعل.\nلذلك نقول where the nearest post office is، ولا نقول where is the nearest post office كما في السؤال المباشر.\nالخيارات الأخرى تحذف الفعل is أو تخلط الترتيب، فلا تكوّن جملة صحيحة.\nنستخدم السؤال غير المباشر حين نسأل شخصًا لا نعرفه، لأنه ألطف من السؤال المباشر، ويكثر في المحلات والمطارات ومحطات القطار."
+        }
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

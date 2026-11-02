@@ -8,16 +8,114 @@ import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
-import 'package:englizia/features/lessons/presentation/grammar/widgets/grammar_player.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
+import 'package:englizia/features/lessons/presentation/reader/cubit/reader_cubit.dart';
+import 'package:englizia/features/lessons/presentation/video/lesson_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+/// The reader's bar: the way out, the lesson's name and kind, and `Aa`.
+class ReaderTopBar extends StatelessWidget {
+  const ReaderTopBar({
+    required this.title,
+    required this.kind,
+    required this.onExit,
+    required this.settingsLabel,
+    required this.onSettings,
+    super.key,
+  });
+
+  static const height = 56.0;
+  static const _side = 72.0;
+
+  final String? title;
+  final String kind;
+  final VoidCallback onExit;
+  final String settingsLabel;
+
+  /// Once there is a text to show.
+  final VoidCallback? onSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final texts = context.texts;
+    final title = this.title;
+    final onSettings = this.onSettings;
+    return SizedBox(
+      height: height,
+      child: Stack(
+        children: [
+          PositionedDirectional(
+            start: AppSpacing.md,
+            top: AppSpacing.xs,
+            child: IconButton(
+              onPressed: onExit,
+              tooltip: 'lesson_gv_exit'.tr(),
+              color: colors.textSecondary,
+              icon: const Icon(Icons.close_rounded),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsetsDirectional.symmetric(horizontal: _side),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (title != null)
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: texts.bodyStrong.copyWith(
+                          color: colors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  Text(
+                    kind,
+                    style: texts.caption.copyWith(color: colors.textSecondary),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          if (onSettings != null)
+            PositionedDirectional(
+              end: AppSpacing.md,
+              top: AppSpacing.xs,
+              child: Semantics(
+                button: true,
+                label: settingsLabel,
+                excludeSemantics: true,
+                child: TextButton(
+                  onPressed: onSettings,
+                  style: TextButton.styleFrom(
+                    foregroundColor: colors.textPrimary,
+                    minimumSize: const Size.square(AppSizes.minTapTarget),
+                    padding: EdgeInsetsDirectional.zero,
+                    shape: const CircleBorder(),
+                  ),
+                  child: Text(
+                    'reader_size_sample'.tr(),
+                    textDirection: TextDirection.ltr,
+                    style: texts.bodyStrong,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
 
 /// The sound's player at the foot of the screen, left to right in any app language.
 class ReaderPlayerBar extends StatelessWidget {
   const ReaderPlayerBar({required this.state, super.key});
 
-  final InteractiveTextState state;
+  final ReaderState state;
 
   static const height = 88.0;
   static const _play = 56.0;
@@ -248,13 +346,17 @@ class ReaderAudioFailed extends StatelessWidget {
   }
 }
 
-/// «الجملة الحالية», over the player once the learner has scrolled away.
+/// The way back to the current sentence, over the player once the learner has
+/// scrolled away.
 class ReaderBackToCurrent extends StatelessWidget {
   const ReaderBackToCurrent({
+    required this.label,
     required this.upward,
     required this.onTap,
     super.key,
   });
+
+  final String label;
 
   /// The sentence is above what shows.
   final bool upward;
@@ -293,7 +395,7 @@ class ReaderBackToCurrent extends StatelessWidget {
                   ),
                   const SizedBox(width: AppSpacing.xs),
                   Text(
-                    'reader_back_to_current'.tr(),
+                    label,
                     style: context.texts.captionStrong.copyWith(
                       color: colors.background,
                     ),
@@ -308,10 +410,15 @@ class ReaderBackToCurrent extends StatelessWidget {
   }
 }
 
-/// «حُفظت في بنك الكلمات», with the way to see them.
+/// That it went to the word bank, with the way to see them.
 class ReaderSavedNotice extends StatelessWidget {
-  const ReaderSavedNotice({required this.onShow, super.key});
+  const ReaderSavedNotice({
+    required this.text,
+    required this.onShow,
+    super.key,
+  });
 
+  final String text;
   final VoidCallback onShow;
 
   static const _height = 48.0;
@@ -341,7 +448,7 @@ class ReaderSavedNotice extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
-                'reader_saved_notice'.tr(),
+                text,
                 style: context.texts.caption.copyWith(color: colors.background),
               ),
             ),
@@ -362,15 +469,20 @@ class ReaderSavedNotice extends StatelessWidget {
 /// The end of the list: how much there was, and the way on.
 class ReaderEnd extends StatelessWidget {
   const ReaderEnd({
+    required this.title,
     required this.sentences,
     required this.savedCount,
     required this.markedCount,
     required this.hasShadowing,
     required this.guide,
     required this.onContinue,
+    this.phrases = false,
     super.key,
   });
 
+  /// A video counts what it marked as phrases, and a text as words.
+  final bool phrases;
+  final String title;
   final int sentences;
   final int savedCount;
   final int markedCount;
@@ -391,7 +503,7 @@ class ReaderEnd extends StatelessWidget {
           Semantics(
             header: true,
             child: Text(
-              'reader_end_title'.tr(),
+              title,
               style: texts.title.copyWith(color: colors.textPrimary),
             ),
           ),
@@ -400,9 +512,13 @@ class ReaderEnd extends StatelessWidget {
             [
               'reader_end_sentences'.plural(sentences),
               if (savedCount > 0)
-                'reader_end_saved'.plural(savedCount)
+                phrases
+                    ? 'reader_end_saved_phrases'.plural(savedCount)
+                    : 'reader_end_saved'.plural(savedCount)
               else if (markedCount > 0)
-                'reader_end_marked'.plural(markedCount),
+                phrases
+                    ? 'reader_end_marked_phrases'.plural(markedCount)
+                    : 'reader_end_marked'.plural(markedCount),
             ].join(' · '),
             textAlign: TextAlign.center,
             style: texts.caption.copyWith(color: colors.textSecondary),
@@ -444,11 +560,7 @@ class _ReaderSettings extends StatelessWidget {
     final colors = context.colors;
     final texts = context.texts;
     final cubit = context.read<InteractiveTextCubit>();
-    return BlocSelector<
-      InteractiveTextCubit,
-      InteractiveTextState,
-      ReaderPrefs
-    >(
+    return BlocSelector<InteractiveTextCubit, ReaderState, ReaderPrefs>(
       selector: (state) => state.prefs,
       builder: (context, prefs) {
         final heading = texts.bodyStrong.copyWith(color: colors.textPrimary);
@@ -505,7 +617,7 @@ class _ReaderSettings extends StatelessWidget {
                 const SizedBox(height: AppSpacing.lg + AppSpacing.xs),
                 Text('reader_mode_title'.tr(), style: heading),
                 const SizedBox(height: AppSpacing.xs),
-                for (final mode in ReaderMode.values)
+                for (final mode in ReaderMode.forText)
                   _ModeRow(
                     mode: mode,
                     selected: prefs.mode == mode,
@@ -565,6 +677,23 @@ TextStyle readerSample(BuildContext context, ReaderTextSize size) {
   );
 }
 
+/// A way of showing the text, as its choice says it.
+(String, String?) readerModeNames(ReaderMode mode) => switch (mode) {
+  ReaderMode.onTap => ('reader_mode_tap'.tr(), 'reader_mode_tap_detail'.tr()),
+  ReaderMode.below => ('reader_mode_below'.tr(), null),
+  ReaderMode.currentTranslated => (
+    'reader_mode_current'.tr(),
+    'reader_mode_current_detail'.tr(),
+  ),
+  ReaderMode.englishOnly => ('reader_mode_english_only'.tr(), null),
+  ReaderMode.arabicFirst => ('reader_mode_arabic_first'.tr(), null),
+  ReaderMode.arabicOnly => ('reader_mode_arabic_only'.tr(), null),
+  ReaderMode.listening => (
+    'reader_mode_listening'.tr(),
+    'reader_mode_listening_detail'.tr(),
+  ),
+};
+
 class _ModeRow extends StatelessWidget {
   const _ModeRow({
     required this.mode,
@@ -582,19 +711,7 @@ class _ModeRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final texts = context.texts;
-    final (String label, String? detail) = switch (mode) {
-      ReaderMode.onTap => (
-        'reader_mode_tap'.tr(),
-        'reader_mode_tap_detail'.tr(),
-      ),
-      ReaderMode.below => ('reader_mode_below'.tr(), null),
-      ReaderMode.arabicFirst => ('reader_mode_arabic_first'.tr(), null),
-      ReaderMode.arabicOnly => ('reader_mode_arabic_only'.tr(), null),
-      ReaderMode.listening => (
-        'reader_mode_listening'.tr(),
-        'reader_mode_listening_detail'.tr(),
-      ),
-    };
+    final (String label, String? detail) = readerModeNames(mode);
     return Semantics(
       inMutuallyExclusiveGroup: true,
       checked: selected,
