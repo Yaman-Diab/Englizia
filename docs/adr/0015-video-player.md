@@ -8,5 +8,7 @@ The grammar video needs HLS, a speed, a position and buffering on Android and iO
 - A quality is another source: the contract sends one URL per quality, and changing it reopens the video at the same place. So it doesn't depend on the player's track selection or on the hosting service.
 - The screen stays on through a small native channel, `englizia/screen_awake`. `wakelock_plus` can't be added: its versions conflict with `connectivity_plus` through `dbus`, or need a newer Flutter than the pin, and existing dependencies aren't replaced.
 
+`video_player` also plays the interactive text's sound, which saves a second player and gives the reader one kind of time whether it follows sound or video (S §8.2).
+
 ## Consequences
 `GrammarLessonCubit` gives commands and follows snapshots, and tests use a fake engine. Moving the Flutter pin allows reconsidering `wakelock_plus` and deleting the channel.

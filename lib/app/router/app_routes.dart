@@ -28,6 +28,8 @@ abstract final class AppRoutes {
   static const passwordChanged = '/reset-password/done';
 
   static const lessonGrammar = '/lessons/:lessonId/grammar';
+  static const lessonText = '/lessons/:lessonId/text';
+  static const lessonShadowing = '/lessons/:lessonId/shadowing';
   static const lessonExercises = '/lessons/:lessonId/exercises';
   static const lessonComplete = '/lessons/:lessonId/complete';
   static const lessonExplain = '/lessons/:lessonId/explain';
@@ -37,6 +39,10 @@ abstract final class AppRoutes {
   static const unitStart = '/units/next';
 
   static String grammarOf(String lessonId) => '/lessons/$lessonId/grammar';
+
+  static String textOf(String lessonId) => '/lessons/$lessonId/text';
+
+  static String shadowingOf(String lessonId) => '/lessons/$lessonId/shadowing';
 
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
 

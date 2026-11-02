@@ -20,6 +20,9 @@ final class SettingsStorageService {
   static const _lessonCacheKey = 'account.lesson_cache';
   static const _videoWatchKey = 'account.video_watch';
   static const _videoQualityKey = 'settings.video_quality';
+  static const _readerPrefsKey = 'settings.reader_prefs';
+  static const _readerTipKey = 'settings.reader_tip_seen';
+  static const _savedWordsKey = 'account.saved_words';
 
   final SharedPreferences _prefs;
 
@@ -114,6 +117,27 @@ final class SettingsStorageService {
     await _prefs.setString(_videoQualityKey, name);
   }
 
+  /// How the reader shows its text, as JSON, for this phone (S §8.2).
+  String? get readerPrefs => _prefs.getString(_readerPrefsKey);
+
+  Future<void> setReaderPrefs(String json) async {
+    await _prefs.setString(_readerPrefsKey, json);
+  }
+
+  /// The reader's first-time tip has been seen.
+  bool get readerTipSeen => _prefs.getBool(_readerTipKey) ?? false;
+
+  Future<void> setReaderTipSeen() async {
+    await _prefs.setBool(_readerTipKey, true);
+  }
+
+  /// The spans saved from each lesson, as JSON, so a star shows without a request.
+  String? get savedWords => _prefs.getString(_savedWordsKey);
+
+  Future<void> setSavedWords(String json) async {
+    await _prefs.setString(_savedWordsKey, json);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -124,6 +148,7 @@ final class SettingsStorageService {
       await _prefs.remove(_lessonProgressKey);
       await _prefs.remove(_lessonCacheKey);
       await _prefs.remove(_videoWatchKey);
+      await _prefs.remove(_savedWordsKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

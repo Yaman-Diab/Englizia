@@ -1,5 +1,6 @@
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/video/silent_audio_engine.dart';
 import 'package:englizia/core/video/video_engine.dart';
 import 'package:englizia/core/video/video_player_engine.dart';
 import 'package:englizia/features/lessons/data/answers_sync.dart';
@@ -15,6 +16,7 @@ import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_c
 import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
+import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -42,6 +44,14 @@ void registerLessonDependencies(GetIt sl) {
     )
     ..registerFactoryParam<TeacherQuestionsCubit, String, void>(
       (lessonId, _) => TeacherQuestionsCubit(sl(), lessonId: lessonId),
+    )
+    ..registerFactoryParam<InteractiveTextCubit, String, void>(
+      (lessonId, _) => InteractiveTextCubit(
+        sl(),
+        // The mock's sound is silent, but its time passes (D-050).
+        AppConfig.isMock ? SilentAudioEngine() : sl<VideoEngine>(),
+        lessonId: lessonId,
+      ),
     )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactory(() => MicCubit(sl(), sl()))

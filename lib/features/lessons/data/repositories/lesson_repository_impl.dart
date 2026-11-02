@@ -12,10 +12,12 @@ import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_so
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
+import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 final class LessonRepositoryImpl implements LessonRepository {
@@ -37,6 +39,8 @@ final class LessonRepositoryImpl implements LessonRepository {
   static const _reportKind = 'report';
   static const _completionKind = 'completion';
   static const _watchKind = 'watch';
+  static const _wordKind = 'word';
+  static const _contentDoneKind = 'contentDone';
 
   /// What is on its way, so it goes one at a time and in order.
   Future<void>? _sending;
@@ -219,6 +223,74 @@ final class LessonRepositoryImpl implements LessonRepository {
       _settings.setVideoQuality(quality.name);
 
   @override
+  ReaderPrefs get readerPrefs {
+    final saved = _settings.readerPrefs;
+    if (saved == null) return const ReaderPrefs();
+    try {
+      return readerPrefsFromJson(asJsonMap(jsonDecode(saved)));
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Reader settings unreadable');
+      return const ReaderPrefs();
+    }
+  }
+
+  @override
+  Future<void> setReaderPrefs(ReaderPrefs prefs) =>
+      _settings.setReaderPrefs(jsonEncode(readerPrefsToJson(prefs)));
+
+  @override
+  bool get readerTipSeen => _settings.readerTipSeen;
+
+  @override
+  Future<void> setReaderTipSeen() => _settings.setReaderTipSeen();
+
+  Map<String, Object?> _savedWords() {
+    final saved = _settings.savedWords;
+    if (saved == null) return {};
+    try {
+      return asJsonMap(jsonDecode(saved));
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Saved words unreadable');
+      return {};
+    }
+  }
+
+  @override
+  Set<String> savedWords(String lessonId) => {
+    for (final id in switch (_savedWords()[lessonId]) {
+      final List<Object?> ids => ids,
+      _ => const <Object?>[],
+    })
+      if (id is String) id,
+  };
+
+  @override
+  Future<void> setWordSaved(SavedWord word, {required bool saved}) async {
+    final ids = savedWords(word.lessonId);
+    saved ? ids.add(word.span.id) : ids.remove(word.span.id);
+    final all = _savedWords()..[word.lessonId] = ids.toList();
+    try {
+      await _settings.setSavedWords(jsonEncode(all));
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Saving a word failed');
+    }
+    await _enqueue(
+      _wordKind,
+      word.lessonId,
+      SettingsStorageService.randomId(),
+      savedWordToJson(word, saved: saved),
+    );
+  }
+
+  @override
+  Future<void> sendContentDone(String lessonId, int lessonVersion) => _enqueue(
+    _contentDoneKind,
+    lessonId,
+    SettingsStorageService.randomId(),
+    {'lessonVersion': lessonVersion},
+  );
+
+  @override
   Future<void> saveReport(ExerciseReport report) async {
     final id = SettingsStorageService.randomId();
     await _enqueue(_reportKind, report.lessonId, id, reportToJson(report, id));
@@ -261,6 +333,8 @@ final class LessonRepositoryImpl implements LessonRepository {
           _reportKind => _remote.sendReport(lessonId, request),
           _completionKind => _remote.completeLesson(lessonId, request),
           _watchKind => _remote.sendWatch(lessonId, request),
+          _wordKind => _remote.sendWord(lessonId, request),
+          _contentDoneKind => _remote.sendContentDone(lessonId, request),
           _ => _remote.sendAnswer(lessonId, request),
         };
       } on ApiException catch (error, stackTrace) {

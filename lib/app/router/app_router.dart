@@ -35,6 +35,8 @@ import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_p
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/pages/grammar_lesson_page.dart';
+import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
+import 'package:englizia/features/lessons/presentation/reader/pages/interactive_text_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -559,6 +561,28 @@ GoRouter createAppRouter(AppSessionController session) {
         },
       ),
       GoRoute(
+        path: AppRoutes.lessonText,
+        builder: (context, state) {
+          final lessonId = state.pathParameters['lessonId']!;
+          return BlocProvider(
+            create: (_) => sl<InteractiveTextCubit>(param1: lessonId)..start(),
+            child: InteractiveTextPage(
+              onExit: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
+              onContinue: (shadowing) => shadowing
+                  ? context.push(AppRoutes.shadowingOf(lessonId))
+                  : context.pushReplacement(AppRoutes.exercisesOf(lessonId)),
+              onShowWords: () => context.push(AppRoutes.savedWords),
+            ),
+          );
+        },
+      ),
+      // Practising saying the sentences has no design yet.
+      GoRoute(
+        path: AppRoutes.lessonShadowing,
+        builder: (_, _) => PendingPage(title: 'reader_continue_shadowing'.tr()),
+      ),
+      GoRoute(
         path: AppRoutes.lessonExercises,
         builder: (context, state) {
           final lessonId = state.pathParameters['lessonId']!;
@@ -599,6 +623,9 @@ GoRouter createAppRouter(AppSessionController session) {
             onNext: (next) => switch (next.lessonId) {
               final lessonId? when next.lessonKind == LessonKind.grammarVideo =>
                 context.pushReplacement(AppRoutes.grammarOf(lessonId)),
+              final lessonId?
+                  when next.lessonKind == LessonKind.interactiveText =>
+                context.pushReplacement(AppRoutes.textOf(lessonId)),
               final lessonId? => context.pushReplacement(
                 AppRoutes.exercisesOf(lessonId),
               ),

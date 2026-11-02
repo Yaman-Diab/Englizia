@@ -1,5 +1,6 @@
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:equatable/equatable.dart';
 
 /// A published lesson as the app answers it: its version, as an attempt counts
@@ -13,6 +14,7 @@ final class Lesson extends Equatable {
     this.explainEnabled = false,
     this.outline = const LessonOutline(),
     this.grammar,
+    this.reader,
   });
 
   final String id;
@@ -31,6 +33,9 @@ final class Lesson extends Equatable {
   /// What a grammar lesson shows before its exercises.
   final GrammarContent? grammar;
 
+  /// What an interactive text reads before its exercises.
+  final ReaderContent? reader;
+
   @override
   List<Object?> get props => [
     id,
@@ -40,6 +45,7 @@ final class Lesson extends Equatable {
     explainEnabled,
     outline,
     grammar,
+    reader,
   ];
 }
 

@@ -15,11 +15,13 @@ import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_so
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
+import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
@@ -37,6 +39,8 @@ class _Remote implements LessonRemoteDataSource {
   final reports = <Map<String, Object?>>[];
   final completed = <Map<String, Object?>>[];
   final watched = <Map<String, Object?>>[];
+  final words = <Map<String, Object?>>[];
+  final contentDone = <Map<String, Object?>>[];
   final lessons = <String>[];
   var reviewSays = true;
   var offline = false;
@@ -59,6 +63,21 @@ class _Remote implements LessonRemoteDataSource {
     if (offline) throw const NetworkException('connectionError');
     reviewed.add(request);
     return reviewSays;
+  }
+
+  @override
+  Future<void> sendWord(String lessonId, Map<String, Object?> request) async {
+    if (offline) throw const NetworkException('connectionError');
+    words.add(request);
+  }
+
+  @override
+  Future<void> sendContentDone(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    if (offline) throw const NetworkException('connectionError');
+    contentDone.add(request);
   }
 
   @override
@@ -971,6 +990,110 @@ void main() {
     });
   });
 
+  group('an interactive text', () {
+    Map<String, Object?> asset(String path) =>
+        asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
+    final content = readerFromJson(asset(LessonFakeDataSource.textAsset))!;
+
+    test('the mock has its sentences, words, timings and spans', () {
+      expect(content.sentences, hasLength(6));
+      expect(content.sentences.first.english, startsWith('Sara wakes up'));
+      expect(content.spans, hasLength(5));
+      expect(content.hasShadowing, isTrue);
+      expect(content.duration, const Duration(seconds: 58));
+    });
+
+    test('a moment finds its sentence and word, and a gap the next', () {
+      final second = content.sentences[1];
+
+      expect(content.placeAt(second.words[2].start), (sentence: 1, word: 2));
+      expect(content.placeAt(second.start - const Duration(milliseconds: 1)), (
+        sentence: 1,
+        word: null,
+      ));
+      expect(content.placeAt(content.duration).word, isNull);
+    });
+
+    test('a word finds its span; one with none has none', () {
+      final sentence = content.sentences[4];
+
+      expect(content.spanOf(sentence, sentence.words[1])?.id, 'turnoff');
+      expect(content.spanOf(sentence, sentence.words[3])?.id, 'turnoff');
+      expect(content.spanOf(sentence, sentence.words[2]), isNull);
+    });
+
+    test('other lessons have none, and a broken one costs only itself', () {
+      expect(_parse([_question({})]).reader, isNull);
+
+      final broken = LessonModel({
+        'id': 'les',
+        'version': 1,
+        'reader': {
+          'audio': {'url': 'a'},
+          'sentences': <Object?>[],
+        },
+        'exercises': [_question({})],
+      }).toEntity('s');
+      expect(broken.reader, isNull);
+      expect(broken.exercises, hasLength(1));
+    });
+
+    test('a span of a kind this version does not know is left unmarked', () {
+      final parsed = readerFromJson({
+        'reader': {
+          'audio': {'url': 'a', 'durationMs': 1000},
+          'sentences': [
+            {
+              'id': 's',
+              'ar': 'a',
+              'words': [
+                {'id': 'w', 'text': 'x', 'startMs': 0, 'endMs': 1000},
+              ],
+            },
+          ],
+          'spans': [
+            {
+              'id': 'n',
+              'sentenceId': 's',
+              'wordIds': ['w'],
+              'kind': 'hologram',
+              'base': 'x',
+              'ar': 'a',
+            },
+          ],
+        },
+      });
+
+      expect(parsed?.spans, isEmpty);
+    });
+
+    test('settings go to their form and back, and a saved word whole', () {
+      const prefs = ReaderPrefs(
+        size: ReaderTextSize.large,
+        mode: ReaderMode.listening,
+        stopEachSentence: true,
+      );
+      expect(readerPrefsFromJson(readerPrefsToJson(prefs)), prefs);
+      expect(
+        readerPrefsFromJson({'size': 'x', 'mode': 'y'}),
+        const ReaderPrefs(),
+      );
+
+      final word = SavedWord(
+        lessonId: 'les',
+        span: content.spans[3],
+        sentence: content.sentences[4],
+      );
+      final saved = savedWordToJson(word, saved: true);
+      expect(saved['base'], 'turn off');
+      expect(asJsonMap(saved['sentence'])['en'], contains('turn it off'));
+      expect(savedWordToJson(word, saved: false), {
+        'spanId': 'turnoff',
+        'saved': false,
+      });
+    });
+  });
+
   group('a grammar lesson', () {
     Map<String, Object?> asset(String path) =>
         asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
@@ -1228,6 +1351,66 @@ void main() {
       positionSeconds: 5,
       ranges: [(0, 5)],
     );
+
+    test('the reader remembers its settings and its tip', () async {
+      expect(repository.readerPrefs, const ReaderPrefs());
+      expect(repository.readerTipSeen, isFalse);
+
+      const prefs = ReaderPrefs(size: ReaderTextSize.small);
+      await repository.setReaderPrefs(prefs);
+      await repository.setReaderTipSeen();
+
+      expect(repository.readerPrefs, prefs);
+      expect(repository.readerTipSeen, isTrue);
+    });
+
+    test('a star stays on the phone, and goes when it can', () async {
+      const word = SavedWord(
+        lessonId: 'les',
+        span: ReaderSpan(
+          id: 'sp',
+          sentenceId: 's',
+          wordIds: ['w'],
+          kind: SpanKind.word,
+          base: 'barn',
+          arabic: 'a',
+        ),
+        sentence: ReaderSentence(
+          id: 's',
+          arabic: 'a',
+          words: [
+            ReaderWord(
+              id: 'w',
+              text: 'barn',
+              start: Duration.zero,
+              end: Duration(seconds: 1),
+            ),
+          ],
+        ),
+      );
+      remote.offline = true;
+      await repository.setWordSaved(word, saved: true);
+      await settle();
+      expect(repository.savedWords('les'), {'sp'});
+      expect(remote.words, isEmpty);
+
+      remote.offline = false;
+      await repository.sendSaved();
+      await settle();
+      expect(remote.words.single['spanId'], 'sp');
+
+      await repository.setWordSaved(word, saved: false);
+      await settle();
+      expect(repository.savedWords('les'), isEmpty);
+      expect(remote.words.last['saved'], isFalse);
+    });
+
+    test('finishing the content goes with its version', () async {
+      await repository.sendContentDone('les', 3);
+      await settle();
+
+      expect(remote.contentDone.single['lessonVersion'], 3);
+    });
 
     test('watching stays on the phone for its video', () async {
       expect(repository.savedWatch('les'), isNull);
