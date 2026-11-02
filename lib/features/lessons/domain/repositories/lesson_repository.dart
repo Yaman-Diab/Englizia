@@ -4,6 +4,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
+import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 
 abstract interface class LessonRepository {
   /// The lesson with its exercises and keys.
@@ -47,11 +48,18 @@ abstract interface class LessonRepository {
 
   Future<void> setReaderTipSeen();
 
-  /// Ids of the spans saved from this lesson.
+  /// Ids of the spans and cards saved from this lesson.
   Set<String> savedWords(String lessonId);
 
   /// Keeps it on the phone and tells the server when it can.
   Future<void> setWordSaved(SavedWord word, {required bool saved});
+
+  /// A vocabulary card's star, kept and sent like a span's.
+  Future<void> setVocabSaved(
+    String lessonId,
+    VocabWord word, {
+    required bool saved,
+  });
 
   /// The lesson's content was finished. Kept and sent like an answer.
   Future<void> sendContentDone(String lessonId, int lessonVersion);

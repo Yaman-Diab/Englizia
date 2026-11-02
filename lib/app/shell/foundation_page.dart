@@ -182,6 +182,12 @@ class FoundationPage extends StatelessWidget {
                   onPressed: () => context.push(AppRoutes.videoOf('les_iv')),
                   child: Text('foundation_try_video'.tr()),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton(
+                  onPressed: () =>
+                      context.push(AppRoutes.vocabularyOf('les_voc')),
+                  child: Text('foundation_try_vocabulary'.tr()),
+                ),
                 const SizedBox(height: AppSpacing.lg),
               ],
               // Here until «أنا» has its account section.

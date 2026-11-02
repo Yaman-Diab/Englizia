@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Vocabulary lesson: stacked cards with each word said as it shows, its kind, meaning and an example marked as it is said, the translation on request, a star to save it, dragging between cards, and the lesson's words together before the exercises.
 - Interactive video: the video with a reader under it instead of captions, who speaks, five ways of showing the text, going to any sentence, cards that stop the picture, words saved with their moment, a side panel when the phone is turned, and how much was really watched.
 - Interactive text: a reader that follows the sound word by word, five ways of showing the text, cards for marked words and phrases with their sound and a star to save them, and display settings kept on the phone.
 - Grammar lessons: a video player with captions, speed, quality and full screen, a watched share counted from what really played that opens the exercises, the rule in short with its examples, and private questions to the teacher, whose replies only the learner who asked can see.

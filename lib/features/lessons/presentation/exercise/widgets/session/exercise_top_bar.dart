@@ -49,7 +49,7 @@ class ExerciseTopBar extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
-            child: _ProgressBar(position: position, total: total),
+            child: LessonProgressBar(position: position, total: total),
           ),
           const SizedBox(width: AppSpacing.sm),
           Visibility(
@@ -95,8 +95,12 @@ class ExerciseTopBar extends StatelessWidget {
 
 /// The lesson's progress: it starts as a dot, so it reads as a bar and not an
 /// empty line, and stretches with a small overshoot.
-class _ProgressBar extends StatelessWidget {
-  const _ProgressBar({required this.position, required this.total});
+class LessonProgressBar extends StatelessWidget {
+  const LessonProgressBar({
+    required this.position,
+    required this.total,
+    super.key,
+  });
 
   final int position;
   final int total;

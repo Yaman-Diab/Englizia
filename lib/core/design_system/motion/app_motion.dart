@@ -111,6 +111,9 @@ abstract final class AppMotion {
   static const sheetIn = Duration(milliseconds: 300);
   static const sheetOut = Duration(milliseconds: 220);
 
+  /// A vocabulary card flying off, and the one behind coming forward.
+  static const cardSwap = Duration(milliseconds: 300);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 

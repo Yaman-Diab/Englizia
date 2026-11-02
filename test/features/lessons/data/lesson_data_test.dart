@@ -16,6 +16,7 @@ import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
+import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
@@ -23,6 +24,7 @@ import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
+import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
 import 'package:englizia/features/lessons/domain/services/stable_order.dart';
@@ -1094,6 +1096,100 @@ void main() {
     });
   });
 
+  group('a vocabulary lesson', () {
+    Map<String, Object?> asset(String path) =>
+        asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
+    final json = asset(LessonFakeDataSource.vocabularyAsset);
+    final content = vocabularyFromJson(json)!;
+
+    test('the mock has the design\'s six cards', () {
+      expect(content.words, hasLength(6));
+      final feed = content.words[2];
+      expect(feed.word, 'feed');
+      expect(feed.kind, VocabKind.verb);
+      expect(feed.imageUrl, isNotNull);
+      expect(feed.example.english, 'Sara feeds the chickens every morning.');
+      expect(feed.example.highlighted, {'w2t1'});
+      expect(content.words.last.imageUrl, isNull);
+    });
+
+    test('a phrase marks all its words in the example', () {
+      final phrase = content.words.firstWhere(
+        (word) => word.kind == VocabKind.phrase,
+      );
+      expect(phrase.example.highlighted, hasLength(3));
+    });
+
+    test(
+      'an unknown kind shows no badge, and a bad card spoils the lesson',
+      () {
+        final word = asJsonMap(
+          asJsonMap(json['vocabulary']).readList('words')!.first,
+        );
+        final unknown = vocabularyFromJson({
+          'vocabulary': {
+            'words': [
+              {...word, 'pos': 'interjection'},
+            ],
+          },
+        })!;
+        expect(unknown.words.single.kind, isNull);
+
+        expect(
+          vocabularyFromJson({
+            'vocabulary': {
+              'words': [
+                {...word}..remove('ar'),
+              ],
+            },
+          }),
+          isNull,
+        );
+        expect(vocabularyFromJson(const {}), isNull);
+      },
+    );
+
+    test('the lesson reads its cards', () {
+      final lesson = LessonModel(json).toEntity('seed');
+      expect(lesson.vocabulary?.words, hasLength(6));
+    });
+
+    test('the word said in the example: by its times, or by its letters', () {
+      const timed = VocabExample(
+        arabic: '',
+        tokens: [
+          VocabToken(id: 'a', text: 'I', start: Duration.zero),
+          VocabToken(id: 'b', text: 'run', start: Duration(milliseconds: 500)),
+        ],
+      );
+      const length = Duration(seconds: 1);
+      expect(timed.tokenAt(const Duration(milliseconds: 400), length), 0);
+      expect(timed.tokenAt(const Duration(milliseconds: 600), length), 1);
+      expect(timed.tokenAt(length, length), isNull);
+
+      const shared = VocabExample(
+        arabic: '',
+        tokens: [
+          VocabToken(id: 'a', text: 'ab'),
+          VocabToken(id: 'b', text: 'cdef'),
+        ],
+      );
+      expect(shared.tokenAt(const Duration(milliseconds: 300), length), 0);
+      expect(shared.tokenAt(const Duration(milliseconds: 400), length), 1);
+    });
+
+    test('a saved card goes whole, and taking it back only says so', () {
+      final saved = vocabWordToJson(content.words[2], saved: true);
+      expect(saved['wordId'], content.words[2].id);
+      expect(saved['kind'], 'verb');
+      expect(asJsonMap(saved['sentence'])['ar'], isNotEmpty);
+      expect(vocabWordToJson(content.words[2], saved: false), {
+        'wordId': content.words[2].id,
+        'saved': false,
+      });
+    });
+  });
+
   group('an interactive video', () {
     Map<String, Object?> asset(String path) =>
         asJsonMap(ApiClient.unwrap(jsonDecode(File(path).readAsStringSync())));
@@ -1498,6 +1594,27 @@ void main() {
       await settle();
       expect(repository.savedWords('les'), isEmpty);
       expect(remote.words.last['saved'], isFalse);
+    });
+
+    test('a vocabulary card is kept and sent like a span', () async {
+      final card = vocabularyFromJson(
+        asJsonMap(
+          ApiClient.unwrap(
+            jsonDecode(
+              File(LessonFakeDataSource.vocabularyAsset).readAsStringSync(),
+            ),
+          ),
+        ),
+      )!.words.first;
+      remote.offline = true;
+      await repository.setVocabSaved('les', card, saved: true);
+      await settle();
+      expect(repository.savedWords('les'), {card.id});
+
+      remote.offline = false;
+      await repository.sendSaved();
+      await settle();
+      expect(remote.words.single['wordId'], card.id);
     });
 
     test('finishing the content goes with its version', () async {

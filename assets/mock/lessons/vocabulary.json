@@ -1,0 +1,391 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_voc",
+    "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": true,
+    "speechPassPercent": 70,
+    "typoMinLetters": 5,
+    "aiReviewEnabled": true,
+    "title": "كلمات المزرعة",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 3,
+      "title": "يوم في المزرعة",
+      "lessons": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "done": true
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "done": true
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "done": true
+        },
+        {
+          "id": "les_mock",
+          "kind": "conversation",
+          "done": false
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "done": false
+        },
+        {
+          "id": "les_rv",
+          "kind": "unitReview",
+          "done": false
+        }
+      ]
+    },
+    "next": {
+      "kind": "lesson",
+      "lessonId": "les_it",
+      "lessonKind": "interactiveText",
+      "title": "يوم في المزرعة"
+    },
+    "exercises": [
+      {
+        "id": "q1",
+        "template": "multipleChoice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "prompt": {
+          "en": "She ___ to school every day.",
+          "audio": "https://example.com/mock/lessons/she_goes.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "go"
+          },
+          {
+            "id": "o2",
+            "text": "goes"
+          },
+          {
+            "id": "o3",
+            "text": "going"
+          },
+          {
+            "id": "o4",
+            "text": "gone"
+          }
+        ],
+        "answer": "o2",
+        "hint": {
+          "ar": "انتبه إلى الفاعل she"
+        },
+        "explanation": {
+          "ar": "مع he/she/it نضيف s للفعل في المضارع البسيط."
+        },
+        "concepts": [
+          "c_present_s"
+        ],
+        "bookRef": null,
+        "reviewOnly": false
+      },
+      {
+        "id": "q4",
+        "template": "multipleChoice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "prompt": {
+          "en": "Excuse me, ___ ?",
+          "audio": "https://example.com/mock/lessons/post_office.mp3"
+        },
+        "options": [
+          {
+            "id": "o1",
+            "text": "could you tell me where the nearest post office is"
+          },
+          {
+            "id": "o2",
+            "text": "where post office"
+          },
+          {
+            "id": "o3",
+            "text": "post office is where"
+          },
+          {
+            "id": "o4",
+            "text": "you know the post office"
+          }
+        ],
+        "answer": "o1",
+        "bookRef": {
+          "page": 34,
+          "exercise": 2
+        },
+        "reviewOnly": false,
+        "explanation": {
+          "ar": "هذا سؤال غير مباشر: نبدأ بعبارة مهذبة مثل could you tell me، ثم نكمل بترتيب الجملة العادية: الفاعل ثم الفعل.\nلذلك نقول where the nearest post office is، ولا نقول where is the nearest post office كما في السؤال المباشر.\nالخيارات الأخرى تحذف الفعل is أو تخلط الترتيب، فلا تكوّن جملة صحيحة.\nنستخدم السؤال غير المباشر حين نسأل شخصًا لا نعرفه، لأنه ألطف من السؤال المباشر، ويكثر في المحلات والمطارات ومحطات القطار."
+        }
+      }
+    ],
+    "vocabulary": {
+      "words": [
+        {
+          "id": "voc_barn",
+          "word": "barn",
+          "pos": "noun",
+          "ar": "حظيرة",
+          "audio": "https://example.com/mock/vocabulary/barn.mp3",
+          "example": {
+            "tokens": [
+              {
+                "id": "w0t0",
+                "text": "The"
+              },
+              {
+                "id": "w0t1",
+                "text": "cow"
+              },
+              {
+                "id": "w0t2",
+                "text": "sleeps"
+              },
+              {
+                "id": "w0t3",
+                "text": "in"
+              },
+              {
+                "id": "w0t4",
+                "text": "the"
+              },
+              {
+                "id": "w0t5",
+                "text": "barn."
+              }
+            ],
+            "ar": "تنام البقرة في الحظيرة.",
+            "audio": "https://example.com/mock/vocabulary/barn_example.mp3",
+            "highlight": [
+              "w0t5"
+            ]
+          },
+          "image": "assets/mock/lessons/barn.svg"
+        },
+        {
+          "id": "voc_chicken",
+          "word": "chicken",
+          "pos": "noun",
+          "ar": "دجاجة",
+          "audio": "https://example.com/mock/vocabulary/chicken.mp3",
+          "example": {
+            "tokens": [
+              {
+                "id": "w1t0",
+                "text": "The"
+              },
+              {
+                "id": "w1t1",
+                "text": "chickens"
+              },
+              {
+                "id": "w1t2",
+                "text": "are"
+              },
+              {
+                "id": "w1t3",
+                "text": "in"
+              },
+              {
+                "id": "w1t4",
+                "text": "the"
+              },
+              {
+                "id": "w1t5",
+                "text": "garden."
+              }
+            ],
+            "ar": "الدجاج في الحديقة.",
+            "audio": "https://example.com/mock/vocabulary/chicken_example.mp3",
+            "highlight": [
+              "w1t1"
+            ]
+          },
+          "image": "assets/mock/lessons/chicken.svg"
+        },
+        {
+          "id": "voc_feed",
+          "word": "feed",
+          "pos": "verb",
+          "ar": "يُطعم",
+          "audio": "https://example.com/mock/vocabulary/feed.mp3",
+          "example": {
+            "tokens": [
+              {
+                "id": "w2t0",
+                "text": "Sara"
+              },
+              {
+                "id": "w2t1",
+                "text": "feeds"
+              },
+              {
+                "id": "w2t2",
+                "text": "the"
+              },
+              {
+                "id": "w2t3",
+                "text": "chickens"
+              },
+              {
+                "id": "w2t4",
+                "text": "every"
+              },
+              {
+                "id": "w2t5",
+                "text": "morning."
+              }
+            ],
+            "ar": "تُطعم سارة الدجاج كل صباح.",
+            "audio": "https://example.com/mock/vocabulary/feed_example.mp3",
+            "highlight": [
+              "w2t1"
+            ]
+          },
+          "image": "assets/mock/lessons/feed.svg"
+        },
+        {
+          "id": "voc_field",
+          "word": "field",
+          "pos": "noun",
+          "ar": "حقل",
+          "audio": "https://example.com/mock/vocabulary/field.mp3",
+          "example": {
+            "tokens": [
+              {
+                "id": "w3t0",
+                "text": "My"
+              },
+              {
+                "id": "w3t1",
+                "text": "grandfather"
+              },
+              {
+                "id": "w3t2",
+                "text": "works"
+              },
+              {
+                "id": "w3t3",
+                "text": "in"
+              },
+              {
+                "id": "w3t4",
+                "text": "the"
+              },
+              {
+                "id": "w3t5",
+                "text": "field."
+              }
+            ],
+            "ar": "يعمل جدي في الحقل.",
+            "audio": "https://example.com/mock/vocabulary/field_example.mp3",
+            "highlight": [
+              "w3t5"
+            ]
+          },
+          "image": "assets/mock/lessons/field.svg"
+        },
+        {
+          "id": "voc_wake_up_early",
+          "word": "wake up early",
+          "pos": "phrase",
+          "ar": "يستيقظ باكرًا",
+          "audio": "https://example.com/mock/vocabulary/wake_up_early.mp3",
+          "example": {
+            "tokens": [
+              {
+                "id": "w4t0",
+                "text": "We"
+              },
+              {
+                "id": "w4t1",
+                "text": "wake"
+              },
+              {
+                "id": "w4t2",
+                "text": "up"
+              },
+              {
+                "id": "w4t3",
+                "text": "early"
+              },
+              {
+                "id": "w4t4",
+                "text": "on"
+              },
+              {
+                "id": "w4t5",
+                "text": "the"
+              },
+              {
+                "id": "w4t6",
+                "text": "farm."
+              }
+            ],
+            "ar": "نستيقظ باكرًا في المزرعة.",
+            "audio": "https://example.com/mock/vocabulary/wake_up_early_example.mp3",
+            "highlight": [
+              "w4t1",
+              "w4t2",
+              "w4t3"
+            ]
+          },
+          "image": "assets/mock/lessons/early.svg"
+        },
+        {
+          "id": "voc_busy",
+          "word": "busy",
+          "pos": "adjective",
+          "ar": "مشغول",
+          "audio": "https://example.com/mock/vocabulary/busy.mp3",
+          "example": {
+            "tokens": [
+              {
+                "id": "w5t0",
+                "text": "The"
+              },
+              {
+                "id": "w5t1",
+                "text": "farmer"
+              },
+              {
+                "id": "w5t2",
+                "text": "is"
+              },
+              {
+                "id": "w5t3",
+                "text": "very"
+              },
+              {
+                "id": "w5t4",
+                "text": "busy"
+              },
+              {
+                "id": "w5t5",
+                "text": "today."
+              }
+            ],
+            "ar": "المزارع مشغول جدًا اليوم.",
+            "audio": "https://example.com/mock/vocabulary/busy_example.mp3",
+            "highlight": [
+              "w5t4"
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

@@ -6,11 +6,10 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
-import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/presentation/reader/widgets/reader_sentence.dart';
+import 'package:englizia/features/lessons/presentation/widgets/save_star.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 /// A tapped word's card, pointing at it: above when there is room, and never past
@@ -245,7 +244,7 @@ class ReaderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _SayButton(label: span.base, onTap: onSay),
-              _Star(saved: saved, onTap: onSave),
+              SaveStar(saved: saved, onTap: onSave),
             ],
           ),
         ],
@@ -327,113 +326,6 @@ class _SayButton extends StatelessWidget {
           AppIcon.volume,
           size: AppSizes.iconSm + AppSpacing.xxs,
           color: context.colors.surface,
-        ),
-      ),
-    );
-  }
-}
-
-/// The star: amber once saved, swelling with four sparks flying from it.
-class _Star extends StatefulWidget {
-  const _Star({required this.saved, required this.onTap});
-
-  final bool saved;
-  final VoidCallback onTap;
-
-  @override
-  State<_Star> createState() => _StarState();
-}
-
-class _StarState extends State<_Star> {
-  static const _circle = 40.0;
-  static const _spark = 6.0;
-  static const _reach = 22.0;
-  static const _swell = .3;
-  static const _sparks = 4;
-
-  var _saves = 0;
-
-  void _tap() {
-    if (!widget.saved) {
-      setState(() => _saves++);
-      HapticFeedback.lightImpact();
-    }
-    widget.onTap();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final saved = widget.saved;
-    final reward = colors.reward.fill;
-    return Semantics(
-      container: true,
-      button: true,
-      selected: saved,
-      label: saved ? 'reader_saved'.tr() : 'reader_save'.tr(),
-      excludeSemantics: true,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _tap,
-        child: SizedBox.square(
-          dimension: AppSizes.minTapTarget,
-          child: Stack(
-            clipBehavior: Clip.none,
-            alignment: Alignment.center,
-            children: [
-              if (_saves > 0 && !AppMotion.reduceMotion(context))
-                TimedValue(
-                  key: ValueKey(_saves),
-                  delay: Duration.zero,
-                  duration: AppMotion.pairLock,
-                  builder: (_, value) => Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      for (var i = 0; i < _sparks; i++)
-                        Transform.translate(
-                          offset: Offset.fromDirection(
-                            (i * 90 + 45) * math.pi / 180,
-                            _reach * value,
-                          ),
-                          child: Opacity(
-                            opacity: 1 - value,
-                            child: Container(
-                              width: _spark,
-                              height: _spark,
-                              decoration: BoxDecoration(
-                                color: reward,
-                                shape: BoxShape.circle,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              Container(
-                width: _circle,
-                height: _circle,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(color: context.scheme.outline),
-                ),
-                child: TimedValue(
-                  key: ValueKey('star:$_saves'),
-                  delay: Duration.zero,
-                  duration: AppMotion.fast,
-                  builder: (_, value) => Transform.scale(
-                    scale: 1 + _swell * math.sin(math.pi * value),
-                    child: Icon(
-                      saved ? Icons.star_rounded : Icons.star_outline_rounded,
-                      size: AppSizes.iconMd,
-                      color: saved ? reward : colors.textSecondary,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
         ),
       ),
     );

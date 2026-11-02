@@ -18,6 +18,7 @@ import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_les
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_video_cubit.dart';
+import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -56,6 +57,9 @@ void registerLessonDependencies(GetIt sl) {
     )
     ..registerFactoryParam<InteractiveVideoCubit, String, void>(
       (lessonId, _) => InteractiveVideoCubit(sl(), sl(), lessonId: lessonId),
+    )
+    ..registerFactoryParam<VocabLessonCubit, String, void>(
+      (lessonId, _) => VocabLessonCubit(sl(), sl(), sl(), lessonId: lessonId),
     )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactory(() => MicCubit(sl(), sl()))

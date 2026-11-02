@@ -13,6 +13,7 @@ import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
+import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 /// The contract's example lesson as it came, with each template in it.
@@ -66,6 +67,8 @@ class FakeLessonRepository implements LessonRepository {
   LessonOutline outline = const LessonOutline();
   GrammarContent? grammar;
   ReaderContent? reader;
+  VocabContent? vocabulary;
+  final vocabSent = <(VocabWord, bool)>[];
   ReaderPrefs prefs = const ReaderPrefs();
   bool tipSeen = true;
   final savedWordIds = <String>{};
@@ -93,6 +96,7 @@ class FakeLessonRepository implements LessonRepository {
               outline: outline,
               grammar: grammar,
               reader: reader,
+              vocabulary: vocabulary,
             ),
           )
         : Err(failure);
@@ -122,6 +126,13 @@ class FakeLessonRepository implements LessonRepository {
   @override
   Future<void> setWordSaved(SavedWord word, {required bool saved}) async =>
       wordsSent.add((word, saved));
+
+  @override
+  Future<void> setVocabSaved(
+    String lessonId,
+    VocabWord word, {
+    required bool saved,
+  }) async => vocabSent.add((word, saved));
 
   @override
   Future<void> sendContentDone(String lessonId, int lessonVersion) async =>
