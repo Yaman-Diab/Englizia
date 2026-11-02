@@ -39,6 +39,8 @@ import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_video_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/pages/interactive_text_page.dart';
 import 'package:englizia/features/lessons/presentation/reader/pages/interactive_video_page.dart';
+import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing_cubit.dart';
+import 'package:englizia/features/lessons/presentation/shadowing/pages/shadowing_page.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/pages/vocab_lesson_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -614,10 +616,27 @@ GoRouter createAppRouter(AppSessionController session) {
           );
         },
       ),
-      // Practising saying the sentences has no design yet.
       GoRoute(
         path: AppRoutes.lessonShadowing,
-        builder: (_, _) => PendingPage(title: 'reader_continue_shadowing'.tr()),
+        builder: (context, state) {
+          final lessonId = state.pathParameters['lessonId']!;
+          void toExercises() =>
+              context.pushReplacement(AppRoutes.exercisesOf(lessonId));
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) => sl<ShadowingCubit>(param1: lessonId)..start(),
+              ),
+              BlocProvider(create: (_) => sl<MicCubit>()),
+            ],
+            child: ShadowingPage(
+              onExit: () =>
+                  context.canPop() ? context.pop() : context.go(AppRoutes.home),
+              onDone: toExercises,
+              onSkip: toExercises,
+            ),
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.lessonExercises,

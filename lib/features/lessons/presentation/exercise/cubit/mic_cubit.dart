@@ -80,7 +80,8 @@ class MicCubit extends Cubit<MicState> {
     }
   }
 
-  Future<void> listen() async {
+  /// Stops after [silence] or at [limit]: by default as a sentence to repeat.
+  Future<void> listen({Duration? silence, Duration? limit}) async {
     if (state.phase == MicPhase.listening || state.phase == MicPhase.thinking) {
       return;
     }
@@ -91,8 +92,8 @@ class MicCubit extends Cubit<MicState> {
       }
     });
     final words = await _listener.listen(
-      silence: _silence,
-      limit: _limit,
+      silence: silence ?? _silence,
+      limit: limit ?? _limit,
       onLevel: _levels.add,
     );
     _clock?.cancel();

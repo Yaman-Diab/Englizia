@@ -32,6 +32,7 @@ final class ReaderSentence extends Equatable {
     this.imageAlt,
     this.speaker,
     this.shadowing = false,
+    this.waveform = const [],
   });
 
   final String id;
@@ -45,6 +46,10 @@ final class ReaderSentence extends Equatable {
 
   /// One of the sentences practised after the text.
   final bool shadowing;
+
+  /// Its sound's loudness, 0 to 1, for comparing with the learner's. With none,
+  /// the words' timings draw it.
+  final List<double> waveform;
 
   String get english => words.map((word) => word.text).join(' ');
 
@@ -61,6 +66,7 @@ final class ReaderSentence extends Equatable {
     imageAlt,
     speaker,
     shadowing,
+    waveform,
   ];
 }
 
@@ -142,6 +148,7 @@ final class ReaderContent extends Equatable {
     this.audioUrl = '',
     this.video,
     this.spans = const [],
+    this.shadowingMode = ShadowingMode.repeat,
   });
 
   /// A text's sound.
@@ -152,6 +159,9 @@ final class ReaderContent extends Equatable {
   final Duration duration;
   final List<ReaderSentence> sentences;
   final List<ReaderSpan> spans;
+
+  /// How shadowing starts, by the learner's level (S §9).
+  final ShadowingMode shadowingMode;
 
   bool get hasShadowing => sentences.any((s) => s.shadowing);
 
@@ -181,7 +191,14 @@ final class ReaderContent extends Equatable {
   }
 
   @override
-  List<Object?> get props => [audioUrl, video, duration, sentences, spans];
+  List<Object?> get props => [
+    audioUrl,
+    video,
+    duration,
+    sentences,
+    spans,
+    shadowingMode,
+  ];
 }
 
 /// How the text shows (S §8.3, §8.4).
@@ -206,12 +223,17 @@ enum ReaderMode {
 
 enum ReaderTextSize { small, medium, large }
 
+/// Shadowing's ways (design "Shadowing"): saying it after the model, saying it
+/// with the model, and with the model while the text is hidden.
+enum ShadowingMode { repeat, together, hidden }
+
 final class ReaderPrefs extends Equatable {
   const ReaderPrefs({
     this.size = ReaderTextSize.medium,
     this.mode = ReaderMode.onTap,
     this.videoMode = ReaderMode.currentTranslated,
     this.stopEachSentence = false,
+    this.shadowingMode,
   });
 
   final ReaderTextSize size;
@@ -219,20 +241,50 @@ final class ReaderPrefs extends Equatable {
   final ReaderMode videoMode;
   final bool stopEachSentence;
 
+  /// The learner's own choice; with none, the lesson's.
+  final ShadowingMode? shadowingMode;
+
   ReaderPrefs copyWith({
     ReaderTextSize? size,
     ReaderMode? mode,
     ReaderMode? videoMode,
     bool? stopEachSentence,
+    ShadowingMode? shadowingMode,
   }) => ReaderPrefs(
     size: size ?? this.size,
     mode: mode ?? this.mode,
     videoMode: videoMode ?? this.videoMode,
     stopEachSentence: stopEachSentence ?? this.stopEachSentence,
+    shadowingMode: shadowingMode ?? this.shadowingMode,
   );
 
   @override
-  List<Object?> get props => [size, mode, videoMode, stopEachSentence];
+  List<Object?> get props => [
+    size,
+    mode,
+    videoMode,
+    stopEachSentence,
+    shadowingMode,
+  ];
+}
+
+/// How much of a sentence the learner was heard saying, at best (S §9). It
+/// is no mistake, and never reaches the mistakes' bank.
+final class ShadowingScore extends Equatable {
+  const ShadowingScore({
+    required this.lessonId,
+    required this.sentenceId,
+    required this.heard,
+    required this.total,
+  });
+
+  final String lessonId;
+  final String sentenceId;
+  final int heard;
+  final int total;
+
+  @override
+  List<Object?> get props => [lessonId, sentenceId, heard, total];
 }
 
 /// A span kept in the learner's word bank, whole: changing it in the panel later

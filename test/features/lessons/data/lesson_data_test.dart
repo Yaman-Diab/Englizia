@@ -42,6 +42,7 @@ class _Remote implements LessonRemoteDataSource {
   final completed = <Map<String, Object?>>[];
   final watched = <Map<String, Object?>>[];
   final words = <Map<String, Object?>>[];
+  final shadowing = <Map<String, Object?>>[];
   final contentDone = <Map<String, Object?>>[];
   final lessons = <String>[];
   var reviewSays = true;
@@ -71,6 +72,15 @@ class _Remote implements LessonRemoteDataSource {
   Future<void> sendWord(String lessonId, Map<String, Object?> request) async {
     if (offline) throw const NetworkException('connectionError');
     words.add(request);
+  }
+
+  @override
+  Future<void> sendShadowing(
+    String lessonId,
+    Map<String, Object?> request,
+  ) async {
+    if (offline) throw const NetworkException('connectionError');
+    shadowing.add(request);
   }
 
   @override
@@ -1275,6 +1285,30 @@ void main() {
       expect(sentence.containsKey('startMs'), isFalse);
     });
 
+    test('shadowing starts as the lesson says; the learner\'s way is kept', () {
+      expect(content.shadowingMode, ShadowingMode.together);
+      final reader = asJsonMap(json['reader']);
+      final sentences = reader.readList('sentences')!;
+      final parsed = readerFromJson({
+        'reader': {
+          ...reader,
+          'shadowingMode': 'sideways',
+          'sentences': [
+            {
+              ...asJsonMap(sentences.first),
+              'waveform': [0.2, 1.4, -1, 'x'],
+            },
+          ],
+        },
+      })!;
+      expect(parsed.shadowingMode, ShadowingMode.repeat);
+      expect(parsed.sentences.single.waveform, [0.2, 1.0, 0.0]);
+
+      const prefs = ReaderPrefs(shadowingMode: ShadowingMode.hidden);
+      expect(readerPrefsFromJson(readerPrefsToJson(prefs)), prefs);
+      expect(readerPrefsFromJson(const {}).shadowingMode, isNull);
+    });
+
     test('its way of showing is kept with a text\'s', () {
       const prefs = ReaderPrefs(videoMode: ReaderMode.englishOnly);
       expect(readerPrefsFromJson(readerPrefsToJson(prefs)), prefs);
@@ -1615,6 +1649,29 @@ void main() {
       await repository.sendSaved();
       await settle();
       expect(remote.words.single['wordId'], card.id);
+    });
+
+    test('a sentence\'s best shadowing is kept and sent', () async {
+      remote.offline = true;
+      await repository.saveShadowingScore(
+        const ShadowingScore(
+          lessonId: 'les',
+          sentenceId: 's1',
+          heard: 5,
+          total: 6,
+        ),
+      );
+      await settle();
+      expect(remote.shadowing, isEmpty);
+
+      remote.offline = false;
+      await repository.sendSaved();
+      await settle();
+      expect(remote.shadowing.single, {
+        'sentenceId': 's1',
+        'heard': 5,
+        'total': 6,
+      });
     });
 
     test('finishing the content goes with its version', () async {

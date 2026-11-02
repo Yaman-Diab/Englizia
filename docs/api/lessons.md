@@ -133,7 +133,8 @@ An interactive text and an interactive video both have `reader` (designs `Intera
 | `reader.requiredWatchPercent` | int | With `video`: how much really watched completes it, from the panel (default 80, S §7.6). Required |
 | `reader.defaultSpeed` | number | With `video`: the speed it opens at, from the panel, as 0.75 for kids. Default 1 |
 | `reader.watch` | `{videoId, positionSeconds, watched[]}` | With `video`: as the server last heard, from any phone |
-| `reader.sentences[]` | `{id, ar, words[], image?, imageAlt?, speaker?, shadowing?}` | In order. `speaker`: shown above the sentence, in every way of showing it. `shadowing`: practised after the text; with none, the text goes on to the exercises |
+| `reader.sentences[]` | `{id, ar, words[], image?, imageAlt?, speaker?, shadowing?, waveform?}` | In order. `speaker`: shown above the sentence, in every way of showing it. `shadowing`: practised after the text; with none, the text goes on to the exercises | `waveform`: its sound's loudness, 0 to 1, for «قارن»; with none, the words' timings draw it. A video's sentence's `image` is its still for shadowing
+| `reader.shadowingMode` | `repeat`, `together` or `hidden` | How shadowing starts, by the learner's level: `repeat` for Pre-A1, A1 and kids, `together` from A2 (S §9). The learner's own choice then stays on the phone. Default `repeat` |
 | `reader.sentences[].words[]` | `{id, text, startMs, endMs, gloss?}` | Punctuation stuck to its word (`leave.`). `gloss`: its meaning when it is in no span; with none, pressing it shows nothing, as no AI is asked |
 | `reader.spans[]` | `{id, sentenceId, wordIds[], kind, base, ar, note?, noteExample?}` | `kind`: `word`, `phrasalVerb`, `idiom`. Words side by side or not, in one sentence, and no word in two spans. `noteExample[]`: `{text, strong?}`, shown under the note |
 
@@ -183,6 +184,16 @@ The star on a span or a vocabulary card, kept on the phone and sent like an answ
 Saving sends the span whole, so changing it in the panel later doesn't change what was saved (S §8.2). From a video, `sentence` also has `videoId`, `startMs` and `endMs`, the moment to find it again (S §8.4). Taking it back sends `{spanId, saved: false}`.
 
 A vocabulary card sends `wordId` instead of `spanId`, with `base` its word, `kind` its `pos`, and `sentence` its example; taking it back sends `{wordId, saved: false}`.
+
+## `POST /api/v1/app/lessons/{lessonId}/shadowing`
+
+A sentence's best shadowing, sent once the learner leaves it, kept on the phone and sent like an answer. Proposed.
+
+```json
+{ "sentenceId": "s1", "heard": 6, "total": 8 }
+```
+
+The server keeps the best for each sentence (S §9), and gives points by its accepted share (default 70%). It is never a mistake. The learner's voice is never sent.
 
 ## `POST /api/v1/app/lessons/{lessonId}/content-done`
 

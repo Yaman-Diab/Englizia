@@ -99,11 +99,15 @@ class LessonProgressBar extends StatelessWidget {
   const LessonProgressBar({
     required this.position,
     required this.total,
+    this.label,
     super.key,
   });
 
   final int position;
   final int total;
+
+  /// What it is the progress of; by default the lesson's.
+  final String? label;
 
   static const _height = 8.0;
 
@@ -112,7 +116,7 @@ class LessonProgressBar extends StatelessWidget {
     final colors = context.colors;
     final share = total == 0 ? 0.0 : position / total;
     return Semantics(
-      label: 'lesson_progress'.tr(),
+      label: label ?? 'lesson_progress'.tr(),
       value: '$position / $total',
       child: ExcludeSemantics(
         child: Container(

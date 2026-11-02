@@ -37,6 +37,9 @@ abstract interface class LessonRemoteDataSource {
   /// [request] comes from `savedWordToJson`.
   Future<void> sendWord(String lessonId, Map<String, Object?> request);
 
+  /// A sentence's best shadowing. Proposed.
+  Future<void> sendShadowing(String lessonId, Map<String, Object?> request);
+
   Future<void> sendContentDone(String lessonId, Map<String, Object?> request);
 
   /// [request] comes from `reportToJson`.
@@ -98,6 +101,10 @@ final class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
   @override
   Future<void> sendWord(String lessonId, Map<String, Object?> request) =>
       _client.post(ApiEndpoints.lessonWords(lessonId), data: request);
+
+  @override
+  Future<void> sendShadowing(String lessonId, Map<String, Object?> request) =>
+      _client.post(ApiEndpoints.lessonShadowing(lessonId), data: request);
 
   @override
   Future<void> sendContentDone(String lessonId, Map<String, Object?> request) =>
@@ -224,6 +231,10 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
 
   @override
   Future<void> sendWord(String lessonId, Map<String, Object?> request) =>
+      Future<void>.delayed(latency);
+
+  @override
+  Future<void> sendShadowing(String lessonId, Map<String, Object?> request) =>
       Future<void>.delayed(latency);
 
   @override

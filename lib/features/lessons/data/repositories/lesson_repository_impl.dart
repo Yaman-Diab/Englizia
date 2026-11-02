@@ -43,6 +43,7 @@ final class LessonRepositoryImpl implements LessonRepository {
   static const _watchKind = 'watch';
   static const _wordKind = 'word';
   static const _contentDoneKind = 'contentDone';
+  static const _shadowingKind = 'shadowing';
 
   /// What is on its way, so it goes one at a time and in order.
   Future<void>? _sending;
@@ -309,6 +310,14 @@ final class LessonRepositoryImpl implements LessonRepository {
   }
 
   @override
+  Future<void> saveShadowingScore(ShadowingScore score) => _enqueue(
+    _shadowingKind,
+    score.lessonId,
+    SettingsStorageService.randomId(),
+    shadowingScoreToJson(score),
+  );
+
+  @override
   Future<void> sendContentDone(String lessonId, int lessonVersion) => _enqueue(
     _contentDoneKind,
     lessonId,
@@ -361,6 +370,7 @@ final class LessonRepositoryImpl implements LessonRepository {
           _watchKind => _remote.sendWatch(lessonId, request),
           _wordKind => _remote.sendWord(lessonId, request),
           _contentDoneKind => _remote.sendContentDone(lessonId, request),
+          _shadowingKind => _remote.sendShadowing(lessonId, request),
           _ => _remote.sendAnswer(lessonId, request),
         };
       } on ApiException catch (error, stackTrace) {

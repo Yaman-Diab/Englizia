@@ -61,6 +61,9 @@ abstract interface class LessonRepository {
     required bool saved,
   });
 
+  /// A sentence's best shadowing, kept and sent like an answer.
+  Future<void> saveShadowingScore(ShadowingScore score);
+
   /// The lesson's content was finished. Kept and sent like an answer.
   Future<void> sendContentDone(String lessonId, int lessonVersion);
 
