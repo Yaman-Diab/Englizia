@@ -8,20 +8,9 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/lessons/presentation/widgets/karaoke_text.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-/// One playing of a sound: its [length], and an [id] so the same sound played
-/// again starts its marks over.
-final class SoundRun extends Equatable {
-  const SoundRun(this.id, this.length);
-
-  final int id;
-  final Duration length;
-
-  @override
-  List<Object?> get props => [id, length];
-}
 
 final class VocabLessonState extends Equatable {
   const VocabLessonState({

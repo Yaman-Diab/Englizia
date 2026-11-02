@@ -446,7 +446,8 @@
           "base": "Here you go",
           "ar": "تفضّل"
         }
-      ]
+      ],
+      "shadowingMode": "together"
     },
     "exercises": [
       {

@@ -69,6 +69,7 @@ class FakeLessonRepository implements LessonRepository {
   ReaderContent? reader;
   VocabContent? vocabulary;
   final vocabSent = <(VocabWord, bool)>[];
+  final shadowingScores = <ShadowingScore>[];
   ReaderPrefs prefs = const ReaderPrefs();
   bool tipSeen = true;
   final savedWordIds = <String>{};
@@ -133,6 +134,10 @@ class FakeLessonRepository implements LessonRepository {
     VocabWord word, {
     required bool saved,
   }) async => vocabSent.add((word, saved));
+
+  @override
+  Future<void> saveShadowingScore(ShadowingScore score) async =>
+      shadowingScores.add(score);
 
   @override
   Future<void> sendContentDone(String lessonId, int lessonVersion) async =>

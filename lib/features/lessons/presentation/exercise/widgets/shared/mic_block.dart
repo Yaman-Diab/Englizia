@@ -23,6 +23,8 @@ class MicBlock extends StatelessWidget {
     required this.onSkip,
     this.locked = false,
     this.onType,
+    this.caption,
+    this.skipLabel,
     super.key,
   });
 
@@ -40,10 +42,23 @@ class MicBlock extends StatelessWidget {
   /// Writing the answer instead, where the question allows it.
   final VoidCallback? onType;
 
+  /// Under the button while waiting, instead of «اضغط وتكلّم».
+  final String? caption;
+
+  /// The denied card's way out, instead of «تخطَّ أسئلة الكلام».
+  final String? skipLabel;
+
   @override
   Widget build(BuildContext context) {
     if (state.phase == MicPhase.denied) {
-      return _DeniedCard(onOpenSettings: onOpenSettings, onSkip: onSkip);
+      return Padding(
+        padding: const EdgeInsetsDirectional.only(top: AppSpacing.lg),
+        child: _DeniedCard(
+          onOpenSettings: onOpenSettings,
+          onSkip: onSkip,
+          skipLabel: skipLabel ?? 'lesson_mic_skip_speech'.tr(),
+        ),
+      );
     }
     final colors = context.colors;
     final listening = state.phase == MicPhase.listening;
@@ -79,7 +94,7 @@ class MicBlock extends StatelessWidget {
           Text(
             state.phase == MicPhase.thinking
                 ? 'lesson_mic_thinking'.tr()
-                : 'lesson_mic_press'.tr(),
+                : caption ?? 'lesson_mic_press'.tr(),
             style: context.texts.caption.copyWith(color: colors.textSecondary),
           ),
         if (state.phase == MicPhase.notHeard) ...[
@@ -367,10 +382,15 @@ class _NotHeardNote extends StatelessWidget {
 
 /// In the microphone's place when the phone says no. Information, not an error.
 class _DeniedCard extends StatelessWidget {
-  const _DeniedCard({required this.onOpenSettings, required this.onSkip});
+  const _DeniedCard({
+    required this.onOpenSettings,
+    required this.onSkip,
+    required this.skipLabel,
+  });
 
   final VoidCallback onOpenSettings;
   final VoidCallback onSkip;
+  final String skipLabel;
 
   static const _circle = 56.0;
   static const _iconSize = 28.0;
@@ -421,10 +441,7 @@ class _DeniedCard extends StatelessWidget {
               onPressed: onOpenSettings,
             ),
             const SizedBox(height: AppSpacing.xs),
-            TextButton(
-              onPressed: onSkip,
-              child: Text('lesson_mic_skip_speech'.tr()),
-            ),
+            TextButton(onPressed: onSkip, child: Text(skipLabel)),
           ],
         ),
       ),

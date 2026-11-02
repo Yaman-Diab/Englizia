@@ -8,7 +8,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
-import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
+import 'package:englizia/features/lessons/presentation/widgets/karaoke_text.dart';
 import 'package:englizia/features/lessons/presentation/widgets/save_star.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -651,84 +651,13 @@ class _RevealButton extends StatelessWidget {
   }
 }
 
-/// The example, the word in it marked, and a mark sliding along the words as
-/// its sound says them, as in the reader.
-class VocabExampleText extends StatefulWidget {
+/// The example, the word in it marked, and a mark following the words as its
+/// sound says them.
+class VocabExampleText extends StatelessWidget {
   const VocabExampleText({required this.example, this.run, super.key});
 
   final VocabExample example;
   final SoundRun? run;
-
-  @override
-  State<VocabExampleText> createState() => _VocabExampleTextState();
-}
-
-class _VocabExampleTextState extends State<VocabExampleText>
-    with SingleTickerProviderStateMixin {
-  final _stage = GlobalKey();
-  final _keys = <int, GlobalKey>{};
-  late final _clock = AnimationController(vsync: this)..addListener(_follow);
-  int? _said;
-  Rect? _mark;
-
-  @override
-  void initState() {
-    super.initState();
-    _start();
-  }
-
-  @override
-  void didUpdateWidget(VocabExampleText oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.run != widget.run) _start();
-  }
-
-  @override
-  void dispose() {
-    _clock.dispose();
-    super.dispose();
-  }
-
-  /// The sound's own time: not motion, so reduce motion leaves it be.
-  void _start() {
-    final run = widget.run;
-    if (run == null) {
-      _clock.stop();
-      if (_said != null) {
-        setState(() {
-          _said = null;
-          _mark = null;
-        });
-      }
-      return;
-    }
-    _clock
-      ..duration = run.length
-      ..forward(from: 0);
-    _follow();
-  }
-
-  void _follow() {
-    final run = widget.run;
-    if (run == null) return;
-    final said = widget.example.tokenAt(run.length * _clock.value, run.length);
-    if (said == _said) return;
-    _said = said;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _measure());
-  }
-
-  void _measure() {
-    if (!mounted) return;
-    final said = _said;
-    final stage = _stage.currentContext?.findRenderObject();
-    final box = said == null ? null : _keys[said]?.currentContext;
-    final word = box?.findRenderObject();
-    setState(() {
-      _mark = stage is RenderBox && word is RenderBox
-          ? word.localToGlobal(Offset.zero, ancestor: stage) & word.size
-          : null;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -738,44 +667,20 @@ class _VocabExampleTextState extends State<VocabExampleText>
       fontFamily: context.texts.bodyStrong.fontFamily,
       color: colors.reader.selectedWord,
     );
-    final mark = _mark;
-    final tokens = widget.example.tokens;
-    return Stack(
-      key: _stage,
-      clipBehavior: Clip.none,
-      children: [
-        if (mark != null)
-          AnimatedPositionedDirectional(
-            duration: AppMotion.resolve(context, AppMotion.closeUp),
-            curve: AppMotion.linear,
-            start: mark.left - AppSpacing.xs,
-            top: mark.top,
-            width: mark.width + AppSpacing.sm,
-            height: mark.height,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.reader.karaokeBackground,
-                borderRadius: BorderRadius.circular(AppSpacing.sm - 2),
-              ),
-            ),
-          ),
-        Wrap(
-          spacing:
-              MediaQuery.textScalerOf(context).scale(style.fontSize ?? 20) *
-              .28,
-          children: [
-            for (final (i, token) in tokens.indexed)
-              Text(
-                token.text,
-                key: _keys.putIfAbsent(i, GlobalKey.new),
-                locale: const Locale('en'),
-                style: widget.example.highlighted.contains(token.id)
-                    ? style.merge(strong)
-                    : style,
-              ),
-          ],
-        ),
-      ],
+    final tokens = example.tokens;
+    return KaraokeText(
+      count: tokens.length,
+      run: run,
+      saidAt: example.tokenAt,
+      spacing:
+          MediaQuery.textScalerOf(context).scale(style.fontSize ?? 20) * .28,
+      word: (context, i) => Text(
+        tokens[i].text,
+        locale: const Locale('en'),
+        style: example.highlighted.contains(tokens[i].id)
+            ? style.merge(strong)
+            : style,
+      ),
     );
   }
 }

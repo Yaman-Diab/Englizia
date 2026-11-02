@@ -38,6 +38,7 @@ ReaderContent? readerFromJson(Map<String, Object?> lesson) {
     return ReaderContent(
       audioUrl: audio == null ? '' : _required(audio.readString('url')),
       video: video,
+      shadowingMode: _shadowingMode(json.readString('shadowingMode')),
       duration: video?.video.duration ?? _ms(audio?.readInt('durationMs')),
       sentences: sentences,
       spans: [
@@ -87,6 +88,10 @@ ReaderSentence _sentence(Map<String, Object?> json) {
     imageAlt: json.readString('imageAlt'),
     speaker: json.readString('speaker'),
     shadowing: json.readBool('shadowing') ?? false,
+    waveform: [
+      for (final level in json.readList('waveform') ?? const <Object?>[])
+        if (level is num) level.toDouble().clamp(0, 1),
+    ],
   );
 }
 
@@ -115,6 +120,11 @@ ReaderSpan? _span(Map<String, Object?> json) {
   );
 }
 
+ShadowingMode _shadowingMode(String? name) => ShadowingMode.values.firstWhere(
+  (mode) => mode.name == name,
+  orElse: () => ShadowingMode.repeat,
+);
+
 ReaderPrefs readerPrefsFromJson(Map<String, Object?> json) => ReaderPrefs(
   size: ReaderTextSize.values.firstWhere(
     (size) => size.name == json.readString('size'),
@@ -129,6 +139,10 @@ ReaderPrefs readerPrefsFromJson(Map<String, Object?> json) => ReaderPrefs(
     orElse: () => ReaderMode.currentTranslated,
   ),
   stopEachSentence: json.readBool('stopEachSentence') ?? false,
+  shadowingMode: switch (json.readString('shadowingMode')) {
+    final String name => _shadowingMode(name),
+    null => null,
+  },
 );
 
 Map<String, Object?> readerPrefsToJson(ReaderPrefs prefs) => {
@@ -136,6 +150,13 @@ Map<String, Object?> readerPrefsToJson(ReaderPrefs prefs) => {
   'mode': prefs.mode.name,
   'videoMode': prefs.videoMode.name,
   'stopEachSentence': prefs.stopEachSentence,
+  'shadowingMode': ?prefs.shadowingMode?.name,
+};
+
+Map<String, Object?> shadowingScoreToJson(ShadowingScore score) => {
+  'sentenceId': score.sentenceId,
+  'heard': score.heard,
+  'total': score.total,
 };
 
 /// A saved word as it is sent: all of it, as the panel may change the original.

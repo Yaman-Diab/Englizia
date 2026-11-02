@@ -76,6 +76,9 @@ abstract final class ApiEndpoints {
   static String lessonContentDone(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/content-done';
 
+  static String lessonShadowing(String lessonId) =>
+      '/api/v1/app/lessons/$lessonId/shadowing';
+
   static String lessonWatch(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/watch';
 
