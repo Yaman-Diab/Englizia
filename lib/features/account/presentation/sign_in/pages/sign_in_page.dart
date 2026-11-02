@@ -290,19 +290,23 @@ class _SignInPageState extends State<SignInPage> {
                 ],
               ),
             ),
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: TextButton(
-                onPressed: state.sending
-                    ? null
-                    : () => widget.onForgotPassword(state.email.trim()),
-                // The only way forward while locked: drawn stronger.
-                style: TextButton.styleFrom(
-                  textStyle: state.locked
-                      ? context.texts.bodyStrong
-                      : context.texts.body,
+            Entrance(
+              motion: EntranceMotion.up,
+              delay: FormEntrance.field(3),
+              child: Align(
+                alignment: AlignmentDirectional.centerEnd,
+                child: TextButton(
+                  onPressed: state.sending
+                      ? null
+                      : () => widget.onForgotPassword(state.email.trim()),
+                  // The only way forward while locked: drawn stronger.
+                  style: TextButton.styleFrom(
+                    textStyle: state.locked
+                        ? context.texts.bodyStrong
+                        : context.texts.body,
+                  ),
+                  child: Text('sign_in_forgot'.tr()),
                 ),
-                child: Text('sign_in_forgot'.tr()),
               ),
             ),
           ],
