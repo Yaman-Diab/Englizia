@@ -45,6 +45,9 @@ abstract final class AppRoutes {
   static const conceptExplain = '/practice/concepts/explain';
   static const practiceSentences = '/practice/sentences';
   static const talk = '/talk';
+  static const talkScenario = '/talk/scenarios/:scenarioId';
+  static const talkWritten = '/talk/written';
+  static const talkSummary = '/talk/summary';
   static const me = '/me';
   static const unitStart = '/units/next';
 
@@ -58,6 +61,9 @@ abstract final class AppRoutes {
       '/lessons/$lessonId/vocabulary';
 
   static String shadowingOf(String lessonId) => '/lessons/$lessonId/shadowing';
+
+  static String talkScenarioOf(String scenarioId) =>
+      '/talk/scenarios/$scenarioId';
 
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
 

@@ -1,17 +1,17 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
-import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
-import 'package:englizia/features/lessons/presentation/exercise/widgets/session/mic_permission_sheet.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_text_field.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/clip_button.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/mic_block.dart';

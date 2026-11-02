@@ -1,0 +1,50 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "sc_fragile_box",
+    "title": "الصندوق القابل للكسر",
+    "kind": "ai",
+    "character": {
+      "name": "Jake",
+      "descriptionAr": "عامل نقل مستعجل",
+      "avatarUrl": null
+    },
+    "intro": {
+      "en": "Jake is carrying your boxes upstairs. He's in a hurry.",
+      "ar": "جيك يحمل صناديقك إلى الأعلى، وهو مستعجل.",
+      "audioUrl": "https://cdn.example.com/talk/jake_intro.mp3"
+    },
+    "roleAr": "انتقلت للتو إلى شقة جديدة.",
+    "tasks": [
+      {
+        "id": "t_fragile",
+        "ar": "نبّه جيك إلى أن الصندوق قابل للكسر"
+      },
+      {
+        "id": "t_kitchen",
+        "ar": "اطلب منه أن يضعه في المطبخ"
+      },
+      {
+        "id": "t_water",
+        "ar": "اشكره واسأله إن كان يريد ماء"
+      }
+    ],
+    "maxTurns": 7,
+    "opening": {
+      "en": "Hey! Where do you want these boxes?",
+      "ar": "مرحبًا! أين تريد هذه الصناديق؟",
+      "audioUrl": "https://cdn.example.com/talk/jake_0.mp3"
+    },
+    "suggestions": [
+      {
+        "en": "Actually, Jake, this one's really fragile.",
+        "audioUrl": "https://cdn.example.com/talk/sug_0a.mp3"
+      },
+      {
+        "en": "Careful, please!",
+        "audioUrl": "https://cdn.example.com/talk/sug_0b.mp3"
+      }
+    ]
+  }
+}

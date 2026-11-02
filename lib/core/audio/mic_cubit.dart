@@ -38,8 +38,8 @@ final class MicState extends Equatable {
 }
 
 /// One press to start and one to stop (requirements v3.0 §7.5). Its own cubit,
-/// as the microphone comes back in shadowing and conversation, and the session
-/// has no business with it (ADR 11). The level changes many times a second, so
+/// shared by the lessons' questions, shadowing and conversation, which have no
+/// business with it (ADR 11). The level changes many times a second, so
 /// it goes on [levels], never through the state.
 class MicCubit extends Cubit<MicState> {
   MicCubit(this._listener, this._permission) : super(const MicState());

@@ -1,0 +1,60 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "quota": { "left": 2, "total": 3 },
+    "units": [
+      {
+        "title": "الوحدة 3: البيت الجديد",
+        "scenarios": [
+          {
+            "id": "sc_fragile_box",
+            "title": "الصندوق القابل للكسر",
+            "character": { "name": "Jake", "avatarUrl": null },
+            "tasks": 3,
+            "kind": "ai",
+            "bestDone": null,
+            "unlockUnit": null
+          },
+          {
+            "id": "sc_new_neighbour",
+            "title": "جار جديد",
+            "character": { "name": "Lina", "avatarUrl": null },
+            "tasks": 3,
+            "kind": "ai",
+            "bestDone": 2,
+            "unlockUnit": null
+          }
+        ]
+      },
+      {
+        "title": "الوحدة 2: في السوق",
+        "scenarios": [
+          {
+            "id": "sc_how_much",
+            "title": "بكم هذه؟",
+            "character": { "name": "Sami", "avatarUrl": null },
+            "tasks": 3,
+            "kind": "written",
+            "bestDone": 3,
+            "unlockUnit": null
+          }
+        ]
+      },
+      {
+        "title": "الوحدة 5: في المطعم",
+        "scenarios": [
+          {
+            "id": "sc_book_table",
+            "title": "حجز طاولة",
+            "character": { "name": "Maya", "avatarUrl": null },
+            "tasks": 3,
+            "kind": "ai",
+            "bestDone": null,
+            "unlockUnit": 5
+          }
+        ]
+      }
+    ]
+  }
+}

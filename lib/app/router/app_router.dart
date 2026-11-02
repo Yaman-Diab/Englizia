@@ -5,6 +5,7 @@ import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/app/shell/tab_shell.dart';
+import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -35,7 +36,6 @@ import 'package:englizia/features/lessons/presentation/concepts/cubit/concepts_c
 import 'package:englizia/features/lessons/presentation/concepts/pages/concept_session_page.dart';
 import 'package:englizia/features/lessons/presentation/concepts/pages/concepts_page.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
-import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
@@ -86,6 +86,11 @@ import 'package:englizia/features/practice/presentation/review/cubit/review_cubi
 import 'package:englizia/features/practice/presentation/review/pages/review_page.dart';
 import 'package:englizia/features/practice/presentation/words/cubit/my_words_cubit.dart';
 import 'package:englizia/features/practice/presentation/words/pages/my_words_page.dart';
+import 'package:englizia/features/talk/domain/entities/talk.dart';
+import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';
+import 'package:englizia/features/talk/presentation/conversation/pages/conversation_page.dart';
+import 'package:englizia/features/talk/presentation/talk/cubit/talk_cubit.dart';
+import 'package:englizia/features/talk/presentation/talk/pages/talk_page.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/foundation.dart';
@@ -781,11 +786,52 @@ GoRouter createAppRouter(AppSessionController session) {
         path: AppRoutes.practiceSentences,
         builder: (_, _) => PendingPage(title: 'practice_sentences_title'.tr()),
       ),
-      // «تحدّث» and «أنا» have no design yet.
       GoRoute(
         path: AppRoutes.talk,
-        builder: (_, _) => PendingPage(title: 'tab_talk'.tr()),
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<TalkCubit>()..start(),
+          child: TabShell(
+            current: AppTab.talk,
+            onSelect: (tab) => _openTab(context, tab),
+            child: TalkPage(
+              onOpen: (scenario) => switch (scenario.kind) {
+                TalkKind.ai => context.push<void>(
+                  AppRoutes.talkScenarioOf(scenario.id),
+                ),
+                // A written conversation's screens have no design yet.
+                TalkKind.written => context.push<void>(AppRoutes.talkWritten),
+              },
+            ),
+          ),
+        ),
       ),
+      GoRoute(
+        path: AppRoutes.talkScenario,
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => sl<ConversationCubit>(
+                param1: state.pathParameters['scenarioId'],
+              )..start(),
+            ),
+            BlocProvider(create: (_) => sl<MicCubit>()),
+          ],
+          child: ConversationPage(
+            onClose: () => _back(context),
+            // The summary has its own design, not sent yet.
+            onSummary: () => context.pushReplacement(AppRoutes.talkSummary),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.talkWritten,
+        builder: (_, _) => PendingPage(title: 'talk_kind_written'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.talkSummary,
+        builder: (_, _) => PendingPage(title: 'talk_summary'.tr()),
+      ),
+      // «أنا» has no design yet.
       GoRoute(
         path: AppRoutes.me,
         builder: (_, _) => PendingPage(title: 'tab_me'.tr()),

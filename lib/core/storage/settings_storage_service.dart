@@ -27,6 +27,7 @@ final class SettingsStorageService {
   static const _wordBankOutboxKey = 'account.word_bank_outbox';
   static const _conceptsKey = 'account.concepts';
   static const _conceptsOutboxKey = 'account.concepts_outbox';
+  static const _talkKey = 'account.talk';
 
   final SharedPreferences _prefs;
 
@@ -170,6 +171,13 @@ final class SettingsStorageService {
     await _prefs.setString(_conceptsOutboxKey, json);
   }
 
+  /// «تحدّث»'s scenarios as last received, so the tab shows offline.
+  String? get talk => _prefs.getString(_talkKey);
+
+  Future<void> setTalk(String json) async {
+    await _prefs.setString(_talkKey, json);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -185,6 +193,7 @@ final class SettingsStorageService {
       await _prefs.remove(_wordBankOutboxKey);
       await _prefs.remove(_conceptsKey);
       await _prefs.remove(_conceptsOutboxKey);
+      await _prefs.remove(_talkKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

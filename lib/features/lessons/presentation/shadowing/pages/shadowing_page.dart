@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
@@ -11,11 +12,10 @@ import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
+import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
-import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
-import 'package:englizia/features/lessons/presentation/exercise/widgets/session/mic_permission_sheet.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/mic_block.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/said_word.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing_cubit.dart';

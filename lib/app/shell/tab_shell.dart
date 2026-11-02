@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 /// The app's four tabs (S §6).
 enum AppTab { learn, practice, talk, me }
 
-/// A tab's page with the tabs' bar under it. Only «تدرّب» has its page yet; the
-/// bar is shared as the others come.
+/// A tab's page with the tabs' bar under it. «تدرّب» and «تحدّث» have their
+/// pages; the bar is shared as the others come.
 class TabShell extends StatelessWidget {
   const TabShell({
     required this.current,
@@ -107,7 +107,11 @@ class _TabItem extends StatelessWidget {
       AppTab.talk => (Icons.chat_bubble_outline_rounded, 'tab_talk'.tr()),
       AppTab.me => (Icons.person_outline_rounded, 'tab_me'.tr()),
     };
-    final ink = current ? colors.primary.fill : colors.textSecondary;
+    // «تحدّث» is the AI's tab, so it is chosen in violet (design "Talk").
+    final tone = tab == AppTab.talk ? colors.ai : colors.primary;
+    final ink = current
+        ? (tab == AppTab.talk ? tone.text : tone.fill)
+        : colors.textSecondary;
     return Semantics(
       button: true,
       selected: current,
@@ -128,9 +132,7 @@ class _TabItem extends StatelessWidget {
                   width: _pillWidth,
                   height: _pillHeight,
                   decoration: BoxDecoration(
-                    color: current
-                        ? colors.primary.surface
-                        : Colors.transparent,
+                    color: current ? tone.surface : Colors.transparent,
                     borderRadius: BorderRadius.circular(_pillHeight / 2),
                   ),
                   child: Icon(icon, size: AppSizes.iconMd, color: ink),
