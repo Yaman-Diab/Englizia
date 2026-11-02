@@ -102,7 +102,7 @@ void main() {
               child: PracticePage(
                 onReview: () async => onReview?.call(),
                 onWords: () async => onWords?.call(),
-                onConcepts: () {},
+                onConcepts: () async {},
                 onSentences: () {},
               ),
             ),

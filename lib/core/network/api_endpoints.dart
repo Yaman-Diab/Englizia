@@ -87,6 +87,13 @@ abstract final class ApiEndpoints {
   static String wordBankWord(String wordId) =>
       '/api/v1/app/word-bank/words/$wordId';
 
+  // ASSUMPTION(api): docs/api/concepts.md.
+  static const concepts = '/api/v1/app/concepts';
+
+  static const conceptAnswers = '/api/v1/app/concepts/answers';
+
+  static const conceptReports = '/api/v1/app/concepts/reports';
+
   static String lessonWatch(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/watch';
 

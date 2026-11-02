@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/logging/app_logger.dart';
-import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/storage/send_queue.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/practice/data/datasources/practice_remote_data_source.dart';
 import 'package:englizia/features/practice/data/models/word_bank_model.dart';
@@ -19,16 +19,21 @@ final class PracticeRepositoryImpl implements PracticeRepository {
     this._remote,
     this._settings, {
     DateTime Function()? now,
-  }) : _now = now ?? DateTime.now;
+  }) : _now = now ?? DateTime.now {
+    _queue = SendQueue(
+      read: () => _settings.wordBankOutbox,
+      write: _settings.setWordBankOutbox,
+      send: _send,
+    );
+  }
 
-  static const _rejected = {400, 404, 409, 410, 422};
   static const _reviewKind = 'review';
   static const _removeKind = 'remove';
 
   final PracticeRemoteDataSource _remote;
   final SettingsStorageService _settings;
   final DateTime Function() _now;
-  Future<void>? _sending;
+  late final SendQueue _queue;
 
   @override
   WordBank? get keptBank {
@@ -71,7 +76,7 @@ final class PracticeRepositoryImpl implements PracticeRepository {
   }
 
   WordBank _withPending(WordBank bank) {
-    final waiting = _outbox();
+    final waiting = _queue.entries;
     if (waiting.isEmpty) return bank;
     final kept = {
       for (final word in keptBank?.words ?? const <BankWord>[]) word.id: word,
@@ -129,56 +134,14 @@ final class PracticeRepositoryImpl implements PracticeRepository {
     await _enqueue({'kind': _removeKind, 'wordId': word.id});
   }
 
-  List<Map<String, Object?>> _outbox() {
-    final saved = _settings.wordBankOutbox;
-    if (saved == null) return [];
-    try {
-      return [
-        for (final entry in jsonDecode(saved) as List<Object?>)
-          asJsonMap(entry),
-      ];
-    } on Object catch (error, stackTrace) {
-      AppLogger.error(error, stackTrace, 'The word bank outbox is unreadable');
-      return [];
-    }
-  }
+  Future<void> _enqueue(Map<String, Object?> entry) => _queue.add(entry);
 
-  Future<void> _setOutbox(List<Map<String, Object?>> entries) async {
-    try {
-      await _settings.setWordBankOutbox(jsonEncode(entries));
-    } catch (error, stackTrace) {
-      AppLogger.error(error, stackTrace, 'Keeping the word bank outbox failed');
-    }
-  }
-
-  Future<void> _enqueue(Map<String, Object?> entry) async {
-    await _setOutbox([..._outbox(), entry]);
-    unawaited(sendPending());
-  }
-
-  /// A failure only leaves them for the next time.
   @override
-  Future<void> sendPending() async {
-    await guard(() => _sending ??= _send().whenComplete(() => _sending = null));
-  }
+  Future<void> sendPending() => _queue.flush();
 
-  /// In order, as a later answer builds on an earlier one. One refused for good
-  /// is dropped, so it can't hold the rest back.
-  Future<void> _send() async {
-    while (true) {
-      final waiting = _outbox();
-      if (waiting.isEmpty) return;
-      final entry = waiting.first;
-      try {
-        await switch (entry.readString('kind')) {
-          _reviewKind => _remote.sendReview(asJsonMap(entry['request'])),
-          _ => _remote.removeWord(entry.readString('wordId')!),
-        };
-      } on ApiException catch (error, stackTrace) {
-        if (!_rejected.contains(error.statusCode)) rethrow;
-        AppLogger.error(error, stackTrace, 'A word bank change refused');
-      }
-      await _setOutbox(_outbox().skip(1).toList());
-    }
-  }
+  Future<void> _send(Map<String, Object?> entry) =>
+      switch (entry.readString('kind')) {
+        _reviewKind => _remote.sendReview(asJsonMap(entry['request'])),
+        _ => _remote.removeWord(entry.readString('wordId')!),
+      };
 }
