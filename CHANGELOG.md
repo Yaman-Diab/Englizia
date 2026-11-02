@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- «اشرح لي»: after a wrong answer, an explanation of your own mistake: your answer with the wrong words struck, the right one, why, and another example with its voice. Within a daily limit, with the lesson's own explanation when it can't be made.
 - «تحدّث»: conversations with a character in real situations, by unit. Speak or type, read what was heard before sending, hear and translate each reply, and see each task done as it happens, with no correction on the way.
 - A conversation's summary: the tasks done, up to three better ways to say what you said (added to the concepts to strengthen), and the whole conversation to read. Written conversations: repeat a sentence or choose a reply.
 - Concepts to strengthen: the concepts a learner got wrong, each brought back at five spaced stations with a new question, until it is mastered, with nothing red and no count of mistakes.

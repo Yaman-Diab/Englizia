@@ -53,7 +53,7 @@ void main() {
           child: ExercisePage(
             onExit: () {},
             onFinished: (_) {},
-            onExplain: () {},
+            onExplain: (_) {},
           ),
         ),
       ),
@@ -421,7 +421,7 @@ void main() {
           child: ExercisePage(
             onExit: () {},
             onFinished: (_) {},
-            onExplain: () {},
+            onExplain: (_) {},
           ),
         ),
         locale: layout.locale,

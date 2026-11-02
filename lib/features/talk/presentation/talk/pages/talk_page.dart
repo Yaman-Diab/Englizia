@@ -3,6 +3,7 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
+import 'package:englizia/core/design_system/widgets/ai_spark.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';

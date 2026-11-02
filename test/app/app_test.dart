@@ -6,7 +6,6 @@ import 'package:englizia/app/app.dart';
 import 'package:englizia/app/di.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
-import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/di/service_locator.dart';
@@ -26,6 +25,7 @@ import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_pag
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
+import 'package:englizia/features/lessons/presentation/explain/widgets/explain_sheet.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
@@ -515,7 +515,14 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       await tester.pump(const Duration(seconds: 1));
 
-      expect(find.byType(PendingPage), findsOneWidget);
+      expect(find.byType(ExplainSheet), findsOneWidget);
+      expect(find.byType(ExercisePage), findsOneWidget);
+
+      await tester.tap(find.byTooltip('explain_close'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(ExplainSheet), findsNothing);
+      expect(find.byType(ExercisePage), findsOneWidget);
     });
 
     testWidgets('with no session, it sends to welcome', (tester) async {

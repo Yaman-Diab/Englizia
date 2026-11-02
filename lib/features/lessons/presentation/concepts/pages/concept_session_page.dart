@@ -10,6 +10,7 @@ import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
 import 'package:englizia/features/lessons/domain/entities/concept.dart';
+import 'package:englizia/features/lessons/domain/entities/explanation.dart';
 import 'package:englizia/features/lessons/domain/services/concept_stations.dart';
 import 'package:englizia/features/lessons/presentation/concepts/cubit/concept_session_cubit.dart';
 import 'package:englizia/features/lessons/presentation/concepts/widgets/concept_parts.dart';
@@ -31,7 +32,7 @@ class ConceptSessionPage extends StatelessWidget {
 
   /// Leaving, and «انتهيت»: with the concepts mastered.
   final ValueChanged<Set<String>> onExit;
-  final VoidCallback onExplain;
+  final ValueChanged<ExplainRequest> onExplain;
 
   @override
   Widget build(BuildContext context) {
@@ -415,7 +416,7 @@ class _Question extends StatelessWidget {
 
   final ConceptSessionState state;
   final Concept concept;
-  final VoidCallback onExplain;
+  final ValueChanged<ExplainRequest> onExplain;
 
   @override
   Widget build(BuildContext context) {
@@ -490,7 +491,14 @@ class _Question extends StatelessWidget {
                     onToggle: cubit.toggleAnswerClip,
                   ),
                   onNext: cubit.answered,
-                  onExplain: onExplain,
+                  onExplain: () => onExplain(
+                    ExplainRequest(
+                      questionId: question.id,
+                      conceptId: concept.id,
+                      draft: state.draft!,
+                      lessonExplanation: question.explanation,
+                    ),
+                  ),
                   onReport: cubit.report,
                   onRetry: cubit.retry,
                   onSkip: cubit.skip,

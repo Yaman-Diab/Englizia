@@ -8,6 +8,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/explanation.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
@@ -55,7 +56,7 @@ void main() {
     Locale locale = const Locale('ar'),
     Size size = defaultViewport,
     ThemeMode themeMode = ThemeMode.light,
-    VoidCallback? onExplain,
+    ValueChanged<ExplainRequest>? onExplain,
   }) async {
     lessons.exercises = [exercise, first<SpellingExercise>()];
     final subject = cubit();
@@ -66,7 +67,7 @@ void main() {
         child: ExercisePage(
           onExit: () {},
           onFinished: (_) {},
-          onExplain: onExplain ?? () {},
+          onExplain: onExplain ?? (_) {},
         ),
       ),
       locale: locale,
@@ -236,18 +237,23 @@ void main() {
   group('explain it to me', () {
     testWidgets('on a wrong answer, when the track allows it', (tester) async {
       lessons.explainEnabled = true;
-      var opened = 0;
+      final asked = <ExplainRequest>[];
+      final question = first<MultipleChoiceExercise>();
       final subject = await pump(
         tester,
-        exercise: first<MultipleChoiceExercise>(),
-        onExplain: () => opened++,
+        exercise: question,
+        onExplain: asked.add,
       );
 
       await answer(tester, subject, 'go');
       await tester.tap(find.text('lesson_fb_explain'.tr()));
       await tester.pump();
 
-      expect(opened, 1);
+      final request = asked.single;
+      expect(request.questionId, question.id);
+      expect(request.lessonId, subject.lessonId);
+      expect(request.draft, isA<ChoiceDraft>());
+      expect(request.lessonExplanation, question.explanation);
       await leave(tester);
     });
 
@@ -698,7 +704,7 @@ void main() {
           child: ExercisePage(
             onExit: () {},
             onFinished: (_) {},
-            onExplain: () {},
+            onExplain: (_) {},
           ),
         ),
       ),

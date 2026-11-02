@@ -64,6 +64,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
 | [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
 | [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
+| [`explanations.md`](explanations.md) | «اشرح لي» under a wrong answer, in a lesson or a concept's session | mock |
 | [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
@@ -92,6 +93,8 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/concepts` | GET | — | today's concepts with their new questions, those later and those mastered ([concepts.md](concepts.md)) | proposed |
 | `/api/v1/app/concepts/answers` | POST | `{answerId, conceptId, questionId, correct, answeredAt}` | none; safe to repeat | proposed |
 | `/api/v1/app/concepts/reports` | POST | `{reportId, conceptId, questionId, reason}` | none; safe to repeat | proposed |
+| `/api/v1/app/explanations` | POST | `{questionId, lessonId or conceptId, answer}` | the explanation and the explanations left today, or `quotaOut` ([explanations.md](explanations.md)) | proposed |
+| `/api/v1/app/explanations/{id}/rating` | POST | `{helpful}` | none | proposed |
 | `/api/v1/app/talk` | GET | — | the scenarios by unit and the AI conversations left today ([talk.md](talk.md)) | proposed |
 | `/api/v1/app/talk/scenarios/{id}` | GET | — | the intro, role, tasks, opening line and first suggestions | proposed |
 | `/api/v1/app/talk/conversations` | POST | `{conversationId, scenarioId}` | none; counts against today's limit | proposed |

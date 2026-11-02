@@ -9,6 +9,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/explanation.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
@@ -415,7 +416,7 @@ void main() {
       ThemeMode themeMode = ThemeMode.light,
       VoidCallback? onExit,
       ValueChanged<LessonSummary>? onFinished,
-      VoidCallback? onExplain,
+      ValueChanged<ExplainRequest>? onExplain,
     }) async {
       final subject = cubit();
       addTearDown(subject.close);
@@ -425,7 +426,7 @@ void main() {
           child: ExercisePage(
             onExit: onExit ?? () {},
             onFinished: onFinished ?? (_) {},
-            onExplain: onExplain ?? () {},
+            onExplain: onExplain ?? (_) {},
           ),
         ),
         locale: locale,
@@ -501,7 +502,7 @@ void main() {
           child: ExercisePage(
             onExit: () {},
             onFinished: (_) {},
-            onExplain: () {},
+            onExplain: (_) {},
           ),
         ),
       );
@@ -854,7 +855,7 @@ void main() {
             child: ExercisePage(
               onExit: () {},
               onFinished: (_) {},
-              onExplain: () {},
+              onExplain: (_) {},
             ),
           ),
         ),
