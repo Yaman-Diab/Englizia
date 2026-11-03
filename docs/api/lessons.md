@@ -149,6 +149,33 @@ A question the app can't read is skipped and logged, so it can't leave the learn
 - English instructions and hints: the package has only Arabic, so both app languages show Arabic (S §7.1 says "Arabic instructions"), read right to left.
 - The order of options is shuffled on the phone, per installation and question (S §7.1), so the server must send them in any order and needs nothing for this.
 
+### A kids' lesson (`kids`)
+
+In kids mode (S §13), a lesson comes with `kids`: its screens in order, the words it teaches, and the guide's recorded lines. Its questions stay in `exercises` as any lesson's, answered and completed the same way (`answers`, `complete`); a `question` screen names one by its `id`. Proposed, from design `Kid Lesson`.
+
+```json
+"kids": {
+  "voice": { "praise": "…/praise.mp3", "tryAgain": "…/try_again.mp3", "leave": "…/leave.mp3", "done": "…/done_six_words.mp3" },
+  "words": [{ "word": "apple", "image": "…/apple.svg", "ar": "تفاحة", "audio": "…/apple.mp3" }],
+  "steps": [
+    { "kind": "word", "id": "k_word", "instructionAudio": "…/in_word.mp3", "word": { "word": "apple", "image": "…", "ar": "تفاحة", "audio": "…" } },
+    { "kind": "letter", "id": "k_letter", "instructionAudio": "…", "letter": "A", "video": "…/letter_a.mp4", "videoMs": 4600, "audio": "…/letter_a.mp3", "words": [{ "word": "apple" }, { "word": "ant" }] },
+    { "kind": "question", "id": "kq_letter", "instructionAudio": "…/in_choose_letter.mp3" }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `voice` | «أحسنت!», «حاول مرة أخرى», «تريد أن تخرج؟» and the end's «رائع! تعلّمت ست كلمات جديدة», recorded |
+| `words[]` | The lesson's 5 or 6 words, pictured at its end; a matching word alone says itself from here |
+| `steps[].instructionAudio` | The screen's Arabic instruction (`instruction_ar_audio`), played by itself; pressing the guide plays it again |
+| `kind: word` | «بطاقة الكلمة» (Starter 2): its picture, the word and its voice, said after the instruction |
+| `kind: letter` | «بطاقة الحرف» (Starter 1): the capital (the small one is shown beside it), its video and its length in ms in case the player can't tell, its voice, and two words that start with it |
+| `kind: question` | One of `exercises`: `listenChoose` with letters (`text`) for «اسمع واختر الحرف», `imageChoice` for «اسمع واختر الصورة», `matching` with pictures for «طابق». No check button: pressing answers. The first answer to each goes to `answers`, so the server records a mistake on its concept without a word to the child |
+
+The end shows five stars filling, whatever the points (S §13.1: points show as stars). A screen that can't be read is left out; with none, the lesson can't be shown.
+
 ### Errors
 
 The common errors (`README.md`). With an unknown lesson, `404`.

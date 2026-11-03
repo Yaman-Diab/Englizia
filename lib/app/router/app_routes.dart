@@ -33,6 +33,7 @@ abstract final class AppRoutes {
   static const lessonVocabulary = '/lessons/:lessonId/vocabulary';
   static const lessonShadowing = '/lessons/:lessonId/shadowing';
   static const lessonExercises = '/lessons/:lessonId/exercises';
+  static const lessonKids = '/lessons/:lessonId/kids';
   static const lessonComplete = '/lessons/:lessonId/complete';
 
   /// Screens a lesson's end leads to, not built yet.
@@ -52,6 +53,8 @@ abstract final class AppRoutes {
   static String textOf(String lessonId) => '/lessons/$lessonId/text';
 
   static String videoOf(String lessonId) => '/lessons/$lessonId/video';
+
+  static String kidsOf(String lessonId) => '/lessons/$lessonId/kids';
 
   static String vocabularyOf(String lessonId) =>
       '/lessons/$lessonId/vocabulary';

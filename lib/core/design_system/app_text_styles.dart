@@ -35,6 +35,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.button,
     required this.kidsGreeting,
     required this.kidsWord,
+    required this.kidsCard,
   });
 
   factory AppTextStyles.build({required Color color, required bool isArabic}) {
@@ -71,6 +72,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       button: style(16, 24, FontWeight.w600),
       kidsGreeting: style(35, 44, FontWeight.w600),
       kidsWord: style(50, 64, FontWeight.w700, kids: true),
+      kidsCard: style(28, 40, FontWeight.w400, kids: true),
     );
   }
 
@@ -102,6 +104,10 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// Kids mode: an English word to hear and tap, in Andika. 50/64, 700.
   final TextStyle kidsWord;
 
+  /// Kids mode: a letter or a word on a card, in Andika. 28/40, 400; a big
+  /// letter takes the same role at its own size.
+  final TextStyle kidsCard;
+
   /// Maps the roles onto Material's scale so stock widgets match.
   TextTheme toTextTheme() => TextTheme(
     displaySmall: display,
@@ -131,6 +137,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? button,
     TextStyle? kidsGreeting,
     TextStyle? kidsWord,
+    TextStyle? kidsCard,
   }) => AppTextStyles(
     display: display ?? this.display,
     title: title ?? this.title,
@@ -142,6 +149,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     button: button ?? this.button,
     kidsGreeting: kidsGreeting ?? this.kidsGreeting,
     kidsWord: kidsWord ?? this.kidsWord,
+    kidsCard: kidsCard ?? this.kidsCard,
   );
 
   @override
@@ -158,6 +166,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       button: TextStyle.lerp(button, other.button, t)!,
       kidsGreeting: TextStyle.lerp(kidsGreeting, other.kidsGreeting, t)!,
       kidsWord: TextStyle.lerp(kidsWord, other.kidsWord, t)!,
+      kidsCard: TextStyle.lerp(kidsCard, other.kidsCard, t)!,
     );
   }
 }

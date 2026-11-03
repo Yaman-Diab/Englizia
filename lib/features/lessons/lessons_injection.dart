@@ -25,6 +25,7 @@ import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_c
 import 'package:englizia/features/lessons/presentation/explain/cubit/explain_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
+import 'package:englizia/features/lessons/presentation/kids/cubit/kid_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_video_cubit.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing_cubit.dart';
@@ -67,6 +68,16 @@ void registerLessonDependencies(GetIt sl) {
     )
     ..registerFactoryParam<InteractiveVideoCubit, String, void>(
       (lessonId, _) => InteractiveVideoCubit(sl(), sl(), lessonId: lessonId),
+    )
+    ..registerFactoryParam<KidLessonCubit, String, void>(
+      (lessonId, _) => KidLessonCubit(
+        sl(),
+        sl(),
+        sl(),
+        // The mock's video is silent, but its time passes (D-050).
+        AppConfig.isMock ? SilentAudioEngine() : sl<VideoEngine>(),
+        lessonId: lessonId,
+      ),
     )
     ..registerFactoryParam<VocabLessonCubit, String, void>(
       (lessonId, _) => VocabLessonCubit(sl(), sl(), sl(), lessonId: lessonId),

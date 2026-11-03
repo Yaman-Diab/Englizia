@@ -49,6 +49,7 @@ flutter:
     - assets/mock/account/
     - assets/mock/placement/
     - assets/mock/lessons/
+    - assets/mock/lessons/kids/
     - assets/mock/practice/
     - assets/mock/talk/
     - assets/mock/settings/

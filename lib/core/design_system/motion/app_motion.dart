@@ -140,6 +140,18 @@ abstract final class AppMotion {
   static const summaryMarkStep = Duration(milliseconds: 150);
   static const replyFlight = Duration(milliseconds: 380);
 
+  /// A kids' lesson (Kid Lesson design): a screen sliding in, a right answer's
+  /// star flying to the bar and the bar's star beating as it lands, the right
+  /// card pulsing after two misses, the guide dancing at the end, and a star
+  /// of the end filling.
+  static const kidScreenIn = Duration(milliseconds: 360);
+  static const kidStarFlight = Duration(milliseconds: 600);
+  static const kidStarFlightDelay = Duration(milliseconds: 280);
+  static const kidHintPulse = Duration(milliseconds: 560);
+  static const kidHintDelay = Duration(milliseconds: 800);
+  static const kidDance = Duration(milliseconds: 640);
+  static const kidStarFill = Duration(milliseconds: 380);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 

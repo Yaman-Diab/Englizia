@@ -10,6 +10,7 @@ import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
+import 'package:englizia/features/lessons/domain/entities/kid_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
@@ -26,6 +27,16 @@ Map<String, Object?> sampleLessonJson() => asJsonMap(
 /// The example's questions.
 List<Exercise> sampleExercises() =>
     LessonModel(sampleLessonJson()).toEntity('seed').exercises;
+
+/// The mock kids' lesson as it came.
+Map<String, Object?> kidLessonJson() => asJsonMap(
+  ApiClient.unwrap(
+    jsonDecode(File(LessonFakeDataSource.kidAsset).readAsStringSync()),
+  ),
+);
+
+/// The mock kids' lesson.
+Lesson kidLesson() => LessonModel(kidLessonJson()).toEntity('seed');
 
 /// Only the first choice templates of the example.
 List<Exercise> sampleChoiceExercises() => sampleExercises()
@@ -68,6 +79,7 @@ class FakeLessonRepository implements LessonRepository {
   GrammarContent? grammar;
   ReaderContent? reader;
   VocabContent? vocabulary;
+  KidLesson? kids;
   final vocabSent = <(VocabWord, bool)>[];
   final shadowingScores = <ShadowingScore>[];
   ReaderPrefs prefs = const ReaderPrefs();
@@ -98,6 +110,7 @@ class FakeLessonRepository implements LessonRepository {
               grammar: grammar,
               reader: reader,
               vocabulary: vocabulary,
+              kids: kids,
             ),
           )
         : Err(failure);

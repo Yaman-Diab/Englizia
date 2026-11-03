@@ -1010,5 +1010,28 @@
   "explain_left": "Explanations left today: {count}",
   "explain_failed": "Couldn't explain right now",
   "explain_quota_out": "You've used today's explanations. They renew tomorrow.",
-  "explain_lesson": "The lesson's explanation"
+  "explain_lesson": "The lesson's explanation",
+  "kid_exit": "Leave the lesson",
+  "kid_progress": "Lesson progress",
+  "kid_say_again": "Say the instruction again",
+  "kid_listen": "Listen",
+  "kid_next": "Next",
+  "kid_word_label": "{word}, {arabic}",
+  "kid_play_video": "Play the video",
+  "kid_replay_video": "Play the video again",
+  "kid_listen_letter": "Listen to the letter",
+  "kid_listen_again": "Listen again",
+  "kid_options": "Options",
+  "kid_pictures": "Pictures",
+  "kid_words": "Words",
+  "kid_lesson_words": "The lesson's words",
+  "kid_stars": {
+    "zero": "No stars of {total}",
+    "one": "1 star of {total}",
+    "other": "{} stars of {total}"
+  },
+  "kid_again": "Play again",
+  "kid_stay": "Stay",
+  "kid_leave": "Leave",
+  "foundation_try_kids": "Try a kids' lesson"
 }
