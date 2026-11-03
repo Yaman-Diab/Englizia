@@ -1,6 +1,7 @@
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
+import 'package:englizia/features/lessons/data/models/kid_lesson_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
@@ -59,6 +60,7 @@ final class LessonModel {
       grammar: grammarFromJson(json),
       reader: readerFromJson(json),
       vocabulary: vocabularyFromJson(json),
+      kids: kidLessonFromJson(json),
     );
   }
 }

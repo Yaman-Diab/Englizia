@@ -1,0 +1,208 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_kid",
+    "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": false,
+    "title": "حرف A",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 1,
+      "title": "الحروف: A وB وC وD",
+      "lessons": [
+        {
+          "id": "les_kid",
+          "kind": "vocabulary",
+          "done": false
+        }
+      ]
+    },
+    "kids": {
+      "voice": {
+        "praise": "https://example.com/mock/kids/praise.mp3",
+        "tryAgain": "https://example.com/mock/kids/try_again.mp3",
+        "leave": "https://example.com/mock/kids/leave.mp3",
+        "done": "https://example.com/mock/kids/done_six_words.mp3"
+      },
+      "words": [
+        {
+          "word": "apple",
+          "image": "assets/mock/lessons/kids/apple.svg",
+          "ar": "تفاحة",
+          "audio": "https://example.com/mock/kids/apple.mp3"
+        },
+        {
+          "word": "ant",
+          "image": "assets/mock/lessons/kids/ant.svg",
+          "ar": "نملة",
+          "audio": "https://example.com/mock/kids/ant.mp3"
+        },
+        {
+          "word": "cat",
+          "image": "assets/mock/lessons/kids/cat.svg",
+          "ar": "قطة",
+          "audio": "https://example.com/mock/kids/cat.mp3"
+        },
+        {
+          "word": "dog",
+          "image": "assets/mock/lessons/kids/dog.svg",
+          "ar": "كلب",
+          "audio": "https://example.com/mock/kids/dog.mp3"
+        },
+        {
+          "word": "fish",
+          "image": "assets/mock/lessons/kids/fish.svg",
+          "ar": "سمكة",
+          "audio": "https://example.com/mock/kids/fish.mp3"
+        },
+        {
+          "word": "bird",
+          "image": "assets/mock/lessons/kids/bird.svg",
+          "ar": "عصفور",
+          "audio": "https://example.com/mock/kids/bird.mp3"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "word",
+          "id": "k_word",
+          "instructionAudio": "https://example.com/mock/kids/in_word.mp3",
+          "word": {
+            "word": "apple",
+            "image": "assets/mock/lessons/kids/apple.svg",
+            "ar": "تفاحة",
+            "audio": "https://example.com/mock/kids/apple.mp3"
+          }
+        },
+        {
+          "kind": "letter",
+          "id": "k_letter",
+          "instructionAudio": "https://example.com/mock/kids/in_letter.mp3",
+          "letter": "A",
+          "video": "https://example.com/mock/kids/letter_a.mp4",
+          "videoMs": 4600,
+          "audio": "https://example.com/mock/kids/letter_a.mp3",
+          "words": [
+            {
+              "word": "apple",
+              "image": "assets/mock/lessons/kids/apple.svg",
+              "ar": "تفاحة",
+              "audio": "https://example.com/mock/kids/apple.mp3"
+            },
+            {
+              "word": "ant",
+              "image": "assets/mock/lessons/kids/ant.svg",
+              "ar": "نملة",
+              "audio": "https://example.com/mock/kids/ant.mp3"
+            }
+          ]
+        },
+        {
+          "kind": "question",
+          "id": "kq_letter",
+          "instructionAudio": "https://example.com/mock/kids/in_choose_letter.mp3"
+        },
+        {
+          "kind": "question",
+          "id": "kq_picture",
+          "instructionAudio": "https://example.com/mock/kids/in_choose_picture.mp3"
+        },
+        {
+          "kind": "question",
+          "id": "kq_match",
+          "instructionAudio": "https://example.com/mock/kids/in_match.mp3"
+        }
+      ]
+    },
+    "exercises": [
+      {
+        "id": "kq_letter",
+        "template": "listenChoose",
+        "instructionAr": "اسمع، واختر الحرف",
+        "prompt": {
+          "audio": "https://example.com/mock/kids/letter_a.mp3",
+          "transcript": "A"
+        },
+        "options": [
+          {
+            "id": "M",
+            "text": "M"
+          },
+          {
+            "id": "A",
+            "text": "A"
+          },
+          {
+            "id": "T",
+            "text": "T"
+          },
+          {
+            "id": "S",
+            "text": "S"
+          }
+        ],
+        "answer": "A",
+        "reviewOnly": false
+      },
+      {
+        "id": "kq_picture",
+        "template": "imageChoice",
+        "instructionAr": "اسمع، واختر الصورة",
+        "prompt": {
+          "en": "cat",
+          "audio": "https://example.com/mock/kids/cat.mp3"
+        },
+        "options": [
+          {
+            "id": "dog",
+            "image": "assets/mock/lessons/kids/dog.svg",
+            "alt": "كلب"
+          },
+          {
+            "id": "cat",
+            "image": "assets/mock/lessons/kids/cat.svg",
+            "alt": "قطة"
+          },
+          {
+            "id": "bird",
+            "image": "assets/mock/lessons/kids/bird.svg",
+            "alt": "عصفور"
+          },
+          {
+            "id": "fish",
+            "image": "assets/mock/lessons/kids/fish.svg",
+            "alt": "سمكة"
+          }
+        ],
+        "answer": "cat",
+        "reviewOnly": false
+      },
+      {
+        "id": "kq_match",
+        "template": "matching",
+        "kind": "image",
+        "instructionAr": "طابق كل صورة بكلمتها",
+        "pairs": [
+          {
+            "left": "apple",
+            "rightImage": "assets/mock/lessons/kids/apple.svg",
+            "rightAlt": "تفاحة"
+          },
+          {
+            "left": "cat",
+            "rightImage": "assets/mock/lessons/kids/cat.svg",
+            "rightAlt": "قطة"
+          },
+          {
+            "left": "ant",
+            "rightImage": "assets/mock/lessons/kids/ant.svg",
+            "rightAlt": "نملة"
+          }
+        ],
+        "reviewOnly": false
+      }
+    ]
+  }
+}

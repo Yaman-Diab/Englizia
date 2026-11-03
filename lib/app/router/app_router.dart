@@ -42,6 +42,8 @@ import 'package:englizia/features/lessons/presentation/explain/widgets/explain_s
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/pages/grammar_lesson_page.dart';
+import 'package:englizia/features/lessons/presentation/kids/cubit/kid_lesson_cubit.dart';
+import 'package:englizia/features/lessons/presentation/kids/pages/kid_lesson_page.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_video_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/pages/interactive_text_page.dart';
@@ -616,6 +618,19 @@ GoRouter createAppRouter(AppSessionController session) {
             ),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.lessonKids,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              sl<KidLessonCubit>(param1: state.pathParameters['lessonId'])
+                ..start(),
+          child: KidLessonPage(
+            onExit: () => _back(context),
+            // The kids' home and unit aren't built yet.
+            onNext: () => context.go(AppRoutes.home),
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.lessonVocabulary,

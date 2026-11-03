@@ -1,4 +1,5 @@
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
+import 'package:englizia/features/lessons/domain/entities/kid_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
@@ -17,6 +18,7 @@ final class Lesson extends Equatable {
     this.grammar,
     this.reader,
     this.vocabulary,
+    this.kids,
   });
 
   final String id;
@@ -41,6 +43,9 @@ final class Lesson extends Equatable {
   /// The cards a vocabulary lesson shows before its exercises.
   final VocabContent? vocabulary;
 
+  /// A kids' lesson's screens, its questions among [exercises].
+  final KidLesson? kids;
+
   @override
   List<Object?> get props => [
     id,
@@ -52,6 +57,7 @@ final class Lesson extends Equatable {
     grammar,
     vocabulary,
     reader,
+    kids,
   ];
 }
 

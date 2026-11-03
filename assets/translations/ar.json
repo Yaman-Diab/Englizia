@@ -1191,5 +1191,31 @@
   "explain_left": "شروحات متبقية اليوم: {count}",
   "explain_failed": "تعذّر الشرح الآن",
   "explain_quota_out": "استخدمت شروحات اليوم. تتجدد غدًا.",
-  "explain_lesson": "الشرح في الدرس"
+  "explain_lesson": "الشرح في الدرس",
+  "kid_exit": "الخروج من الدرس",
+  "kid_progress": "تقدّم الدرس",
+  "kid_say_again": "أعد التعليمة",
+  "kid_listen": "استمع",
+  "kid_next": "التالي",
+  "kid_word_label": "{word}، {arabic}",
+  "kid_play_video": "شغّل الفيديو",
+  "kid_replay_video": "شغّل الفيديو مرة أخرى",
+  "kid_listen_letter": "استمع إلى الحرف",
+  "kid_listen_again": "استمع مرة أخرى",
+  "kid_options": "الخيارات",
+  "kid_pictures": "الصور",
+  "kid_words": "الكلمات",
+  "kid_lesson_words": "كلمات الدرس",
+  "kid_stars": {
+    "zero": "لا نجوم من {total}",
+    "one": "نجمة واحدة من {total}",
+    "two": "نجمتان من {total}",
+    "few": "{} نجوم من {total}",
+    "many": "{} نجمة من {total}",
+    "other": "{} نجمة من {total}"
+  },
+  "kid_again": "العب مرة أخرى",
+  "kid_stay": "ابقَ",
+  "kid_leave": "اخرج",
+  "foundation_try_kids": "جرّب درس الأطفال"
 }

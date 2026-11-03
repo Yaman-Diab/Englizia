@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Kids' lessons: a word or a letter with its pictures, voice and video, then listening for a letter or a picture and matching pictures with words, answered by pressing. A right answer sends a star to the bar, and the lesson ends with the guide dancing and five stars.
 - «اشرح لي»: after a wrong answer, an explanation of your own mistake: your answer with the wrong words struck, the right one, why, and another example with its voice. Within a daily limit, with the lesson's own explanation when it can't be made.
 - «تحدّث»: conversations with a character in real situations, by unit. Speak or type, read what was heard before sending, hear and translate each reply, and see each task done as it happens, with no correction on the way.
 - A conversation's summary: the tasks done, up to three better ways to say what you said (added to the concepts to strengthen), and the whole conversation to read. Written conversations: repeat a sentence or choose a reply.
