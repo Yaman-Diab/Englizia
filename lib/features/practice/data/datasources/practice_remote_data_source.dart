@@ -40,10 +40,15 @@ final class PracticeFakeDataSource implements PracticeRemoteDataSource {
   PracticeFakeDataSource(
     this._bundle, {
     this.latency = const Duration(milliseconds: 400),
+    this.kids = false,
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   static const asset = 'assets/mock/practice/word_bank.json';
+  static const kidsAsset = 'assets/mock/practice/kid_word_bank.json';
+
+  /// A child's bank (`env/mock_kids.json`): pictured words by unit.
+  final bool kids;
 
   final AssetBundle _bundle;
   final Duration latency;
@@ -55,7 +60,9 @@ final class PracticeFakeDataSource implements PracticeRemoteDataSource {
     return WordBankModel(
       movedToToday(
         asJsonMap(
-          ApiClient.unwrap(jsonDecode(await _bundle.loadString(asset))),
+          ApiClient.unwrap(
+            jsonDecode(await _bundle.loadString(kids ? kidsAsset : asset)),
+          ),
         ),
         _now(),
       ),

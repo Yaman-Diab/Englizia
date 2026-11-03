@@ -113,6 +113,9 @@ class ReviewCubit extends Cubit<ReviewState> {
 
   Future<void> saySentence() => _say(state.word?.sentenceAudioUrl);
 
+  /// A line of the guide, as kids' «العب بكلماتي» says them.
+  Future<void> sayLine(String? url) => _say(url);
+
   Future<void> _say(String? url) async {
     if (url == null) return;
     await _clip.start(url, onEnd: () {});

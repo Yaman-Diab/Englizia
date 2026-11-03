@@ -1033,5 +1033,33 @@
   "kid_again": "Play again",
   "kid_stay": "Stay",
   "kid_leave": "Leave",
-  "foundation_try_kids": "Try a kids' lesson"
+  "foundation_try_kids": "Try a kids' lesson",
+  "kid_previous": "Previous",
+  "kid_auto_turn": "Turn the pages by themselves",
+  "kid_play_song": "Play the song",
+  "kid_speed_slow": "Speed 0.75, press for normal speed",
+  "kid_speed_normal": "Normal speed, press for slower",
+  "kid_sing_again": "Sing again",
+  "kid_listen_to": "Listen: {word}",
+  "kid_star": "Star",
+  "kid_say_sentence": "Say the sentence",
+  "kid_listen_model": "Hear how it is said",
+  "kid_speak": "Speak",
+  "kid_words_title": "My words",
+  "kid_words_count": {
+    "zero": "No words",
+    "one": "1 word",
+    "other": "{} words"
+  },
+  "kid_play_words": "Play with my words",
+  "kid_words_all": "All",
+  "kid_know": "I know it",
+  "kid_dont_know": "I don't know it",
+  "kid_review_stars": {
+    "zero": "No stars",
+    "one": "1 star",
+    "other": "{} stars"
+  },
+  "foundation_try_kid_media": "Try a kids' story and song",
+  "foundation_try_kid_words": "Try kids' My words"
 }

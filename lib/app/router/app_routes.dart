@@ -44,6 +44,8 @@ abstract final class AppRoutes {
   static const practiceConceptSession = '/practice/concepts/session';
   static const practiceSentences = '/practice/sentences';
   static const talk = '/talk';
+  static const kidsWords = '/kids/words';
+  static const kidsReview = '/kids/words/review';
   static const talkScenario = '/talk/scenarios/:scenarioId';
   static const me = '/me';
   static const unitStart = '/units/next';

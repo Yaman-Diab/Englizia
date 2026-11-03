@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/router/route_policies.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
+import 'package:englizia/app/shell/kid_tab_shell.dart';
 import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/app/shell/tab_shell.dart';
@@ -84,6 +85,11 @@ import 'package:englizia/features/placement/presentation/result/cubit/placement_
 import 'package:englizia/features/placement/presentation/result/pages/placement_result_page.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
 import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
+import 'package:englizia/features/practice/domain/entities/word_bank.dart';
+import 'package:englizia/features/practice/domain/repositories/practice_repository.dart';
+import 'package:englizia/features/practice/presentation/kids/cubit/kid_words_cubit.dart';
+import 'package:englizia/features/practice/presentation/kids/pages/kid_review_page.dart';
+import 'package:englizia/features/practice/presentation/kids/pages/kid_words_page.dart';
 import 'package:englizia/features/practice/presentation/practice/cubit/practice_cubit.dart';
 import 'package:englizia/features/practice/presentation/practice/pages/practice_page.dart';
 import 'package:englizia/features/practice/presentation/review/cubit/review_cubit.dart';
@@ -621,10 +627,15 @@ GoRouter createAppRouter(AppSessionController session) {
       ),
       GoRoute(
         path: AppRoutes.lessonKids,
-        builder: (context, state) => BlocProvider(
-          create: (_) =>
-              sl<KidLessonCubit>(param1: state.pathParameters['lessonId'])
-                ..start(),
+        builder: (context, state) => MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) =>
+                  sl<KidLessonCubit>(param1: state.pathParameters['lessonId'])
+                    ..start(),
+            ),
+            BlocProvider(create: (_) => sl<MicCubit>()),
+          ],
           child: KidLessonPage(
             onExit: () => _back(context),
             // The kids' home and unit aren't built yet.
@@ -810,6 +821,36 @@ GoRouter createAppRouter(AppSessionController session) {
               onOpen: (scenario) =>
                   context.push<void>(AppRoutes.talkScenarioOf(scenario.id)),
             ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.kidsWords,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<KidWordsCubit>()..start(),
+          child: KidTabShell(
+            current: KidTab.words,
+            onSelect: (tab) => switch (tab) {
+              // The kids' home and «أنا» aren't built yet.
+              KidTab.learn => context.go(AppRoutes.home),
+              KidTab.words => null,
+              KidTab.me => context.go(AppRoutes.me),
+            },
+            child: KidWordsPage(
+              onPlay: () => context.push<void>(AppRoutes.kidsReview),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.kidsReview,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<ReviewCubit>()..start(),
+          child: KidReviewPage(
+            voice:
+                sl<PracticeRepository>().keptBank?.kidsVoice ??
+                const KidWordsVoice(),
+            onExit: () => _back(context),
           ),
         ),
       ),

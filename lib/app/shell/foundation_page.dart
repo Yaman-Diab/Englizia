@@ -195,6 +195,17 @@ class FoundationPage extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 OutlinedButton(
+                  onPressed: () =>
+                      context.push(AppRoutes.kidsOf('les_kid_media')),
+                  child: Text('foundation_try_kid_media'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton(
+                  onPressed: () => context.push(AppRoutes.kidsWords),
+                  child: Text('foundation_try_kid_words'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton(
                   onPressed: () => context.push(AppRoutes.practice),
                   child: Text('foundation_try_practice'.tr()),
                 ),

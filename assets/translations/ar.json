@@ -1217,5 +1217,39 @@
   "kid_again": "العب مرة أخرى",
   "kid_stay": "ابقَ",
   "kid_leave": "اخرج",
-  "foundation_try_kids": "جرّب درس الأطفال"
+  "foundation_try_kids": "جرّب درس الأطفال",
+  "kid_previous": "السابق",
+  "kid_auto_turn": "اقلب الصفحات وحدها",
+  "kid_play_song": "شغّل الأنشودة",
+  "kid_speed_slow": "السرعة 0.75، اضغط للسرعة العادية",
+  "kid_speed_normal": "السرعة العادية، اضغط للأبطأ",
+  "kid_sing_again": "غنِّ مرة أخرى",
+  "kid_listen_to": "استمع: {word}",
+  "kid_star": "نجمة",
+  "kid_say_sentence": "قل الجملة",
+  "kid_listen_model": "اسمع النموذج",
+  "kid_speak": "تكلّم",
+  "kid_words_title": "كلماتي",
+  "kid_words_count": {
+    "zero": "لا كلمات",
+    "one": "كلمة واحدة",
+    "two": "كلمتان",
+    "few": "{} كلمات",
+    "many": "{} كلمة",
+    "other": "{} كلمة"
+  },
+  "kid_play_words": "العب بكلماتي",
+  "kid_words_all": "الكل",
+  "kid_know": "أعرفها",
+  "kid_dont_know": "لا أعرفها",
+  "kid_review_stars": {
+    "zero": "لا نجوم",
+    "one": "نجمة واحدة",
+    "two": "نجمتان",
+    "few": "{} نجوم",
+    "many": "{} نجمة",
+    "other": "{} نجمة"
+  },
+  "foundation_try_kid_media": "جرّب قصة وأنشودة للأطفال",
+  "foundation_try_kid_words": "جرّب كلماتي للأطفال"
 }

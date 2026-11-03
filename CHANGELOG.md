@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Kids' media: a picture story told word by word with cards for its marked words, a song lit line by line over its video, a written dialogue answered by picking a picture then saying the sentence, and «كرّر بعدي», each for a star. The kids' «كلماتي» tab: the words learned by unit, a picture each that says itself, and «العب بكلماتي».
 - Kids' lessons: a word or a letter with its pictures, voice and video, then listening for a letter or a picture and matching pictures with words, answered by pressing. A right answer sends a star to the bar, and the lesson ends with the guide dancing and five stars.
 - «اشرح لي»: after a wrong answer, an explanation of your own mistake: your answer with the wrong words struck, the right one, why, and another example with its voice. Within a daily limit, with the lesson's own explanation when it can't be made.
 - «تحدّث»: conversations with a character in real situations, by unit. Speak or type, read what was heard before sending, hear and translate each reply, and see each task done as it happens, with no correction on the way.

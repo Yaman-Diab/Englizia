@@ -1,18 +1,22 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/mic_cubit.dart';
+import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
+import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/kid_lesson.dart';
 import 'package:englizia/features/lessons/presentation/kids/cubit/kid_lesson_cubit.dart';
-import 'package:englizia/features/lessons/presentation/kids/widgets/kid_parts.dart';
+import 'package:englizia/features/lessons/presentation/kids/widgets/kid_media_screens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -67,6 +71,39 @@ class _KidLessonPageState extends State<KidLessonPage>
     );
   }
 
+  late final _mic = context.read<MicCubit>();
+
+  Future<void> _tapMic() async {
+    if (_mic.state.phase == MicPhase.listening) return _mic.stop();
+    if (_mic.state.phase == MicPhase.thinking) return;
+    switch (await _mic.access()) {
+      case MicAccess.granted:
+        await _mic.listen();
+      case MicAccess.denied:
+        // A refused microphone mustn't stop the child: the try still counts.
+        _cubit.tried();
+      case MicAccess.notAsked:
+        if (!mounted) return;
+        if (await showMicPermissionSheet(context)) {
+          await _mic.ask();
+        } else {
+          _cubit.tried();
+        }
+    }
+  }
+
+  void _onMic(BuildContext context, MicState state) {
+    switch (state.phase) {
+      case MicPhase.listening:
+        _cubit.listening();
+      case MicPhase.heard || MicPhase.notHeard || MicPhase.denied:
+        _mic.reset();
+        _cubit.tried();
+      case MicPhase.idle || MicPhase.thinking:
+        break;
+    }
+  }
+
   Future<void> _askToLeave() async {
     _cubit.askToLeave();
     final leave = await showKidExitSheet(context);
@@ -81,80 +118,117 @@ class _KidLessonPageState extends State<KidLessonPage>
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return BlocConsumer<KidLessonCubit, KidLessonState>(
-      listenWhen: (previous, current) => current.won > previous.won,
-      listener: (context, state) => unawaited(_fly(state.wonFrom!)),
-      builder: (context, state) => switch (state.stage) {
-        KidStage.loading => const Scaffold(body: AppStateView.loading()),
-        KidStage.failed => Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              onPressed: widget.onExit,
-              tooltip: 'common_close'.tr(),
-              icon: const Icon(Icons.close_rounded),
+    return BlocListener<MicCubit, MicState>(
+      listener: _onMic,
+      child: BlocConsumer<KidLessonCubit, KidLessonState>(
+        listenWhen: (previous, current) => current.won > previous.won,
+        listener: (context, state) => unawaited(_fly(state.wonFrom!)),
+        builder: (context, state) => switch (state.stage) {
+          KidStage.loading => const Scaffold(body: AppStateView.loading()),
+          KidStage.failed => Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                onPressed: widget.onExit,
+                tooltip: 'common_close'.tr(),
+                icon: const Icon(Icons.close_rounded),
+              ),
+            ),
+            body: AppStateView.error(
+              message: state.failure!.localizedMessage,
+              onRetry: _cubit.start,
             ),
           ),
-          body: AppStateView.error(
-            message: state.failure!.localizedMessage,
-            onRetry: _cubit.start,
-          ),
-        ),
-        KidStage.playing || KidStage.done => PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, _) {
-            if (didPop) return;
-            if (state.stage == KidStage.done) {
-              widget.onExit();
-            } else {
-              unawaited(_askToLeave());
-            }
-          },
-          child: Scaffold(
-            backgroundColor: colors.background,
-            body: SafeArea(
-              child: state.stage == KidStage.done
-                  ? _Done(state: state, onNext: widget.onNext)
-                  : Column(
-                      children: [
-                        KidTopBar(
-                          state: state,
-                          starKey: _barStar,
-                          onExit: _askToLeave,
-                          onGuide: _cubit.replayInstruction,
-                        ),
-                        Expanded(
-                          child: _Arrival(
-                            key: ValueKey(state.step),
-                            child: _screen(state),
+          KidStage.playing || KidStage.done => PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, _) {
+              if (didPop) return;
+              if (state.stage == KidStage.done) {
+                widget.onExit();
+              } else {
+                unawaited(_askToLeave());
+              }
+            },
+            child: Scaffold(
+              backgroundColor: colors.background,
+              body: SafeArea(
+                child: state.stage == KidStage.done
+                    ? _Done(state: state, onNext: widget.onNext)
+                    : Column(
+                        children: [
+                          KidTopBar(
+                            progress: state.progress,
+                            total: state.stepCount,
+                            speaking: state.speaking,
+                            expression: kidExpression(state.mood),
+                            starKey: _barStar,
+                            onExit: _askToLeave,
+                            onGuide: _cubit.replayInstruction,
                           ),
-                        ),
-                      ],
-                    ),
+                          Expanded(
+                            child: _Arrival(
+                              key: ValueKey(state.step),
+                              child: _screen(state),
+                            ),
+                          ),
+                        ],
+                      ),
+              ),
             ),
           ),
-        ),
-      },
+        },
+      ),
     );
   }
 
-  Widget _screen(KidLessonState state) => switch (state.current) {
-    KidWordStep(:final word) => _WordCard(word: word, state: state),
-    final KidLetterStep step => _LetterCard(step: step, state: state),
-    KidQuestionStep() => switch (state.question) {
-      final MatchingExercise question => _Match(
-        question: question,
-        state: state,
-        cardKey: _cardKey,
-      ),
-      final ChoiceExercise question => _Choose(
-        question: question,
-        state: state,
-        cardKey: _cardKey,
-      ),
-      _ => const SizedBox.shrink(),
-    },
-    null => const SizedBox.shrink(),
-  };
+  Widget _screen(KidLessonState state) => BlocBuilder<MicCubit, MicState>(
+    builder: (context, mic) =>
+        _screenFor(state, recording: mic.phase == MicPhase.listening),
+  );
+
+  Widget _screenFor(KidLessonState state, {required bool recording}) =>
+      switch (state.current) {
+        final KidStoryStep step => KidStoryScreen(
+          step: step,
+          state: state,
+          cardKey: _cardKey,
+        ),
+        final KidSongStep step => KidSongScreen(
+          step: step,
+          state: state,
+          cardKey: _cardKey,
+          video: _VideoPicture(cubit: _cubit),
+        ),
+        final KidDialogueStep step => KidDialogueScreen(
+          step: step,
+          state: state,
+          cardKey: _cardKey,
+          recording: recording,
+          onMic: _tapMic,
+        ),
+        final KidSpeakStep step => KidSpeakScreen(
+          step: step,
+          state: state,
+          cardKey: _cardKey,
+          recording: recording,
+          onMic: _tapMic,
+        ),
+        KidWordStep(:final word) => _WordCard(word: word, state: state),
+        final KidLetterStep step => _LetterCard(step: step, state: state),
+        KidQuestionStep() => switch (state.question) {
+          final MatchingExercise question => _Match(
+            question: question,
+            state: state,
+            cardKey: _cardKey,
+          ),
+          final ChoiceExercise question => _Choose(
+            question: question,
+            state: state,
+            cardKey: _cardKey,
+          ),
+          _ => const SizedBox.shrink(),
+        },
+        null => const SizedBox.shrink(),
+      };
 }
 
 /// Each screen slides in from where the lesson goes.
@@ -964,3 +1038,11 @@ class _Done extends StatelessWidget {
     );
   }
 }
+
+MascotExpression kidExpression(KidMood mood) => switch (mood) {
+  KidMood.welcome => MascotExpression.welcome,
+  KidMood.talking => MascotExpression.talk,
+  KidMood.happy => MascotExpression.happy,
+  KidMood.encourage => MascotExpression.encourage,
+  KidMood.listening => MascotExpression.listen,
+};

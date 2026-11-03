@@ -375,7 +375,8 @@ Add Android flavors / iOS schemes only when you need side-by-side installs or di
 **Mock mode** (`env/mock.json` → `APP_ENV=mock`): `configureDependencies()` registers fake
 datasources that read `test/fixtures/api/*.json` instead of the real Dio ones.
 Englizia: the fakes read `assets/mock/<feature>/*.json` (fixtures under `test/` are not bundled),
-and the tests parse those same files; `test/fixtures/api/` holds real responses once they exist. You can then
+and the tests parse those same files; `test/fixtures/api/` holds real responses once they exist.
+`env/mock_kids.json` adds `MOCK_AUDIENCE=kids` (`AppConfig.isKidsMock`), where a feature shows a child's data instead. You can then
 develop, demo to a client, and record screenshots without depending on a teammate's server
 or an ngrok tunnel. Same fixtures power the tests.
 

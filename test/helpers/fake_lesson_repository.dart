@@ -38,6 +38,15 @@ Map<String, Object?> kidLessonJson() => asJsonMap(
 /// The mock kids' lesson.
 Lesson kidLesson() => LessonModel(kidLessonJson()).toEntity('seed');
 
+/// The mock kids' lesson of a story, a song, a dialogue and a word to say.
+Lesson kidMediaLesson() => LessonModel(
+  asJsonMap(
+    ApiClient.unwrap(
+      jsonDecode(File(LessonFakeDataSource.kidMediaAsset).readAsStringSync()),
+    ),
+  ),
+).toEntity('seed');
+
 /// Only the first choice templates of the example.
 List<Exercise> sampleChoiceExercises() => sampleExercises()
     .whereType<ChoiceExercise>()

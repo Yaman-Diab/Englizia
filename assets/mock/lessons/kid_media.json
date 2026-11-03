@@ -1,0 +1,356 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "les_kid_media",
+    "version": 1,
+    "xpPerAnswer": 10,
+    "explainEnabled": false,
+    "title": "قصة وأنشودة",
+    "alreadyCompleted": false,
+    "unit": {
+      "number": 2,
+      "title": "الألوان",
+      "lessons": [
+        {
+          "id": "les_kid_media",
+          "kind": "vocabulary",
+          "done": false
+        }
+      ]
+    },
+    "kids": {
+      "voice": {
+        "praise": "https://example.com/mock/kids/praise.mp3",
+        "tryAgain": "https://example.com/mock/kids/try_again.mp3",
+        "leave": "https://example.com/mock/kids/leave.mp3",
+        "done": "https://example.com/mock/kids/done.mp3"
+      },
+      "words": [
+        {
+          "word": "cat",
+          "image": "assets/mock/lessons/kids/cat.svg",
+          "ar": "قطة",
+          "audio": "https://example.com/mock/kids/cat.mp3"
+        },
+        {
+          "word": "bed",
+          "image": "assets/mock/lessons/kids/bed.svg",
+          "ar": "سرير",
+          "audio": "https://example.com/mock/kids/bed.mp3"
+        },
+        {
+          "word": "dog",
+          "image": "assets/mock/lessons/kids/dog.svg",
+          "ar": "كلب",
+          "audio": "https://example.com/mock/kids/dog.mp3"
+        },
+        {
+          "word": "bird",
+          "image": "assets/mock/lessons/kids/bird.svg",
+          "ar": "عصفور",
+          "audio": "https://example.com/mock/kids/bird.mp3"
+        },
+        {
+          "word": "red",
+          "image": "assets/mock/lessons/kids/red.svg",
+          "ar": "أحمر",
+          "audio": "https://example.com/mock/kids/red.mp3"
+        },
+        {
+          "word": "blue",
+          "image": "assets/mock/lessons/kids/blue.svg",
+          "ar": "أزرق",
+          "audio": "https://example.com/mock/kids/blue.mp3"
+        },
+        {
+          "word": "banana",
+          "image": "assets/mock/lessons/kids/banana.svg",
+          "ar": "موزة",
+          "audio": "https://example.com/mock/kids/banana.mp3"
+        }
+      ],
+      "steps": [
+        {
+          "kind": "story",
+          "id": "k_story",
+          "instructionAudio": "https://example.com/mock/kids/in_story.mp3",
+          "pages": [
+            {
+              "image": "assets/mock/lessons/kids/story_1.svg",
+              "audio": "https://example.com/mock/kids/story_1.mp3",
+              "words": [
+                {
+                  "text": "The",
+                  "startMs": 180
+                },
+                {
+                  "text": "cat",
+                  "startMs": 620
+                },
+                {
+                  "text": "is",
+                  "startMs": 1060
+                },
+                {
+                  "text": "on",
+                  "startMs": 1500
+                },
+                {
+                  "text": "the",
+                  "startMs": 1940
+                },
+                {
+                  "text": "bed.",
+                  "startMs": 2380
+                }
+              ],
+              "marked": [
+                {
+                  "word": "cat",
+                  "image": "assets/mock/lessons/kids/cat.svg",
+                  "ar": "قطة",
+                  "audio": "https://example.com/mock/kids/cat.mp3"
+                },
+                {
+                  "word": "bed",
+                  "image": "assets/mock/lessons/kids/bed.svg",
+                  "ar": "سرير",
+                  "audio": "https://example.com/mock/kids/bed.mp3"
+                }
+              ]
+            },
+            {
+              "image": "assets/mock/lessons/kids/story_2.svg",
+              "audio": "https://example.com/mock/kids/story_2.mp3",
+              "words": [
+                {
+                  "text": "The",
+                  "startMs": 180
+                },
+                {
+                  "text": "dog",
+                  "startMs": 620
+                },
+                {
+                  "text": "is",
+                  "startMs": 1060
+                },
+                {
+                  "text": "under",
+                  "startMs": 1500
+                },
+                {
+                  "text": "the",
+                  "startMs": 1940
+                },
+                {
+                  "text": "bed.",
+                  "startMs": 2380
+                }
+              ],
+              "marked": [
+                {
+                  "word": "dog",
+                  "image": "assets/mock/lessons/kids/dog.svg",
+                  "ar": "كلب",
+                  "audio": "https://example.com/mock/kids/dog.mp3"
+                },
+                {
+                  "word": "bed",
+                  "image": "assets/mock/lessons/kids/bed.svg",
+                  "ar": "سرير",
+                  "audio": "https://example.com/mock/kids/bed.mp3"
+                }
+              ]
+            },
+            {
+              "image": "assets/mock/lessons/kids/story_3.svg",
+              "audio": "https://example.com/mock/kids/story_3.mp3",
+              "words": [
+                {
+                  "text": "The",
+                  "startMs": 180
+                },
+                {
+                  "text": "bird",
+                  "startMs": 620
+                },
+                {
+                  "text": "is",
+                  "startMs": 1060
+                },
+                {
+                  "text": "on",
+                  "startMs": 1500
+                },
+                {
+                  "text": "the",
+                  "startMs": 1940
+                },
+                {
+                  "text": "cat.",
+                  "startMs": 2380
+                }
+              ],
+              "marked": [
+                {
+                  "word": "bird",
+                  "image": "assets/mock/lessons/kids/bird.svg",
+                  "ar": "عصفور",
+                  "audio": "https://example.com/mock/kids/bird.mp3"
+                },
+                {
+                  "word": "cat",
+                  "image": "assets/mock/lessons/kids/cat.svg",
+                  "ar": "قطة",
+                  "audio": "https://example.com/mock/kids/cat.mp3"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "song",
+          "id": "k_song",
+          "instructionAudio": "https://example.com/mock/kids/in_song.mp3",
+          "video": "https://example.com/mock/kids/colors_song.mp4",
+          "videoMs": 6150,
+          "pictures": [
+            "assets/mock/lessons/kids/red.svg",
+            "assets/mock/lessons/kids/blue.svg",
+            "assets/mock/lessons/kids/yellow.svg"
+          ],
+          "lines": [
+            {
+              "words": [
+                {
+                  "text": "Red",
+                  "startMs": 250
+                },
+                {
+                  "text": "and",
+                  "startMs": 630
+                },
+                {
+                  "text": "blue,",
+                  "startMs": 1010
+                }
+              ]
+            },
+            {
+              "words": [
+                {
+                  "text": "yellow",
+                  "startMs": 1770
+                },
+                {
+                  "text": "too,",
+                  "startMs": 2150
+                }
+              ]
+            },
+            {
+              "words": [
+                {
+                  "text": "I",
+                  "startMs": 2910
+                },
+                {
+                  "text": "like",
+                  "startMs": 3290
+                },
+                {
+                  "text": "colors,",
+                  "startMs": 3670
+                }
+              ]
+            },
+            {
+              "words": [
+                {
+                  "text": "how",
+                  "startMs": 4430
+                },
+                {
+                  "text": "about",
+                  "startMs": 4810
+                },
+                {
+                  "text": "you?",
+                  "startMs": 5190
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "kind": "dialogue",
+          "id": "k_dialogue",
+          "instructionAudio": "https://example.com/mock/kids/in_choose_reply.mp3",
+          "echoInstructionAudio": "https://example.com/mock/kids/in_say_sentence.mp3",
+          "character": {
+            "word": "Benny",
+            "image": "assets/mock/lessons/kids/rabbit.svg",
+            "ar": "بيني",
+            "audio": null
+          },
+          "opening": {
+            "en": "What's your favorite color?",
+            "audio": "https://example.com/mock/kids/benny_q.mp3"
+          },
+          "replies": [
+            {
+              "word": {
+                "word": "red",
+                "image": "assets/mock/lessons/kids/red.svg",
+                "ar": "أحمر",
+                "audio": "https://example.com/mock/kids/red.mp3"
+              },
+              "answer": {
+                "en": "Red! I like red too!",
+                "audio": "https://example.com/mock/kids/benny_red.mp3"
+              },
+              "echo": {
+                "en": "I like red.",
+                "audio": "https://example.com/mock/kids/echo_red.mp3"
+              }
+            },
+            {
+              "word": {
+                "word": "blue",
+                "image": "assets/mock/lessons/kids/blue.svg",
+                "ar": "أزرق",
+                "audio": "https://example.com/mock/kids/blue.mp3"
+              },
+              "answer": {
+                "en": "Blue! I like blue too!",
+                "audio": "https://example.com/mock/kids/benny_blue.mp3"
+              },
+              "echo": {
+                "en": "I like blue.",
+                "audio": "https://example.com/mock/kids/echo_blue.mp3"
+              }
+            }
+          ],
+          "closing": {
+            "en": "Yay! Bye bye!",
+            "audio": "https://example.com/mock/kids/benny_bye.mp3"
+          }
+        },
+        {
+          "kind": "speak",
+          "id": "k_speak",
+          "instructionAudio": "https://example.com/mock/kids/in_speak.mp3",
+          "word": {
+            "word": "banana",
+            "image": "assets/mock/lessons/kids/banana.svg",
+            "ar": "موزة",
+            "audio": "https://example.com/mock/kids/banana.mp3"
+          }
+        }
+      ]
+    },
+    "exercises": []
+  }
+}

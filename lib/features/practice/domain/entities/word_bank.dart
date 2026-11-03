@@ -32,10 +32,11 @@ final class BankWord extends Equatable {
     required this.id,
     required this.word,
     required this.arabic,
-    required this.sentence,
-    required this.sentenceArabic,
     required this.box,
     required this.dueAt,
+    this.sentence = '',
+    this.sentenceArabic = '',
+    this.unitId,
     this.kind,
     this.highlighted = const {},
     this.imageUrl,
@@ -51,8 +52,13 @@ final class BankWord extends Equatable {
 
   /// Its meaning in the sentence it was saved from.
   final String arabic;
+
+  /// The lesson's sentence with it; a kids' word has none.
   final String sentence;
   final String sentenceArabic;
+
+  /// The unit it came from, which kids filter by.
+  final String? unitId;
 
   /// The places in [sentence], split by spaces, that are the word.
   final Set<int> highlighted;
@@ -103,7 +109,35 @@ final class BankWord extends Equatable {
     moment,
     box,
     dueAt,
+    unitId,
   ];
+}
+
+/// A unit the words came from, shown to kids by its picture.
+final class BankUnit extends Equatable {
+  const BankUnit({required this.id, required this.title, this.imageUrl});
+
+  final String id;
+  final String title;
+  final String? imageUrl;
+
+  @override
+  List<Object?> get props => [id, title, imageUrl];
+}
+
+/// What the guide says in kids' «كلماتي» and its game, recorded once.
+final class KidWordsVoice extends Equatable {
+  const KidWordsVoice({this.words, this.empty, this.review, this.done});
+
+  /// «هذه كلماتك.», «تعلّم كلمات في الدروس لتجمعها هنا.», «هل تعرف هذه
+  /// الكلمة؟» and «رائع!».
+  final String? words;
+  final String? empty;
+  final String? review;
+  final String? done;
+
+  @override
+  List<Object?> get props => [words, empty, review, done];
 }
 
 /// Everything «تدرّب» shows: the bank, and the counts of what lies beside it.
@@ -113,9 +147,15 @@ final class WordBank extends Equatable {
     this.sessionSize = 12,
     this.conceptsDue,
     this.savedSentences = 0,
+    this.units = const [],
+    this.kidsVoice = const KidWordsVoice(),
   });
 
   final List<BankWord> words;
+
+  /// Kids mode: the units to filter by.
+  final List<BankUnit> units;
+  final KidWordsVoice kidsVoice;
 
   /// How many cards a review takes, from the panel.
   final int sessionSize;
@@ -131,8 +171,17 @@ final class WordBank extends Equatable {
     sessionSize: sessionSize,
     conceptsDue: conceptsDue,
     savedSentences: savedSentences,
+    units: units,
+    kidsVoice: kidsVoice,
   );
 
   @override
-  List<Object?> get props => [words, sessionSize, conceptsDue, savedSentences];
+  List<Object?> get props => [
+    words,
+    sessionSize,
+    conceptsDue,
+    savedSentences,
+    units,
+    kidsVoice,
+  ];
 }

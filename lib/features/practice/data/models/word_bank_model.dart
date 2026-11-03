@@ -33,11 +33,30 @@ final class WordBankModel {
     sessionSize: json.readInt('sessionSize') ?? 12,
     conceptsDue: json.readInt('conceptsDue'),
     savedSentences: json.readInt('savedSentences') ?? 0,
+    units: [
+      for (final unit in json.readList('units') ?? const <Object?>[])
+        if (asJsonMap(unit).readString('id') case final id?)
+          BankUnit(
+            id: id,
+            title: asJsonMap(unit).readString('title') ?? '',
+            imageUrl: asJsonMap(unit).readString('image'),
+          ),
+    ],
+    kidsVoice: switch (json.readMap('kidsVoice')) {
+      final voice? => KidWordsVoice(
+        words: voice.readString('words'),
+        empty: voice.readString('empty'),
+        review: voice.readString('review'),
+        done: voice.readString('done'),
+      ),
+      null => const KidWordsVoice(),
+    },
   );
 
   static BankWord? _word(Map<String, Object?> json) {
     try {
-      final sentence = asJsonMap(json['sentence']);
+      // A kids' word comes with no sentence.
+      final sentence = json.readMap('sentence') ?? const <String, Object?>{};
       final source = json.readMap('source');
       final video = json.readMap('video');
       final box = json.readInt('box') ?? 1;
@@ -46,8 +65,9 @@ final class WordBankModel {
         word: _required(json.readString('base')),
         kind: _kinds[json.readString('kind')],
         arabic: _required(json.readString('ar')),
-        sentence: _required(sentence.readString('en')),
-        sentenceArabic: _required(sentence.readString('ar')),
+        sentence: sentence.readString('en') ?? '',
+        sentenceArabic: sentence.readString('ar') ?? '',
+        unitId: json.readString('unitId'),
         highlighted: {
           for (final place in sentence.readList('highlight') ?? const [])
             if (place is int) place,
@@ -76,6 +96,16 @@ final class WordBankModel {
     'sessionSize': bank.sessionSize,
     'conceptsDue': ?bank.conceptsDue,
     'savedSentences': bank.savedSentences,
+    'units': [
+      for (final unit in bank.units)
+        {'id': unit.id, 'title': unit.title, 'image': ?unit.imageUrl},
+    ],
+    'kidsVoice': {
+      'words': ?bank.kidsVoice.words,
+      'empty': ?bank.kidsVoice.empty,
+      'review': ?bank.kidsVoice.review,
+      'done': ?bank.kidsVoice.done,
+    },
     'words': [
       for (final word in bank.words)
         {
@@ -91,6 +121,7 @@ final class WordBankModel {
           },
           'image': ?word.imageUrl,
           'audio': ?word.audioUrl,
+          'unitId': ?word.unitId,
           if (word.lessonTitle case final title?) 'source': {'title': title},
           if (word.moment case final moment?)
             'video': {

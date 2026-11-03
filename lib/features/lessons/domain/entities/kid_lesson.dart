@@ -86,6 +86,174 @@ final class KidQuestionStep extends KidStep {
   List<Object?> get props => [id, instructionAudioUrl];
 }
 
+/// A recorded line in English.
+final class KidLine extends Equatable {
+  const KidLine({required this.text, this.audioUrl});
+
+  final String text;
+  final String? audioUrl;
+
+  @override
+  List<Object?> get props => [text, audioUrl];
+}
+
+/// A word of a sung or told sentence, and when its sound says it.
+final class KidTimedWord extends Equatable {
+  const KidTimedWord(this.text, this.start);
+
+  final String text;
+  final Duration start;
+
+  @override
+  List<Object?> get props => [text, start];
+}
+
+/// A page of a picture story: one sentence, told with its words marked as
+/// they are said, from the timings in its sound.
+final class KidStoryPage extends Equatable {
+  const KidStoryPage({
+    required this.image,
+    required this.words,
+    this.audioUrl,
+    this.marked = const [],
+  });
+
+  final String image;
+  final List<KidTimedWord> words;
+  final String? audioUrl;
+
+  /// The words that open a little card with their picture and voice.
+  final List<KidWord> marked;
+
+  String get sentence => words.map((word) => word.text).join(' ');
+
+  /// The card [text] opens, if it is marked.
+  KidWord? markedFor(String text) {
+    final plain = text.toLowerCase().replaceAll(RegExp('[^a-z]'), '');
+    return marked.where((word) => word.word == plain).firstOrNull;
+  }
+
+  @override
+  List<Object?> get props => [image, words, audioUrl, marked];
+}
+
+/// «قصة مصوّرة» (S §13.3): a page for each sentence, 3 to 6 of them.
+final class KidStoryStep extends KidStep {
+  const KidStoryStep({
+    required super.id,
+    required this.pages,
+    super.instructionAudioUrl,
+  });
+
+  final List<KidStoryPage> pages;
+
+  @override
+  List<Object?> get props => [id, instructionAudioUrl, pages];
+}
+
+/// «أنشودة» (S §13.3): its video, slower by default, and its lines with the
+/// one sung marked, without a translation.
+final class KidSongStep extends KidStep {
+  const KidSongStep({
+    required super.id,
+    required this.lines,
+    super.instructionAudioUrl,
+    this.videoUrl,
+    this.videoLength,
+    this.pictures = const [],
+  });
+
+  /// Each line's words, timed on the video.
+  final List<List<KidTimedWord>> lines;
+  final String? videoUrl;
+  final Duration? videoLength;
+
+  /// What shows in the video's place before it plays.
+  final List<String> pictures;
+
+  /// The panel's default (S §13.3), and the normal speed beside it.
+  static const slow = .75;
+  static const normal = 1.0;
+
+  @override
+  List<Object?> get props => [
+    id,
+    instructionAudioUrl,
+    lines,
+    videoUrl,
+    videoLength,
+    pictures,
+  ];
+}
+
+/// A reply the child picks by its picture: the character answers it, then
+/// the child says its sentence.
+final class KidReply extends Equatable {
+  const KidReply({
+    required this.word,
+    required this.answer,
+    required this.echo,
+  });
+
+  final KidWord word;
+  final KidLine answer;
+
+  /// «ردّد»: what the child says next.
+  final KidLine echo;
+
+  @override
+  List<Object?> get props => [word, answer, echo];
+}
+
+/// «حوار مكتوب» (S §13.3), always written ahead: the character asks, the child
+/// picks a picture, repeats the sentence, and the character says goodbye.
+final class KidDialogueStep extends KidStep {
+  const KidDialogueStep({
+    required super.id,
+    required this.character,
+    required this.opening,
+    required this.replies,
+    required this.closing,
+    super.instructionAudioUrl,
+    this.echoInstructionAudioUrl,
+  });
+
+  /// Its name and picture.
+  final KidWord character;
+  final KidLine opening;
+  final List<KidReply> replies;
+  final KidLine closing;
+
+  /// «قل الجملة», before the child repeats.
+  final String? echoInstructionAudioUrl;
+
+  @override
+  List<Object?> get props => [
+    id,
+    instructionAudioUrl,
+    character,
+    opening,
+    replies,
+    closing,
+    echoInstructionAudioUrl,
+  ];
+}
+
+/// «كرّر بعدي» (S §13.3): a word to hear and say. The try itself earns the
+/// star, with no words missed or numbers.
+final class KidSpeakStep extends KidStep {
+  const KidSpeakStep({
+    required super.id,
+    required this.word,
+    super.instructionAudioUrl,
+  });
+
+  final KidWord word;
+
+  @override
+  List<Object?> get props => [id, instructionAudioUrl, word];
+}
+
 /// What the guide says between the screens, recorded once.
 final class KidVoice extends Equatable {
   const KidVoice({this.praise, this.tryAgain, this.leave, this.done});

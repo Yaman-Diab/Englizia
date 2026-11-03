@@ -23,6 +23,18 @@ WordBank mockBank(DateTime today) => WordBankModel(
   ),
 ).toEntity();
 
+/// The mock child's bank, its days moved to [today].
+WordBank mockKidBank(DateTime today) => WordBankModel(
+  PracticeFakeDataSource.movedToToday(
+    asJsonMap(
+      ApiClient.unwrap(
+        jsonDecode(File(PracticeFakeDataSource.kidsAsset).readAsStringSync()),
+      ),
+    ),
+    today,
+  ),
+).toEntity();
+
 class FakePracticeRepository implements PracticeRepository {
   FakePracticeRepository({this.bank, this.failure, DateTime? now})
     : now = now ?? DateTime(2026, 11, 2, 10);

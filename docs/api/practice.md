@@ -54,6 +54,19 @@ One bank per learner across all their tracks (§10.2). Words reach it through th
 
 A word that can't be read is left out, and the rest show.
 
+### In kids mode («كلماتي», S §13.4)
+
+The same bank, with no sentences: a child's words come from the lesson's pictures. Proposed, from design `Kid Media`.
+
+| Field | Type | Meaning |
+|---|---|---|
+| `words[].sentence` | absent | A word may come without one |
+| `words[].unitId` | string? | The unit it was learned in, for the unit chips |
+| `units[]` | `{id, title, image}` | The units with words, in order: a chip each, drawn by its picture, with `title` read aloud and as its label for screen readers |
+| `kidsVoice` | `{words, empty, review, done}` | The guide's recorded lines: what the screen is, how to collect words when there are none, the game's instruction, and its end |
+
+«العب بكلماتي» is the same review (`sessionSize`, `POST …/reviews`): a picture says its word, and «أعرفها» or «لا أعرفها» answers.
+
 ## `POST /api/v1/app/word-bank/reviews`
 
 One answer of a review, sent as soon as it can be, in the order given.

@@ -16,7 +16,7 @@
 | Task | Command |
 |---|---|
 | Run (dev) | `flutter run --dart-define-from-file=env/dev.json` |
-| Run (no backend) | `flutter run --dart-define-from-file=env/mock.json` |
+| Run (no backend) | `flutter run --dart-define-from-file=env/mock.json` (a child's data: `env/mock_kids.json`) |
 | Test | `flutter test` |
 | Analyze | `flutter analyze --fatal-infos` |
 | Format | `dart format lib test` |
