@@ -28,6 +28,8 @@ final class SettingsStorageService {
   static const _conceptsKey = 'account.concepts';
   static const _conceptsOutboxKey = 'account.concepts_outbox';
   static const _talkKey = 'account.talk';
+  static const _unitsKey = 'account.units';
+  static const _unitsSeenKey = 'account.units_seen';
 
   final SharedPreferences _prefs;
 
@@ -178,6 +180,20 @@ final class SettingsStorageService {
     await _prefs.setString(_talkKey, json);
   }
 
+  /// The units last opened, as JSON, to show offline.
+  String? get units => _prefs.getString(_unitsKey);
+
+  Future<void> setUnits(String json) async {
+    await _prefs.setString(_unitsKey, json);
+  }
+
+  /// Units whose goals were shown open once.
+  List<String> get unitsSeen => _prefs.getStringList(_unitsSeenKey) ?? const [];
+
+  Future<void> setUnitsSeen(List<String> ids) async {
+    await _prefs.setStringList(_unitsSeenKey, ids);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -194,6 +210,8 @@ final class SettingsStorageService {
       await _prefs.remove(_conceptsKey);
       await _prefs.remove(_conceptsOutboxKey);
       await _prefs.remove(_talkKey);
+      await _prefs.remove(_unitsKey);
+      await _prefs.remove(_unitsSeenKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

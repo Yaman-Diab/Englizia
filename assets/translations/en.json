@@ -1061,5 +1061,52 @@
     "other": "{} stars"
   },
   "foundation_try_kid_media": "Try a kids' story and song",
-  "foundation_try_kid_words": "Try kids' My words"
+  "foundation_try_kid_words": "Try kids' My words",
+  "unit_number": "Unit {}",
+  "unit_progress": {
+    "zero": "No lessons",
+    "one": "{done} of 1 lesson",
+    "other": "{done} of {} lessons"
+  },
+  "unit_progress_label": "Unit progress",
+  "unit_goals": "You'll learn to…",
+  "unit_concepts": "The unit's grammar",
+  "unit_book_pages": "Student's book, pages {from} to {to}",
+  "unit_page": "Page {}",
+  "unit_lessons": "The unit's lessons",
+  "unit_lesson_number": "Lesson {}",
+  "unit_start": "Start",
+  "unit_continue": "Continue",
+  "unit_start_review": "Start the review",
+  "unit_redo": "Redo",
+  "unit_stopped_at": "You stopped at question {}",
+  "unit_review_after": "Opens once the lessons are done",
+  "unit_done": "You finished unit {}",
+  "unit_next": "Next unit: {}",
+  "unit_locked": "Finish unit {} to open this unit",
+  "unit_go_to": "Go to unit {}",
+  "unit_offline": "No connection. You can only continue what you started",
+  "unit_minutes": {
+    "zero": "under a minute",
+    "one": "1 minute",
+    "other": "{} minutes"
+  },
+  "unit_lesson_meta": "{kind}, {minutes}",
+  "unit_lesson_semantics": "Lesson {number}, {title}, {meta}, {status}",
+  "unit_status_done": "done",
+  "unit_status_current": "current lesson",
+  "unit_status_locked": "locked",
+  "unit_status_open": "open",
+  "unit_status_offline": "needs a connection",
+  "unit_say_name": "The unit's name",
+  "unit_kid_stars": {
+    "zero": "no stars",
+    "one": "1 star",
+    "other": "{} stars"
+  },
+  "unit_kid_semantics": "{name}, {status}",
+  "foundation_try_unit": "Try the unit screen",
+  "foundation_try_unit_emar": "Try an Emar unit",
+  "foundation_try_unit_kids": "Try a kids' unit",
+  "foundation_try_unit_locked": "Try a locked unit"
 }

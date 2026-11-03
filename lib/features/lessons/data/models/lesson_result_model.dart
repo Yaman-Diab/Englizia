@@ -20,6 +20,9 @@ const _nextKinds = {
 
 LessonKind _kind(String? name) => _kinds[name] ?? LessonKind.other;
 
+/// A lesson's `kind` as the contract spells it.
+LessonKind lessonKindFrom(String? name) => _kind(name);
+
 /// A part that can't be read is left out: it must not cost the learner a lesson.
 UnitProgress? _unit(Map<String, Object?>? json) {
   final number = json?.readInt('number');

@@ -186,6 +186,54 @@ The end shows five stars filling, whatever the points (S §13.1: points show as 
 
 The common errors (`README.md`). With an unknown lesson, `404`.
 
+## `GET /api/v1/app/units/{unitId}`
+
+A unit's screen (S §6.2, §13.5, §14): what it teaches and its lessons in the panel's order, however many and of whatever kinds. Needs a session. The phone keeps the last few for offline. Proposed, from design `Unit`. Mock: `assets/mock/units/<unitId>.json`.
+
+```json
+{
+  "id": "unit_gen_a2_03",
+  "number": 3,
+  "title": "يوم في المزرعة",
+  "levelLabel": "A2",
+  "cover": "https://…/farm.webp",
+  "kidsMode": false,
+  "ordered": true,
+  "goals": ["تصف يومًا في الريف", "تستخدم المضارع البسيط للعادات"],
+  "concepts": [{ "id": "c_present_simple", "name": "المضارع البسيط" }],
+  "bookPages": null,
+  "titleAudio": null,
+  "lockedBy": null,
+  "next": { "id": "unit_gen_a2_04", "number": 4, "title": "في السوق" },
+  "lessons": [
+    { "id": "les_voc", "kind": "vocabulary", "title": "كلمات المزرعة", "minutes": 5, "done": true },
+    { "id": "les_chat_box", "kind": "conversation", "title": "الصندوق القابل للكسر", "minutes": 5, "done": false, "scenarioId": "sc_fragile_box" }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `number`, `title`, `levelLabel` | «الوحدة 3», its title, and the level's short name on the badge («A2», «الصف 7», «Starter 2») |
+| `cover` | The unit's cover from the panel, wider than tall; it moves slower than the page as it scrolls |
+| `kidsMode` | The effective setting: a grid of picture cards with stars, and no goals or grammar |
+| `ordered` | The effective «ترتيب إلزامي» setting proposed for the panel: lessons open one after another; `false` (Emar) opens them all and suggests the first left. Default `true` |
+| `goals` | «ستتعلّم أن…», open on the learner's first visit and folded after (kept on the phone) |
+| `concepts[].name` | «قواعد الوحدة»: the concepts the unit targets |
+| `bookPages` | `{from, to}` in the student's book (Emar), or `null` |
+| `titleAudio` | Kids: the unit's name, said by the guide when the screen opens and when it is pressed |
+| `lockedBy` | `{id, number, title}` of the unit to finish first, or `null`: the lessons show locked as a preview, with «أكمل الوحدة 2 لتفتح هذه الوحدة» |
+| `next` | The next unit, for «الوحدة التالية» once every lesson is done |
+| `lessons[].kind` | One of the lesson kinds of `complete` (`vocabulary`, `interactiveVideo`, `grammarVideo`, `interactiveText`, `conversation`, `unitReview`); another shows with the general icon and opens as exercises. A kids' unit opens each as a kids' lesson |
+| `lessons[].minutes` | Its estimated length, from the media and the questions or written in the content |
+| `lessons[].page` | Its page in the book (Emar) |
+| `lessons[].done`, `stars` | Completed, and the stars it earned (kids, 0 to 5) |
+| `lessons[].image`, `audio` | Kids: its card's picture, and its name said when a locked card is pressed |
+| `lessons[].scenarioId` | A conversation lesson is that «تحدّث» scenario, and opens it |
+| `lessons[].resume` | `{question, share}`: where it stopped on another phone. The phone's own place, and a completion still on its way, come first |
+
+The current lesson is the first not done; `unitReview` waits until every other lesson is done («تُفتح بعد إكمال الدروس»). Offline, only lessons kept on the phone open («يمكنك متابعة ما بدأته فقط»). A lesson that can't be read is left out; with none, the unit can't be shown.
+
 ## `POST /api/v1/app/lessons/{lessonId}/reports`
 
 "A problem with this question" (S §18), kept on the phone and sent like an answer. The app's version and platform go in every request's headers.

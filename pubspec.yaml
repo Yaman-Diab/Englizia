@@ -52,6 +52,7 @@ flutter:
     - assets/mock/lessons/kids/
     - assets/mock/practice/
     - assets/mock/talk/
+    - assets/mock/units/
     - assets/mock/settings/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.

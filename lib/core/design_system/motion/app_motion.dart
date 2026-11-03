@@ -152,6 +152,19 @@ abstract final class AppMotion {
   static const kidDance = Duration(milliseconds: 640);
   static const kidStarFill = Duration(milliseconds: 380);
 
+  /// A unit's chain after a lesson (Unit design): its mark fills, its line
+  /// grows, then the next lesson's card opens with its button. The kids'
+  /// current card breathes, and a skeleton pulses while it loads.
+  static const unitMarkFill = Duration(milliseconds: 380);
+  static const unitLineDelay = Duration(milliseconds: 320);
+  static const unitLineGrow = slow;
+  static const unitMoveOn = Duration(milliseconds: 760);
+  static const unitCardIn = Duration(milliseconds: 320);
+  static const unitButtonDelay = Duration(milliseconds: 120);
+  static const unitButtonIn = Duration(milliseconds: 280);
+  static const kidCurrentPulse = Duration(milliseconds: 1600);
+  static const skeletonPulse = Duration(milliseconds: 1400);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 

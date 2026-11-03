@@ -4,6 +4,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 
 abstract interface class LessonRepository {
@@ -79,4 +80,7 @@ abstract interface class LessonRepository {
 
   /// The lesson's exercises are done: it starts over if opened again.
   Future<void> clearProgress(String lessonId);
+
+  /// Whether it opens offline, was completed here, and where it left off.
+  LessonOnPhone onPhone(String lessonId);
 }

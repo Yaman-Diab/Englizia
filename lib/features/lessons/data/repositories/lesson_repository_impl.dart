@@ -19,6 +19,7 @@ import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
@@ -50,6 +51,10 @@ final class LessonRepositoryImpl implements LessonRepository {
 
   /// Each lesson's completion keeps its id through every try.
   final _completionIds = <String, String>{};
+
+  /// Completed while the app runs: a unit kept from before still shows them
+  /// done, sent or not.
+  final _completedHere = <String>{};
 
   @override
   Future<Result<Lesson>> getLesson(String lessonId) async {
@@ -163,6 +168,7 @@ final class LessonRepositoryImpl implements LessonRepository {
       await keep();
       return const Err(NetworkFailure());
     }
+    _completedHere.add(lessonId);
     final result = await guard(() => _remote.completeLesson(lessonId, request));
     if (result is Err) {
       await keep();
@@ -394,6 +400,29 @@ final class LessonRepositoryImpl implements LessonRepository {
   Future<void> saveProgress(String lessonId, ExerciseProgress progress) async {
     final store = _store()..setProgress(lessonId, progress);
     await _keep(store);
+  }
+
+  @override
+  LessonOnPhone onPhone(String lessonId) {
+    final store = _store();
+    final waiting = store.unsent.any(
+      (entry) =>
+          entry['kind'] == _completionKind && entry['lessonId'] == lessonId,
+    );
+    final cached = _cache()[lessonId];
+    final done = progress(lessonId).done.length;
+    LessonResume? resume;
+    if (cached != null && done > 0) {
+      final total = asJsonMap(cached).readList('exercises')?.length ?? 0;
+      if (total > done) {
+        resume = LessonResume(question: done + 1, share: done / total);
+      }
+    }
+    return LessonOnPhone(
+      kept: cached != null,
+      done: waiting || _completedHere.contains(lessonId),
+      resume: resume,
+    );
   }
 
   @override

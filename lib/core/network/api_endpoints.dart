@@ -64,6 +64,8 @@ abstract final class ApiEndpoints {
       '/api/v1/app/enrollments/$enrollmentId';
 
   // ASSUMPTION(api): docs/api/lessons.md.
+  static String unit(String unitId) => '/api/v1/app/units/$unitId';
+
   static String lesson(String lessonId) => '/api/v1/app/lessons/$lessonId';
 
   // ASSUMPTION(api): docs/api/lessons.md.
