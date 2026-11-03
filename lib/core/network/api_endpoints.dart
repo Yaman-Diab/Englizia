@@ -94,6 +94,23 @@ abstract final class ApiEndpoints {
 
   static const conceptReports = '/api/v1/app/concepts/reports';
 
+  // ASSUMPTION(api): docs/api/talk.md.
+  static const talk = '/api/v1/app/talk';
+
+  static String talkScenario(String scenarioId) =>
+      '/api/v1/app/talk/scenarios/$scenarioId';
+
+  static const talkConversations = '/api/v1/app/talk/conversations';
+
+  static String talkTurns(String conversationId) =>
+      '/api/v1/app/talk/conversations/$conversationId/turns';
+
+  static String talkEnd(String conversationId) =>
+      '/api/v1/app/talk/conversations/$conversationId/end';
+
+  static String talkNotes(String conversationId) =>
+      '/api/v1/app/talk/conversations/$conversationId/notes';
+
   static String lessonWatch(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/watch';
 

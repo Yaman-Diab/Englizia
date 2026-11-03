@@ -64,6 +64,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
 | [`auth.md`](auth.md) | "Save progress": the guest account (ADR 10) | mock |
 | [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
+| [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
@@ -91,6 +92,12 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/concepts` | GET | — | today's concepts with their new questions, those later and those mastered ([concepts.md](concepts.md)) | proposed |
 | `/api/v1/app/concepts/answers` | POST | `{answerId, conceptId, questionId, correct, answeredAt}` | none; safe to repeat | proposed |
 | `/api/v1/app/concepts/reports` | POST | `{reportId, conceptId, questionId, reason}` | none; safe to repeat | proposed |
+| `/api/v1/app/talk` | GET | — | the scenarios by unit and the AI conversations left today ([talk.md](talk.md)) | proposed |
+| `/api/v1/app/talk/scenarios/{id}` | GET | — | the intro, role, tasks, opening line and first suggestions | proposed |
+| `/api/v1/app/talk/conversations` | POST | `{conversationId, scenarioId}` | none; counts against today's limit | proposed |
+| `/api/v1/app/talk/conversations/{id}/turns` | POST | `{turnId, text, via}` | the reply, every task done so far, suggestions, turns left; safe to repeat | proposed |
+| `/api/v1/app/talk/conversations/{id}/end` | POST | `{tasksDone}` | none | proposed |
+| `/api/v1/app/talk/conversations/{id}/notes` | GET | — | the summary's notes: `ready`, `pending` or `failed` | proposed |
 | `/api/v1/app/word-bank` | GET | — | the bank, its words and their boxes ([practice.md](practice.md)) | proposed |
 | `/api/v1/app/word-bank/reviews` | POST | `{reviewId, wordId, known, reviewedAt}` | none; safe to repeat | proposed |
 | `/api/v1/app/word-bank/words/{wordId}` | DELETE | — | none; safe to repeat | proposed |

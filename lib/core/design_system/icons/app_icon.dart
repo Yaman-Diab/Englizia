@@ -153,6 +153,15 @@ enum AppIcon {
     '<path d="M12 11v5.5M12 7.6v.2"/>',
   ),
   bookmark('<path d="M6 3.5h12v17l-6-4-6 4z"/>'),
+  bookmarkAdd(
+    '<path d="M6 3h12v18l-6-4-6 4z"/>'
+    '<path d="M12 7.5v5M9.5 10h5"/>',
+  ),
+  scriptPage(
+    '<path d="M6 3h8l4 4v14H6z"/>'
+    '<path d="M9 12h6M9 16h6"/>',
+  ),
+  soundBars('<path d="M4 10v4M8 7v10M12 4v16M16 8v8M20 11v2"/>'),
   book(
     '<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/>'
     '<path d="M12 6.5v13"/>',

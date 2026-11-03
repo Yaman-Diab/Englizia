@@ -1,0 +1,25 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "reply": {
+      "en": "Oh! Okay, I'll be careful. Where should it go?",
+      "ar": "أوه! حسنًا، سأنتبه. أين أضعه؟",
+      "audioUrl": "https://cdn.example.com/talk/jake_1.mp3"
+    },
+    "tasksDone": [
+      "t_fragile"
+    ],
+    "suggestions": [
+      {
+        "en": "Can you put it in the kitchen, please?",
+        "audioUrl": "https://cdn.example.com/talk/sug_1a.mp3"
+      },
+      {
+        "en": "In the kitchen, please.",
+        "audioUrl": "https://cdn.example.com/talk/sug_1b.mp3"
+      }
+    ],
+    "turnsLeft": 6
+  }
+}

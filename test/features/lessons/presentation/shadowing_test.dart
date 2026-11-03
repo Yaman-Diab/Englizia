@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/json_reader.dart';
@@ -9,7 +10,6 @@ import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
-import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing_cubit.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/pages/shadowing_page.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/widgets/shadowing_parts.dart';

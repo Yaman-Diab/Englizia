@@ -95,6 +95,7 @@ class ListeningWaves extends StatelessWidget {
     this.opacity = .55,
     this.filled = false,
     this.duration = AppMotion.characterPulse,
+    this.color,
     super.key,
   });
 
@@ -110,11 +111,14 @@ class ListeningWaves extends StatelessWidget {
   final bool filled;
   final Duration duration;
 
+  /// The info color unless told otherwise, as a clip plays.
+  final Color? color;
+
   static const _stroke = 2.0;
 
   @override
   Widget build(BuildContext context) {
-    final color = context.colors.info.fill;
+    final color = this.color ?? context.colors.info.fill;
     if (!active || AppMotion.reduceMotion(context)) {
       return const SizedBox.shrink();
     }
@@ -147,5 +151,38 @@ class ListeningWaves extends StatelessWidget {
         ),
       ),
     ),
+  );
+}
+
+/// [child] growing by [growth] and fading to [fade] of itself and back, once
+/// per [duration], while [active]: a character's halo as it waits, its ring as
+/// it speaks. Still under reduce motion.
+class Breathing extends StatelessWidget {
+  const Breathing({
+    required this.active,
+    required this.duration,
+    required this.child,
+    this.growth = .08,
+    this.fade = .3,
+    super.key,
+  });
+
+  final bool active;
+  final Duration duration;
+  final Widget child;
+  final double growth;
+  final double fade;
+
+  @override
+  Widget build(BuildContext context) => _Loop(
+    active: active,
+    duration: duration,
+    builder: (_, progress) {
+      final breath = math.sin(math.pi * progress);
+      return Opacity(
+        opacity: 1 - (1 - fade) * breath,
+        child: Transform.scale(scale: 1 + growth * breath, child: child),
+      );
+    },
   );
 }

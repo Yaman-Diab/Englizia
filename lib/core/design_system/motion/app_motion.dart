@@ -114,6 +114,27 @@ abstract final class AppMotion {
   /// A vocabulary card flying off, and the one behind coming forward.
   static const cardSwap = Duration(milliseconds: 300);
 
+  /// A conversation (Talk design): the character's halo breathing in or out,
+  /// its ring pulsing once with its voice, the microphone's ring while it
+  /// records, a bubble joining, and a done task's panel staying open.
+  static const characterBreath = Duration(milliseconds: 1200);
+  static const voiceRing = Duration(milliseconds: 350);
+  static const micRing = Duration(milliseconds: 1100);
+  static const bubbleIn = Duration(milliseconds: 200);
+  static const taskPanelHold = Duration(milliseconds: 1900);
+
+  /// A done task's circle pops after the panel opens, its check after it, and
+  /// the count rolls once the panel has been read.
+  static const taskPop = Duration(milliseconds: 360);
+  static const taskPopDelay = Duration(milliseconds: 200);
+  static const taskTickDelay = Duration(milliseconds: 420);
+  static const taskCountDelay = Duration(milliseconds: 900);
+
+  /// A summary's done tasks are marked one after another, this far apart; a
+  /// chosen reply flies from its card into the conversation.
+  static const summaryMarkStep = Duration(milliseconds: 150);
+  static const replyFlight = Duration(milliseconds: 380);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 

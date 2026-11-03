@@ -1,0 +1,353 @@
+{
+  "sc_fragile_box": {
+    "id": "sc_fragile_box",
+    "title": "الصندوق القابل للكسر",
+    "kind": "ai",
+    "character": {
+      "name": "Jake",
+      "descriptionAr": "عامل نقل مستعجل",
+      "avatarUrl": null
+    },
+    "intro": {
+      "en": "Jake is carrying your boxes upstairs. He's in a hurry.",
+      "ar": "جيك يحمل صناديقك إلى الأعلى، وهو مستعجل.",
+      "audioUrl": "https://cdn.example.com/talk/jake_intro.mp3"
+    },
+    "roleAr": "انتقلت للتو إلى شقة جديدة.",
+    "tasks": [
+      {
+        "id": "t_fragile",
+        "ar": "نبّه جيك إلى أن الصندوق قابل للكسر"
+      },
+      {
+        "id": "t_kitchen",
+        "ar": "اطلب منه أن يضعه في المطبخ"
+      },
+      {
+        "id": "t_water",
+        "ar": "اشكره واسأله إن كان يريد ماء"
+      }
+    ],
+    "maxTurns": 7,
+    "opening": {
+      "en": "Hey! Where do you want these boxes?",
+      "ar": "مرحبًا! أين تريد هذه الصناديق؟",
+      "audioUrl": "https://cdn.example.com/talk/jake_0.mp3"
+    },
+    "suggestions": [
+      {
+        "en": "Actually, Jake, this one's really fragile.",
+        "audioUrl": "https://cdn.example.com/talk/sug_0a.mp3"
+      },
+      {
+        "en": "Careful, please!",
+        "audioUrl": "https://cdn.example.com/talk/sug_0b.mp3"
+      }
+    ],
+    "replies": [
+      {
+        "reply": {
+          "en": "Oh! Okay, I'll be careful. Where should it go?",
+          "ar": "أوه! حسنًا، سأنتبه. أين أضعه؟",
+          "audioUrl": "https://cdn.example.com/talk/jake_1.mp3"
+        },
+        "tasksDone": [
+          "t_fragile"
+        ],
+        "suggestions": [
+          {
+            "en": "Can you put it in the kitchen, please?",
+            "audioUrl": "https://cdn.example.com/talk/sug_1a.mp3"
+          },
+          {
+            "en": "In the kitchen, please.",
+            "audioUrl": "https://cdn.example.com/talk/sug_1b.mp3"
+          }
+        ],
+        "turnsLeft": 6
+      },
+      {
+        "reply": {
+          "en": "Sure, the kitchen. Anything else?",
+          "ar": "حسنًا، المطبخ. شيء آخر؟",
+          "audioUrl": "https://cdn.example.com/talk/jake_2.mp3"
+        },
+        "tasksDone": [
+          "t_fragile",
+          "t_kitchen"
+        ],
+        "suggestions": [
+          {
+            "en": "Thanks a lot!",
+            "audioUrl": "https://cdn.example.com/talk/sug_2a.mp3"
+          },
+          {
+            "en": "Do you want some water?",
+            "audioUrl": "https://cdn.example.com/talk/sug_2b.mp3"
+          }
+        ],
+        "turnsLeft": 5
+      },
+      {
+        "reply": {
+          "en": "Yes, please! It's so hot today. Thanks!",
+          "ar": "نعم من فضلك! الجو حار جدًا اليوم. شكرًا!",
+          "audioUrl": "https://cdn.example.com/talk/jake_3.mp3"
+        },
+        "tasksDone": [
+          "t_fragile",
+          "t_kitchen",
+          "t_water"
+        ],
+        "suggestions": [],
+        "turnsLeft": 4
+      }
+    ],
+    "notes": [
+      {
+        "turn": 0,
+        "better": {
+          "before": "Jake, this box is very fragile. ",
+          "fix": "Please put it down slowly.",
+          "after": ""
+        },
+        "audioUrl": "https://cdn.example.com/talk/better_0.mp3",
+        "concept": {
+          "id": "c_adverbs",
+          "ar": "الصفة والظرف: slow و slowly"
+        }
+      },
+      {
+        "turn": 1,
+        "better": {
+          "before": "Can you put it in ",
+          "fix": "the",
+          "after": " kitchen?"
+        },
+        "audioUrl": "https://cdn.example.com/talk/better_1.mp3",
+        "concept": {
+          "id": "c_articles",
+          "ar": "أداة التعريف: the"
+        }
+      }
+    ]
+  },
+  "sc_new_neighbour": {
+    "id": "sc_new_neighbour",
+    "title": "جار جديد",
+    "kind": "ai",
+    "character": {
+      "name": "Lina",
+      "descriptionAr": "جارتك في الشقة المقابلة",
+      "avatarUrl": null
+    },
+    "intro": {
+      "en": "Lina lives next door. She comes to say hello.",
+      "ar": "لينا تسكن في الشقة المجاورة، وجاءت لتسلّم عليك.",
+      "audioUrl": "https://cdn.example.com/talk/lina_intro.mp3"
+    },
+    "roleAr": "أنت الساكن الجديد في البناية.",
+    "tasks": [
+      {
+        "id": "t_name",
+        "ar": "عرّفها بنفسك"
+      },
+      {
+        "id": "t_since",
+        "ar": "اسألها منذ متى تسكن هنا"
+      },
+      {
+        "id": "t_tea",
+        "ar": "ادعُها إلى كوب شاي"
+      }
+    ],
+    "maxTurns": 8,
+    "opening": {
+      "en": "Hi! You must be the new neighbour.",
+      "ar": "مرحبًا! لا بد أنك الجار الجديد.",
+      "audioUrl": "https://cdn.example.com/talk/lina_0.mp3"
+    },
+    "suggestions": [
+      {
+        "en": "Hi! I'm Sam. Nice to meet you.",
+        "audioUrl": "https://cdn.example.com/talk/sug_l0a.mp3"
+      },
+      {
+        "en": "Yes, I just moved in.",
+        "audioUrl": "https://cdn.example.com/talk/sug_l0b.mp3"
+      }
+    ],
+    "replies": [
+      {
+        "reply": {
+          "en": "Nice to meet you too! Welcome to the building.",
+          "ar": "تشرفت بمعرفتك أيضًا! أهلًا بك في البناية.",
+          "audioUrl": "https://cdn.example.com/talk/lina_1.mp3"
+        },
+        "tasksDone": [
+          "t_name"
+        ],
+        "suggestions": [
+          {
+            "en": "How long have you lived here?",
+            "audioUrl": "https://cdn.example.com/talk/sug_l1a.mp3"
+          }
+        ],
+        "turnsLeft": 7
+      },
+      {
+        "reply": {
+          "en": "About five years. It's a quiet place.",
+          "ar": "منذ خمس سنوات تقريبًا. المكان هادئ.",
+          "audioUrl": "https://cdn.example.com/talk/lina_2.mp3"
+        },
+        "tasksDone": [
+          "t_name",
+          "t_since"
+        ],
+        "suggestions": [
+          {
+            "en": "Would you like some tea?",
+            "audioUrl": "https://cdn.example.com/talk/sug_l2a.mp3"
+          }
+        ],
+        "turnsLeft": 6
+      },
+      {
+        "reply": {
+          "en": "I'd love some. Thank you!",
+          "ar": "بكل سرور. شكرًا لك!",
+          "audioUrl": "https://cdn.example.com/talk/lina_3.mp3"
+        },
+        "tasksDone": [
+          "t_name",
+          "t_since",
+          "t_tea"
+        ],
+        "suggestions": [],
+        "turnsLeft": 5
+      }
+    ],
+    "notes": []
+  },
+  "sc_how_much": {
+    "id": "sc_how_much",
+    "title": "بكم هذه؟",
+    "kind": "written",
+    "character": {
+      "name": "Sami",
+      "descriptionAr": "بائع في السوق",
+      "avatarUrl": null
+    },
+    "intro": {
+      "en": "Sami sells bags at the market. You like one of them.",
+      "ar": "سامي يبيع الحقائب في السوق، وأعجبتك واحدة منها.",
+      "audioUrl": "https://cdn.example.com/talk/sami_intro.mp3"
+    },
+    "roleAr": "أنت تتسوّق في السوق.",
+    "tasks": [
+      {
+        "id": "t_price",
+        "ar": "اسأل عن سعر الحقيبة"
+      },
+      {
+        "id": "t_buy",
+        "ar": "اشترِ الحقيبة"
+      },
+      {
+        "id": "t_bye",
+        "ar": "اشكره وودّعه"
+      }
+    ],
+    "maxTurns": 3,
+    "opening": {
+      "en": "Hello! Can I help you?",
+      "ar": "مرحبًا! هل أستطيع مساعدتك؟",
+      "audioUrl": "https://cdn.example.com/talk/sami_0.mp3"
+    },
+    "suggestions": [],
+    "script": [
+      {
+        "kind": "repeat",
+        "sentence": {
+          "en": "How much is this bag?",
+          "audioUrl": "https://cdn.example.com/talk/sami_s0.mp3"
+        },
+        "reply": {
+          "en": "It's ten dollars.",
+          "ar": "ثمنها عشرة دولارات.",
+          "audioUrl": "https://cdn.example.com/talk/sami_1.mp3"
+        },
+        "taskId": "t_price"
+      },
+      {
+        "kind": "choose",
+        "options": [
+          {
+            "said": {
+              "en": "I'll take it, please.",
+              "audioUrl": "https://cdn.example.com/talk/sami_o1a.mp3"
+            },
+            "reply": {
+              "en": "Great choice! Here you are.",
+              "ar": "اختيار رائع! تفضّل.",
+              "audioUrl": "https://cdn.example.com/talk/sami_2a.mp3"
+            },
+            "taskId": "t_buy"
+          },
+          {
+            "said": {
+              "en": "It's too expensive.",
+              "audioUrl": "https://cdn.example.com/talk/sami_o1b.mp3"
+            },
+            "reply": {
+              "en": "Sorry, that's the price. Anything else?",
+              "ar": "آسف، هذا هو السعر. شيء آخر؟",
+              "audioUrl": "https://cdn.example.com/talk/sami_2b.mp3"
+            }
+          },
+          {
+            "said": {
+              "en": "I don't know.",
+              "audioUrl": "https://cdn.example.com/talk/sami_o1c.mp3"
+            },
+            "reply": {
+              "en": "Take your time. Anything else?",
+              "ar": "خذ وقتك. شيء آخر؟",
+              "audioUrl": "https://cdn.example.com/talk/sami_2c.mp3"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "choose",
+        "options": [
+          {
+            "said": {
+              "en": "Thank you! Goodbye.",
+              "audioUrl": "https://cdn.example.com/talk/sami_o2a.mp3"
+            },
+            "reply": {
+              "en": "Goodbye! Have a nice day.",
+              "ar": "مع السلامة! يومًا سعيدًا.",
+              "audioUrl": "https://cdn.example.com/talk/sami_3a.mp3"
+            },
+            "taskId": "t_bye"
+          },
+          {
+            "said": {
+              "en": "Bye.",
+              "audioUrl": "https://cdn.example.com/talk/sami_o2b.mp3"
+            },
+            "reply": {
+              "en": "Bye!",
+              "ar": "مع السلامة!",
+              "audioUrl": "https://cdn.example.com/talk/sami_3b.mp3"
+            }
+          }
+        ]
+      }
+    ],
+    "replies": []
+  }
+}

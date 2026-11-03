@@ -10,6 +10,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/smooth_size.dart';
+import 'package:englizia/core/design_system/widgets/ai_dots.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/xp_amount.dart';
@@ -308,7 +309,7 @@ class _Content extends StatelessWidget {
         tone: tone,
         title: 'lesson_fb_reviewing'.tr(),
         leading: exercise is SpeakAnswerExercise
-            ? const _AiDots()
+            ? const AiDots()
             : AppSpinner(size: _Mark.size - 8, color: tone.fill),
       );
     }
@@ -1006,76 +1007,6 @@ class _ExplainButton extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Three dots that pulse while the AI judges, still under reduce motion.
-class _AiDots extends StatefulWidget {
-  const _AiDots();
-
-  @override
-  State<_AiDots> createState() => _AiDotsState();
-}
-
-class _AiDotsState extends State<_AiDots> with SingleTickerProviderStateMixin {
-  static const _dot = 7.0;
-  static const _dots = 3;
-  static const _dimmest = .3;
-
-  late final _round = AnimationController(
-    vsync: this,
-    duration: AppMotion.aiDots,
-  );
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (AppMotion.reduceMotion(context)) {
-      _round.stop();
-    } else if (!_round.isAnimating) {
-      unawaited(_round.repeat());
-    }
-  }
-
-  @override
-  void dispose() {
-    _round.dispose();
-    super.dispose();
-  }
-
-  double _strength(int dot) {
-    final offset =
-        AppMotion.aiDotsOffset.inMilliseconds /
-        AppMotion.aiDots.inMilliseconds *
-        dot;
-    final t = (_round.value - offset) % 1;
-    return _dimmest + (1 - _dimmest) * (1 - (2 * t - 1).abs());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final color = context.colors.ai.fill;
-    return ExcludeSemantics(
-      child: AnimatedBuilder(
-        animation: _round,
-        builder: (context, _) => Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < _dots; i++) ...[
-              if (i > 0) const SizedBox(width: AppSpacing.xxs),
-              Container(
-                width: _dot,
-                height: _dot,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: _strength(i)),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ],
-          ],
         ),
       ),
     );

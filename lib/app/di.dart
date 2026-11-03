@@ -5,6 +5,7 @@ import 'package:englizia/features/onboarding/onboarding_injection.dart';
 import 'package:englizia/features/placement/placement_injection.dart';
 import 'package:englizia/features/practice/practice_injection.dart';
 import 'package:englizia/features/settings/settings_injection.dart';
+import 'package:englizia/features/talk/talk_injection.dart';
 import 'package:englizia/features/tracks/tracks_injection.dart';
 
 /// DI composition root. `main()` and `test/di/di_test.dart` call this same
@@ -19,4 +20,5 @@ Future<void> configureDependencies() async {
   registerAccountDependencies(sl);
   registerOnboardingDependencies(sl);
   registerPracticeDependencies(sl);
+  registerTalkDependencies(sl);
 }

@@ -6,6 +6,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- «تحدّث»: conversations with a character in real situations, by unit. Speak or type, read what was heard before sending, hear and translate each reply, and see each task done as it happens, with no correction on the way.
+- A conversation's summary: the tasks done, up to three better ways to say what you said (added to the concepts to strengthen), and the whole conversation to read. Written conversations: repeat a sentence or choose a reply.
 - Concepts to strengthen: the concepts a learner got wrong, each brought back at five spaced stations with a new question, until it is mastered, with nothing red and no count of mistakes.
 - The «تدرّب» tab: the word bank with how firmly each word is kept, a review that turns each card and moves it between five boxes, offline too, and «كلماتي» to search, filter and remove words; and the tabs' bar.
 - Shadowing: a lesson's chosen sentences said after the model, with it, or with the text hidden, the words heard and doing better each try, and the try and the model drawn side by side.

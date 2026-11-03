@@ -1,6 +1,6 @@
+import 'package:englizia/core/text/plain_words.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
-import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 
 /// A piece of a sentence shown in the feedback; [strong] for what was at stake.
 final class AnswerPart {

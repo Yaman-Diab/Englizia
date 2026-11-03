@@ -18,7 +18,6 @@ import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_com
 import 'package:englizia/features/lessons/presentation/concepts/cubit/concept_session_cubit.dart';
 import 'package:englizia/features/lessons/presentation/concepts/cubit/concepts_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
-import 'package:englizia/features/lessons/presentation/exercise/cubit/mic_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
@@ -86,7 +85,6 @@ void registerLessonDependencies(GetIt sl) {
     ..registerFactory(() => ConceptsCubit(sl()))
     ..registerFactory(() => ConceptSessionCubit(sl(), sl()))
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
-    ..registerFactory(() => MicCubit(sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(
       (lessonId, _) =>
           ExerciseCubit(sl(), sl(), sl(), sl(), lessonId: lessonId),
