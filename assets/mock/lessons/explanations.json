@@ -1,0 +1,154 @@
+{
+  "Q1": {
+    "id": "ex_Q1",
+    "yours": [
+      {
+        "text": "She"
+      },
+      {
+        "text": "go",
+        "wrong": true
+      },
+      {
+        "text": "to"
+      },
+      {
+        "text": "school"
+      },
+      {
+        "text": "every"
+      },
+      {
+        "text": "day."
+      }
+    ],
+    "right": [
+      {
+        "text": "She"
+      },
+      {
+        "text": "goes",
+        "fixed": true
+      },
+      {
+        "text": "to"
+      },
+      {
+        "text": "school"
+      },
+      {
+        "text": "every"
+      },
+      {
+        "text": "day."
+      }
+    ],
+    "whyAr": "الفاعل She مفرد غائب، ومعه نضيف s إلى الفعل في المضارع البسيط. go تأتي مع I وyou وwe وthey.",
+    "example": {
+      "en": "My brother plays football on Fridays.",
+      "ar": "يلعب أخي كرة القدم أيام الجمعة.",
+      "audioUrl": "https://example.com/mock/lessons/ex_plays.mp3"
+    }
+  },
+  "q6": {
+    "id": "ex_q6",
+    "yours": [
+      {
+        "text": "Sara"
+      },
+      {
+        "text": "feeds"
+      },
+      {
+        "text": "chickens",
+        "wrong": true
+      },
+      {
+        "text": "the",
+        "wrong": true
+      },
+      {
+        "text": "before"
+      },
+      {
+        "text": "school."
+      }
+    ],
+    "right": [
+      {
+        "text": "Sara"
+      },
+      {
+        "text": "feeds"
+      },
+      {
+        "text": "the",
+        "fixed": true
+      },
+      {
+        "text": "chickens",
+        "fixed": true
+      },
+      {
+        "text": "before"
+      },
+      {
+        "text": "school."
+      }
+    ],
+    "whyAr": "the تأتي قبل الاسم مباشرة، فنقول the chickens. والترتيب: الفاعل Sara، ثم الفعل feeds، ثم ما يُطعمه.",
+    "example": {
+      "en": "Omar reads the book after dinner.",
+      "ar": "يقرأ عمر الكتاب بعد العشاء.",
+      "audioUrl": "https://example.com/mock/lessons/ex_omar.mp3"
+    }
+  },
+  "q15": {
+    "id": "ex_q15",
+    "yours": [
+      {
+        "text": "She"
+      },
+      {
+        "text": "don't",
+        "wrong": true
+      },
+      {
+        "text": "like"
+      },
+      {
+        "text": "coffee."
+      }
+    ],
+    "right": [
+      {
+        "text": "She"
+      },
+      {
+        "text": "doesn't",
+        "fixed": true
+      },
+      {
+        "text": "like"
+      },
+      {
+        "text": "coffee."
+      }
+    ],
+    "whyAr": "مع he وshe وit ننفي بـ doesn't، لأن الفاعل مفرد غائب. don't تأتي مع I وyou وwe وthey.",
+    "example": {
+      "en": "He doesn't drink tea in the morning.",
+      "ar": "هو لا يشرب الشاي في الصباح.",
+      "audioUrl": "https://example.com/mock/lessons/ex_doesnt.mp3"
+    }
+  },
+  "default": {
+    "id": "ex_default",
+    "whyAr": "الكلمة التي اخترتها لا تناسب معنى الجملة هنا. اقرأ الجملة كاملة وابحث عن الكلمة التي تكمل معناها.",
+    "example": {
+      "en": "I'm going to the market to buy bread.",
+      "ar": "أنا ذاهب إلى السوق لأشتري الخبز.",
+      "audioUrl": "https://example.com/mock/lessons/ex_market.mp3"
+    }
+  }
+}

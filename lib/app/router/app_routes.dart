@@ -34,7 +34,6 @@ abstract final class AppRoutes {
   static const lessonShadowing = '/lessons/:lessonId/shadowing';
   static const lessonExercises = '/lessons/:lessonId/exercises';
   static const lessonComplete = '/lessons/:lessonId/complete';
-  static const lessonExplain = '/lessons/:lessonId/explain';
 
   /// Screens a lesson's end leads to, not built yet.
   static const savedWords = '/words';
@@ -42,7 +41,6 @@ abstract final class AppRoutes {
   static const practiceReview = '/practice/review';
   static const practiceConcepts = '/practice/concepts';
   static const practiceConceptSession = '/practice/concepts/session';
-  static const conceptExplain = '/practice/concepts/explain';
   static const practiceSentences = '/practice/sentences';
   static const talk = '/talk';
   static const talkScenario = '/talk/scenarios/:scenarioId';
@@ -66,8 +64,6 @@ abstract final class AppRoutes {
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
 
   static String completeOf(String lessonId) => '/lessons/$lessonId/complete';
-
-  static String explainOf(String lessonId) => '/lessons/$lessonId/explain';
 
   /// The path of the link that confirms an email (docs/api/auth.md).
   static const verifyEmail = '/verify-email';

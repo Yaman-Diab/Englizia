@@ -1174,5 +1174,22 @@
     "other": "سمعنا {heard} من {} كلمة"
   },
   "talk_say_sentence": "قل الجملة",
-  "talk_choose": "اختر ردك"
+  "talk_choose": "اختر ردك",
+  "explain_title": "لماذا كانت إجابتك خاطئة؟",
+  "explain_close": "إغلاق الشرح",
+  "explain_writing": "نكتب لك الشرح…",
+  "explain_yours": "إجابتك",
+  "explain_yours_label": "إجابتك: {sentence}، الخطأ: {wrong}",
+  "explain_right": "الصحيح",
+  "explain_why": "السبب",
+  "explain_example": "مثال آخر",
+  "explain_listen": "استمع إلى المثال",
+  "explain_helped": "هل ساعدك الشرح؟",
+  "explain_helped_yes": "نعم، ساعدني",
+  "explain_helped_no": "لا، لم يساعدني",
+  "explain_thanks": "شكرًا",
+  "explain_left": "شروحات متبقية اليوم: {count}",
+  "explain_failed": "تعذّر الشرح الآن",
+  "explain_quota_out": "استخدمت شروحات اليوم. تتجدد غدًا.",
+  "explain_lesson": "الشرح في الدرس"
 }

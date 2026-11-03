@@ -730,7 +730,7 @@ Map<String, Object?> attemptToJson(ExerciseAttempt attempt, String attemptId) =>
       'attemptId': attemptId,
       'lessonVersion': attempt.lessonVersion,
       'questionId': attempt.questionId,
-      'answer': _answerJson(attempt.draft),
+      'answer': answerToJson(attempt.draft),
       'hinted': attempt.hinted,
     };
 
@@ -740,10 +740,11 @@ Map<String, Object?> reportToJson(ExerciseReport report, String reportId) => {
   'lessonVersion': report.lessonVersion,
   'questionId': report.questionId,
   'reason': report.reason.name,
-  if (report.draft case final draft?) 'answer': _answerJson(draft),
+  if (report.draft case final draft?) 'answer': answerToJson(draft),
 };
 
-Map<String, Object?> _answerJson(ExerciseDraft draft) => switch (draft) {
+/// A learner's answer as the server reads it.
+Map<String, Object?> answerToJson(ExerciseDraft draft) => switch (draft) {
   ChoiceDraft(:final optionId) => {'optionId': optionId},
   SlotsDraft(:final chips) => {
     'words': [for (final chip in chips) chip?.text],

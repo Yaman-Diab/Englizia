@@ -13,6 +13,7 @@ import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/explanation.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
@@ -42,7 +43,7 @@ class ExercisePage extends StatelessWidget {
   final ValueChanged<LessonSummary> onFinished;
 
   /// «اشرح لي».
-  final VoidCallback onExplain;
+  final ValueChanged<ExplainRequest> onExplain;
 
   static const _topBarHeight = 56.0;
   static const _sheetGuide = 96.0;
@@ -177,7 +178,7 @@ class _Footer extends StatelessWidget {
 
   final ExerciseState state;
   final Exercise question;
-  final VoidCallback onExplain;
+  final ValueChanged<ExplainRequest> onExplain;
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +200,14 @@ class _Footer extends StatelessWidget {
           onToggle: cubit.toggleAnswerClip,
         ),
         onNext: cubit.next,
-        onExplain: onExplain,
+        onExplain: () => onExplain(
+          ExplainRequest(
+            questionId: question.id,
+            lessonId: cubit.lessonId,
+            draft: state.draft!,
+            lessonExplanation: question.explanation,
+          ),
+        ),
         onReport: cubit.report,
         onRetry: cubit.retrySpeech,
         onSkip: cubit.skipQuestion,

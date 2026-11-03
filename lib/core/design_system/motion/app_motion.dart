@@ -107,6 +107,11 @@ abstract final class AppMotion {
   /// A new part joining a progress bar.
   static const barGrow = Duration(milliseconds: 450);
 
+  /// ✦ glinting while the AI writes an explanation, and when the lines
+  /// through the wrong words start to draw once it arrives.
+  static const aiGlint = Duration(milliseconds: 1600);
+  static const strikeDelay = Duration(milliseconds: 240);
+
   /// A bottom sheet coming up, and going down a little faster.
   static const sheetIn = Duration(milliseconds: 300);
   static const sheetOut = Duration(milliseconds: 220);

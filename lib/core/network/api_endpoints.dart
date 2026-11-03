@@ -94,6 +94,12 @@ abstract final class ApiEndpoints {
 
   static const conceptReports = '/api/v1/app/concepts/reports';
 
+  // ASSUMPTION(api): docs/api/explanations.md.
+  static const explanations = '/api/v1/app/explanations';
+
+  static String explanationRating(String explanationId) =>
+      '/api/v1/app/explanations/$explanationId/rating';
+
   // ASSUMPTION(api): docs/api/talk.md.
   static const talk = '/api/v1/app/talk';
 

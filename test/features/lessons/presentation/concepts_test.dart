@@ -288,7 +288,7 @@ void main() {
       await tester.pumpLocalized(
         BlocProvider.value(
           value: subject,
-          child: ConceptSessionPage(onExit: onExit ?? (_) {}, onExplain: () {}),
+          child: ConceptSessionPage(onExit: onExit ?? (_) {}, onExplain: (_) {}),
         ),
         locale: locale,
         size: size,

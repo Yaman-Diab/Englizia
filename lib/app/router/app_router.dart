@@ -37,6 +37,8 @@ import 'package:englizia/features/lessons/presentation/concepts/pages/concept_se
 import 'package:englizia/features/lessons/presentation/concepts/pages/concepts_page.dart';
 import 'package:englizia/features/lessons/presentation/exercise/cubit/exercise_cubit.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
+import 'package:englizia/features/lessons/presentation/explain/cubit/explain_cubit.dart';
+import 'package:englizia/features/lessons/presentation/explain/widgets/explain_sheet.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/teacher_questions_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/pages/grammar_lesson_page.dart';
@@ -671,16 +673,15 @@ GoRouter createAppRouter(AppSessionController session) {
                 AppRoutes.completeOf(lessonId),
                 extra: summary,
               ),
-              onExplain: () => context.push(AppRoutes.explainOf(lessonId)),
+              onExplain: (request) => showExplainSheet(
+                context,
+                cubit: () => sl<ExplainCubit>(param1: request),
+              ),
             ),
           );
         },
       ),
       // "Explain it to me" has no design yet.
-      GoRoute(
-        path: AppRoutes.lessonExplain,
-        builder: (_, _) => PendingPage(title: 'lesson_fb_explain'.tr()),
-      ),
       GoRoute(
         path: AppRoutes.lessonComplete,
         // Only a lesson that has just ended has anything to show.
@@ -772,14 +773,12 @@ GoRouter createAppRouter(AppSessionController session) {
             onExit: (mastered) => context.canPop()
                 ? context.pop(mastered)
                 : context.go(AppRoutes.practice),
-            // «اشرح لي» has no design yet, as in a lesson.
-            onExplain: () => context.push(AppRoutes.conceptExplain),
+            onExplain: (request) => showExplainSheet(
+              context,
+              cubit: () => sl<ExplainCubit>(param1: request),
+            ),
           ),
         ),
-      ),
-      GoRoute(
-        path: AppRoutes.conceptExplain,
-        builder: (_, _) => PendingPage(title: 'lesson_fb_explain'.tr()),
       ),
       GoRoute(
         path: AppRoutes.practiceSentences,

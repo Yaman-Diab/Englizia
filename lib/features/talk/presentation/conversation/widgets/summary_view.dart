@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/ai_dots.dart';
+import 'package:englizia/core/design_system/widgets/ai_spark.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';

@@ -11,6 +11,7 @@ import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/listening_motion.dart';
 import 'package:englizia/core/design_system/motion/rolling_number.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
+import 'package:englizia/core/design_system/widgets/ai_spark.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';

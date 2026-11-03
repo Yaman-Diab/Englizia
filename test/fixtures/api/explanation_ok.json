@@ -1,0 +1,59 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "status": "ready",
+    "explanation": {
+      "id": "ex_Q1",
+      "yours": [
+        {
+          "text": "She"
+        },
+        {
+          "text": "go",
+          "wrong": true
+        },
+        {
+          "text": "to"
+        },
+        {
+          "text": "school"
+        },
+        {
+          "text": "every"
+        },
+        {
+          "text": "day."
+        }
+      ],
+      "right": [
+        {
+          "text": "She"
+        },
+        {
+          "text": "goes",
+          "fixed": true
+        },
+        {
+          "text": "to"
+        },
+        {
+          "text": "school"
+        },
+        {
+          "text": "every"
+        },
+        {
+          "text": "day."
+        }
+      ],
+      "whyAr": "الفاعل She مفرد غائب، ومعه نضيف s إلى الفعل في المضارع البسيط. go تأتي مع I وyou وwe وthey.",
+      "example": {
+        "en": "My brother plays football on Fridays.",
+        "ar": "يلعب أخي كرة القدم أيام الجمعة.",
+        "audioUrl": "https://example.com/mock/lessons/ex_plays.mp3"
+      }
+    },
+    "left": 4
+  }
+}

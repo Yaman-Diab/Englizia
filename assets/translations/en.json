@@ -993,5 +993,22 @@
     "other": "Heard {heard} of {} words"
   },
   "talk_say_sentence": "Say the sentence",
-  "talk_choose": "Choose your reply"
+  "talk_choose": "Choose your reply",
+  "explain_title": "Why was your answer wrong?",
+  "explain_close": "Close the explanation",
+  "explain_writing": "Writing your explanation…",
+  "explain_yours": "Your answer",
+  "explain_yours_label": "Your answer: {sentence}, wrong: {wrong}",
+  "explain_right": "Correct",
+  "explain_why": "Why",
+  "explain_example": "Another example",
+  "explain_listen": "Listen to the example",
+  "explain_helped": "Did this help?",
+  "explain_helped_yes": "Yes, it helped",
+  "explain_helped_no": "No, it didn't help",
+  "explain_thanks": "Thank you",
+  "explain_left": "Explanations left today: {count}",
+  "explain_failed": "Couldn't explain right now",
+  "explain_quota_out": "You've used today's explanations. They renew tomorrow.",
+  "explain_lesson": "The lesson's explanation"
 }
