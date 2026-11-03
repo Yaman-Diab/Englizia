@@ -134,6 +134,7 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
   static const videoAsset = 'assets/mock/lessons/interactive_video.json';
   static const vocabularyAsset = 'assets/mock/lessons/vocabulary.json';
   static const kidAsset = 'assets/mock/lessons/kid_lesson.json';
+  static const kidMediaAsset = 'assets/mock/lessons/kid_media.json';
   static const brokenTextAsset =
       'assets/mock/lessons/interactive_text_broken.json';
   static const reviewsAsset = 'assets/mock/lessons/spoken_reviews.json';
@@ -164,6 +165,7 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
         'les_iv' => videoAsset,
         'les_voc' => vocabularyAsset,
         'les_kid' => kidAsset,
+        'les_kid_media' => kidMediaAsset,
         _ => asset,
       }),
     );

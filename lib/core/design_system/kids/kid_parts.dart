@@ -7,7 +7,6 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
-import 'package:englizia/features/lessons/presentation/kids/cubit/kid_lesson_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -153,18 +152,25 @@ class KidRoundButton extends StatelessWidget {
   }
 }
 
-/// The lesson's bar: the way out, the progress with a star riding on its
+/// A kids' screen's bar: the way out, the progress with a star riding on its
 /// end, and the guide, who says the instruction again when pressed.
 class KidTopBar extends StatelessWidget {
   const KidTopBar({
-    required this.state,
+    required this.progress,
+    required this.total,
+    required this.speaking,
+    required this.expression,
     required this.starKey,
     required this.onExit,
     required this.onGuide,
     super.key,
   });
 
-  final KidLessonState state;
+  /// The screens done, of [total].
+  final int progress;
+  final int total;
+  final bool speaking;
+  final MascotExpression expression;
 
   /// Where a star flies to.
   final GlobalKey starKey;
@@ -175,13 +181,11 @@ class KidTopBar extends StatelessWidget {
   static const _exit = 56.0;
   static const _track = 16.0;
   static const _star = 30.0;
-  static const _guide = 64.0;
-  static const _bubble = 30.0;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final share = state.stepCount == 0 ? 0.0 : state.progress / state.stepCount;
+    final share = total == 0 ? 0.0 : progress / total;
     final duration = AppMotion.resolve(context, AppMotion.slow * 1.5);
     return SizedBox(
       height: _height,
@@ -210,7 +214,7 @@ class KidTopBar extends StatelessWidget {
                 ),
                 child: Semantics(
                   label: 'kid_progress'.tr(),
-                  value: '${state.progress} / ${state.stepCount}',
+                  value: '$progress / $total',
                   child: SizedBox(
                     height: _star,
                     child: LayoutBuilder(
@@ -243,7 +247,7 @@ class KidTopBar extends StatelessWidget {
                               start: width * share - _star / 2,
                               top: 0,
                               child: Pulse(
-                                trigger: state.progress,
+                                trigger: progress,
                                 growth: .6,
                                 child: KidStar(
                                   key: starKey,
@@ -260,53 +264,10 @@ class KidTopBar extends StatelessWidget {
                 ),
               ),
             ),
-            Semantics(
-              button: true,
-              label: 'kid_say_again'.tr(),
-              excludeSemantics: true,
-              child: GestureDetector(
-                onTap: onGuide,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedContainer(
-                      duration: AppMotion.resolve(context, AppMotion.closeUp),
-                      margin: const EdgeInsetsDirectional.only(
-                        top: AppSpacing.xxs,
-                      ),
-                      width: _bubble,
-                      height: _bubble,
-                      decoration: BoxDecoration(
-                        color: colors.info.surface,
-                        borderRadius: const BorderRadiusDirectional.only(
-                          topStart: Radius.circular(_bubble / 2),
-                          topEnd: Radius.circular(_bubble / 2),
-                          bottomStart: Radius.circular(_bubble / 2),
-                          bottomEnd: Radius.circular(AppSpacing.xs),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: state.speaking
-                                ? colors.info.fill
-                                : Colors.transparent,
-                            spreadRadius: 2,
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.volume_up_rounded,
-                        size: AppSizes.iconSm,
-                        color: colors.info.fill,
-                      ),
-                    ),
-                    Mascot(
-                      expression: kidExpression(state.mood),
-                      size: _guide,
-                      sparkles: false,
-                    ),
-                  ],
-                ),
-              ),
+            KidGuideButton(
+              speaking: speaking,
+              expression: expression,
+              onPressed: onGuide,
             ),
           ],
         ),
@@ -315,12 +276,69 @@ class KidTopBar extends StatelessWidget {
   }
 }
 
-MascotExpression kidExpression(KidMood mood) => switch (mood) {
-  KidMood.welcome => MascotExpression.welcome,
-  KidMood.talking => MascotExpression.talk,
-  KidMood.happy => MascotExpression.happy,
-  KidMood.encourage => MascotExpression.encourage,
-};
+/// The guide in a corner with its sound bubble, ringed while it speaks;
+/// pressed, it says the instruction again.
+class KidGuideButton extends StatelessWidget {
+  const KidGuideButton({
+    required this.speaking,
+    required this.expression,
+    required this.onPressed,
+    super.key,
+  });
+
+  final bool speaking;
+  final MascotExpression expression;
+  final VoidCallback onPressed;
+
+  static const _guide = 64.0;
+  static const _bubble = 30.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Semantics(
+      button: true,
+      label: 'kid_say_again'.tr(),
+      excludeSemantics: true,
+      child: GestureDetector(
+        onTap: onPressed,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AnimatedContainer(
+              duration: AppMotion.resolve(context, AppMotion.closeUp),
+              margin: const EdgeInsetsDirectional.only(top: AppSpacing.xxs),
+              width: _bubble,
+              height: _bubble,
+              decoration: BoxDecoration(
+                color: colors.info.surface,
+                borderRadius: const BorderRadiusDirectional.only(
+                  topStart: Radius.circular(_bubble / 2),
+                  topEnd: Radius.circular(_bubble / 2),
+                  bottomStart: Radius.circular(_bubble / 2),
+                  bottomEnd: Radius.circular(AppSpacing.xs),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: speaking ? colors.info.fill : Colors.transparent,
+                    spreadRadius: 2,
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.volume_up_rounded,
+                size: AppSizes.iconSm,
+                color: colors.info.fill,
+              ),
+            ),
+            Mascot(expression: expression, size: _guide, sparkles: false),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 /// «تريد أن تخرج؟» with two pictures and no words: the guide smiling with an
 /// arrow to stay, or a little sad with a door to leave. Outside it is staying.

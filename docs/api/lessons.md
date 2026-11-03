@@ -151,7 +151,7 @@ A question the app can't read is skipped and logged, so it can't leave the learn
 
 ### A kids' lesson (`kids`)
 
-In kids mode (S §13), a lesson comes with `kids`: its screens in order, the words it teaches, and the guide's recorded lines. Its questions stay in `exercises` as any lesson's, answered and completed the same way (`answers`, `complete`); a `question` screen names one by its `id`. Proposed, from design `Kid Lesson`.
+In kids mode (S §13), a lesson comes with `kids`: its screens in order, the words it teaches, and the guide's recorded lines. Its questions stay in `exercises` as any lesson's, answered and completed the same way (`answers`, `complete`); a `question` screen names one by its `id`. Proposed, from designs `Kid Lesson` and `Kid Media`.
 
 ```json
 "kids": {
@@ -173,6 +173,12 @@ In kids mode (S §13), a lesson comes with `kids`: its screens in order, the wor
 | `kind: word` | «بطاقة الكلمة» (Starter 2): its picture, the word and its voice, said after the instruction |
 | `kind: letter` | «بطاقة الحرف» (Starter 1): the capital (the small one is shown beside it), its video and its length in ms in case the player can't tell, its voice, and two words that start with it |
 | `kind: question` | One of `exercises`: `listenChoose` with letters (`text`) for «اسمع واختر الحرف», `imageChoice` for «اسمع واختر الصورة», `matching` with pictures for «طابق». No check button: pressing answers. The first answer to each goes to `answers`, so the server records a mistake on its concept without a word to the child |
+| `kind: story` | «قصة مصوّرة» (S §13.3): `pages[]` of `{image, audio, words[{text, startMs}], marked[]}`. Each page is told with its words lit from `startMs`; a `marked` word (a `words[]` entry, matched by its letters) is underlined and opens its card: picture and voice, no text. The child turns the pages, or lets them turn; past the last, a star |
+| `kind: song` | «أنشودة»: `video`, `videoMs`, `pictures[]` drawn over it, and `lines[]` of `{words[{text, startMs}]}` lit with the video's own clock. It opens at 0.75, «عادي» plays at 1; no translation. «غنِّ مرة أخرى» starts it over, «التالي» gives the star |
+| `kind: dialogue` | «حوار مكتوب»: `character` (a word: name and picture), `opening`, `closing` and each of `replies[]` `{word, answer, echo}`, every line `{en, audio}`. The child picks a reply by its picture, the character answers, then the child says `echo` (`echoInstructionAudio` asks for it) and any try earns the star before `closing` |
+| `kind: speak` | «كرّر بعدي»: a `word`, its model said after the instruction; the child's try is never judged (S §13.2), it earns the star |
+
+The voice isn't sent or kept: the phone's speech engine only tells the app that the child spoke (D-088).
 
 The end shows five stars filling, whatever the points (S §13.1: points show as stars). A screen that can't be read is left out; with none, the lesson can't be shown.
 

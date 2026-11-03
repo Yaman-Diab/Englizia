@@ -1,12 +1,13 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/mic_cubit.dart';
+import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/video/video_engine.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/kid_lesson.dart';
 import 'package:englizia/features/lessons/presentation/kids/cubit/kid_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/kids/pages/kid_lesson_page.dart';
-import 'package:englizia/features/lessons/presentation/kids/widgets/kid_parts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -236,9 +237,14 @@ void main() {
       exits = 0;
       final subject = cubit();
       addTearDown(subject.close);
+      final mic = MicCubit(FakeSpeechListener(), FakeMicPermission());
+      addTearDown(mic.close);
       await tester.pumpLocalized(
-        BlocProvider.value(
-          value: subject,
+        MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: subject),
+            BlocProvider.value(value: mic),
+          ],
           child: KidLessonPage(onExit: () => exits++, onNext: () {}),
         ),
         locale: locale,

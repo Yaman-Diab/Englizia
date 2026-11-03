@@ -15,13 +15,144 @@ import 'package:englizia/features/lessons/domain/repositories/lesson_repository.
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+part 'kid_media_steps.dart';
+
 enum KidStage { loading, failed, playing, done }
 
-/// How the guide looks: listening, saying something, pleased, or cheering
-/// the child on after a miss.
-enum KidMood { welcome, talking, happy, encourage }
+/// How the guide looks: at ease, saying something, pleased, cheering the
+/// child on after a miss, or listening while the child speaks.
+enum KidMood { welcome, talking, happy, encourage, listening }
 
 enum KidVideoStatus { idle, playing, done }
+
+/// A picture story's place: the page, the word being told, whether pages turn
+/// by themselves, a marked word's card, and the page just turned from.
+final class KidStoryView extends Equatable {
+  const KidStoryView({
+    this.page = 0,
+    this.word = -1,
+    this.auto = false,
+    this.opened,
+    this.turnedFrom,
+    this.forward = true,
+  });
+
+  final int page;
+  final int word;
+  final bool auto;
+  final KidWord? opened;
+  final int? turnedFrom;
+  final bool forward;
+
+  KidStoryView copyWith({
+    int? page,
+    int? word,
+    bool? auto,
+    KidWord? Function()? opened,
+    int? Function()? turnedFrom,
+    bool? forward,
+  }) => KidStoryView(
+    page: page ?? this.page,
+    word: word ?? this.word,
+    auto: auto ?? this.auto,
+    opened: opened != null ? opened() : this.opened,
+    turnedFrom: turnedFrom != null ? turnedFrom() : this.turnedFrom,
+    forward: forward ?? this.forward,
+  );
+
+  @override
+  List<Object?> get props => [page, word, auto, opened, turnedFrom, forward];
+}
+
+/// A song's place: the line and word sung, how far it is, and its speed.
+final class KidSongView extends Equatable {
+  const KidSongView({
+    this.status = KidVideoStatus.idle,
+    this.line = -1,
+    this.word = -1,
+    this.progress = 0,
+    this.speed = KidSongStep.slow,
+  });
+
+  final KidVideoStatus status;
+  final int line;
+  final int word;
+  final double progress;
+  final double speed;
+
+  KidSongView copyWith({
+    KidVideoStatus? status,
+    int? line,
+    int? word,
+    double? progress,
+    double? speed,
+  }) => KidSongView(
+    status: status ?? this.status,
+    line: line ?? this.line,
+    word: word ?? this.word,
+    progress: progress ?? this.progress,
+    speed: speed ?? this.speed,
+  );
+
+  @override
+  List<Object?> get props => [status, line, word, progress, speed];
+}
+
+enum KidTalkPhase {
+  /// The character asks.
+  opening,
+
+  /// Pictures to pick from.
+  choose,
+
+  /// The pick goes up, and the character answers it.
+  reply,
+
+  /// «ردّد»: the sentence to say.
+  echo,
+  recording,
+
+  /// Said: the star is on it, and the character says goodbye.
+  echoed,
+}
+
+final class KidDialogueView extends Equatable {
+  const KidDialogueView({
+    this.phase = KidTalkPhase.opening,
+    this.picked,
+    this.line = '',
+    this.lineAudioUrl,
+    this.lines = 0,
+  });
+
+  final KidTalkPhase phase;
+  final int? picked;
+
+  /// What the character says now, and how many lines it has said: it hops at
+  /// each one.
+  final String line;
+  final String? lineAudioUrl;
+  final int lines;
+
+  KidDialogueView copyWith({
+    KidTalkPhase? phase,
+    int? picked,
+    String? line,
+    String? lineAudioUrl,
+    int? lines,
+  }) => KidDialogueView(
+    phase: phase ?? this.phase,
+    picked: picked ?? this.picked,
+    line: line ?? this.line,
+    lineAudioUrl: lineAudioUrl ?? this.lineAudioUrl,
+    lines: lines ?? this.lines,
+  );
+
+  @override
+  List<Object?> get props => [phase, picked, line, lineAudioUrl, lines];
+}
+
+enum KidSpeakPhase { idle, recording, done }
 
 final class KidLessonState extends Equatable {
   const KidLessonState({
@@ -45,6 +176,10 @@ final class KidLessonState extends Equatable {
     this.stars = 0,
     this.won = 0,
     this.wonFrom,
+    this.story = const KidStoryView(),
+    this.song = const KidSongView(),
+    this.dialogue = const KidDialogueView(),
+    this.speak = KidSpeakPhase.idle,
   });
 
   final KidStage stage;
@@ -86,6 +221,11 @@ final class KidLessonState extends Equatable {
   final int won;
   final String? wonFrom;
 
+  final KidStoryView story;
+  final KidSongView song;
+  final KidDialogueView dialogue;
+  final KidSpeakPhase speak;
+
   KidLesson? get kids => lesson?.kids;
 
   int get stepCount => kids?.steps.length ?? 0;
@@ -123,6 +263,10 @@ final class KidLessonState extends Equatable {
     int? stars,
     int? won,
     String? wonFrom,
+    KidStoryView? story,
+    KidSongView? song,
+    KidDialogueView? dialogue,
+    KidSpeakPhase? speak,
   }) => KidLessonState(
     stage: stage ?? this.stage,
     failure: failure != null ? failure() : this.failure,
@@ -144,6 +288,10 @@ final class KidLessonState extends Equatable {
     stars: stars ?? this.stars,
     won: won ?? this.won,
     wonFrom: wonFrom ?? this.wonFrom,
+    story: story ?? this.story,
+    song: song ?? this.song,
+    dialogue: dialogue ?? this.dialogue,
+    speak: speak ?? this.speak,
   );
 
   @override
@@ -168,6 +316,10 @@ final class KidLessonState extends Equatable {
     stars,
     won,
     wonFrom,
+    story,
+    song,
+    dialogue,
+    speak,
   ];
 }
 
@@ -197,6 +349,12 @@ class KidLessonCubit extends Cubit<KidLessonState> {
   static const firstStar = Duration(milliseconds: 500);
   static const starGap = Duration(milliseconds: 420);
   static const starCount = 5;
+
+  /// Where the media screens' stars fly from.
+  static const storyCard = 'story';
+  static const songNext = 'song';
+  static const echoCard = 'echo';
+  static const micButton = 'mic';
 
   /// After this many misses on one question, the right answer is shown.
   static const _missesForHint = 2;
@@ -304,6 +462,14 @@ class KidLessonCubit extends Cubit<KidLessonState> {
         then: () => switch (step) {
           KidWordStep(:final word) => unawaited(_play(word.audioUrl)),
           KidQuestionStep() => unawaited(playQuestion()),
+          KidStoryStep() => unawaited(narrate()),
+          final KidDialogueStep dialogue => _characterSays(
+            dialogue.opening,
+            then: () => _setDialogue(
+              state.dialogue.copyWith(phase: KidTalkPhase.choose),
+            ),
+          ),
+          KidSpeakStep() => unawaited(playModel()),
           _ => null,
         },
       ),
@@ -361,6 +527,8 @@ class KidLessonCubit extends Cubit<KidLessonState> {
     );
     _enter();
   }
+
+  void _set(KidLessonState next) => emit(next);
 
   /// A letter or a picture, pressed.
   void pick(String optionId) {

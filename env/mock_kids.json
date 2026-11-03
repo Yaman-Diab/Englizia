@@ -1,0 +1,5 @@
+{
+  "APP_ENV": "mock",
+  "BASE_URL": "https://mock.invalid",
+  "MOCK_AUDIENCE": "kids"
+}

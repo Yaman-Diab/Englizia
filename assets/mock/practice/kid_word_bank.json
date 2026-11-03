@@ -1,0 +1,298 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "mockToday": "2026-11-03",
+    "sessionSize": 4,
+    "savedSentences": 0,
+    "units": [
+      {
+        "id": "colors",
+        "title": "الألوان",
+        "image": "assets/mock/lessons/kids/red.svg"
+      },
+      {
+        "id": "animals",
+        "title": "الحيوانات",
+        "image": "assets/mock/lessons/kids/cat.svg"
+      },
+      {
+        "id": "food",
+        "title": "الطعام",
+        "image": "assets/mock/lessons/kids/apple.svg"
+      }
+    ],
+    "kidsVoice": {
+      "words": "https://example.com/mock/kids/in_words.mp3",
+      "empty": "https://example.com/mock/kids/in_words_empty.mp3",
+      "review": "https://example.com/mock/kids/in_review.mp3",
+      "done": "https://example.com/mock/kids/review_done.mp3"
+    },
+    "words": [
+      {
+        "id": "kw_red",
+        "base": "red",
+        "kind": "noun",
+        "ar": "أحمر",
+        "image": "assets/mock/lessons/kids/red.svg",
+        "audio": "https://example.com/mock/kids/red.mp3",
+        "unitId": "colors",
+        "box": 1,
+        "dueAt": "2026-11-03T00:00:00.000"
+      },
+      {
+        "id": "kw_blue",
+        "base": "blue",
+        "kind": "noun",
+        "ar": "أزرق",
+        "image": "assets/mock/lessons/kids/blue.svg",
+        "audio": "https://example.com/mock/kids/blue.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_yellow",
+        "base": "yellow",
+        "kind": "noun",
+        "ar": "أصفر",
+        "image": "assets/mock/lessons/kids/yellow.svg",
+        "audio": "https://example.com/mock/kids/yellow.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_green",
+        "base": "green",
+        "kind": "noun",
+        "ar": "أخضر",
+        "image": "assets/mock/lessons/kids/green.svg",
+        "audio": "https://example.com/mock/kids/green.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_orange",
+        "base": "orange",
+        "kind": "noun",
+        "ar": "برتقالي",
+        "image": "assets/mock/lessons/kids/orange.svg",
+        "audio": "https://example.com/mock/kids/orange.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_pink",
+        "base": "pink",
+        "kind": "noun",
+        "ar": "وردي",
+        "image": "assets/mock/lessons/kids/pink.svg",
+        "audio": "https://example.com/mock/kids/pink.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_black",
+        "base": "black",
+        "kind": "noun",
+        "ar": "أسود",
+        "image": "assets/mock/lessons/kids/black.svg",
+        "audio": "https://example.com/mock/kids/black.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_white",
+        "base": "white",
+        "kind": "noun",
+        "ar": "أبيض",
+        "image": "assets/mock/lessons/kids/white.svg",
+        "audio": "https://example.com/mock/kids/white.mp3",
+        "unitId": "colors",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_cat",
+        "base": "cat",
+        "kind": "noun",
+        "ar": "قطة",
+        "image": "assets/mock/lessons/kids/cat.svg",
+        "audio": "https://example.com/mock/kids/cat.mp3",
+        "unitId": "animals",
+        "box": 1,
+        "dueAt": "2026-11-03T00:00:00.000"
+      },
+      {
+        "id": "kw_dog",
+        "base": "dog",
+        "kind": "noun",
+        "ar": "كلب",
+        "image": "assets/mock/lessons/kids/dog.svg",
+        "audio": "https://example.com/mock/kids/dog.mp3",
+        "unitId": "animals",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_fish",
+        "base": "fish",
+        "kind": "noun",
+        "ar": "سمكة",
+        "image": "assets/mock/lessons/kids/fish.svg",
+        "audio": "https://example.com/mock/kids/fish.mp3",
+        "unitId": "animals",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_bird",
+        "base": "bird",
+        "kind": "noun",
+        "ar": "عصفور",
+        "image": "assets/mock/lessons/kids/bird.svg",
+        "audio": "https://example.com/mock/kids/bird.mp3",
+        "unitId": "animals",
+        "box": 1,
+        "dueAt": "2026-11-03T00:00:00.000"
+      },
+      {
+        "id": "kw_ant",
+        "base": "ant",
+        "kind": "noun",
+        "ar": "نملة",
+        "image": "assets/mock/lessons/kids/ant.svg",
+        "audio": "https://example.com/mock/kids/ant.mp3",
+        "unitId": "animals",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_rabbit",
+        "base": "rabbit",
+        "kind": "noun",
+        "ar": "أرنب",
+        "image": "assets/mock/lessons/kids/rabbit.svg",
+        "audio": "https://example.com/mock/kids/rabbit.mp3",
+        "unitId": "animals",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_duck",
+        "base": "duck",
+        "kind": "noun",
+        "ar": "بطة",
+        "image": "assets/mock/lessons/kids/duck.svg",
+        "audio": "https://example.com/mock/kids/duck.mp3",
+        "unitId": "animals",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_cow",
+        "base": "cow",
+        "kind": "noun",
+        "ar": "بقرة",
+        "image": "assets/mock/lessons/kids/cow.svg",
+        "audio": "https://example.com/mock/kids/cow.mp3",
+        "unitId": "animals",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_apple",
+        "base": "apple",
+        "kind": "noun",
+        "ar": "تفاحة",
+        "image": "assets/mock/lessons/kids/apple.svg",
+        "audio": "https://example.com/mock/kids/apple.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_banana",
+        "base": "banana",
+        "kind": "noun",
+        "ar": "موزة",
+        "image": "assets/mock/lessons/kids/banana.svg",
+        "audio": "https://example.com/mock/kids/banana.mp3",
+        "unitId": "food",
+        "box": 1,
+        "dueAt": "2026-11-03T00:00:00.000"
+      },
+      {
+        "id": "kw_egg",
+        "base": "egg",
+        "kind": "noun",
+        "ar": "بيضة",
+        "image": "assets/mock/lessons/kids/egg.svg",
+        "audio": "https://example.com/mock/kids/egg.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_milk",
+        "base": "milk",
+        "kind": "noun",
+        "ar": "حليب",
+        "image": "assets/mock/lessons/kids/milk.svg",
+        "audio": "https://example.com/mock/kids/milk.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_carrot",
+        "base": "carrot",
+        "kind": "noun",
+        "ar": "جزرة",
+        "image": "assets/mock/lessons/kids/carrot.svg",
+        "audio": "https://example.com/mock/kids/carrot.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_cake",
+        "base": "cake",
+        "kind": "noun",
+        "ar": "كعكة",
+        "image": "assets/mock/lessons/kids/cake.svg",
+        "audio": "https://example.com/mock/kids/cake.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_grapes",
+        "base": "grapes",
+        "kind": "noun",
+        "ar": "عنب",
+        "image": "assets/mock/lessons/kids/grapes.svg",
+        "audio": "https://example.com/mock/kids/grapes.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      },
+      {
+        "id": "kw_bread",
+        "base": "bread",
+        "kind": "noun",
+        "ar": "خبز",
+        "image": "assets/mock/lessons/kids/bread.svg",
+        "audio": "https://example.com/mock/kids/bread.mp3",
+        "unitId": "food",
+        "box": 3,
+        "dueAt": "2026-11-09T00:00:00.000"
+      }
+    ]
+  }
+}
