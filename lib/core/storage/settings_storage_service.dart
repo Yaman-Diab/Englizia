@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 
 import 'package:englizia/core/logging/app_logger.dart';
@@ -34,6 +35,9 @@ final class SettingsStorageService {
   static const _unitsSeenKey = 'account.units_seen';
   static const _profileKey = 'account.profile';
   static const _meSeenKey = 'account.me_seen_day';
+  static const _homeKey = 'account.home';
+  static const _homeOpeningDayKey = 'account.home_opening_day';
+  static const _homeSeenEventsKey = 'account.home_seen_events';
 
   final SharedPreferences _prefs;
 
@@ -224,6 +228,49 @@ final class SettingsStorageService {
     await _prefs.setString(_meSeenKey, day);
   }
 
+  /// Home («تعلّم») as last received, as JSON, to show at once and offline.
+  String? get home => _prefs.getString(_homeKey);
+
+  Future<void> setHome(String json) async {
+    await _prefs.setString(_homeKey, json);
+  }
+
+  Future<void> removeHome() async {
+    await _prefs.remove(_homeKey);
+  }
+
+  /// The learner's day (`yyyy-mm-dd`) home last played its opening on.
+  String? get homeOpeningDay => _prefs.getString(_homeOpeningDayKey);
+
+  /// Null forgets it, so the opening plays again.
+  Future<void> setHomeOpeningDay(String? day) async {
+    if (day == null) {
+      await _prefs.remove(_homeOpeningDayKey);
+    } else {
+      await _prefs.setString(_homeOpeningDayKey, day);
+    }
+  }
+
+  /// The one-time notices (a freeze used, a streak ended) already shown, as a
+  /// JSON list of their ids, oldest first.
+  List<String> get homeSeenEvents {
+    final saved = _prefs.getString(_homeSeenEventsKey);
+    if (saved == null) return const [];
+    try {
+      final ids = jsonDecode(saved);
+      return ids is List
+          ? [for (final id in ids) ?(id is String ? id : null)]
+          : const [];
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Seen home notices unreadable');
+      return const [];
+    }
+  }
+
+  Future<void> setHomeSeenEvents(List<String> ids) async {
+    await _prefs.setString(_homeSeenEventsKey, jsonEncode(ids));
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -244,6 +291,9 @@ final class SettingsStorageService {
       await _prefs.remove(_unitsSeenKey);
       await _prefs.remove(_profileKey);
       await _prefs.remove(_meSeenKey);
+      await _prefs.remove(_homeKey);
+      await _prefs.remove(_homeOpeningDayKey);
+      await _prefs.remove(_homeSeenEventsKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

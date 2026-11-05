@@ -55,6 +55,7 @@ flutter:
     - assets/mock/units/
     - assets/mock/me/
     - assets/mock/settings/
+    - assets/mock/home/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.
     - assets/fonts/ReadexPro-Regular.ttf

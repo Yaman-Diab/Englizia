@@ -30,7 +30,7 @@
         "levelId": "lvl_emar_07",
         "levelLabel": "ص7",
         "levelName": "الصف السابع",
-        "unit": 2,
+        "unit": 3,
         "units": 6,
         "unitCover": "assets/mock/units/market.svg",
         "active": false

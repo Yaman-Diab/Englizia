@@ -28,6 +28,9 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): proposed, docs/api/me.md.
   static const activeEnrollment = '/api/v1/app/me/active-enrollment';
 
+  // ASSUMPTION(api): proposed, docs/api/home.md.
+  static const home = '/api/v1/app/home';
+
   // ASSUMPTION(api): proposed, docs/api/me.md.
   static const preferences = '/api/v1/app/me/preferences';
 

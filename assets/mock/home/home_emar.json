@@ -1,0 +1,580 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "learner": {
+      "name": "أحمد",
+      "lessonsDone": 14,
+      "welcomeBack": false,
+      "emailVerified": false,
+      "signIn": "email",
+      "stars": null,
+      "greetingAudio": null
+    },
+    "enrollment": {
+      "id": "enr_emar",
+      "trackId": "trk_emar",
+      "title": "منهاج إيمار",
+      "audience": "schoolStudent",
+      "kidsMode": false,
+      "ordered": false,
+      "levelLabel": "grade"
+    },
+    "enrollments": [
+      {
+        "enrollmentId": "enr_general",
+        "trackId": "trk_general",
+        "title": "الإنجليزية العامة",
+        "audience": "self",
+        "levelId": "lvl_gen_a2",
+        "levelLabel": "A2",
+        "levelName": "ما قبل المتوسط",
+        "unit": 3,
+        "units": 8,
+        "unitCover": "assets/mock/units/farm.svg",
+        "active": false
+      },
+      {
+        "enrollmentId": "enr_emar",
+        "trackId": "trk_emar",
+        "title": "منهاج إيمار",
+        "audience": "schoolStudent",
+        "levelId": "lvl_emar_07",
+        "levelLabel": "ص7",
+        "levelName": "الصف السابع",
+        "unit": 3,
+        "units": 6,
+        "unitCover": "assets/mock/units/market.svg",
+        "active": true
+      }
+    ],
+    "level": {
+      "id": "lvl_emar_07",
+      "label": "الصف 7",
+      "name": "الصف السابع",
+      "cefr": null,
+      "completed": false,
+      "next": {
+        "id": "lvl_emar_08",
+        "label": "الصف 8",
+        "name": "الصف الثامن",
+        "cefr": null
+      }
+    },
+    "units": [
+      {
+        "id": "unit_emar_07_01",
+        "number": 1,
+        "title": {
+          "ar": "التحيات والتعارف",
+          "en": "Greetings"
+        },
+        "cover": null,
+        "status": "done",
+        "bookPages": {
+          "from": 6,
+          "to": 17
+        }
+      },
+      {
+        "id": "unit_emar_07_02",
+        "number": 2,
+        "title": {
+          "ar": "عائلتي",
+          "en": "My family"
+        },
+        "cover": null,
+        "status": "done",
+        "bookPages": {
+          "from": 18,
+          "to": 29
+        }
+      },
+      {
+        "id": "unit_emar_07_03",
+        "number": 3,
+        "title": {
+          "ar": "يوم في المزرعة",
+          "en": "A day on the farm"
+        },
+        "cover": "assets/mock/units/farm.svg",
+        "status": "current",
+        "bookPages": {
+          "from": 30,
+          "to": 41
+        },
+        "lessons": [
+          {
+            "id": "les_voc",
+            "kind": "vocabulary",
+            "title": "كلمات المزرعة",
+            "minutes": 5,
+            "done": true,
+            "page": 30
+          },
+          {
+            "id": "les_iv",
+            "kind": "interactiveVideo",
+            "title": "صباح في المزرعة",
+            "minutes": 6,
+            "done": true,
+            "page": 32
+          },
+          {
+            "id": "les_gv",
+            "kind": "grammarVideo",
+            "title": "المضارع البسيط",
+            "minutes": 8,
+            "done": true,
+            "page": 34
+          },
+          {
+            "id": "les_it",
+            "kind": "interactiveText",
+            "title": "يوم في حياة سارة",
+            "minutes": 7,
+            "done": false,
+            "page": 36
+          },
+          {
+            "id": "les_chat_box",
+            "kind": "conversation",
+            "title": "الصندوق القابل للكسر",
+            "minutes": 5,
+            "done": false,
+            "ai": true,
+            "page": 39,
+            "scenarioId": "sc_fragile_box"
+          },
+          {
+            "id": "les_mock",
+            "kind": "unitReview",
+            "title": "مراجعة الوحدة",
+            "minutes": 10,
+            "done": false,
+            "levelCheck": false,
+            "page": 41
+          }
+        ]
+      },
+      {
+        "id": "unit_emar_07_04",
+        "number": 4,
+        "title": {
+          "ar": "في السوق",
+          "en": "At the market"
+        },
+        "cover": "assets/mock/units/market.svg",
+        "status": "open",
+        "bookPages": {
+          "from": 42,
+          "to": 53
+        }
+      },
+      {
+        "id": "unit_emar_07_05",
+        "number": 5,
+        "title": {
+          "ar": "البيت الجديد",
+          "en": "The new house"
+        },
+        "cover": null,
+        "status": "open",
+        "bookPages": {
+          "from": 54,
+          "to": 65
+        }
+      },
+      {
+        "id": "unit_emar_07_06",
+        "number": 6,
+        "title": {
+          "ar": "في المطعم",
+          "en": "At the restaurant"
+        },
+        "cover": null,
+        "status": "open",
+        "bookPages": {
+          "from": 66,
+          "to": 77
+        }
+      }
+    ],
+    "week": {
+      "goalMinutes": 10,
+      "dayStart": "04:00",
+      "today": 3,
+      "days": [
+        {
+          "date": "2026-10-31",
+          "minutes": 14
+        },
+        {
+          "date": "2026-11-01",
+          "frozen": true
+        },
+        {
+          "date": "2026-11-02",
+          "minutes": 16
+        },
+        {
+          "date": "2026-11-03",
+          "minutes": 7
+        },
+        {
+          "date": "2026-11-04"
+        },
+        {
+          "date": "2026-11-05"
+        },
+        {
+          "date": "2026-11-06"
+        }
+      ]
+    },
+    "streak": {
+      "current": 7,
+      "longest": 12,
+      "freezes": 2,
+      "maxFreezes": 3,
+      "freezesPerWeek": 1,
+      "nextFreezeWeekday": 6
+    },
+    "review": {
+      "wordsDue": 12,
+      "conceptsDue": 3,
+      "minutes": 5
+    },
+    "cards": {
+      "levelCheck": null,
+      "placement": null
+    },
+    "events": [],
+    "mockLessons": {
+      "unit_emar_07_01": [
+        {
+          "id": "les_e1_voc",
+          "kind": "vocabulary",
+          "title": "كلمات المزرعة",
+          "minutes": 5,
+          "done": false,
+          "page": 6
+        },
+        {
+          "id": "les_e1_iv",
+          "kind": "interactiveVideo",
+          "title": "صباح في المزرعة",
+          "minutes": 6,
+          "done": false,
+          "page": 8
+        },
+        {
+          "id": "les_e1_gv",
+          "kind": "grammarVideo",
+          "title": "المضارع البسيط",
+          "minutes": 8,
+          "done": false,
+          "page": 10
+        },
+        {
+          "id": "les_e1_it",
+          "kind": "interactiveText",
+          "title": "يوم في حياة سارة",
+          "minutes": 7,
+          "done": false,
+          "page": 12
+        },
+        {
+          "id": "les_e1_chat",
+          "kind": "conversation",
+          "title": "الصندوق القابل للكسر",
+          "minutes": 5,
+          "done": false,
+          "ai": true,
+          "page": 15
+        },
+        {
+          "id": "les_e1_review",
+          "kind": "unitReview",
+          "title": "مراجعة الوحدة",
+          "minutes": 10,
+          "done": false,
+          "levelCheck": false,
+          "page": 17
+        }
+      ],
+      "unit_emar_07_02": [
+        {
+          "id": "les_e2_voc",
+          "kind": "vocabulary",
+          "title": "كلمات المزرعة",
+          "minutes": 5,
+          "done": false,
+          "page": 18
+        },
+        {
+          "id": "les_e2_iv",
+          "kind": "interactiveVideo",
+          "title": "صباح في المزرعة",
+          "minutes": 6,
+          "done": false,
+          "page": 20
+        },
+        {
+          "id": "les_e2_gv",
+          "kind": "grammarVideo",
+          "title": "المضارع البسيط",
+          "minutes": 8,
+          "done": false,
+          "page": 22
+        },
+        {
+          "id": "les_e2_it",
+          "kind": "interactiveText",
+          "title": "يوم في حياة سارة",
+          "minutes": 7,
+          "done": false,
+          "page": 24
+        },
+        {
+          "id": "les_e2_chat",
+          "kind": "conversation",
+          "title": "الصندوق القابل للكسر",
+          "minutes": 5,
+          "done": false,
+          "ai": true,
+          "page": 27
+        },
+        {
+          "id": "les_e2_review",
+          "kind": "unitReview",
+          "title": "مراجعة الوحدة",
+          "minutes": 10,
+          "done": false,
+          "levelCheck": false,
+          "page": 29
+        }
+      ],
+      "unit_emar_07_03": [
+        {
+          "id": "les_voc",
+          "kind": "vocabulary",
+          "title": "كلمات المزرعة",
+          "minutes": 5,
+          "done": false,
+          "page": 30
+        },
+        {
+          "id": "les_iv",
+          "kind": "interactiveVideo",
+          "title": "صباح في المزرعة",
+          "minutes": 6,
+          "done": false,
+          "page": 32
+        },
+        {
+          "id": "les_gv",
+          "kind": "grammarVideo",
+          "title": "المضارع البسيط",
+          "minutes": 8,
+          "done": false,
+          "page": 34
+        },
+        {
+          "id": "les_it",
+          "kind": "interactiveText",
+          "title": "يوم في حياة سارة",
+          "minutes": 7,
+          "done": false,
+          "page": 36
+        },
+        {
+          "id": "les_chat_box",
+          "kind": "conversation",
+          "title": "الصندوق القابل للكسر",
+          "minutes": 5,
+          "done": false,
+          "ai": true,
+          "page": 39,
+          "scenarioId": "sc_fragile_box"
+        },
+        {
+          "id": "les_mock",
+          "kind": "unitReview",
+          "title": "مراجعة الوحدة",
+          "minutes": 10,
+          "done": false,
+          "levelCheck": false,
+          "page": 41
+        }
+      ],
+      "unit_emar_07_04": [
+        {
+          "id": "les_e4_voc",
+          "kind": "vocabulary",
+          "title": "كلمات المزرعة",
+          "minutes": 5,
+          "done": false,
+          "page": 42
+        },
+        {
+          "id": "les_e4_iv",
+          "kind": "interactiveVideo",
+          "title": "صباح في المزرعة",
+          "minutes": 6,
+          "done": false,
+          "page": 44
+        },
+        {
+          "id": "les_e4_gv",
+          "kind": "grammarVideo",
+          "title": "المضارع البسيط",
+          "minutes": 8,
+          "done": false,
+          "page": 46
+        },
+        {
+          "id": "les_e4_it",
+          "kind": "interactiveText",
+          "title": "يوم في حياة سارة",
+          "minutes": 7,
+          "done": false,
+          "page": 48
+        },
+        {
+          "id": "les_e4_chat",
+          "kind": "conversation",
+          "title": "الصندوق القابل للكسر",
+          "minutes": 5,
+          "done": false,
+          "ai": true,
+          "page": 51
+        },
+        {
+          "id": "les_e4_review",
+          "kind": "unitReview",
+          "title": "مراجعة الوحدة",
+          "minutes": 10,
+          "done": false,
+          "levelCheck": false,
+          "page": 53
+        }
+      ],
+      "unit_emar_07_05": [
+        {
+          "id": "les_e5_voc",
+          "kind": "vocabulary",
+          "title": "كلمات المزرعة",
+          "minutes": 5,
+          "done": false,
+          "page": 54
+        },
+        {
+          "id": "les_e5_iv",
+          "kind": "interactiveVideo",
+          "title": "صباح في المزرعة",
+          "minutes": 6,
+          "done": false,
+          "page": 56
+        },
+        {
+          "id": "les_e5_gv",
+          "kind": "grammarVideo",
+          "title": "المضارع البسيط",
+          "minutes": 8,
+          "done": false,
+          "page": 58
+        },
+        {
+          "id": "les_e5_it",
+          "kind": "interactiveText",
+          "title": "يوم في حياة سارة",
+          "minutes": 7,
+          "done": false,
+          "page": 60
+        },
+        {
+          "id": "les_e5_chat",
+          "kind": "conversation",
+          "title": "الصندوق القابل للكسر",
+          "minutes": 5,
+          "done": false,
+          "ai": true,
+          "page": 63
+        },
+        {
+          "id": "les_e5_review",
+          "kind": "unitReview",
+          "title": "مراجعة الوحدة",
+          "minutes": 10,
+          "done": false,
+          "levelCheck": false,
+          "page": 65
+        }
+      ],
+      "unit_emar_07_06": [
+        {
+          "id": "les_e6_voc",
+          "kind": "vocabulary",
+          "title": "كلمات المزرعة",
+          "minutes": 5,
+          "done": false,
+          "page": 66
+        },
+        {
+          "id": "les_e6_iv",
+          "kind": "interactiveVideo",
+          "title": "صباح في المزرعة",
+          "minutes": 6,
+          "done": false,
+          "page": 68
+        },
+        {
+          "id": "les_e6_gv",
+          "kind": "grammarVideo",
+          "title": "المضارع البسيط",
+          "minutes": 8,
+          "done": false,
+          "page": 70
+        },
+        {
+          "id": "les_e6_it",
+          "kind": "interactiveText",
+          "title": "يوم في حياة سارة",
+          "minutes": 7,
+          "done": false,
+          "page": 72
+        },
+        {
+          "id": "les_e6_chat",
+          "kind": "conversation",
+          "title": "الصندوق القابل للكسر",
+          "minutes": 5,
+          "done": false,
+          "ai": true,
+          "page": 75
+        },
+        {
+          "id": "les_e6_review",
+          "kind": "unitReview",
+          "title": "مراجعة الوحدة",
+          "minutes": 10,
+          "done": false,
+          "levelCheck": false,
+          "page": 77
+        }
+      ]
+    },
+    "mockGoals": {
+      "unit_emar_07_01": "تحيّي الآخرين وتعرّف بنفسك",
+      "unit_emar_07_02": "تصف أفراد عائلتك",
+      "unit_emar_07_03": "تصف يومًا في الريف",
+      "unit_emar_07_04": "تسأل عن الأسعار وتشتري ما تحتاجه",
+      "unit_emar_07_05": "تصف بيتك وغرفه",
+      "unit_emar_07_06": "تطلب طعامك وتسأل عن القائمة"
+    },
+    "mockExtraLessons": []
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}

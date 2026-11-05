@@ -1,0 +1,627 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "learner": {
+      "name": "ليان",
+      "lessonsDone": 14,
+      "welcomeBack": false,
+      "emailVerified": true,
+      "signIn": "email",
+      "stars": 14,
+      "greetingAudio": null
+    },
+    "enrollment": {
+      "id": "enr_kids",
+      "trackId": "trk_kids",
+      "title": "الأطفال",
+      "audience": "child",
+      "kidsMode": true,
+      "ordered": true,
+      "levelLabel": "level"
+    },
+    "enrollments": [
+      {
+        "enrollmentId": "enr_kids",
+        "trackId": "trk_kids",
+        "title": "الأطفال",
+        "audience": "child",
+        "levelId": "lvl_kids_s2",
+        "levelLabel": "Starter 2",
+        "levelName": "",
+        "unit": 2,
+        "units": 6,
+        "unitCover": "assets/mock/lessons/kids/red.svg",
+        "active": true
+      }
+    ],
+    "level": {
+      "id": "lvl_kids_s2",
+      "label": "Starter 2",
+      "name": "المواضيع",
+      "cefr": "preA1",
+      "completed": false,
+      "next": null
+    },
+    "units": [
+      {
+        "id": "unit_kids_s2_01",
+        "number": 1,
+        "title": {
+          "ar": "مرحبًا",
+          "en": "Hello"
+        },
+        "cover": null,
+        "status": "done",
+        "stars": 5,
+        "titleAudio": "https://example.com/mock/kids/unit_1.mp3"
+      },
+      {
+        "id": "unit_kids_s2_02",
+        "number": 2,
+        "title": {
+          "ar": "عائلتي",
+          "en": "My family"
+        },
+        "cover": null,
+        "status": "done",
+        "stars": 4,
+        "titleAudio": "https://example.com/mock/kids/unit_2.mp3"
+      },
+      {
+        "id": "unit_kids_s2_03",
+        "number": 3,
+        "title": {
+          "ar": "الألوان",
+          "en": "Colors"
+        },
+        "cover": "assets/mock/lessons/kids/red.svg",
+        "status": "current",
+        "stars": 2,
+        "titleAudio": "https://example.com/mock/kids/unit_3.mp3",
+        "lessons": [
+          {
+            "id": "les_kid",
+            "kind": "vocabulary",
+            "title": "Red",
+            "minutes": 5,
+            "done": true,
+            "stars": 3,
+            "audio": "https://example.com/mock/kids/les_kid.mp3",
+            "image": "assets/mock/lessons/kids/red.svg"
+          },
+          {
+            "id": "les_kid_media",
+            "kind": "vocabulary",
+            "title": "Blue",
+            "minutes": 5,
+            "done": true,
+            "stars": 2,
+            "audio": "https://example.com/mock/kids/les_kid_media.mp3",
+            "image": "assets/mock/lessons/kids/blue.svg"
+          },
+          {
+            "id": "les_kid_cat",
+            "kind": "vocabulary",
+            "title": "Yellow",
+            "minutes": 5,
+            "done": true,
+            "stars": 2,
+            "audio": "https://example.com/mock/kids/les_kid_cat.mp3",
+            "image": "assets/mock/lessons/kids/yellow.svg"
+          },
+          {
+            "id": "les_kid_eggs",
+            "kind": "vocabulary",
+            "title": "Green",
+            "minutes": 5,
+            "done": false,
+            "stars": 0,
+            "audio": "https://example.com/mock/kids/les_kid_eggs.mp3",
+            "image": "assets/mock/lessons/kids/green.svg"
+          },
+          {
+            "id": "les_kid_hello",
+            "kind": "vocabulary",
+            "title": "Colors song",
+            "minutes": 5,
+            "done": false,
+            "stars": 0,
+            "audio": "https://example.com/mock/kids/les_kid_hello.mp3"
+          },
+          {
+            "id": "les_kid_play",
+            "kind": "vocabulary",
+            "title": "Rainbow",
+            "minutes": 5,
+            "done": false,
+            "stars": 0,
+            "audio": "https://example.com/mock/kids/les_kid_play.mp3"
+          }
+        ]
+      },
+      {
+        "id": "unit_kids_s2_04",
+        "number": 4,
+        "title": {
+          "ar": "الحيوانات",
+          "en": "Animals"
+        },
+        "cover": "assets/mock/lessons/kids/cow.svg",
+        "status": "locked",
+        "stars": 0,
+        "titleAudio": "https://example.com/mock/kids/unit_4.mp3",
+        "lockedBy": {
+          "id": "unit_kids_s2_03",
+          "number": 3
+        }
+      },
+      {
+        "id": "unit_kids_s2_05",
+        "number": 5,
+        "title": {
+          "ar": "الأرقام",
+          "en": "Numbers"
+        },
+        "cover": null,
+        "status": "locked",
+        "stars": 0,
+        "titleAudio": "https://example.com/mock/kids/unit_5.mp3",
+        "lockedBy": {
+          "id": "unit_kids_s2_04",
+          "number": 4
+        }
+      },
+      {
+        "id": "unit_kids_s2_06",
+        "number": 6,
+        "title": {
+          "ar": "الطعام",
+          "en": "Food"
+        },
+        "cover": "assets/mock/lessons/kids/apple.svg",
+        "status": "locked",
+        "stars": 0,
+        "titleAudio": "https://example.com/mock/kids/unit_6.mp3",
+        "lockedBy": {
+          "id": "unit_kids_s2_05",
+          "number": 5
+        }
+      },
+      {
+        "id": "unit_kids_s2_07",
+        "number": 7,
+        "title": {
+          "ar": "ملابسي",
+          "en": "My clothes"
+        },
+        "cover": null,
+        "status": "locked",
+        "stars": 0,
+        "titleAudio": "https://example.com/mock/kids/unit_7.mp3",
+        "lockedBy": {
+          "id": "unit_kids_s2_06",
+          "number": 6
+        }
+      },
+      {
+        "id": "unit_kids_s2_08",
+        "number": 8,
+        "title": {
+          "ar": "ألعابي",
+          "en": "My toys"
+        },
+        "cover": null,
+        "status": "locked",
+        "stars": 0,
+        "titleAudio": "https://example.com/mock/kids/unit_8.mp3",
+        "lockedBy": {
+          "id": "unit_kids_s2_07",
+          "number": 7
+        }
+      }
+    ],
+    "week": {
+      "goalMinutes": 10,
+      "dayStart": "04:00",
+      "today": 3,
+      "days": [
+        {
+          "date": "2026-10-31",
+          "minutes": 12
+        },
+        {
+          "date": "2026-11-01",
+          "minutes": 10
+        },
+        {
+          "date": "2026-11-02",
+          "minutes": 15
+        },
+        {
+          "date": "2026-11-03",
+          "minutes": 10
+        },
+        {
+          "date": "2026-11-04"
+        },
+        {
+          "date": "2026-11-05"
+        },
+        {
+          "date": "2026-11-06"
+        }
+      ]
+    },
+    "streak": {
+      "current": 4,
+      "longest": 6,
+      "freezes": 0,
+      "maxFreezes": 0,
+      "freezesPerWeek": 0
+    },
+    "cards": {
+      "levelCheck": null,
+      "placement": null
+    },
+    "events": [],
+    "mockLessons": {
+      "unit_kids_s2_03": [
+        {
+          "id": "les_kid",
+          "kind": "vocabulary",
+          "title": "Red",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid.mp3",
+          "image": "assets/mock/lessons/kids/red.svg"
+        },
+        {
+          "id": "les_kid_media",
+          "kind": "vocabulary",
+          "title": "Blue",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_media.mp3",
+          "image": "assets/mock/lessons/kids/blue.svg"
+        },
+        {
+          "id": "les_kid_cat",
+          "kind": "vocabulary",
+          "title": "Yellow",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_cat.mp3",
+          "image": "assets/mock/lessons/kids/yellow.svg"
+        },
+        {
+          "id": "les_kid_eggs",
+          "kind": "vocabulary",
+          "title": "Green",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_eggs.mp3",
+          "image": "assets/mock/lessons/kids/green.svg"
+        },
+        {
+          "id": "les_kid_hello",
+          "kind": "vocabulary",
+          "title": "Colors song",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_hello.mp3"
+        },
+        {
+          "id": "les_kid_play",
+          "kind": "vocabulary",
+          "title": "Rainbow",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_play.mp3"
+        }
+      ],
+      "unit_kids_s2_04": [
+        {
+          "id": "les_kid_bird",
+          "kind": "vocabulary",
+          "title": "Bird",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_bird.mp3",
+          "image": "assets/mock/lessons/kids/bird.svg"
+        },
+        {
+          "id": "les_kid_my_cat",
+          "kind": "vocabulary",
+          "title": "My cat",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_my_cat.mp3",
+          "image": "assets/mock/lessons/kids/cat.svg"
+        },
+        {
+          "id": "les_kid_dog",
+          "kind": "vocabulary",
+          "title": "Dog",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_dog.mp3",
+          "image": "assets/mock/lessons/kids/dog.svg"
+        },
+        {
+          "id": "les_kid_cow",
+          "kind": "vocabulary",
+          "title": "Cow",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_cow.mp3",
+          "image": "assets/mock/lessons/kids/cow.svg"
+        },
+        {
+          "id": "les_kid_duck",
+          "kind": "vocabulary",
+          "title": "Duck",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_duck.mp3",
+          "image": "assets/mock/lessons/kids/duck.svg"
+        },
+        {
+          "id": "les_kid_egg",
+          "kind": "vocabulary",
+          "title": "Eggs",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_egg.mp3",
+          "image": "assets/mock/lessons/kids/egg.svg"
+        }
+      ],
+      "unit_kids_s2_05": [
+        {
+          "id": "les_kid_one",
+          "kind": "vocabulary",
+          "title": "One",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_one.mp3"
+        },
+        {
+          "id": "les_kid_two",
+          "kind": "vocabulary",
+          "title": "Two",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_two.mp3"
+        },
+        {
+          "id": "les_kid_three",
+          "kind": "vocabulary",
+          "title": "Three",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_three.mp3"
+        },
+        {
+          "id": "les_kid_four",
+          "kind": "vocabulary",
+          "title": "Four",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_four.mp3"
+        },
+        {
+          "id": "les_kid_five",
+          "kind": "vocabulary",
+          "title": "Five",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_five.mp3"
+        },
+        {
+          "id": "les_kid_count",
+          "kind": "vocabulary",
+          "title": "Count with me",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_count.mp3"
+        }
+      ],
+      "unit_kids_s2_06": [
+        {
+          "id": "les_kid_apple",
+          "kind": "vocabulary",
+          "title": "Apple",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_apple.mp3",
+          "image": "assets/mock/lessons/kids/apple.svg"
+        },
+        {
+          "id": "les_kid_banana",
+          "kind": "vocabulary",
+          "title": "Banana",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_banana.mp3",
+          "image": "assets/mock/lessons/kids/banana.svg"
+        },
+        {
+          "id": "les_kid_bread",
+          "kind": "vocabulary",
+          "title": "Bread",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_bread.mp3",
+          "image": "assets/mock/lessons/kids/bread.svg"
+        },
+        {
+          "id": "les_kid_milk",
+          "kind": "vocabulary",
+          "title": "Milk",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_milk.mp3",
+          "image": "assets/mock/lessons/kids/milk.svg"
+        },
+        {
+          "id": "les_kid_cake",
+          "kind": "vocabulary",
+          "title": "Cake",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_cake.mp3",
+          "image": "assets/mock/lessons/kids/cake.svg"
+        },
+        {
+          "id": "les_kid_carrot",
+          "kind": "vocabulary",
+          "title": "Carrot",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_carrot.mp3",
+          "image": "assets/mock/lessons/kids/carrot.svg"
+        }
+      ],
+      "unit_kids_s2_07": [
+        {
+          "id": "les_kid_hat",
+          "kind": "vocabulary",
+          "title": "Hat",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_hat.mp3"
+        },
+        {
+          "id": "les_kid_shoes",
+          "kind": "vocabulary",
+          "title": "Shoes",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_shoes.mp3"
+        },
+        {
+          "id": "les_kid_coat",
+          "kind": "vocabulary",
+          "title": "Coat",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_coat.mp3"
+        },
+        {
+          "id": "les_kid_socks",
+          "kind": "vocabulary",
+          "title": "Socks",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_socks.mp3"
+        },
+        {
+          "id": "les_kid_dress",
+          "kind": "vocabulary",
+          "title": "Dress",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_dress.mp3"
+        },
+        {
+          "id": "les_kid_shirt",
+          "kind": "vocabulary",
+          "title": "Shirt",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_shirt.mp3"
+        }
+      ],
+      "unit_kids_s2_08": [
+        {
+          "id": "les_kid_ball",
+          "kind": "vocabulary",
+          "title": "Ball",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_ball.mp3"
+        },
+        {
+          "id": "les_kid_doll",
+          "kind": "vocabulary",
+          "title": "Doll",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_doll.mp3"
+        },
+        {
+          "id": "les_kid_kite",
+          "kind": "vocabulary",
+          "title": "Kite",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_kite.mp3"
+        },
+        {
+          "id": "les_kid_train",
+          "kind": "vocabulary",
+          "title": "Train",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_train.mp3"
+        },
+        {
+          "id": "les_kid_blocks",
+          "kind": "vocabulary",
+          "title": "Blocks",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_blocks.mp3"
+        },
+        {
+          "id": "les_kid_teddy",
+          "kind": "vocabulary",
+          "title": "Teddy",
+          "minutes": 5,
+          "done": false,
+          "stars": 0,
+          "audio": "https://example.com/mock/kids/les_kid_teddy.mp3"
+        }
+      ]
+    },
+    "mockGoals": {},
+    "mockExtraLessons": []
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}
