@@ -1,4 +1,5 @@
 import 'package:englizia/core/audio/clip_playback.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_card.dart';
 import 'package:flutter/services.dart';
@@ -33,7 +34,7 @@ final class BodyAnswer {
   VoidCallback? chooser(String id) => evaluation != null
       ? null
       : () {
-          HapticFeedback.selectionClick();
+          AppHaptics.selectionClick();
           onDraft(ChoiceDraft(id));
         };
 }

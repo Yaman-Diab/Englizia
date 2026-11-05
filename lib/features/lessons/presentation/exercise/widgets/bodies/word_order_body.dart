@@ -4,13 +4,13 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/core/design_system/widgets/speech_bubble.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/chip_stage.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// The guide says the meaning in Arabic, and the learner builds the English on
 /// its lines, left to right in any app language. A tap sends a word up or back;
@@ -42,7 +42,7 @@ class _WordOrderBodyState extends State<WordOrderBody> {
   bool get _locked => widget.answer.evaluation != null;
 
   void _send(List<WordChip> placed, ChipMove move) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move([
       move,
     ], () => widget.answer.onDraft(SequenceDraft(placed, needed: _needed)));

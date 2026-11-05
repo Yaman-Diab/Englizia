@@ -10,6 +10,7 @@ import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/presentation/grammar/cubit/grammar_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/grammar/widgets/grammar_player.dart';
@@ -18,7 +19,6 @@ import 'package:englizia/features/lessons/presentation/grammar/widgets/teacher_q
 import 'package:englizia/features/lessons/presentation/video/lesson_player.dart';
 import 'package:englizia/features/lessons/presentation/video/video_fullscreen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A grammar lesson before its exercises (requirements v3.0 §8.1, design "Grammar
@@ -99,7 +99,7 @@ class _GrammarLessonPageState extends State<GrammarLessonPage>
   Widget build(BuildContext context) =>
       BlocConsumer<GrammarLessonCubit, GrammarLessonState>(
         listenWhen: (before, now) => !before.unlocked && now.celebrating,
-        listener: (_, _) => unawaited(HapticFeedback.lightImpact()),
+        listener: (_, _) => unawaited(AppHaptics.lightImpact()),
         buildWhen: (before, now) =>
             before.load != now.load ||
             before.content != now.content ||

@@ -50,6 +50,7 @@ Dependency direction: `presentation → domain ← data`.
 - Grading and XP are computed **on the server**; the app only submits attempts with a stable attempt id (safe to resend).
 - Every configurable value (thresholds, limits, points, day start, texts the panel controls) is read from the server's effective settings after inheritance (global → track → level → lesson); **never hardcode one**. Doc: S §2 principle 6.
 - Questions to the teacher are private (owner, 2026-11-01; ADR 14, overrides S §17): a learner sees only their own and the replies of the teacher or admins to them. The server enforces it.
+- Notifications are all or none (owner, 2026-11-05; ADR 16): one switch, no choice by kind; the reading text size isn't in the settings.
 - Guest mode is back (owner, 2026-10-27; ADR 10, overrides S §4.3): «لاحقًا» on "save progress" creates a **server-side guest account** tied to the phone; a full account later must upgrade it. Onboarding answers travel on `OnboardingPath` and are sent with the account.
 
 ---

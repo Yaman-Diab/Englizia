@@ -93,6 +93,49 @@ class FakeProfileRepository implements ProfileRepository {
     return const Ok(null);
   }
 
+  Preferences preferences = const Preferences(
+    dailyGoalMinutes: 10,
+    notifications: true,
+    reminderHour: 20,
+  );
+  final saved = <Preferences>[];
+  final passwords = <(String, String)>[];
+  final deletions = <String?>[];
+
+  /// What a password check answers: a wrong one, or none.
+  Failure? passwordFailure;
+
+  @override
+  Future<Result<Preferences>> getPreferences() async {
+    if (failure case final failure?) return Err(failure);
+    return Ok(preferences);
+  }
+
+  @override
+  Future<Result<void>> savePreferences(Preferences preferences) async {
+    if (writeFailure case final failure?) return Err(failure);
+    saved.add(preferences);
+    this.preferences = preferences;
+    return const Ok(null);
+  }
+
+  @override
+  Future<Result<void>> changePassword({
+    required String current,
+    required String next,
+  }) async {
+    if (passwordFailure case final failure?) return Err(failure);
+    passwords.add((current, next));
+    return const Ok(null);
+  }
+
+  @override
+  Future<Result<void>> deleteAccount({String? password}) async {
+    if (passwordFailure case final failure?) return Err(failure);
+    deletions.add(password);
+    return const Ok(null);
+  }
+
   @override
   bool firstViewOn(DateTime day) => firstView;
 }

@@ -22,6 +22,8 @@ final class SettingsStorageService {
   static const _videoQualityKey = 'settings.video_quality';
   static const _readerPrefsKey = 'settings.reader_prefs';
   static const _readerTipKey = 'settings.reader_tip_seen';
+  static const _soundEffectsKey = 'settings.sound_effects';
+  static const _vibrationKey = 'settings.vibration';
   static const _savedWordsKey = 'account.saved_words';
   static const _wordBankKey = 'account.word_bank';
   static const _wordBankOutboxKey = 'account.word_bank_outbox';
@@ -134,6 +136,18 @@ final class SettingsStorageService {
   }
 
   /// The reader's first-time tip has been seen.
+  bool get soundEffects => _prefs.getBool(_soundEffectsKey) ?? true;
+
+  Future<void> setSoundEffects({required bool on}) async {
+    await _prefs.setBool(_soundEffectsKey, on);
+  }
+
+  bool get vibration => _prefs.getBool(_vibrationKey) ?? true;
+
+  Future<void> setVibration({required bool on}) async {
+    await _prefs.setBool(_vibrationKey, on);
+  }
+
   bool get readerTipSeen => _prefs.getBool(_readerTipKey) ?? false;
 
   Future<void> setReaderTipSeen() async {

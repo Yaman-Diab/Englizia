@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
+import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:flutter/services.dart';
@@ -14,6 +16,14 @@ abstract interface class ProfileRemoteDataSource {
   Future<void> switchTrack(String enrollmentId);
 
   Future<void> changeLevel(String enrollmentId, String levelId);
+
+  Future<Map<String, Object?>> getPreferences();
+
+  Future<void> savePreferences(Map<String, Object?> request);
+
+  Future<void> changePassword(String current, String next);
+
+  Future<void> deleteAccount(String? password);
 }
 
 final class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
@@ -50,6 +60,25 @@ final class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<void> changeLevel(String enrollmentId, String levelId) => _client
       .patch(ApiEndpoints.enrollment(enrollmentId), data: {'levelId': levelId});
+
+  @override
+  Future<Map<String, Object?>> getPreferences() async =>
+      asJsonMap(await _client.get(ApiEndpoints.preferences));
+
+  @override
+  Future<void> savePreferences(Map<String, Object?> request) =>
+      _client.put(ApiEndpoints.preferences, data: request);
+
+  @override
+  Future<void> changePassword(String current, String next) => _client.post(
+    ApiEndpoints.changePassword,
+    data: {'currentPassword': current, 'newPassword': next},
+  );
+
+  // ASSUMPTION(api): `DELETE /api/v1/app/me`, docs/api/me.md.
+  @override
+  Future<void> deleteAccount(String? password) =>
+      _client.delete(ApiEndpoints.me, data: {'password': ?password});
 }
 
 /// Mock mode (`env/mock.json`): the bundled profile, its days moved to this
@@ -155,4 +184,48 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
       ],
     };
   }
+
+  Map<String, Object?> _preferences = const {
+    'dailyGoalMinutes': 10,
+    'notifications': true,
+    'reminderTime': '20:00',
+  };
+
+  @override
+  Future<Map<String, Object?>> getPreferences() async {
+    await Future<void>.delayed(latency);
+    return _preferences;
+  }
+
+  @override
+  Future<void> savePreferences(Map<String, Object?> request) async {
+    await Future<void>.delayed(latency);
+    _preferences = request;
+  }
+
+  /// The mock's password is `password`, so a wrong one can be seen.
+  @override
+  Future<void> changePassword(String current, String next) async {
+    await Future<void>.delayed(latency);
+    if (current != mockPassword) throw _wrong('currentPassword');
+  }
+
+  @override
+  Future<void> deleteAccount(String? password) async {
+    await Future<void>.delayed(latency);
+    if (password != null && password != mockPassword) {
+      throw _wrong('password');
+    }
+  }
+
+  static const mockPassword = 'password';
+
+  /// ASSUMPTION(api): a wrong password is a validation error on its field.
+  static ApiException _wrong(String field) => ApiException(
+    statusCode: 400,
+    code: ApiErrorCodes.validationFailed,
+    fieldCodes: {
+      field: const ['wrong'],
+    },
+  );
 }

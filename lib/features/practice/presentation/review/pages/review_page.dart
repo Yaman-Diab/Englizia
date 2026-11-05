@@ -8,11 +8,11 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/practice/domain/entities/word_bank.dart';
 import 'package:englizia/features/practice/presentation/review/cubit/review_cubit.dart';
 import 'package:englizia/features/practice/presentation/widgets/word_parts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A review (requirements v3.0 §10.3, design "Practice"): a card's face, turned
@@ -82,7 +82,7 @@ class _SessionState extends State<_Session> with TickerProviderStateMixin {
       AppMotion.reduceMotion(context) ? AppMotion.quick : full;
 
   Future<void> _answer({required bool known}) async {
-    unawaited(HapticFeedback.selectionClick());
+    unawaited(AppHaptics.selectionClick());
     setState(() => _leftKnown = known);
     unawaited(_cubit.answer(known: known));
     _leave.duration = _time(AppMotion.sheetIn);

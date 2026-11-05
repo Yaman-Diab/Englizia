@@ -1,6 +1,49 @@
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:equatable/equatable.dart';
 
+/// How the learner signs in: a password to change, or another account's.
+enum SignInMethod { email, google, apple }
+
+/// What the learner chose for their learning and reminders, kept on the
+/// server so it follows the account (S §19.2).
+final class Preferences extends Equatable {
+  const Preferences({
+    required this.dailyGoalMinutes,
+    required this.notifications,
+    this.reminderHour,
+    this.reminderMinute = 0,
+  });
+
+  final int dailyGoalMinutes;
+
+  /// The phone may show notifications: all of them, or none.
+  final bool notifications;
+
+  /// The daily reminder's time, or none chosen.
+  final int? reminderHour;
+  final int reminderMinute;
+
+  Preferences copyWith({
+    int? dailyGoalMinutes,
+    bool? notifications,
+    int? reminderHour,
+    int? reminderMinute,
+  }) => Preferences(
+    dailyGoalMinutes: dailyGoalMinutes ?? this.dailyGoalMinutes,
+    notifications: notifications ?? this.notifications,
+    reminderHour: reminderHour ?? this.reminderHour,
+    reminderMinute: reminderMinute ?? this.reminderMinute,
+  );
+
+  @override
+  List<Object?> get props => [
+    dailyGoalMinutes,
+    notifications,
+    reminderHour,
+    reminderMinute,
+  ];
+}
+
 /// A track the learner has joined, with how far they are in it (S §19.1).
 final class ProfileTrack extends Equatable {
   const ProfileTrack({
@@ -213,6 +256,7 @@ final class Profile extends Equatable {
     this.wordBank,
     this.stars,
     this.whatsapp,
+    this.signIn = SignInMethod.email,
   });
 
   final String name;
@@ -237,6 +281,7 @@ final class Profile extends Equatable {
 
   /// Support's WhatsApp number, from the panel.
   final String? whatsapp;
+  final SignInMethod signIn;
 
   ProfileTrack? get active {
     for (final track in tracks) {
@@ -266,6 +311,7 @@ final class Profile extends Equatable {
     wordBank: wordBank,
     stars: stars,
     whatsapp: whatsapp,
+    signIn: signIn,
   );
 
   @override
@@ -286,5 +332,6 @@ final class Profile extends Equatable {
     wordBank,
     stars,
     whatsapp,
+    signIn,
   ];
 }

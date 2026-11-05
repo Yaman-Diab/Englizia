@@ -9,13 +9,13 @@ import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/chip_stage.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/lesson_picture.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// The word's picture and sound, a place for each letter, and letters with two
 /// extra among them. A tap sends a letter to the first empty place; a tap on a
@@ -56,7 +56,7 @@ class _SpellingBodyState extends State<SpellingBody> {
     final at = slots.indexOf(null);
     if (at < 0) return;
     slots[at] = chip;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move([
       ChipMove(
         from: ChipStageState.bank(chip.id),
@@ -69,7 +69,7 @@ class _SpellingBodyState extends State<SpellingBody> {
   void _takeBack(int index, WordChip chip) {
     final slots = [..._slots];
     slots[index] = null;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move([
       ChipMove(
         from: ChipStageState.placed(chip.id),

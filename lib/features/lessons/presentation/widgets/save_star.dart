@@ -5,8 +5,8 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/timed_value.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// The star that keeps a word in the word bank: amber once saved, swelling with
 /// four sparks flying from it. [raised] sits it on a picture, on a white circle
@@ -40,7 +40,7 @@ class _SaveStarState extends State<SaveStar> {
   void _tap() {
     if (!widget.saved) {
       setState(() => _saves++);
-      HapticFeedback.lightImpact();
+      AppHaptics.lightImpact();
     }
     widget.onTap();
   }

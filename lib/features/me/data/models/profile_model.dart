@@ -35,7 +35,38 @@ final class ProfileModel {
       placement: _placement(json.readMap('placement')),
       wordBank: _wordBank(json.readMap('wordBank')),
       stars: json.readInt('stars'),
+      signIn: switch (json.readString('signIn')) {
+        'google' => SignInMethod.google,
+        'apple' => SignInMethod.apple,
+        _ => SignInMethod.email,
+      },
     );
+  }
+
+  static Preferences? preferences(Map<String, Object?> json) {
+    final goal = json.readInt('dailyGoalMinutes');
+    if (goal == null) return null;
+    final reminder = json.readString('reminderTime')?.split(':');
+    return Preferences(
+      dailyGoalMinutes: goal,
+      notifications: json.readBool('notifications') ?? true,
+      reminderHour: reminder == null ? null : int.tryParse(reminder.first),
+      reminderMinute: reminder == null || reminder.length < 2
+          ? 0
+          : int.tryParse(reminder[1]) ?? 0,
+    );
+  }
+
+  static Map<String, Object?> preferencesToJson(Preferences preferences) {
+    final hour = preferences.reminderHour;
+    String two(int value) => value.toString().padLeft(2, '0');
+    return {
+      'dailyGoalMinutes': preferences.dailyGoalMinutes,
+      'notifications': preferences.notifications,
+      'reminderTime': hour == null
+          ? null
+          : '${two(hour)}:${two(preferences.reminderMinute)}',
+    };
   }
 
   static const _audiences = {

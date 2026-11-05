@@ -10,6 +10,7 @@ import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
@@ -22,7 +23,6 @@ import 'package:englizia/features/lessons/presentation/exercise/widgets/session/
 import 'package:englizia/features/lessons/presentation/exercise/widgets/session/feedback_sheet.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/session/session_notes.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// The container of a lesson's exercises (requirements v3.0 §7.1, design
@@ -58,9 +58,9 @@ class ExercisePage extends StatelessWidget {
           ReviewQuotaOut():
         return;
       case _ when evaluation.correct:
-        HapticFeedback.lightImpact();
+        AppHaptics.lightImpact();
       default:
-        HapticFeedback.mediumImpact();
+        AppHaptics.mediumImpact();
     }
   }
 

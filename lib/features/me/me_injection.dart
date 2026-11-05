@@ -4,6 +4,7 @@ import 'package:englizia/features/me/data/datasources/profile_remote_data_source
 import 'package:englizia/features/me/data/repositories/profile_repository_impl.dart';
 import 'package:englizia/features/me/domain/repositories/profile_repository.dart';
 import 'package:englizia/features/me/presentation/me/cubit/me_cubit.dart';
+import 'package:englizia/features/me/presentation/settings/cubit/preferences_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -17,6 +18,7 @@ void registerMeDependencies(GetIt sl) {
     ..registerLazySingleton<ProfileRepository>(
       () => ProfileRepositoryImpl(sl(), settings: sl()),
     )
+    ..registerFactory(() => PreferencesCubit(sl(), sl(), sl(), sl()))
     ..registerFactory(
       () => MeCubit(
         sl(),

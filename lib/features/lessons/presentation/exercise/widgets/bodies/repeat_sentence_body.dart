@@ -8,6 +8,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/design_system/widgets/said_word.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/core/text/plain_words.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
@@ -15,7 +16,6 @@ import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/b
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/clip_button.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/mic_block.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Listen, then say it. There is no «تحقق»: the end of the recording is the
@@ -90,7 +90,7 @@ class _RepeatSentenceBodyState extends State<RepeatSentenceBody>
     widget.clip.onStop();
     switch (await mic.access()) {
       case MicAccess.granted:
-        unawaited(HapticFeedback.selectionClick());
+        unawaited(AppHaptics.selectionClick());
         await mic.listen();
       case MicAccess.denied:
         mic.showDenied();

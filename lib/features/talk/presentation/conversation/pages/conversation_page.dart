@@ -16,13 +16,13 @@ import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/talk/domain/entities/talk.dart';
 import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';
 import 'package:englizia/features/talk/presentation/conversation/widgets/chat_parts.dart';
 import 'package:englizia/features/talk/presentation/conversation/widgets/summary_view.dart';
 import 'package:englizia/features/talk/presentation/widgets/talk_parts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A scenario's intro, the conversation, then its summary (requirements v3.0
@@ -450,7 +450,7 @@ class _ChatState extends State<_Chat> {
     }
     switch (await _mic.access()) {
       case MicAccess.granted:
-        unawaited(HapticFeedback.selectionClick());
+        unawaited(AppHaptics.selectionClick());
         await _mic.listen();
       case MicAccess.denied:
         _mic.showDenied();

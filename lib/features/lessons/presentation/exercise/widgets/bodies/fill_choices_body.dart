@@ -7,13 +7,13 @@ import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/chip_stage.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 /// A sentence with one blank or more, and the words for them. A tap sends a
@@ -65,7 +65,7 @@ class _FillChoicesBodyState extends State<FillChoicesBody> {
     final slots = [..._slots];
     slots[active] = chip;
     final next = _nextEmpty(slots, active);
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move(
       [
         ChipMove(
@@ -97,7 +97,7 @@ class _FillChoicesBodyState extends State<FillChoicesBody> {
     }
     final slots = [..._slots];
     slots[index] = null;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move(
       [
         ChipMove(
