@@ -558,6 +558,26 @@ void main() {
         await tester.pump(AppMotion.fast);
       });
 
+      testWidgets('placed once it applies (home\'s header), it still comes', (
+        tester,
+      ) async {
+        final cubit = cubitWith(FakeAccountRepository());
+        await cubit.load();
+        expect(cubit.state.showsReminder, isTrue);
+        await tester.pumpLocalized(
+          BlocProvider.value(
+            value: cubit,
+            child: const Scaffold(body: VerifyEmailBanner()),
+          ),
+        );
+        expect(find.text('verify_reminder'.tr()), findsNothing);
+
+        await tester.pump(EmailReminderEntrance.delay);
+        await tester.pump(AppMotion.fast);
+        expect(find.text('verify_reminder'.tr()), findsOneWidget);
+        await tester.pump(AppMotion.fast);
+      });
+
       testWidgets('hiding folds it, and the row stays', (tester) async {
         await pumpHome(tester);
         await tester.tap(find.byTooltip('verify_reminder_hide'.tr()));
