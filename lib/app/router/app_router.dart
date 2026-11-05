@@ -965,9 +965,7 @@ GoRouter createAppRouter(AppSessionController session) {
                       context.read<MeCubit>().state.profile?.signIn ??
                       SignInMethod.email,
                 ),
-                onMail: sl<ExternalLink>().open,
                 version: sl<AppInfo>().version,
-                platform: sl<AppInfo>().platform,
               ),
             ),
           ),

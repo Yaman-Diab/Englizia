@@ -4,8 +4,6 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
-import 'package:englizia/core/design_system/widgets/app_button.dart';
-import 'package:englizia/core/design_system/widgets/app_logo_mark.dart';
 import 'package:englizia/core/design_system/widgets/theme_preview.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/onboarding/presentation/goal/widgets/goal_preview.dart';
@@ -699,79 +697,4 @@ Future<VideoQuality?> showQualitySheet(
         ),
     ],
   ),
-);
-
-/// «عن التطبيق»: what it is, its version, and who to write to.
-Future<void> showAboutSheet(
-  BuildContext context, {
-  required String version,
-  required VoidCallback onWrite,
-  required VoidCallback onCopy,
-}) => _showSettingsSheet<void>(
-  context,
-  title: 'about_title'.tr(),
-  body: (sheet) {
-    final colors = sheet.colors;
-    final texts = sheet.texts;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const Center(child: AppLogoMark(size: 64)),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          'about_tagline'.tr(),
-          textAlign: TextAlign.center,
-          style: texts.body,
-        ),
-        Text(
-          'settings_version'.tr(args: [version]),
-          textAlign: TextAlign.center,
-          style: texts.caption.copyWith(color: colors.textSecondary),
-        ),
-        const SizedBox(height: AppSpacing.lg + 4),
-        Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: colors.background,
-            borderRadius: BorderRadius.circular(AppRadius.lg),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'about_developer'.tr(),
-                style: texts.captionStrong.copyWith(
-                  color: colors.textSecondary,
-                ),
-              ),
-              Text('about_developer_name'.tr(), style: texts.bodyStrong),
-              Text(
-                'about_email'.tr(),
-                textDirection: TextDirection.ltr,
-                style: texts.body.copyWith(color: colors.textSecondary),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                'about_write_hint'.tr(),
-                style: texts.caption.copyWith(color: colors.textSecondary),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        AppButton(
-          label: 'about_write'.tr(),
-          icon: Icons.mail_outline_rounded,
-          onPressed: onWrite,
-        ),
-        const SizedBox(height: AppSpacing.sm),
-        AppButton(
-          label: 'about_copy_email'.tr(),
-          icon: Icons.copy_rounded,
-          variant: AppButtonVariant.text,
-          onPressed: onCopy,
-        ),
-      ],
-    );
-  },
 );

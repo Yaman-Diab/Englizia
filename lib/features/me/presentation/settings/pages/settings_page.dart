@@ -16,7 +16,6 @@ import 'package:englizia/features/me/presentation/settings/widgets/settings_part
 import 'package:englizia/features/onboarding/presentation/reminder/widgets/reminder_time_sheet.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// What the settings lead to outside themselves.
@@ -31,9 +30,7 @@ final class SettingsActions {
     required this.onVerifyEmail,
     required this.onPassword,
     required this.onDelete,
-    required this.onMail,
     required this.version,
-    required this.platform,
   });
 
   final VoidCallback onBack;
@@ -48,10 +45,7 @@ final class SettingsActions {
   final Future<bool?> Function() onPassword;
   final VoidCallback onDelete;
 
-  /// Opens a mail to write; false when the phone has nothing to write with.
-  final Future<bool> Function(Uri mail) onMail;
   final String version;
-  final String platform;
 }
 
 /// The settings (S §19.2, design "Settings"): each saved as it changes, with
@@ -166,50 +160,6 @@ class _SettingsPageState extends State<SettingsPage> {
       _actions.onCreateAccount();
     }
   }
-
-  void _about() {
-    final email = 'about_email'.tr();
-    showAboutSheet(
-      context,
-      version: _actions.version,
-      onWrite: () async {
-        final opened = await _actions.onMail(
-          Uri(
-            scheme: 'mailto',
-            path: email,
-            query: _query({
-              'subject': 'about_mail_subject'.tr(),
-              'body':
-                  '\n\n${'about_mail_body'.tr(namedArgs: {'version': _actions.version, 'platform': _actions.platform})}',
-            }),
-          ),
-        );
-        if (!opened && mounted) {
-          showNoticeSnackBar(
-            context,
-            icon: AppIcon.infoCircle,
-            text: 'about_no_mail'.tr(),
-            tone: context.colors.info,
-          );
-        }
-      },
-      onCopy: () async {
-        await Clipboard.setData(ClipboardData(text: email));
-        if (!mounted) return;
-        showNoticeSnackBar(
-          context,
-          icon: AppIcon.checkCircle,
-          text: 'about_copied'.tr(),
-          tone: context.colors.success,
-        );
-      },
-    );
-  }
-
-  /// Mail apps want spaces as `%20`, not the `+` of [Uri.queryParameters].
-  static String _query(Map<String, String> parameters) => parameters.entries
-      .map((e) => '${e.key}=${Uri.encodeComponent(e.value)}')
-      .join('&');
 
   @override
   Widget build(BuildContext context) {
@@ -434,7 +384,6 @@ class _SettingsPageState extends State<SettingsPage> {
           onPressed: _actions.onPrivacy,
         ),
         SettingsRow(label: 'settings_terms'.tr(), onPressed: _actions.onTerms),
-        SettingsRow(label: 'settings_about'.tr(), onPressed: _about),
       ],
     );
   }

@@ -1,10 +1,7 @@
-/// What the installed app is: shown in the settings and sent with feedback.
+/// What the installed app is, as the settings show it.
 final class AppInfo {
-  const AppInfo({required this.version, required this.platform});
+  const AppInfo({required this.version});
 
   /// "1.0.0", from the build.
   final String version;
-
-  /// "android" or "ios", as the API's headers say it.
-  final String platform;
 }

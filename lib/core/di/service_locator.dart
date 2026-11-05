@@ -37,9 +37,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
   final packageInfo = await PackageInfo.fromPlatform();
 
   sl
-    ..registerSingleton(
-      AppInfo(version: packageInfo.version, platform: _platformName()),
-    )
+    ..registerSingleton(AppInfo(version: packageInfo.version))
     ..registerLazySingleton(() => SettingsStorageService(prefs))
     ..registerLazySingleton<TokenStorage>(SecureTokenStorage.new)
     ..registerLazySingleton(CurrentLanguage.new)

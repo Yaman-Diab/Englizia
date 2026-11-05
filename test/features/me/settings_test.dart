@@ -149,7 +149,6 @@ void main() {
 
   group('the page', () {
     late List<String> did;
-    late List<Uri> mails;
 
     Future<PreferencesCubit> pump(
       WidgetTester tester, {
@@ -159,7 +158,6 @@ void main() {
       ThemeMode themeMode = ThemeMode.light,
     }) async {
       did = [];
-      mails = [];
       SharedPreferences.setMockInitialValues({});
       final storage = SettingsStorageService(
         await SharedPreferences.getInstance(),
@@ -195,12 +193,7 @@ void main() {
                 return true;
               },
               onDelete: () => did.add('delete'),
-              onMail: (uri) async {
-                mails.add(uri);
-                return true;
-              },
               version: '1.0.0',
-              platform: 'android',
             ),
           ),
         ),
@@ -226,7 +219,7 @@ void main() {
         find.text('settings_version'.tr(args: ['1.0.0'])),
         300,
       );
-      expect(find.text('settings_about'.tr()), findsOneWidget);
+      expect(find.text('settings_terms'.tr()), findsOneWidget);
     });
 
     testWidgets('the goal from its sheet, saved at once', (tester) async {
@@ -250,26 +243,6 @@ void main() {
       expect(find.text('settings_notifications_off'.tr()), findsOneWidget);
       await tester.tap(find.text('settings_open_phone'.tr()));
       expect(permission.settingsOpened, 1);
-    });
-
-    testWidgets('«عن التطبيق»: the developer, and a mail to write', (
-      tester,
-    ) async {
-      await pump(tester);
-
-      await tester.scrollUntilVisible(find.text('settings_about'.tr()), 300);
-      await tester.ensureVisible(find.text('settings_about'.tr()));
-      await settle(tester);
-      await tester.tap(find.text('settings_about'.tr()));
-      await settle(tester);
-      expect(find.text('about_developer_name'.tr()), findsOneWidget);
-      expect(find.text('yamandiab7@gmail.com'), findsOneWidget);
-
-      await tester.tap(find.text('about_write'.tr()));
-      await tester.pump();
-      expect(mails.single.scheme, 'mailto');
-      expect(mails.single.path, 'yamandiab7@gmail.com');
-      expect(mails.single.toString(), contains('1.0.0'));
     });
 
     testWidgets('a saved password is said', (tester) async {
