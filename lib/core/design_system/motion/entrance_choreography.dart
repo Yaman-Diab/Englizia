@@ -177,3 +177,26 @@ abstract final class LessonCompleteEntrance {
   static const rollAfterData = Duration(milliseconds: 800);
   static const metAfterData = Duration(milliseconds: 960);
 }
+
+/// Home's opening, once a day (design "Home Archipelago", M1): the map fades
+/// in, each island rises in turn from the top, then the trail, the ring and
+/// its guide, the bubble and the review box.
+abstract final class HomeEntrance {
+  static const map = Duration.zero;
+  static const trail = Duration(milliseconds: 300);
+  static const ring = Duration(milliseconds: 300);
+  static const guide = Duration(milliseconds: 560);
+  static const bubble = Duration(milliseconds: 880);
+  static const box = Duration(milliseconds: 980);
+
+  /// When island [index] (from the top) starts to rise.
+  static Duration isle(int index) =>
+      AppMotion.homeIsleDelay + AppMotion.homeIsleStagger * index;
+
+  /// When everything has arrived, with [islands] on the map.
+  static Duration settled(int islands) {
+    final box = HomeEntrance.box + AppMotion.homeBoxIn;
+    final isles = isle(islands < 1 ? 0 : islands - 1) + AppMotion.homeIsleRise;
+    return box > isles ? box : isles;
+  }
+}

@@ -6,11 +6,30 @@ import 'package:flutter/widgets.dart';
 /// A short sideways shake of [child] each time [trigger] changes: a field
 /// that refused what was sent. Never on the first build, and not at all
 /// under reduce motion (the error's border, icon and text still show).
+///
+/// [offsets] and [duration] give another design's shake (a stone, a locked
+/// island); by default the account designs' one.
 class Shake extends StatefulWidget {
-  const Shake({required this.trigger, required this.child, super.key});
+  const Shake({
+    required this.trigger,
+    required this.child,
+    this.offsets = defaultOffsets,
+    this.duration,
+    super.key,
+  });
 
   final Object? trigger;
   final Widget child;
+
+  /// Offsets in logical pixels at evenly spaced moments, mirrored for
+  /// right-to-left so the first move is toward the start.
+  final List<double> offsets;
+
+  /// [AppMotion.shake] when null.
+  final Duration? duration;
+
+  /// The account designs' shake, dying out.
+  static const defaultOffsets = [0.0, -7.0, 6.0, -4.0, 2.0, 0.0];
 
   @override
   State<Shake> createState() => _ShakeState();
@@ -19,17 +38,14 @@ class Shake extends StatefulWidget {
 class _ShakeState extends State<Shake> with SingleTickerProviderStateMixin {
   late final _controller = AnimationController(
     vsync: this,
-    duration: AppMotion.shake,
+    duration: widget.duration ?? AppMotion.shake,
     value: 1,
   );
-
-  /// Offsets in logical pixels at evenly spaced moments (designs), dying
-  /// out; mirrored for right-to-left so the first move is toward the start.
-  static const _offsets = [0.0, -7.0, 6.0, -4.0, 2.0, 0.0];
 
   @override
   void didUpdateWidget(Shake oldWidget) {
     super.didUpdateWidget(oldWidget);
+    _controller.duration = widget.duration ?? AppMotion.shake;
     if (oldWidget.trigger != widget.trigger &&
         !AppMotion.reduceMotion(context)) {
       _controller.forward(from: 0);
@@ -43,9 +59,11 @@ class _ShakeState extends State<Shake> with SingleTickerProviderStateMixin {
   }
 
   double _offsetAt(double t) {
-    final position = AppMotion.out.transform(t) * (_offsets.length - 1);
-    final i = position.floor().clamp(0, _offsets.length - 2);
-    return lerpDouble(_offsets[i], _offsets[i + 1], position - i)!;
+    final offsets = widget.offsets;
+    if (offsets.length < 2) return offsets.firstOrNull ?? 0;
+    final position = AppMotion.out.transform(t) * (offsets.length - 1);
+    final i = position.floor().clamp(0, offsets.length - 2);
+    return lerpDouble(offsets[i], offsets[i + 1], position - i)!;
   }
 
   @override

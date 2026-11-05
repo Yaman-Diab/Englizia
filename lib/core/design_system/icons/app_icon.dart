@@ -205,7 +205,47 @@ enum AppIcon {
     '<path d="M3 5.5h18v13H3zM7 15l2.2-5.5 2.2 5.5M7.8 13.2h2.8M15 10v4l3-2z"/>',
   ),
   lessonReview('<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3M19.5 4.5v3.8h-3.8"/>'),
-  unitFlag('<path d="M6 21V4h11l-2.5 4L17 12H6"/>');
+  unitFlag('<path d="M6 21V4h11l-2.5 4L17 12H6"/>'),
+  // Home Archipelago: the level check's gate, the review's cycle, and the
+  // top bar's and notices' own marks.
+  levelGate(
+    '<path d="M5 21V9a7 7 0 0 1 14 0v12"/>'
+    '<path d="M9 21v-8a3 3 0 0 1 6 0v8"/>',
+  ),
+  reviewCycle(
+    '<path d="M4.5 12a7.5 7.5 0 0 1 12.8-5.3L19.5 9"/>'
+    '<path d="M19.5 4v5h-5"/>'
+    '<path d="M19.5 12a7.5 7.5 0 0 1-12.8 5.3L4.5 15"/>'
+    '<path d="M4.5 20v-5h5"/>',
+  ),
+  cloudOff(
+    '<path d="M8 18h8.5a3.5 3.5 0 0 0 .5-7A5.5 5.5 0 0 0 6.6 10 4 4 0 0 0 8 18z"/>'
+    '<path d="M4 4l16 16"/>',
+  ),
+  gauge(
+    '<path d="M4 16a8 8 0 1 1 16 0"/>'
+    '<path d="M12 16l4.5-4.5"/>',
+  ),
+  globe(
+    '<path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/>'
+    '<path d="M3 12h18"/>'
+    '<path d="M12 3c2.5 2.5 3.5 5.5 3.5 9s-1 6.5-3.5 9c-2.5-2.5-3.5-5.5-3.5-9s1-6.5 3.5-9z"/>',
+  ),
+  pageSearch(
+    '<path d="M10.5 18a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15z"/>'
+    '<path d="M16 16l5 5"/>'
+    '<path d="M8.2 8.2h4.6M8.2 12.8h4.6M9.6 6.8l-.8 7.4M12.2 6.8l-.8 7.4"/>',
+  ),
+  alertTriangle(
+    '<path d="M12 8.5v4.5"/>'
+    '<path d="M12 16.5h.01"/>'
+    '<path d="M12 3.5l9 16h-18z"/>',
+  ),
+  snowflake(
+    '<path d="M12 3v18"/>'
+    '<path d="M4.2 7.5l15.6 9"/>'
+    '<path d="M4.2 16.5l15.6-9"/>',
+  );
 
   const AppIcon(this._shapes);
 

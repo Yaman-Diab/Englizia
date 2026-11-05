@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/sea/island_blob.dart';
 import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
@@ -15,83 +16,6 @@ SeaTone seaOf(ProfileTrack? track) => switch (track?.audience) {
   TrackAudience.child => SeaTone.kids,
   _ => SeaTone.general,
 };
-
-/// A soft closed shape through [count] points around an ellipse, each pushed
-/// in or out by up to [wobble]; the same [seed] always draws the same shape.
-Path islandBlob(
-  double cx,
-  double cy,
-  double rx,
-  double ry,
-  int seed, {
-  double wobble = .1,
-  int count = 10,
-}) {
-  var state = seed;
-  double next() {
-    state = (state * 9301 + 49297) % 233280;
-    return state / 233280;
-  }
-
-  final points = [
-    for (var i = 0; i < count; i++)
-      () {
-        final angle = i / count * math.pi * 2;
-        final push = 1 + (next() - .5) * 2 * wobble;
-        return Offset(
-          cx + math.cos(angle) * rx * push,
-          cy + math.sin(angle) * ry * push,
-        );
-      }(),
-  ];
-  final path = Path()..moveTo(points[0].dx, points[0].dy);
-  for (var i = 0; i < count; i++) {
-    final p0 = points[(i - 1 + count) % count];
-    final p1 = points[i];
-    final p2 = points[(i + 1) % count];
-    final p3 = points[(i + 2) % count];
-    path.cubicTo(
-      p1.dx + (p2.dx - p0.dx) / 6,
-      p1.dy + (p2.dy - p0.dy) / 6,
-      p2.dx - (p3.dx - p1.dx) / 6,
-      p2.dy - (p3.dy - p1.dy) / 6,
-      p2.dx,
-      p2.dy,
-    );
-  }
-  return path..close();
-}
-
-/// Draws [draw] in a [width] × [height] box scaled to cover [size], held to
-/// the bottom; mirrored when the layout runs left to right, as the designs are
-/// drawn right to left.
-void _inBox(
-  Canvas canvas,
-  Size size,
-  double width,
-  double height, {
-  required bool cover,
-  required bool mirrored,
-  required void Function() draw,
-}) {
-  final scale = cover
-      ? math.max(size.width / width, size.height / height)
-      : math.min(size.width / width, size.height / height);
-  canvas.save();
-  if (mirrored) {
-    canvas
-      ..translate(size.width, 0)
-      ..scale(-1, 1);
-  }
-  canvas
-    ..translate(
-      (size.width - width * scale) / 2,
-      cover ? size.height - height * scale : (size.height - height * scale) / 2,
-    )
-    ..scale(scale);
-  draw();
-  canvas.restore();
-}
 
 /// «أنا»'s header: sky and sea, clouds, three lines of waves, and an island
 /// with the current unit's medal; the shore meets the page.
@@ -252,7 +176,7 @@ class _BandPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    _inBox(
+    paintInBox(
       canvas,
       size,
       _width,
@@ -470,7 +394,7 @@ class _ChainPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     if (units < 1) return;
-    _inBox(
+    paintInBox(
       canvas,
       size,
       _width,
