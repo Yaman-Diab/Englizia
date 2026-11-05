@@ -87,18 +87,36 @@ Future<bool?> showSignOutSheet(
   };
 }
 
-/// The flame's sheet: how a day counts, the freezes, and this week.
+/// The flame's sheet: how a day counts, the freezes, and this week. Home
+/// passes [onWeekInMe] for «هذا الأسبوع في «أنا»» under «فهمت» (frame 16):
+/// it closes the sheet, then runs.
+Future<void> showStreakSheetOf(
+  BuildContext context, {
+  required Streak streak,
+  required StudyWeek? week,
+  VoidCallback? onWeekInMe,
+}) => _showMeSheet<void>(
+  context,
+  (_) => _StreakSheet(streak: streak, week: week, onWeekInMe: onWeekInMe),
+);
+
+/// The flame's sheet from «أنا»'s profile.
 Future<void> showStreakSheet(BuildContext context, Profile profile) =>
-    _showMeSheet<void>(
-      context,
-      (_) => _StreakSheet(streak: profile.streak!, week: profile.week),
-    );
+    showStreakSheetOf(context, streak: profile.streak!, week: profile.week);
 
 class _StreakSheet extends StatelessWidget {
-  const _StreakSheet({required this.streak, required this.week});
+  const _StreakSheet({
+    required this.streak,
+    required this.week,
+    this.onWeekInMe,
+  });
 
   final Streak streak;
   final StudyWeek? week;
+  final VoidCallback? onWeekInMe;
+
+  /// The link sits 18 − 8 under «فهمت» (bubble §12.1).
+  static const _aboveLink = 10.0;
 
   static String _time(String hhmm) {
     final parts = hhmm.split(':');
@@ -281,6 +299,25 @@ class _StreakSheet extends StatelessWidget {
           label: 'me_got_it'.tr(),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        if (onWeekInMe case final open?) ...[
+          const SizedBox(height: _aboveLink),
+          Center(
+            child: TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                open();
+              },
+              style: TextButton.styleFrom(
+                minimumSize: const Size(
+                  AppSizes.minTapTarget,
+                  AppSizes.minTapTarget,
+                ),
+                textStyle: texts.button.copyWith(fontSize: 14, height: 20 / 14),
+              ),
+              child: Text('home_week_in_me'.tr()),
+            ),
+          ),
+        ],
       ],
     );
   }

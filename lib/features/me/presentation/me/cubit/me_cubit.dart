@@ -131,6 +131,24 @@ class MeCubit extends Cubit<MeState> {
     await refresh();
   }
 
+  /// «مساراتك» opened from home, where «أنا» hasn't started: the kept
+  /// profile at once, then the server's. «أنا»'s first view of the day is
+  /// left for «أنا» itself.
+  Future<void> openTracks() async {
+    if (state.profile == null) {
+      if (_profiles.keptProfile case final kept?) {
+        emit(
+          state.copyWith(
+            load: LoadStatus.ready,
+            profile: kept,
+            guest: _isGuest(),
+          ),
+        );
+      }
+    }
+    await refresh();
+  }
+
   Future<void> refresh() async {
     if (state.profile == null) {
       emit(state.copyWith(load: LoadStatus.loading, failure: () => null));
