@@ -323,16 +323,18 @@ class FoundationPage extends StatelessWidget {
   static void _home(BuildContext context) =>
       context.go(AppRoutes.home, extra: HomeRestart());
 
-  /// Home as [scenario]'s frame, from its first load; the skeleton and "no
-  /// data" need nothing kept.
+  /// Home as [scenario]'s frame, from its first load, its one-time notices
+  /// unseen again; the skeleton and "no data" need nothing kept.
   static Future<void> _tryHome(
     BuildContext context,
     HomeMockScenario scenario,
   ) async {
+    final settings = sl<SettingsStorageService>();
     sl<HomeFakeDataSource>().scenario = scenario;
+    await settings.setHomeSeenEvents(const []);
     if (scenario == HomeMockScenario.offlineEmpty ||
         scenario == HomeMockScenario.slow) {
-      await sl<SettingsStorageService>().removeHome();
+      await settings.removeHome();
     }
     if (context.mounted) _home(context);
   }
