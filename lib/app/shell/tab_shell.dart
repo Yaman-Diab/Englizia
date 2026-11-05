@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 /// The app's four tabs (S §6).
 enum AppTab { learn, practice, talk, me }
 
-/// A tab's page with the tabs' bar under it. «تدرّب» and «تحدّث» have their
-/// pages; the bar is shared as the others come.
+/// A tab's page with the tabs' bar under it; each tab's route builds it
+/// around its page (plain routes, D-084).
 class TabShell extends StatelessWidget {
   const TabShell({
     required this.current,
