@@ -17,6 +17,8 @@ final class TrackLevelModel {
         name: json.readText('name') ?? _empty,
         schoolGrade: json.readInt('schoolGrade'),
         group: json.readText('displayGroup'),
+        // ASSUMPTION(api): docs/api/tracks.md.
+        kidsMode: json.readBool('kidsMode') ?? false,
       ),
     );
   }

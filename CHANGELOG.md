@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- «أنا»: who you are with the name to edit and the email to confirm, your active track as a chain of islands with switching tracks and changing grade, the streak with its freezes, points, lessons, words and days, this week against the goal, the placement test's result and its wait, support on WhatsApp with your account number, and signing out; for kids, their stars and words with the parent's part behind a number to type.
 - The unit screen: what the unit teaches, its grammar and how far you are, its lessons as a timeline with the current one to start or continue, the chain moving on after a lesson, the unit's review last, the next unit once it is done, a locked unit as a preview, Emar's book pages, a picture grid with stars for kids, and what still opens offline.
 - Kids' media: a picture story told word by word with cards for its marked words, a song lit line by line over its video, a written dialogue answered by picking a picture then saying the sentence, and «كرّر بعدي», each for a star. The kids' «كلماتي» tab: the words learned by unit, a picture each that says itself, and «العب بكلماتي».
 - Kids' lessons: a word or a letter with its pictures, voice and video, then listening for a letter or a picture and matching pictures with words, answered by pressing. A right answer sends a star to the bar, and the lesson ends with the guide dancing and five stars.

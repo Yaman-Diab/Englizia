@@ -14,6 +14,11 @@ class MainActivity : FlutterActivity() {
             .setMethodCallHandler { call, result ->
                 if (call.method == "open") result.success(openMailApp()) else result.notImplemented()
             }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/links")
+            .setMethodCallHandler { call, result ->
+                val link = call.arguments as? String
+                if (call.method == "open" && link != null) result.success(openLink(link)) else result.notImplemented()
+            }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/screen_awake")
             .setMethodCallHandler { call, result ->
                 if (call.method != "set") return@setMethodCallHandler result.notImplemented()
@@ -24,6 +29,14 @@ class MainActivity : FlutterActivity() {
                 }
                 result.success(null)
             }
+    }
+
+    /** Views a link in the app that handles it (WhatsApp, the browser). */
+    private fun openLink(link: String): Boolean = try {
+        startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(link)))
+        true
+    } catch (_: ActivityNotFoundException) {
+        false
     }
 
     /** Lets the learner pick among the mail apps; false when there is none. */

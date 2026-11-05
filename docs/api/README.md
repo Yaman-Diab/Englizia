@@ -67,6 +67,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`explanations.md`](explanations.md) | «اشرح لي» under a wrong answer, in a lesson or a concept's session | mock |
 | [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
+| [`me.md`](me.md) | «أنا»: the profile, its name, the active track and the grade | mock (`PUT /api/v1/app/me` confirmed) |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
 ## Headers sent on every request

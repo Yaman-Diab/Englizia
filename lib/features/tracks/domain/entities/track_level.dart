@@ -10,6 +10,7 @@ final class TrackLevel extends Equatable {
     required this.name,
     this.schoolGrade,
     this.group,
+    this.kidsMode = false,
   });
 
   final String id;
@@ -26,6 +27,9 @@ final class TrackLevel extends Equatable {
   /// Display group such as "الحلقة الأولى"; null when the track has none.
   final LocalizedText? group;
 
+  /// The level opens in kids mode (a panel setting, by level).
+  final bool kidsMode;
+
   @override
-  List<Object?> get props => [id, order, name, schoolGrade, group];
+  List<Object?> get props => [id, order, name, schoolGrade, group, kidsMode];
 }

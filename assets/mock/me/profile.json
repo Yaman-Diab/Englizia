@@ -1,0 +1,140 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "name": "أحمد",
+    "email": "user@example.com",
+    "emailVerified": true,
+    "learningSince": "2026-10-01",
+    "accountNumber": "EZ-0000",
+    "whatsapp": "+000000000000",
+    "tracks": [
+      {
+        "enrollmentId": "enr_general",
+        "trackId": "trk_general",
+        "title": "الإنجليزية العامة",
+        "audience": "self",
+        "levelId": "lvl_gen_a2",
+        "levelLabel": "A2",
+        "levelName": "ما قبل المتوسط",
+        "unit": 3,
+        "units": 8,
+        "unitCover": "assets/mock/units/farm.svg",
+        "active": true
+      },
+      {
+        "enrollmentId": "enr_emar",
+        "trackId": "trk_emar",
+        "title": "منهاج إيمار",
+        "audience": "schoolStudent",
+        "levelId": "lvl_emar_07",
+        "levelLabel": "ص7",
+        "levelName": "الصف السابع",
+        "unit": 2,
+        "units": 6,
+        "unitCover": "assets/mock/units/market.svg",
+        "active": false
+      }
+    ],
+    "lessonsDone": 18,
+    "learningDays": 23,
+    "wordsSaved": 64,
+    "streak": {
+      "current": 7,
+      "longest": 12,
+      "freezes": 2,
+      "maxFreezes": 3,
+      "nextFreezeWeekday": 6
+    },
+    "points": {
+      "total": 1240,
+      "week": 86
+    },
+    "week": {
+      "goalMinutes": 10,
+      "dayStart": "04:00",
+      "today": 4,
+      "days": [
+        {
+          "minutes": 14
+        },
+        {
+          "minutes": 10
+        },
+        {
+          "frozen": true
+        },
+        {
+          "minutes": 16
+        },
+        {
+          "minutes": 6
+        },
+        {},
+        {}
+      ]
+    },
+    "placement": {
+      "level": "A2",
+      "takenDaysAgo": 18,
+      "retestInDays": 12,
+      "waitDays": 30
+    },
+    "wordBank": {
+      "words": 48,
+      "due": 12
+    },
+    "mockLevels": {
+      "lvl_emar_01": {
+        "levelLabel": "ص1",
+        "levelName": "الصف الأول"
+      },
+      "lvl_emar_02": {
+        "levelLabel": "ص2",
+        "levelName": "الصف الثاني"
+      },
+      "lvl_emar_03": {
+        "levelLabel": "ص3",
+        "levelName": "الصف الثالث"
+      },
+      "lvl_emar_04": {
+        "levelLabel": "ص4",
+        "levelName": "الصف الرابع"
+      },
+      "lvl_emar_05": {
+        "levelLabel": "ص5",
+        "levelName": "الصف الخامس"
+      },
+      "lvl_emar_06": {
+        "levelLabel": "ص6",
+        "levelName": "الصف السادس"
+      },
+      "lvl_emar_07": {
+        "levelLabel": "ص7",
+        "levelName": "الصف السابع"
+      },
+      "lvl_emar_08": {
+        "levelLabel": "ص8",
+        "levelName": "الصف الثامن"
+      },
+      "lvl_emar_09": {
+        "levelLabel": "ص9",
+        "levelName": "الصف التاسع"
+      },
+      "lvl_emar_10": {
+        "levelLabel": "ص10",
+        "levelName": "الصف العاشر"
+      },
+      "lvl_emar_11": {
+        "levelLabel": "ص11",
+        "levelName": "الصف الحادي عشر"
+      },
+      "lvl_emar_12": {
+        "levelLabel": "بك",
+        "levelName": "البكالوريا"
+      }
+    }
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}

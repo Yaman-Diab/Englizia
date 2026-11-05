@@ -49,6 +49,8 @@ abstract final class AppRoutes {
   static const kidsReview = '/kids/words/review';
   static const talkScenario = '/talk/scenarios/:scenarioId';
   static const me = '/me';
+  static const meSettings = '/me/settings';
+  static const meJoin = '/me/join';
   static const unitStart = '/units/next';
 
   static String unitOf(String unitId) => '/units/$unitId';

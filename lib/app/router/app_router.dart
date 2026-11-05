@@ -8,12 +8,14 @@ import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/app/shell/tab_shell.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/di/service_locator.dart';
+import 'package:englizia/core/links/external_link.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/domain/entities/password_link.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
+import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
 import 'package:englizia/features/account/presentation/check_email/cubit/check_email_cubit.dart';
 import 'package:englizia/features/account/presentation/check_email/pages/check_email_page.dart';
 import 'package:englizia/features/account/presentation/forgot_password/cubit/forgot_password_cubit.dart';
@@ -27,8 +29,10 @@ import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_pag
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
+import 'package:englizia/features/account/presentation/verify_email/cubit/verify_email_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
+import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
@@ -56,6 +60,8 @@ import 'package:englizia/features/lessons/presentation/unit/cubit/unit_cubit.dar
 import 'package:englizia/features/lessons/presentation/unit/pages/unit_page.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/pages/vocab_lesson_page.dart';
+import 'package:englizia/features/me/presentation/me/cubit/me_cubit.dart';
+import 'package:englizia/features/me/presentation/me/pages/me_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -871,10 +877,69 @@ GoRouter createAppRouter(AppSessionController session) {
           child: ConversationPage(onClose: () => _back(context)),
         ),
       ),
-      // «أنا» has no design yet.
       GoRoute(
         path: AppRoutes.me,
-        builder: (_, _) => PendingPage(title: 'tab_me'.tr()),
+        builder: (context, _) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => sl<MeCubit>()..start()),
+            BlocProvider(create: (_) => sl<VerifyEmailCubit>()..load()),
+            BlocProvider(create: (_) => sl<AccountCubit>()),
+          ],
+          child: Builder(
+            builder: (context) {
+              final page = MePage(
+                actions: MeActions(
+                  onSettings: () => context.push<void>(AppRoutes.meSettings),
+                  onPrivacy: () => context.push<void>(AppRoutes.legalPrivacy),
+                  onWhatsApp: (number) => sl<ExternalLink>().open(
+                    Uri.https('wa.me', number.replaceAll(RegExp('[^0-9]'), '')),
+                  ),
+                  onPractice: () => context.go(AppRoutes.practice),
+                  onCreateAccount: () => context.push<void>(AppRoutes.signUp),
+                  onSignOut: context.read<AccountCubit>().signOut,
+                  onVerifyEmail: () => showVerifyEmailSheet(context),
+                  onRetest: () =>
+                      context.push<void>(AppRoutes.onboardingPlacement),
+                  onJoin: (track) => context.push<void>(
+                    AppRoutes.meJoin,
+                    extra: track.title.of(context.locale.languageCode),
+                  ),
+                ),
+              );
+              return BlocSelector<MeCubit, MeState, bool>(
+                selector: MePage.isKids,
+                builder: (context, kids) => kids
+                    ? KidTabShell(
+                        current: KidTab.me,
+                        onSelect: (tab) => switch (tab) {
+                          // The kids' home isn't built yet.
+                          KidTab.learn => context.go(AppRoutes.home),
+                          KidTab.words => context.go(AppRoutes.kidsWords),
+                          KidTab.me => null,
+                        },
+                        child: page,
+                      )
+                    : TabShell(
+                        current: AppTab.me,
+                        onSelect: (tab) => _openTab(context, tab),
+                        child: page,
+                      ),
+              );
+            },
+          ),
+        ),
+      ),
+      // The settings screen, and joining another track from «أنا», have no
+      // design yet.
+      GoRoute(
+        path: AppRoutes.meSettings,
+        builder: (_, _) => PendingPage(title: 'me_settings'.tr()),
+      ),
+      GoRoute(
+        path: AppRoutes.meJoin,
+        builder: (_, state) => PendingPage(
+          title: state.extra is String ? state.extra! as String : '',
+        ),
       ),
       GoRoute(
         path: AppRoutes.unitStart,
