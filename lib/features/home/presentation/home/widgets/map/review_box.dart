@@ -20,6 +20,8 @@ class ReviewBox extends StatelessWidget {
   final VoidCallback onPressed;
 
   static const width = 198.0;
+  static const _padStart = 10.0;
+  static const _padEnd = 12.0;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +40,12 @@ class ReviewBox extends StatelessWidget {
             scale: AppMotion.scaleSmall,
             child: Container(
               width: width,
-              padding: const EdgeInsetsDirectional.fromSTEB(10, 9, 12, 10),
+              padding: const EdgeInsetsDirectional.fromSTEB(
+                _padStart,
+                9,
+                _padEnd,
+                10,
+              ),
               decoration: BoxDecoration(
                 color: colors.surface,
                 border: Border.all(color: scheme.outline),
@@ -68,14 +75,23 @@ class ReviewBox extends StatelessWidget {
                       Expanded(
                         // ASSUMPTION(design): two lines where the words run
                         // longer (English); the board has Arabic only.
-                        child: Text(
-                          'home_review_title'.tr(),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: texts.bodyStrong.copyWith(
-                            fontSize: 14,
-                            height: 20 / 14,
-                          ),
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final title = 'home_review_title'.tr();
+                            return Text(
+                              title,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: texts.sizedFor(
+                                context,
+                                texts.bodyStrong,
+                                text: title,
+                                width: constraints.maxWidth,
+                                size: 14,
+                                line: 20,
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -91,11 +107,14 @@ class ReviewBox extends StatelessWidget {
                         alignment: Alignment.center,
                         child: Text(
                           'home_review_action'.tr(),
-                          style: texts.button.copyWith(
-                            fontSize: 12,
-                            height: 1,
-                            color: colors.primary.text,
-                          ),
+                          style: texts
+                              .sized(
+                                texts.button,
+                                size: 12,
+                                line: 12,
+                                running: false,
+                              )
+                              .copyWith(color: colors.primary.text),
                         ),
                       ),
                     ],
@@ -103,11 +122,16 @@ class ReviewBox extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     line,
-                    style: texts.caption.copyWith(
-                      fontSize: 12,
-                      height: 16 / 12,
-                      color: colors.textSecondary,
-                    ),
+                    style: texts
+                        .sizedFor(
+                          context,
+                          texts.caption,
+                          text: line,
+                          width: width - _padStart - _padEnd,
+                          size: 12,
+                          line: 16,
+                        )
+                        .copyWith(color: colors.textSecondary),
                   ),
                 ],
               ),

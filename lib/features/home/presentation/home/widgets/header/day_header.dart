@@ -507,11 +507,14 @@ class _KidsHead extends StatelessWidget {
                                   HomeGreeting.kids,
                                   home.learner.firstName,
                                 ),
-                                style: texts.title.copyWith(
-                                  fontSize: 26,
-                                  height: 36 / 26,
-                                  color: colors.textPrimary,
-                                ),
+                                style: texts
+                                    .sized(
+                                      texts.title,
+                                      size: 26,
+                                      line: 36,
+                                      running: false,
+                                    )
+                                    .copyWith(color: colors.textPrimary),
                               ),
                             ),
                           ),
@@ -548,11 +551,14 @@ class _KidsHead extends StatelessWidget {
                         daysText(streak.current),
                         maxLines: 1,
                         softWrap: false,
-                        style: texts.bodyStrong.copyWith(
-                          fontSize: 18,
-                          height: 24 / 18,
-                          color: colors.streak.text,
-                        ),
+                        style: texts
+                            .sized(
+                              texts.bodyStrong,
+                              size: 18,
+                              line: 24,
+                              running: false,
+                            )
+                            .copyWith(color: colors.streak.text),
                       ),
                       const SizedBox(width: 10),
                       Expanded(child: KidWeek(week: week)),

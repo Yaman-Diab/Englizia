@@ -69,11 +69,14 @@ class HomeNoData extends StatelessWidget {
                     child: Text(
                       heading,
                       textAlign: TextAlign.center,
-                      style: texts.title.copyWith(
-                        fontSize: 20,
-                        height: 28 / 20,
-                        color: colors.textPrimary,
-                      ),
+                      style: texts
+                          .sized(
+                            texts.title,
+                            size: 20,
+                            line: 28,
+                            running: false,
+                          )
+                          .copyWith(color: colors.textPrimary),
                     ),
                   ),
                   // The gap 12, plus the button's margin 6.

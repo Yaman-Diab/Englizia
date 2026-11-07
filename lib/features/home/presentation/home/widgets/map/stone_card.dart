@@ -131,19 +131,19 @@ class StoneCard extends StatelessWidget {
             done
                 ? 'unit_status_done'.tr()
                 : 'unit_lesson_number'.tr(args: ['${index + 1}']),
-            style: texts.caption.copyWith(
-              fontSize: 12,
-              height: 18 / 12,
-              color: colors.textSecondary,
-            ),
+            style: texts
+                .sized(texts.caption, size: 12, line: 18)
+                .copyWith(color: colors.textSecondary),
           ),
-          Text(lesson.title, style: texts.bodyStrong.copyWith(height: 24 / 16)),
+          Text(
+            lesson.title,
+            style: texts.sized(texts.bodyStrong, size: 16, line: 24),
+          ),
           Text(
             lessonMeta(lesson),
-            style: texts.caption.copyWith(
-              height: 20 / 13,
-              color: colors.textSecondary,
-            ),
+            style: texts
+                .sized(texts.caption, size: 13, line: 20)
+                .copyWith(color: colors.textSecondary),
           ),
           if (action != null) ...[
             const SizedBox(height: AppSpacing.sm),
@@ -163,10 +163,9 @@ class StoneCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     lockLine,
-                    style: texts.captionStrong.copyWith(
-                      height: 20 / 13,
-                      color: colors.textPrimary,
-                    ),
+                    style: texts
+                        .sized(texts.captionStrong, size: 13, line: 20)
+                        .copyWith(color: colors.textPrimary),
                   ),
                 ),
               ],
@@ -244,11 +243,14 @@ class _CardButton extends StatelessWidget {
               ),
               child: Text(
                 label,
-                style: context.texts.button.copyWith(
-                  fontSize: 14,
-                  height: 1,
-                  color: colors.primary.text,
-                ),
+                style: context.texts
+                    .sized(
+                      context.texts.button,
+                      size: 14,
+                      line: 14,
+                      running: false,
+                    )
+                    .copyWith(color: colors.primary.text),
               ),
             ),
           ),

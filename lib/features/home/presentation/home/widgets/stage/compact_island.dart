@@ -351,21 +351,18 @@ class _Labels extends StatelessWidget {
     final texts = context.texts;
     final done = unit.status == UnitLessonStatus.done;
     final pages = unit.bookPages;
-    final sub = texts.caption.copyWith(
-      fontSize: 12,
-      height: 16 / 12,
-      color: colors.textSecondary,
-    );
+    final sub = texts
+        .sized(texts.caption, size: 12, line: 16, running: false)
+        .copyWith(color: colors.textSecondary);
     final english = unit.titleEn;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           kids ? unit.title : unitTitle(unit),
-          style: texts.captionStrong.copyWith(
-            height: 18 / 13,
-            color: colors.textPrimary,
-          ),
+          style: texts
+              .sized(texts.captionStrong, size: 13, line: 18, running: false)
+              .copyWith(color: colors.textPrimary),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
@@ -374,11 +371,9 @@ class _Labels extends StatelessWidget {
           const SizedBox(height: _gap),
           Text(
             english,
-            style: texts.kidsCard.copyWith(
-              fontSize: 15,
-              height: 20 / 15,
-              color: colors.textSecondary,
-            ),
+            style: texts
+                .sized(texts.kidsCard, size: 15, line: 20, running: false)
+                .copyWith(color: colors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textDirection: TextDirection.ltr,
@@ -437,11 +432,14 @@ class _RedoChip extends StatelessWidget {
         widthFactor: 1,
         child: Text(
           'unit_redo'.tr(),
-          style: context.texts.captionStrong.copyWith(
-            fontSize: 12,
-            height: 1,
-            color: colors.primary.text,
-          ),
+          style: context.texts
+              .sized(
+                context.texts.captionStrong,
+                size: 12,
+                line: 12,
+                running: false,
+              )
+              .copyWith(color: colors.primary.text),
         ),
       ),
     );

@@ -116,7 +116,7 @@ class LessonBubble extends StatelessWidget {
   }) {
     final content = _Content.of(mode: mode, lesson: lesson, home: home);
     if (content == null) return 0;
-    final styles = _Styles.of(context);
+    final styles = _Styles.of(context, content, width);
     final measure = _Measure(context);
     final inner = width - 2 * _Bubble.padX;
     if (content.kids) {
@@ -414,36 +414,53 @@ final class _Styles {
     required this.kidTitle,
   });
 
-  factory _Styles.of(BuildContext context) {
+  /// The roles for [content] in a bubble [width] wide. The label and the
+  /// meta keep the design's line on one line, so the design's 170 holds the
+  /// bubble, and the running floor where large text wraps them.
+  factory _Styles.of(BuildContext context, _Content content, double width) {
     final texts = context.texts;
     final colors = context.colors;
     final white = colors.onPrimaryStrong;
     final soft = white.withValues(alpha: .9);
+    final textWidth = width - 2 * _Bubble.padX - _Bubble.gap - _Bubble.disk;
+    TextStyle fitted(String text, double size, double line, double width) =>
+        texts
+            .sizedFor(
+              context,
+              texts.caption,
+              text: text,
+              width: width,
+              size: size,
+              line: line,
+            )
+            .copyWith(color: soft);
+
     return _Styles(
-      label: texts.caption.copyWith(fontSize: 13, height: 18 / 13, color: soft),
-      title: texts.title.copyWith(fontSize: 20, height: 26 / 20, color: white),
-      meta: texts.caption.copyWith(fontSize: 13, height: 20 / 13, color: soft),
-      unit: texts.caption.copyWith(fontSize: 12, height: 16 / 12, color: soft),
-      question: texts.captionStrong.copyWith(
-        fontSize: 12,
-        height: 16 / 12,
-        color: white,
+      label: fitted(content.label, 13, 18, textWidth),
+      title: texts
+          .sized(texts.title, size: 20, line: 26, running: false)
+          .copyWith(color: white),
+      meta: fitted(
+        content.meta,
+        13,
+        20,
+        textWidth - (content.ai ? _Bubble.spark + AppSpacing.xs : 0),
       ),
-      cta: texts.button.copyWith(
-        fontSize: 16,
-        height: 1,
-        color: colors.primaryStrong,
-      ),
-      kidLabel: texts.caption.copyWith(
-        fontSize: 15,
-        height: 20 / 15,
-        color: white.withValues(alpha: .92),
-      ),
-      kidTitle: texts.kidsWord.copyWith(
-        fontSize: 26,
-        height: 34 / 26,
-        color: white,
-      ),
+      unit: texts
+          .sized(texts.caption, size: 12, line: 16, running: false)
+          .copyWith(color: soft),
+      question: texts
+          .sized(texts.captionStrong, size: 12, line: 16, running: false)
+          .copyWith(color: white),
+      cta: texts
+          .sized(texts.button, size: 16, line: 16, running: false)
+          .copyWith(color: colors.primaryStrong),
+      kidLabel: texts
+          .sized(texts.caption, size: 15, line: 20, running: false)
+          .copyWith(color: white.withValues(alpha: .92)),
+      kidTitle: texts
+          .sized(texts.kidsWord, size: 26, line: 34, running: false)
+          .copyWith(color: white),
     );
   }
 
@@ -567,7 +584,7 @@ class _Bubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final styles = _Styles.of(context);
+    final styles = _Styles.of(context, content, frame.width);
     final pop = _pop(overrides.bubbleIn);
     final scale = overrides.bubbleScale;
     final faded = (scale < .95 ? .85 : 1.0) * opacity * pop.opacity;

@@ -45,10 +45,14 @@ class LockedToast extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: context.texts.captionStrong.copyWith(
-            height: 20 / 13,
-            color: colors.textPrimary,
-          ),
+          style: context.texts
+              .sized(
+                context.texts.captionStrong,
+                size: 13,
+                line: 20,
+                running: false,
+              )
+              .copyWith(color: colors.textPrimary),
           maxLines: 1,
           softWrap: false,
         ),

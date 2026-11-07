@@ -75,17 +75,20 @@ class KidWeek extends StatelessWidget {
                       Text(
                         letterOf(day.date),
                         maxLines: 1,
-                        style:
-                            (index == week.today
-                                    ? texts.captionStrong
-                                    : texts.caption)
-                                .copyWith(
-                                  fontSize: 12,
-                                  height: 16 / 12,
-                                  color: index == week.today
-                                      ? colors.textPrimary
-                                      : colors.textSecondary,
-                                ),
+                        style: texts
+                            .sized(
+                              index == week.today
+                                  ? texts.captionStrong
+                                  : texts.caption,
+                              size: 12,
+                              line: 16,
+                              running: false,
+                            )
+                            .copyWith(
+                              color: index == week.today
+                                  ? colors.textPrimary
+                                  : colors.textSecondary,
+                            ),
                       ),
                     ],
                   ),

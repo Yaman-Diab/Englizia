@@ -1,24 +1,5 @@
-import 'dart:math' as math;
-
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/material.dart';
-
-/// [role] at the design's [size] and [line] height. Arabic running text keeps
-/// the role's own height when it is taller (the theme's 1.7 minimum for
-/// diacritics), so a wrapped line never clips (plan §5.4).
-TextStyle headerText(
-  BuildContext context,
-  TextStyle role, {
-  required double size,
-  required double line,
-}) {
-  final design = line / size;
-  final arabic = Localizations.localeOf(context).languageCode == 'ar';
-  return role.copyWith(
-    fontSize: size,
-    height: arabic ? math.max(design, role.height ?? design) : design,
-  );
-}
 
 /// A tap target of the header: at least 48 with [margin] around a smaller
 /// drawing, so the drawing keeps the design's size. [builder] draws it,

@@ -98,13 +98,14 @@ class _PageSearchSheetState extends State<_PageSearchSheet> {
     final colors = context.colors;
     final texts = context.texts;
     final scheme = context.scheme;
-    final number = HomeSheet.text(
-      context,
-      texts.bodyStrong,
-      size: _fieldText,
-      line: _fieldText,
-      running: false,
-    ).copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
+    final number = texts
+        .sized(
+          texts.bodyStrong,
+          size: _fieldText,
+          line: _fieldText,
+          running: false,
+        )
+        .copyWith(fontFeatures: const [FontFeature.tabularFigures()]);
     OutlineInputBorder border(Color color, double width) => OutlineInputBorder(
       borderRadius: BorderRadius.circular(14),
       borderSide: BorderSide(color: color, width: width),
@@ -120,8 +121,7 @@ class _PageSearchSheetState extends State<_PageSearchSheet> {
               header: true,
               child: Text(
                 'home_page_search'.tr(),
-                style: HomeSheet.text(
-                  context,
+                style: texts.sized(
                   texts.title,
                   size: 20,
                   line: 28,
@@ -131,12 +131,9 @@ class _PageSearchSheetState extends State<_PageSearchSheet> {
             ),
             Text(
               'home_page_book'.tr(args: [_book]),
-              style: HomeSheet.text(
-                context,
-                texts.caption,
-                size: 13,
-                line: 20,
-              ).copyWith(color: colors.textSecondary),
+              style: texts
+                  .sized(texts.caption, size: 13, line: 20)
+                  .copyWith(color: colors.textSecondary),
             ),
           ],
         ),
@@ -148,12 +145,7 @@ class _PageSearchSheetState extends State<_PageSearchSheet> {
             children: [
               Text(
                 'home_page_label'.tr(),
-                style: HomeSheet.text(
-                  context,
-                  texts.captionStrong,
-                  size: 13,
-                  line: 20,
-                ),
+                style: texts.sized(texts.captionStrong, size: 13, line: 20),
               ),
               TextField(
                 controller: _field,
@@ -188,7 +180,8 @@ class _PageSearchSheetState extends State<_PageSearchSheet> {
             constraints: const BoxConstraints(minHeight: 22),
             child: Text(
               _result(),
-              style: HomeSheet.text(context, texts.body, size: 14, line: 22)
+              style: texts
+                  .sized(texts.body, size: 14, line: 22)
                   .copyWith(
                     color: _field.text.isEmpty
                         ? colors.textSecondary

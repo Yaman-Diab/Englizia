@@ -109,11 +109,14 @@ class LevelCompleteCard extends StatelessWidget {
                         ),
                         Text(
                           title,
-                          style: texts.title.copyWith(
-                            fontSize: 20,
-                            height: 28 / 20,
-                            color: colors.textPrimary,
-                          ),
+                          style: texts
+                              .sized(
+                                texts.title,
+                                size: 20,
+                                line: 28,
+                                running: false,
+                              )
+                              .copyWith(color: colors.textPrimary),
                         ),
                       ],
                     ),

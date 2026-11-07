@@ -121,11 +121,9 @@ class IslandBanner extends StatelessWidget {
         : 'unit_book_pages'.tr(
             namedArgs: {'from': '${pages.from}', 'to': '${pages.to}'},
           );
-    final subStyle = texts.caption.copyWith(
-      fontSize: 12,
-      height: 16 / 12,
-      color: colors.textSecondary,
-    );
+    final subStyle = texts
+        .sized(texts.caption, size: 12, line: 16, running: false)
+        .copyWith(color: colors.textSecondary);
     // Emar: the book's line, wider than the design's 236 where it needs
     // it, or only its pages where even that would cut it.
     var width = _maxWidth(context);
@@ -194,11 +192,14 @@ class IslandBanner extends StatelessWidget {
                           maxLines: 1,
                           softWrap: false,
                           overflow: TextOverflow.ellipsis,
-                          style: texts.captionStrong.copyWith(
-                            fontSize: 12,
-                            height: 17 / 12,
-                            color: colors.textPrimary,
-                          ),
+                          style: texts
+                              .sized(
+                                texts.captionStrong,
+                                size: 12,
+                                line: 17,
+                                running: false,
+                              )
+                              .copyWith(color: colors.textPrimary),
                         ),
                         Text(
                           sub,
@@ -322,10 +323,14 @@ class IslandBanner extends StatelessWidget {
                                 maxLines: 1,
                                 softWrap: false,
                                 overflow: TextOverflow.ellipsis,
-                                style: texts.bodyStrong.copyWith(
-                                  height: 22 / 16,
-                                  color: colors.textPrimary,
-                                ),
+                                style: texts
+                                    .sized(
+                                      texts.bodyStrong,
+                                      size: 16,
+                                      line: 22,
+                                      running: false,
+                                    )
+                                    .copyWith(color: colors.textPrimary),
                               ),
                             ),
                             if (en.isNotEmpty) ...[
@@ -337,11 +342,14 @@ class IslandBanner extends StatelessWidget {
                                   softWrap: false,
                                   overflow: TextOverflow.ellipsis,
                                   textDirection: TextDirection.ltr,
-                                  style: texts.kidsCard.copyWith(
-                                    fontSize: 16,
-                                    height: 22 / 16,
-                                    color: colors.textSecondary,
-                                  ),
+                                  style: texts
+                                      .sized(
+                                        texts.kidsCard,
+                                        size: 16,
+                                        line: 22,
+                                        running: false,
+                                      )
+                                      .copyWith(color: colors.textSecondary),
                                 ),
                               ),
                             ],

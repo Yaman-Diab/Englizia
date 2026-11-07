@@ -674,6 +674,42 @@ void main() {
     });
   });
 
+  testWidgets('Arabic lines that wrap keep the running floor; one line its '
+      'design height', (tester) async {
+    double heightOf(String text) =>
+        tester.widget<Text>(find.text(text)).style!.height!;
+    final home = mockHome();
+    const meta = 'نص تفاعلي، 7 دقائق';
+    for (final (scale, height) in [(1.0, 20 / 13), (1.6, 1.7)]) {
+      await tester.pumpLocalized(
+        MediaQuery.withClampedTextScaling(
+          minScaleFactor: scale,
+          maxScaleFactor: scale,
+          child: _bubble(home, width: 254),
+        ),
+      );
+      expect(heightOf(meta), closeTo(height, 1e-9), reason: '×$scale');
+    }
+
+    final unit = home.currentUnit!;
+    await tester.pumpLocalized(
+      Center(
+        child: StoneCard(
+          lesson: unit.lessons[4],
+          index: 4,
+          state: StoneState.locked,
+          lockedAfter: unit.lessons[3].title,
+          reviewFirst: false,
+          onReplay: () {},
+          onStart: () {},
+        ),
+      ),
+    );
+    await _settle(tester, 4);
+    expect(heightOf(unit.lessons[4].title), 1.7);
+    expect(heightOf('يُفتح بعد «${unit.lessons[3].title}»'), 1.7);
+  });
+
   group('StoneCard', () {
     testWidgets('done replays, locked says what comes first, Emar starts', (
       tester,

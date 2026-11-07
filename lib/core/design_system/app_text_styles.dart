@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,6 +39,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     required this.kidsGreeting,
     required this.kidsWord,
     required this.kidsCard,
+    required this.runningMinHeight,
   });
 
   factory AppTextStyles.build({required Color color, required bool isArabic}) {
@@ -73,6 +77,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       kidsGreeting: style(35, 44, FontWeight.w600),
       kidsWord: style(50, 64, FontWeight.w700, kids: true),
       kidsCard: style(28, 40, FontWeight.w400, kids: true),
+      runningMinHeight: isArabic ? _arabicMinHeight : 0,
     );
   }
 
@@ -108,6 +113,52 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
   /// letter takes the same role at its own size.
   final TextStyle kidsCard;
 
+  /// The least line height of running text: Arabic's 1.7, for diacritics
+  /// and descenders; none in English.
+  final double runningMinHeight;
+
+  /// [role] at a design's [size] and [line] height (logical px, as the
+  /// design gives them). [running] text, which may wrap, keeps at least
+  /// [runningMinHeight], so a wrapped line never clips; a single line, such
+  /// as a chip, keeps the design's.
+  TextStyle sized(
+    TextStyle role, {
+    required double size,
+    required double line,
+    bool running = true,
+  }) {
+    final design = line / size;
+    return role.copyWith(
+      fontSize: size,
+      height: running ? math.max(design, runningMinHeight) : design,
+    );
+  }
+
+  /// [sized] for [text] laid out [width] wide in [context], for a box the
+  /// design sizes: the design's line while it fits one line, so the box
+  /// holds it at its own size, and the running floor once it wraps (large
+  /// text).
+  TextStyle sizedFor(
+    BuildContext context,
+    TextStyle role, {
+    required String text,
+    required double width,
+    required double size,
+    required double line,
+  }) {
+    final one = sized(role, size: size, line: line, running: false);
+    if (runningMinHeight <= line / size) return one;
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: one),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 2,
+    )..layout(maxWidth: math.max(0, width));
+    final wraps = painter.computeLineMetrics().length > 1;
+    painter.dispose();
+    return wraps ? sized(role, size: size, line: line) : one;
+  }
+
   /// Maps the roles onto Material's scale so stock widgets match.
   TextTheme toTextTheme() => TextTheme(
     displaySmall: display,
@@ -138,6 +189,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     TextStyle? kidsGreeting,
     TextStyle? kidsWord,
     TextStyle? kidsCard,
+    double? runningMinHeight,
   }) => AppTextStyles(
     display: display ?? this.display,
     title: title ?? this.title,
@@ -150,6 +202,7 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
     kidsGreeting: kidsGreeting ?? this.kidsGreeting,
     kidsWord: kidsWord ?? this.kidsWord,
     kidsCard: kidsCard ?? this.kidsCard,
+    runningMinHeight: runningMinHeight ?? this.runningMinHeight,
   );
 
   @override
@@ -167,6 +220,11 @@ final class AppTextStyles extends ThemeExtension<AppTextStyles> {
       kidsGreeting: TextStyle.lerp(kidsGreeting, other.kidsGreeting, t)!,
       kidsWord: TextStyle.lerp(kidsWord, other.kidsWord, t)!,
       kidsCard: TextStyle.lerp(kidsCard, other.kidsCard, t)!,
+      runningMinHeight: lerpDouble(
+        runningMinHeight,
+        other.runningMinHeight,
+        t,
+      )!,
     );
   }
 }

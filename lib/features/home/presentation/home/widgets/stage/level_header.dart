@@ -117,11 +117,14 @@ class LevelHeader extends StatelessWidget {
                               ExcludeSemantics(
                                 child: Text(
                                   count,
-                                  style: texts.caption.copyWith(
-                                    fontSize: 13,
-                                    height: 20 / 13,
-                                    color: colors.textSecondary,
-                                  ),
+                                  style: texts
+                                      .sized(
+                                        texts.caption,
+                                        size: 13,
+                                        line: 20,
+                                        running: false,
+                                      )
+                                      .copyWith(color: colors.textSecondary),
                                   maxLines: 1,
                                   softWrap: false,
                                 ),

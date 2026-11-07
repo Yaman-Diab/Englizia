@@ -48,11 +48,9 @@ class KidSayBubble extends StatelessWidget {
             unit.title,
             maxLines: 1,
             softWrap: false,
-            style: texts.bodyStrong.copyWith(
-              fontSize: 18,
-              height: 24 / 18,
-              color: colors.textPrimary,
-            ),
+            style: texts
+                .sized(texts.bodyStrong, size: 18, line: 24, running: false)
+                .copyWith(color: colors.textPrimary),
           ),
           if (en != null && en.isNotEmpty) ...[
             const SizedBox(width: AppSpacing.sm),
@@ -61,11 +59,9 @@ class KidSayBubble extends StatelessWidget {
               maxLines: 1,
               softWrap: false,
               textDirection: TextDirection.ltr,
-              style: texts.kidsCard.copyWith(
-                fontSize: 18,
-                height: 24 / 18,
-                color: colors.textSecondary,
-              ),
+              style: texts
+                  .sized(texts.kidsCard, size: 18, line: 24, running: false)
+                  .copyWith(color: colors.textSecondary),
             ),
           ],
         ],

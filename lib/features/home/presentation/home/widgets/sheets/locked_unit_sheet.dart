@@ -69,19 +69,15 @@ class _LockedUnitSheet extends StatelessWidget {
                   children: [
                     Text(
                       'home_preview'.tr(),
-                      style: HomeSheet.text(
-                        context,
-                        texts.caption,
-                        size: 13,
-                        line: 20,
-                      ).copyWith(color: colors.textSecondary),
+                      style: texts
+                          .sized(texts.caption, size: 13, line: 20)
+                          .copyWith(color: colors.textSecondary),
                     ),
                     Semantics(
                       header: true,
                       child: Text(
                         unitTitle(unit),
-                        style: HomeSheet.text(
-                          context,
+                        style: texts.sized(
                           texts.title,
                           size: 20,
                           line: 28,
@@ -102,12 +98,7 @@ class _LockedUnitSheet extends StatelessWidget {
               children: [
                 Text(
                   'home_preview_goal'.tr(args: [preview.goal]),
-                  style: HomeSheet.text(
-                    context,
-                    texts.bodyStrong,
-                    size: 15,
-                    line: 24,
-                  ),
+                  style: texts.sized(texts.bodyStrong, size: 15, line: 24),
                 ),
                 Text(
                   'home_preview_meta'.tr(
@@ -116,12 +107,9 @@ class _LockedUnitSheet extends StatelessWidget {
                       'minutes': minutesText(preview.roundedMinutes),
                     },
                   ),
-                  style: HomeSheet.text(
-                    context,
-                    texts.caption,
-                    size: 13,
-                    line: 20,
-                  ).copyWith(color: colors.textSecondary),
+                  style: texts
+                      .sized(texts.caption, size: 13, line: 20)
+                      .copyWith(color: colors.textSecondary),
                 ),
               ],
             ),
@@ -148,8 +136,7 @@ class _LockedUnitSheet extends StatelessWidget {
                 minimumSize: const Size(_linkTarget, _linkTarget),
                 padding: EdgeInsets.zero,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                textStyle: HomeSheet.text(
-                  context,
+                textStyle: texts.sized(
                   texts.button,
                   size: 14,
                   line: 20,
@@ -179,12 +166,9 @@ class _LockedUnitSheet extends StatelessWidget {
                   Expanded(
                     child: Text(
                       'unit_locked'.tr(args: ['$before']),
-                      style: HomeSheet.text(
-                        context,
-                        texts.body,
-                        size: 14,
-                        line: 20,
-                      ).copyWith(color: colors.info.text),
+                      style: texts
+                          .sized(texts.body, size: 14, line: 20)
+                          .copyWith(color: colors.info.text),
                     ),
                   ),
                 ],
@@ -237,12 +221,9 @@ class _LessonRow extends StatelessWidget {
           Expanded(
             child: Text(
               lesson.title,
-              style: HomeSheet.text(
-                context,
-                context.texts.body,
-                size: 14,
-                line: 22,
-              ).copyWith(color: muted),
+              style: context.texts
+                  .sized(context.texts.body, size: 14, line: 22)
+                  .copyWith(color: muted),
             ),
           ),
           AppIconView(AppIcon.lock, size: 14, color: muted),

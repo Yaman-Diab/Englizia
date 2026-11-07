@@ -150,11 +150,9 @@ class NoticeCard extends StatelessWidget {
               Flexible(
                 child: Text(
                   'home_freeze_kicker'.tr(),
-                  style: texts.captionStrong.copyWith(
-                    fontSize: 12,
-                    height: 18 / 12,
-                    color: colors.info.text,
-                  ),
+                  style: texts
+                      .sized(texts.captionStrong, size: 12, line: 18)
+                      .copyWith(color: colors.info.text),
                 ),
               ),
             ],
@@ -201,19 +199,13 @@ class NoticeCard extends StatelessWidget {
   );
 }
 
-TextStyle _title(BuildContext context) => headerText(
-  context,
-  context.texts.bodyStrong,
-  size: 14,
-  line: 20,
-).copyWith(color: context.colors.textPrimary);
+TextStyle _title(BuildContext context) => context.texts
+    .sized(context.texts.bodyStrong, size: 14, line: 20)
+    .copyWith(color: context.colors.textPrimary);
 
-TextStyle _sub(BuildContext context) => headerText(
-  context,
-  context.texts.caption,
-  size: 12,
-  line: 18,
-).copyWith(color: context.colors.textSecondary);
+TextStyle _sub(BuildContext context) => context.texts
+    .sized(context.texts.caption, size: 12, line: 18)
+    .copyWith(color: context.colors.textSecondary);
 
 /// The one-time cards: the guide, the texts, the X.
 class _Card extends StatelessWidget {

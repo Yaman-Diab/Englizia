@@ -440,12 +440,17 @@ class _Stars extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               '$count',
-              style: context.texts.bodyStrong.copyWith(
-                fontSize: 18,
-                height: 1,
-                color: colors.reward.text,
-                fontFeatures: const [FontFeature.tabularFigures()],
-              ),
+              style: context.texts
+                  .sized(
+                    context.texts.bodyStrong,
+                    size: 18,
+                    line: 18,
+                    running: false,
+                  )
+                  .copyWith(
+                    color: colors.reward.text,
+                    fontFeatures: const [FontFeature.tabularFigures()],
+                  ),
             ),
           ],
         ),

@@ -4,7 +4,6 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
-import 'package:englizia/features/home/presentation/home/widgets/header/header_styles.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
@@ -107,12 +106,9 @@ class _Bubble extends StatelessWidget {
             ),
             child: Text(
               text,
-              style: headerText(
-                context,
-                context.texts.captionStrong,
-                size: 13,
-                line: 20,
-              ).copyWith(color: colors.textPrimary),
+              style: context.texts
+                  .sized(context.texts.captionStrong, size: 13, line: 20)
+                  .copyWith(color: colors.textPrimary),
             ),
           ),
         ),

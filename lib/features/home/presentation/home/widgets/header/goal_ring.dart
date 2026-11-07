@@ -234,12 +234,19 @@ class GoalRingOverlay extends StatelessWidget {
                         child: Text(
                           '$shownMinutes/$goal',
                           textDirection: TextDirection.ltr,
-                          style: context.texts.title.copyWith(
-                            fontSize: 22,
-                            height: 1,
-                            color: context.colors.textPrimary,
-                            fontFeatures: const [FontFeature.tabularFigures()],
-                          ),
+                          style: context.texts
+                              .sized(
+                                context.texts.title,
+                                size: 22,
+                                line: 22,
+                                running: false,
+                              )
+                              .copyWith(
+                                color: context.colors.textPrimary,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
                         ),
                       ),
                     ),

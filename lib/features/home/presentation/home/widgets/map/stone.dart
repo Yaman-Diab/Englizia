@@ -210,16 +210,16 @@ class StoneLabel extends StatelessWidget {
       style = strong ? texts.captionStrong : texts.caption;
     }
     final chipStyle = kids
-        ? style.copyWith(
-            fontSize: 15,
-            height: 20 / 15,
-            color: strong ? colors.primary.text : colors.textPrimary,
-          )
-        : style.copyWith(
-            fontSize: 11,
-            height: 15 / 11,
-            color: strong ? colors.primary.text : colors.textSecondary,
-          );
+        ? texts
+              .sized(style, size: 15, line: 20, running: false)
+              .copyWith(
+                color: strong ? colors.primary.text : colors.textPrimary,
+              )
+        : texts
+              .sized(style, size: 11, line: 15, running: false)
+              .copyWith(
+                color: strong ? colors.primary.text : colors.textSecondary,
+              );
     return IgnorePointer(
       child: ExcludeSemantics(
         child: SizedBox(
@@ -241,11 +241,9 @@ class StoneLabel extends StatelessWidget {
                 // run off the frame beside a lighthouse at the edge.
                 _Chip(
                   text: 'unit_review_after'.tr(),
-                  style: texts.caption.copyWith(
-                    fontSize: 10,
-                    height: 14 / 10,
-                    color: colors.textSecondary,
-                  ),
+                  style: texts
+                      .sized(texts.caption, size: 10, line: 14)
+                      .copyWith(color: colors.textSecondary),
                   padding: const EdgeInsets.symmetric(horizontal: 6),
                   radius: 7,
                   english: false,
