@@ -32,6 +32,7 @@ class CompactIsland extends StatelessWidget {
     this.clear = 0,
     this.flagWave = false,
     this.fogRunning = false,
+    this.labels = true,
     super.key,
   });
 
@@ -50,6 +51,10 @@ class CompactIsland extends StatelessWidget {
   /// The done flag's pennant waves; the clouds drift (the loop budget's).
   final bool flagWave;
   final bool fogRunning;
+
+  /// Its labels under the drawing; false where the map draws them over every
+  /// island instead ([CompactIslandLabels]).
+  final bool labels;
 
   /// The whole button, and the drawing's box in its top.
   static const size = Size(176, 162);
@@ -79,7 +84,10 @@ class CompactIsland extends StatelessWidget {
   bool get _done => unit.status == UnitLessonStatus.done;
 
   /// The unit before this one, which opens it.
-  int get _before => unit.lockedBy?.number ?? math.max(1, unit.number - 1);
+  int get _before => _beforeOf(unit);
+
+  static int _beforeOf(HomeUnit unit) =>
+      unit.lockedBy?.number ?? math.max(1, unit.number - 1);
 
   /// The design's shake: offsets in equal legs, in the right-to-left layout's
   /// physical space.
@@ -89,6 +97,12 @@ class CompactIsland extends StatelessWidget {
     final at = AppMotion.inOut.transform(t) * (offsets.length - 1);
     final i = at.floor().clamp(0, offsets.length - 2);
     return lerpDouble(offsets[i], offsets[i + 1], at - i)!;
+  }
+
+  /// [shakeOffset] as drawn, the right-to-left layout's offset mirrored.
+  static Offset shakeOf(BuildContext context, double shake) {
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    return Offset(shakeOffset(shake) * (rtl ? 1 : -1), 0);
   }
 
   String _label() {
@@ -124,11 +138,9 @@ class CompactIsland extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rtl = Directionality.of(context) == TextDirection.rtl;
-    final dx = shakeOffset(shake) * (rtl ? 1 : -1);
     final lockOpacity = _open ? 0.0 : 1 - clear;
     return Transform.translate(
-      offset: Offset(dx, 0),
+      offset: shakeOf(context, shake),
       child: Semantics(
         button: true,
         label: _label(),
@@ -179,12 +191,13 @@ class CompactIsland extends StatelessWidget {
                         height: lockSize,
                         child: _LockBadge(opening: clear, opacity: lockOpacity),
                       ),
-                    PositionedDirectional(
-                      start: 0,
-                      end: 0,
-                      top: labelsTop,
-                      child: _Labels(unit: unit, kids: kids, before: _before),
-                    ),
+                    if (labels)
+                      PositionedDirectional(
+                        start: 0,
+                        end: 0,
+                        top: labelsTop,
+                        child: _Labels(unit: unit, kids: kids, before: _before),
+                      ),
                   ],
                 ),
               ),
@@ -194,6 +207,53 @@ class CompactIsland extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A compact island's labels alone, in its box and shaking with it. The map
+/// draws them after every island's drawing: where the columns overlap (320
+/// wide) the next island's drawing and clouds reach over the labels of the
+/// one before, and the design draws the labels over all the islands.
+/// Decorative: the island's button says them.
+class CompactIslandLabels extends StatelessWidget {
+  const CompactIslandLabels({
+    required this.unit,
+    required this.kids,
+    this.shake = 0,
+    super.key,
+  });
+
+  final HomeUnit unit;
+  final bool kids;
+
+  /// The island's shake ([CompactIsland.shake]).
+  final double shake;
+
+  @override
+  Widget build(BuildContext context) => IgnorePointer(
+    child: ExcludeSemantics(
+      child: Transform.translate(
+        offset: CompactIsland.shakeOf(context, shake),
+        child: SizedBox.fromSize(
+          size: CompactIsland.size,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              PositionedDirectional(
+                start: 0,
+                end: 0,
+                top: CompactIsland.labelsTop,
+                child: _Labels(
+                  unit: unit,
+                  kids: kids,
+                  before: CompactIsland._beforeOf(unit),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// The unit's cover in the medallion, a centre crop; faded while locked.

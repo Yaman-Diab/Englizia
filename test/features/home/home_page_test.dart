@@ -10,6 +10,7 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
+import 'package:englizia/features/home/presentation/home/paint/fog_layer.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/goal_ring.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/back_to_lesson_button.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/island_banner.dart';
@@ -542,6 +543,36 @@ void main() {
         expect(rect.left, greaterThanOrEqualTo(0));
         expect(rect.right, lessThanOrEqualTo(narrowViewport.width));
       }
+    });
+
+    testWidgets('at 320dp a locked island\'s line is drawn over the next '
+        'island (${locale.languageCode})', (tester) async {
+      await pumpHome(tester, _home(), locale: locale, size: narrowViewport);
+      final line = tester.getRect(
+        find.text(
+          locale.languageCode == 'ar'
+              ? 'تُفتح بعد الوحدة 3'
+              : 'Opens after unit 3',
+        ),
+      );
+      final next = find.byWidgetPredicate(
+        (w) => w is CompactIsland && w.unit.number == 5,
+      );
+      final clouds = tester.getRect(
+        find.descendant(of: next, matching: find.byType(FogLayer)),
+      );
+      expect(line.overlaps(clouds), isTrue, reason: 'the columns overlap');
+      // Painted in the tree's order: every island's labels after all clouds.
+      final order = [
+        for (final element in tester.allElements)
+          if (element.widget is FogLayer ||
+              element.widget is CompactIslandLabels)
+            element.widget,
+      ];
+      expect(
+        order.indexWhere((w) => w is CompactIslandLabels),
+        greaterThan(order.lastIndexWhere((w) => w is FogLayer)),
+      );
     });
   }
 

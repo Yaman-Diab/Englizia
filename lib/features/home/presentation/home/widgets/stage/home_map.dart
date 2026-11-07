@@ -304,9 +304,13 @@ class HomeMap extends StatelessWidget {
       ),
       for (final (j, slot) in map.islands.indexed)
         if (slot.index != map.currentIndex)
-          _compact(context, slot, _rise(j))
+          _compact(slot, _rise(j))
         else if (scene.island != null)
           _current(context, slot, _rise(j)),
+      // Over every island: the next one's drawing reaches over the labels of
+      // the one before where the columns overlap.
+      for (final (j, slot) in map.islands.indexed)
+        if (slot.index != map.currentIndex) _compactLabels(slot, _rise(j)),
       ..._reviewBox(context),
       ..._horizon(context, horizonOpen),
       ?_bridgeGuide(),
@@ -330,9 +334,9 @@ class HomeMap extends StatelessWidget {
     );
   }
 
-  Widget _compact(BuildContext context, IslandSlot slot, double rise) {
-    final unit = scene.home.units[slot.index];
-    final done = unit.status == UnitLessonStatus.done;
+  /// A compact island's box, rising and pulsing with the island: its button,
+  /// or its labels drawn over every island.
+  Widget _compactBox(IslandSlot slot, double rise, Widget child) {
     final pulse = overrides.pulse;
     final scale = pulse != null && pulse.island && pulse.index == slot.index
         ? pulseScale(pulse.t)
@@ -343,34 +347,51 @@ class HomeMap extends StatelessWidget {
       top: rect.top,
       width: rect.width,
       height: rect.height,
-      child: Semantics(
-        sortKey: OrdinalSortKey((done ? _doneOrder : _aheadOrder) + slot.index),
-        child: _Rise(
-          t: rise,
-          child: RepaintBoundary(
-            child: Transform.scale(
-              scale: scale,
-              child: CompactIsland(
-                unit: unit,
-                slot: slot,
-                tone: scene.tone,
-                kids: scene.kids,
-                shake: overrides.shakeIsland == slot.index
-                    ? overrides.shakeT
-                    : 0,
-                clear: overrides.cloudsIsland == slot.index
-                    ? overrides.clouds
-                    : 0,
-                flagWave: done && loops.isOn(HomeLoop.flags),
-                fogRunning: loops.isOn(HomeLoop.clouds),
-                onPressed: () => actions.onIsland(slot.index),
-              ),
-            ),
-          ),
+      child: _Rise(
+        t: rise,
+        child: RepaintBoundary(
+          child: Transform.scale(scale: scale, child: child),
         ),
       ),
     );
   }
+
+  double _shakeOf(IslandSlot slot) =>
+      overrides.shakeIsland == slot.index ? overrides.shakeT : 0;
+
+  Widget _compact(IslandSlot slot, double rise) {
+    final unit = scene.home.units[slot.index];
+    final done = unit.status == UnitLessonStatus.done;
+    return _compactBox(
+      slot,
+      rise,
+      Semantics(
+        sortKey: OrdinalSortKey((done ? _doneOrder : _aheadOrder) + slot.index),
+        child: CompactIsland(
+          unit: unit,
+          slot: slot,
+          tone: scene.tone,
+          kids: scene.kids,
+          shake: _shakeOf(slot),
+          clear: overrides.cloudsIsland == slot.index ? overrides.clouds : 0,
+          flagWave: done && loops.isOn(HomeLoop.flags),
+          fogRunning: loops.isOn(HomeLoop.clouds),
+          labels: false,
+          onPressed: () => actions.onIsland(slot.index),
+        ),
+      ),
+    );
+  }
+
+  Widget _compactLabels(IslandSlot slot, double rise) => _compactBox(
+    slot,
+    rise,
+    CompactIslandLabels(
+      unit: scene.home.units[slot.index],
+      kids: scene.kids,
+      shake: _shakeOf(slot),
+    ),
+  );
 
   Widget _current(BuildContext context, IslandSlot slot, double rise) {
     final island = scene.island!;
