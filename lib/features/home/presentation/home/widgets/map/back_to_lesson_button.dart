@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot_palette.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/settings/app_haptics.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
 /// Which way the current lesson is from the screen: [up] above it (the
@@ -321,6 +322,7 @@ class _BackToLessonButtonState extends State<BackToLessonButton>
         excluding: _hiding,
         child: Semantics(
           button: true,
+          sortKey: HomeReadOrder.back,
           label: 'home_back_semantics'.tr(args: [title]),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,

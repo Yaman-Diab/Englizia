@@ -381,6 +381,56 @@ void main() {
       handle.dispose();
     });
 
+    for (final locale in const [Locale('ar'), Locale('en')]) {
+      testWidgets('reads the header first, then the level and the map '
+          '(header §14, ${locale.languageCode})', (tester) async {
+        final handle = tester.ensureSemantics();
+        await pumpHome(
+          tester,
+          _home(scenario: HomeMockScenario.freezeUsed),
+          size: _design,
+          locale: locale,
+        );
+        final read = [
+          for (final node in tester.semantics.simulatedAccessibilityTraversal())
+            if (node.label.isNotEmpty) node.label,
+        ];
+        int at(String start) => read.indexWhere((l) => l.startsWith(start));
+        final ar = locale.languageCode == 'ar';
+        final order = [
+          at(ar ? 'تبديل المسار' : 'Switch track'),
+          at(ar ? 'صباح الخير' : 'Good morning'),
+          at(ar ? 'استخدمنا تجميدًا' : 'We used a freeze'),
+          at(ar ? '7 أيام متتالية،' : '7 days in a row,'),
+          at(ar ? 'A2، ما قبل المتوسط' : 'A2, '),
+          at(ar ? '2 من 8 وحدات' : '2 of 8 units'),
+          at(ar ? 'خريطة المستوى' : 'Map of level'),
+          at(ar ? 'الوحدة 1،' : 'Unit 1,'),
+        ];
+        expect(order, everyElement(isNonNegative), reason: '$read');
+        expect(order, orderedEquals([...order]..sort()), reason: '$read');
+        handle.dispose();
+      });
+    }
+
+    testWidgets('the guide comes after the flame and before the level', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await pumpHome(tester, _home(), size: _design);
+      final read = [
+        for (final node in tester.semantics.simulatedAccessibilityTraversal())
+          if (node.label.isNotEmpty) node.label,
+      ];
+      int at(String start) => read.indexWhere((l) => l.startsWith(start));
+      final flame = at('7 أيام متتالية،');
+      final guide = at('بلبل');
+      expect(flame, isNonNegative);
+      expect(guide, greaterThan(flame));
+      expect(at('A2، ما قبل المتوسط'), greaterThan(guide));
+      handle.dispose();
+    });
+
     testWidgets('meets the tap target and label guidelines', (tester) async {
       final handle = tester.ensureSemantics();
       await pumpHome(tester, _home(), size: _design);

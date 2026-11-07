@@ -9,6 +9,7 @@ import 'package:englizia/core/design_system/widgets/streak_flame.dart';
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/header_styles.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
 /// The 56 top bar (design "Home Archipelago", header §2): the track capsule
@@ -98,24 +99,38 @@ class TopBar extends StatelessWidget {
               child: Align(
                 alignment: AlignmentDirectional.centerStart,
                 child: !kids && title != null
-                    ? _Capsule(title: title, onPressed: onTracks)
+                    ? Semantics(
+                        sortKey: HomeReadOrder.capsule,
+                        child: _Capsule(title: title, onPressed: onTracks),
+                      )
                     : null,
               ),
             ),
-            if (flame && emar) _PageSearch(onPressed: onPageSearch),
+            if (flame && emar)
+              Semantics(
+                sortKey: HomeReadOrder.search,
+                child: _PageSearch(onPressed: onPageSearch),
+              ),
             if (flame) ...[
-              _Flame(
-                streak: streak,
-                freezes: freezes,
-                maxFreezes: maxFreezes,
-                atRisk: atRisk,
-                wobble: wobble,
-                overrides: overrides,
-                onPressed: onStreak,
+              Semantics(
+                sortKey: HomeReadOrder.flame,
+                child: _Flame(
+                  streak: streak,
+                  freezes: freezes,
+                  maxFreezes: maxFreezes,
+                  atRisk: atRisk,
+                  wobble: wobble,
+                  overrides: overrides,
+                  onPressed: onStreak,
+                ),
               ),
               const SizedBox(width: _ringSpot),
             ],
-            if (kids && !skeleton && stars != null) _Stars(count: stars),
+            if (kids && !skeleton && stars != null)
+              Semantics(
+                sortKey: HomeReadOrder.flame,
+                child: _Stars(count: stars),
+              ),
             const SizedBox(width: _edge),
           ],
         ),
@@ -123,8 +138,11 @@ class TopBar extends StatelessWidget {
     );
     final longPress = onLongPress;
     if (longPress != null) {
+      // A node of its own would hold the bar's buttons out of the stage's
+      // reading order (HomeReadOrder); the dev page needs none.
       bar = GestureDetector(
         behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
         onLongPress: longPress,
         child: bar,
       );

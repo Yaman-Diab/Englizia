@@ -1,4 +1,5 @@
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/stage_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,8 @@ typedef StageLayerBuilder =
 ///
 /// Only the layers that follow the header rebuild as it moves; the
 /// [scrollView] is built once per change of the map. A vertical drag on the
-/// headers scrolls the map too.
+/// headers scrolls the map too. The screen reader reads them in
+/// [HomeReadOrder], not by where they lie.
 class HomeStage extends StatelessWidget {
   const HomeStage({
     required this.stage,
@@ -86,7 +88,7 @@ class HomeStage extends StatelessWidget {
               offset: Offset(0, contentShift),
               child: Opacity(
                 opacity: mapOpacity.clamp(0.0, 1.0),
-                child: scrollView,
+                child: Semantics(sortKey: HomeReadOrder.map, child: scrollView),
               ),
             ),
             builder: (context, map) {

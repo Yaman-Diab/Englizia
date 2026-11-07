@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/widgets.dart';
 
 /// While the unit's celebration runs (M6), a tap anywhere skips to its end
@@ -15,6 +16,7 @@ class SkipLayer extends StatelessWidget {
     if (!active) return const SizedBox.shrink();
     return Semantics(
       container: true,
+      sortKey: HomeReadOrder.skip,
       button: true,
       label: 'home_skip'.tr(),
       onTap: onSkip,

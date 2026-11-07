@@ -3,6 +3,7 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
 /// «انتقلت إلى …» after a track switch (header §10, M11): an inverse strip
@@ -61,6 +62,7 @@ class _Strip extends StatelessWidget {
     return Semantics(
       container: true,
       liveRegion: true,
+      sortKey: HomeReadOrder.strip,
       child: Container(
         width: double.infinity,
         constraints: const BoxConstraints(minHeight: SwitchStrip.height),

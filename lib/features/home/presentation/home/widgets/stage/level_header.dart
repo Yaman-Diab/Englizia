@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
 /// The level's title and units bar over its shore (design "Home
@@ -68,93 +69,98 @@ class LevelHeader extends StatelessWidget {
     final title = home.kids
         ? texts.title.copyWith(fontSize: 17, height: _kidLine / 17)
         : texts.title.copyWith(fontSize: 15, height: _line / 15);
-    return SizedBox(
-      height: height + shore,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ColoredBox(
-            color: colors.background,
-            child: SizedBox(
-              height: height,
-              child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  top: _top,
-                  start: _side,
-                  end: _side,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Never taller than its room: the two texts' baselines
-                    // can ask a fraction more than the title's line.
-                    Flexible(
-                      child: MediaQuery.withClampedTextScaling(
-                        maxScaleFactor: maxTextScale(kids: home.kids),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Expanded(
-                              child: Semantics(
-                                header: true,
+    return Semantics(
+      container: true,
+      explicitChildNodes: true,
+      sortKey: HomeReadOrder.level,
+      child: SizedBox(
+        height: height + shore,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ColoredBox(
+              color: colors.background,
+              child: SizedBox(
+                height: height,
+                child: Padding(
+                  padding: const EdgeInsetsDirectional.only(
+                    top: _top,
+                    start: _side,
+                    end: _side,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      // Never taller than its room: the two texts' baselines
+                      // can ask a fraction more than the title's line.
+                      Flexible(
+                        child: MediaQuery.withClampedTextScaling(
+                          maxScaleFactor: maxTextScale(kids: home.kids),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.baseline,
+                            textBaseline: TextBaseline.alphabetic,
+                            children: [
+                              Expanded(
+                                child: Semantics(
+                                  header: true,
+                                  child: Text(
+                                    levelTitle(home),
+                                    style: title.copyWith(
+                                      color: colors.textPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: _gap),
+                              ExcludeSemantics(
                                 child: Text(
-                                  levelTitle(home),
-                                  style: title.copyWith(
-                                    color: colors.textPrimary,
+                                  count,
+                                  style: texts.caption.copyWith(
+                                    fontSize: 13,
+                                    height: 20 / 13,
+                                    color: colors.textSecondary,
                                   ),
                                   maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: _gap),
-                            ExcludeSemantics(
-                              child: Text(
-                                count,
-                                style: texts.caption.copyWith(
-                                  fontSize: 13,
-                                  height: 20 / 13,
-                                  color: colors.textSecondary,
-                                ),
-                                maxLines: 1,
-                                softWrap: false,
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: _barGap),
-                    Semantics(
-                      role: SemanticsRole.progressBar,
-                      label: count,
-                      value: '$done',
-                      minValue: '0',
-                      maxValue: '$total',
-                      child: _Bar(
-                        share: share,
-                        fill: complete
-                            ? colors.success.fill
-                            : colors.primary.fill,
-                        track: colors.primary.surface,
+                      const SizedBox(height: _barGap),
+                      Semantics(
+                        role: SemanticsRole.progressBar,
+                        label: count,
+                        value: '$done',
+                        minValue: '0',
+                        maxValue: '$total',
+                        child: _Bar(
+                          share: share,
+                          fill: complete
+                              ? colors.success.fill
+                              : colors.primary.fill,
+                          track: colors.primary.surface,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          ExcludeSemantics(
-            child: CustomPaint(
-              size: const Size.fromHeight(shore),
-              painter: ShorePainter(
-                color: colors.background,
-                mirrored: Directionality.of(context) == TextDirection.ltr,
+            ExcludeSemantics(
+              child: CustomPaint(
+                size: const Size.fromHeight(shore),
+                painter: ShorePainter(
+                  color: colors.background,
+                  mirrored: Directionality.of(context) == TextDirection.ltr,
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

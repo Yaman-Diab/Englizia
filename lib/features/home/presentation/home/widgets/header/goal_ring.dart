@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
 /// Today's ring over the header, with the guide in it, shrinking to the top
@@ -177,6 +178,7 @@ class GoalRingOverlay extends StatelessWidget {
             ignoring: !here,
             child: Semantics(
               button: here,
+              sortKey: here ? HomeReadOrder.guide : null,
               label: here ? 'mascot_name'.tr() : null,
               onTap: here ? onGuideTap : null,
               excludeSemantics: true,

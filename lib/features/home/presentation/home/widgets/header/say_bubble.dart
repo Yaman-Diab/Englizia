@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/header_styles.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
 /// What the guide says when tapped, beside the ring (design "Home
@@ -78,6 +79,7 @@ class _Bubble extends StatelessWidget {
     return Semantics(
       liveRegion: true,
       container: true,
+      sortKey: HomeReadOrder.say,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: SayBubble.maxWidth),
         child: DecoratedBox(

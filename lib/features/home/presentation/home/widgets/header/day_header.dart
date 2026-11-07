@@ -15,6 +15,7 @@ import 'package:englizia/features/home/presentation/home/widgets/header/kid_week
 import 'package:englizia/features/home/presentation/home/widgets/header/level_complete_card.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/notice_cards.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -150,7 +151,12 @@ class DayHeader extends StatelessWidget {
                         _stripSide,
                         email ? 0 : _stripBottom,
                       ),
-                      child: strip,
+                      child: Semantics(
+                        sortKey: HomeReadOrder.strip,
+                        container: true,
+                        explicitChildNodes: true,
+                        child: strip,
+                      ),
                     ),
             ),
             // The design's slack sits under the content, as its flex column
@@ -185,7 +191,12 @@ class DayHeader extends StatelessWidget {
                     if (slot != HomeCardNotice.none)
                       Padding(
                         padding: const EdgeInsetsDirectional.only(top: cardGap),
-                        child: _card(home, slot),
+                        child: Semantics(
+                          sortKey: HomeReadOrder.card,
+                          container: true,
+                          explicitChildNodes: true,
+                          child: _card(home, slot),
+                        ),
                       ),
                   ],
                 ),
@@ -284,6 +295,7 @@ class _Greeting extends StatelessWidget {
     final status = state.status;
     return Semantics(
       container: true,
+      sortKey: HomeReadOrder.header,
       label: semanticsOf(state, home, minutes),
       explicitChildNodes: true,
       child: Row(
@@ -469,6 +481,7 @@ class _KidsHead extends StatelessWidget {
     final week = home.week;
     return Semantics(
       container: true,
+      sortKey: HomeReadOrder.header,
       label: semanticsOf(home),
       explicitChildNodes: true,
       child: Padding(
