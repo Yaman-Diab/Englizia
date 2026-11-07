@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/mascot/mascot_expression.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
+import 'package:englizia/features/home/data/models/home_model.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
@@ -182,7 +183,7 @@ void main() {
 
     test('it starts on the day before', () {
       final f = at(0);
-      expect(f.map.doneN, 3);
+      expect(f.map.done, {0, 1, 2});
       expect(f.map.cur, 3);
       expect(f.map.segments, {4: 0.0});
       expect(f.map.bubbleContent, 1);
@@ -202,7 +203,7 @@ void main() {
     test('beat 2: the guide lands, the stone fills and sparks', () {
       expect(at(500).guide, const GuideFlying());
       final f = at(700);
-      expect(f.map.doneN, 4);
+      expect(f.map.done, {0, 1, 2, 3});
       expect(f.map.cur, 3);
       expect(f.guide, const GuideBesideStone(3));
       expect(f.map.stonePop?.index, 3);
@@ -225,7 +226,7 @@ void main() {
     test('beat 4: the next stone is the current one, the tail follows', () {
       final f = at(1400);
       expect(f.map.cur, isNull);
-      expect(f.map.doneN, isNull);
+      expect(f.map.done, isNull);
       expect(f.map.tail?.a, 3);
       expect(f.map.tail?.b, 4);
       expect(f.map.tail!.t, inExclusiveRange(0, 1));
@@ -261,6 +262,29 @@ void main() {
       expect(last.header.streakRoll, 1);
       expect(last.header.guideJump, 1);
       expect(last.header.ringSparks, 1);
+    });
+
+    test('Emar: a lesson done out of turn is drawn done throughout', () {
+      final json = mockHomeJson(emar: true, now: _morning);
+      final unit = (json['units']! as List)
+          .cast<Map<String, Object?>>()
+          .firstWhere((unit) => unit['status'] == 'current');
+      ((unit['lessons']! as List)[4] as Map<String, Object?>)['done'] = true;
+      final day = HomeModel(json).toEntity();
+      final emar = LessonDoneMotion(
+        moment: _lessonDone(home: day, next: 5),
+        collapsed: false,
+      );
+      MotionFrame at(int ms) => emar.frameAt(_ms(ms));
+      expect(at(0).map.done, {0, 1, 2, 4});
+      expect(at(700).map.done, {0, 1, 2, 3, 4});
+      // The island's colour only grows: four of six, then five.
+      expect(at(0).map.saturation, closeTo(4 / 6, 1e-9));
+      expect(at(1299).map.saturation, closeTo(5 / 6, 1e-9));
+      // The trail draws out of the finished stone; the guide hops over 4.
+      expect(at(1000).map.segments.keys, [4]);
+      final hop = at(1000).guide! as GuideHop;
+      expect((hop.from, hop.to), (3, 5));
     });
 
     test('short of the goal it ends at 2030 with no goal step', () {
@@ -304,7 +328,7 @@ void main() {
 
     test('beat 1: stone 6 fills, the bubble still over its row', () {
       final f = at(700);
-      expect(f.map.doneN, 6);
+      expect(f.map.done, {0, 1, 2, 3, 4, 5});
       expect(f.map.stonePop?.index, 5);
       expect(f.guide, const GuideBesideStone(5));
       expect(f.map.rowFrom, isNull);
@@ -337,7 +361,7 @@ void main() {
     test('the lead-in is M5\'s: the ring, the flight, the last stone', () {
       final f = motion.frameAt(_ms(300));
       expect(f.map.snapshot, moment.before);
-      expect(f.map.doneN, 5);
+      expect(f.map.done, isNull, reason: 'as the day before has them');
       expect(f.map.bubbleVisible, isTrue);
       expect(f.header.ringFraction, inExclusiveRange(.7, 1));
       expect(motion.frameAt(_ms(400)).guide, const GuideFlying());
@@ -350,7 +374,7 @@ void main() {
         final shown = f.map.snapshot!;
         expect(shown.currentUnit!.lessons.every((l) => l.done), isTrue);
         expect(shown.unitsDone, moment.before.unitsDone + 1);
-        expect(f.map.doneN, 6);
+        expect(f.map.done, isNull);
         expect(f.map.bubbleVisible, isFalse);
         expect(f.map.flagUp, inExclusiveRange(.4, 1.3));
         expect(f.map.saturation, inExclusiveRange(5 / 6, 1));
@@ -379,7 +403,7 @@ void main() {
     test('beat 4: unit 4 current, its island grows, the bubble pops', () {
       final f = at(2100);
       expect(f.map.snapshot, isNull);
-      expect(f.map.doneN, isNull);
+      expect(f.map.done, isNull);
       expect(f.map.islandGrow!.scale, inExclusiveRange(.82, 1));
       expect(f.map.bubbleIn, 0);
       expect(f.guide, isNull);
@@ -682,11 +706,11 @@ void main() {
           .then((_) => done = true);
 
       expect(subject.busy, isTrue);
-      expect(subject.map.doneN, 3);
+      expect(subject.map.done, {0, 1, 2});
       expect(subject.header.minutes, 14);
       await tester.pump();
       await tester.pump(_ms(140 + 700));
-      expect(subject.map.doneN, 4);
+      expect(subject.map.done, {0, 1, 2, 3});
       expect(taps, ['HapticFeedbackType.lightImpact']);
       await tester.pump(_ms(1400));
       expect(subject.header.ringSuccess, isTrue);
@@ -714,7 +738,7 @@ void main() {
         map: mapOf(island),
       );
       expect(subject.busy, isFalse);
-      expect(subject.map.doneN, isNull);
+      expect(subject.map.done, isNull);
       expect(subject.map.bubbleContent, 0);
       expect(subject.forcedGuide, isNull);
       expect(taps, [

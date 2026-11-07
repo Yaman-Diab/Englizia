@@ -171,7 +171,6 @@ final class UnitDoneMotion implements MotionTimeline {
       final next = moment.nextUnit;
       map = MapOverrides(
         snapshot: leadIn ? moment.before : _done,
-        doneN: leadIn ? _last : _n,
         cur: leadIn ? _last : _n,
         bubbleVisible: leadIn,
         saturation: leadIn

@@ -569,7 +569,7 @@ class _HomePageState extends State<HomePage>
     final scene = _scene;
     final unit = scene?.unit;
     if (scene == null || unit == null || k >= unit.lessons.length) return;
-    final state = scene.stoneState(k, _choreo.map);
+    final state = scene.stoneState(k);
     if (state == StoneState.current &&
         scene.bubbleFrame != null &&
         !scene.reviewFirst) {
@@ -801,14 +801,19 @@ class _HomePageState extends State<HomePage>
     final mode = bubbleModeOf(state);
     IslandLayout? island;
     var current = 0;
-    var doneN = 0;
+    var done = const <int>{};
     HomeLesson? lesson;
     BubbleFrame? bubbleFrame;
     var bubbleHeight = 0.0;
     if (unit != null && unit.lessons.isNotEmpty) {
       final n = unit.lessons.length;
       current = overrides.cur ?? unit.currentLesson;
-      doneN = overrides.doneN ?? unit.doneCount;
+      done =
+          overrides.done ??
+          {
+            for (final (k, lesson) in unit.lessons.indexed)
+              if (lesson.done) k,
+          };
       lesson = current < n ? unit.lessons[current] : null;
       IslandLayout layout(double extra) => IslandLayout.compute(
         lessons: n,
@@ -888,7 +893,7 @@ class _HomePageState extends State<HomePage>
       island: island,
       unitIndex: island == null ? -1 : unitIndex,
       current: current,
-      doneN: doneN,
+      done: done,
       reviewFirst: reviewFirst && island != null,
       reviewBox: reviewBox,
       bubbleMode: mode,

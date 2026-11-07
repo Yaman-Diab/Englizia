@@ -54,7 +54,7 @@ final class HomeMapScene {
     required this.island,
     required this.unitIndex,
     required this.current,
-    required this.doneN,
+    required this.done,
     required this.reviewFirst,
     required this.reviewBox,
     required this.bubbleMode,
@@ -74,9 +74,9 @@ final class HomeMapScene {
   /// The current unit, -1 when none is.
   final int unitIndex;
 
-  /// The current lesson as drawn, and the lessons done.
+  /// The current lesson as drawn, and the lessons done (in any order).
   final int current;
-  final int doneN;
+  final Set<int> done;
   final bool reviewFirst;
   final bool reviewBox;
   final BubbleMode bubbleMode;
@@ -87,6 +87,7 @@ final class HomeMapScene {
   final double bubbleHeight;
 
   HomeUnit? get unit => unitIndex < 0 ? null : home.units[unitIndex];
+  int get doneN => done.length;
   bool get kids => home.kids;
   bool get emar => home.enrollment.audience == TrackAudience.schoolStudent;
   SeaTone get tone => toneOf(home.enrollment);
@@ -109,14 +110,8 @@ final class HomeMapScene {
     return unit == null ? LastStone.none : lastStoneOf(unit, kids: kids);
   }
 
-  bool lessonDone(int k, MapOverrides overrides) {
-    final doneN = overrides.doneN;
-    if (doneN != null) return k < doneN;
-    return unit!.lessons[k].done;
-  }
-
-  StoneState stoneState(int k, MapOverrides overrides) {
-    if (lessonDone(k, overrides)) return StoneState.done;
+  StoneState stoneState(int k) {
+    if (done.contains(k)) return StoneState.done;
     if (k == current) return StoneState.current;
     return home.enrollment.ordered ? StoneState.locked : StoneState.open;
   }
@@ -392,8 +387,11 @@ class HomeMap extends StatelessWidget {
             unitIndex: slot.index,
             saturation:
                 overrides.saturation ??
-                HomeRules.saturation(unit, doneOverride: overrides.doneN),
-            doneN: scene.doneN,
+                HomeRules.saturation(
+                  unit,
+                  doneOverride: overrides.done?.length,
+                ),
+            done: scene.done,
             segments: overrides.segments,
             last: scene.lastStone,
             lit: scene.doneN >= island.n - 1,
@@ -514,7 +512,7 @@ class HomeMap extends StatelessWidget {
       for (final (k, point) in island.stones.indexed)
         if (k < unit.lessons.length)
           () {
-            final state = scene.stoneState(k, overrides);
+            final state = scene.stoneState(k);
             final landmark = _landmark(k, island);
             final top =
                 point.dy +
@@ -591,7 +589,7 @@ class HomeMap extends StatelessWidget {
         if (k < unit.lessons.length)
           () {
             final lesson = unit.lessons[k];
-            final state = scene.stoneState(k, overrides);
+            final state = scene.stoneState(k);
             final landmark = _landmark(k, island);
             final scale = pulse != null && !pulse.island && pulse.index == k
                 ? pulseScale(pulse.t)
@@ -747,7 +745,7 @@ class HomeMap extends StatelessWidget {
   Widget? _card(IslandLayout island, HomeUnit unit) {
     final k = card;
     if (k == null || k < 0 || k >= unit.lessons.length) return null;
-    final state = scene.stoneState(k, overrides);
+    final state = scene.stoneState(k);
     final landmark = _landmark(k, island);
     final above = island.rowOf(k) > island.clear;
     final rect = StoneCard.place(

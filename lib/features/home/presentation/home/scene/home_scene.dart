@@ -118,7 +118,7 @@ bool ringShowsMinutes({
 /// (or the default) draws the data.
 final class MapOverrides extends Equatable {
   const MapOverrides({
-    this.doneN,
+    this.done,
     this.cur,
     this.unitIndex,
     this.segments = const {},
@@ -149,8 +149,9 @@ final class MapOverrides extends Equatable {
     this.snapshot,
   });
 
-  /// The current island as drawn: lessons done, the current one, its unit.
-  final int? doneN;
+  /// The current island as drawn: its lessons done (by index, in any order:
+  /// Emar's may be done out of turn), the current one, its unit.
+  final Set<int>? done;
   final int? cur;
   final int? unitIndex;
 
@@ -206,7 +207,7 @@ final class MapOverrides extends Equatable {
 
   /// A field can't be cleared this way: build a new one for that.
   MapOverrides copyWith({
-    int? doneN,
+    Set<int>? done,
     int? cur,
     int? unitIndex,
     Map<int, double>? segments,
@@ -236,7 +237,7 @@ final class MapOverrides extends Equatable {
     MascotExpression? guideExpression,
     HomeSnapshot? snapshot,
   }) => MapOverrides(
-    doneN: doneN ?? this.doneN,
+    done: done ?? this.done,
     cur: cur ?? this.cur,
     unitIndex: unitIndex ?? this.unitIndex,
     segments: segments ?? this.segments,
@@ -269,7 +270,7 @@ final class MapOverrides extends Equatable {
 
   @override
   List<Object?> get props => [
-    doneN,
+    done,
     cur,
     unitIndex,
     segments,

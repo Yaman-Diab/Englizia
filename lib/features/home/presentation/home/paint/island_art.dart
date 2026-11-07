@@ -40,15 +40,15 @@ LastStone lastStoneOf(HomeUnit unit, {required bool kids}) {
 /// screen readers. Drawn in the right-to-left layout's physical space,
 /// mirrored in left-to-right ones (D1).
 class IslandArt extends StatelessWidget {
-  /// The current island, as wide as the map and [layout] high. [doneN]
-  /// lessons are done; [segments] overrides how much of each trail piece is
+  /// The current island, as wide as the map and [layout] high. The lessons
+  /// in [done] are done, in any order; [segments] overrides how much of each trail piece is
   /// drawn (0 to 1); [complete] raises the unit flag, [flagUp] of the way.
   const IslandArt.current({
     required IslandLayout this.layout,
     required this.tone,
     required this.unitIndex,
     required this.saturation,
-    required this.doneN,
+    required this.done,
     required this.segments,
     required LastStone this.last,
     required this.lit,
@@ -68,7 +68,7 @@ class IslandArt extends StatelessWidget {
     super.key,
   }) : layout = null,
        saturation = 0,
-       doneN = 0,
+       done = const {},
        segments = const {},
        last = null,
        lit = false,
@@ -79,11 +79,29 @@ class IslandArt extends StatelessWidget {
   /// A compact island's drawing box; the art overflows it a little.
   static const compactSize = MapLayout.compactSize;
 
+  /// How much of trail piece [j] of [n] + 1 is drawn: its share in
+  /// [segments] when it has one, else all of the way in, of each piece out of
+  /// a done stone (so up to the current one when they are done in turn), and
+  /// of the way out of the island once [exit].
+  // ASSUMPTION(design): the design draws the pieces up to a count of lessons
+  // done, which only holds when they are done in turn; Emar's may not be.
+  static double trailShare(
+    int j, {
+    required int n,
+    required Set<int> done,
+    Map<int, double> segments = const {},
+    bool exit = false,
+  }) {
+    if (segments[j] case final share?) return share;
+    if (j == n) return exit ? 1 : 0;
+    return j == 0 || done.contains(j - 1) ? 1 : 0;
+  }
+
   final IslandLayout? layout;
   final SeaTone tone;
   final int unitIndex;
   final double saturation;
-  final int doneN;
+  final Set<int> done;
   final Map<int, double> segments;
   final LastStone? last;
 
@@ -114,7 +132,7 @@ class IslandArt extends StatelessWidget {
     final frame = this.frame;
     final current = layout != null && frame != null;
     // Every lesson done: the trail leaves the island and the unit flag rises.
-    final finished = current && (complete || doneN >= layout.n);
+    final finished = current && (complete || done.length >= layout.n);
     final spec = current
         ? _ArtSpec.current(
             layout: layout,
@@ -122,7 +140,7 @@ class IslandArt extends StatelessWidget {
             unitIndex: unitIndex,
             shades: shades,
             ink: ink,
-            doneN: doneN,
+            done: done,
             segments: segments,
             last: last ?? LastStone.none,
             lit: lit,
@@ -243,7 +261,7 @@ final class _ArtSpec {
     required this.unitIndex,
     required this.shades,
     required this.ink,
-    required this.doneN,
+    required this.done,
     required this.segments,
     required LastStone this.last,
     required this.lit,
@@ -257,7 +275,7 @@ final class _ArtSpec {
     required this.ink,
   }) : layout = null,
        frame = null,
-       doneN = 0,
+       done = const {},
        segments = const {},
        last = null,
        lit = false,
@@ -269,7 +287,7 @@ final class _ArtSpec {
   final UnitLessonStatus status;
   final IslandShades shades;
   final _Ink ink;
-  final int doneN;
+  final Set<int> done;
   final Map<int, double> segments;
   final LastStone? last;
   final bool lit;
@@ -282,7 +300,7 @@ final class _ArtSpec {
       other.status == status &&
       other.shades == shades &&
       other.ink == ink &&
-      other.doneN == doneN &&
+      setEquals(other.done, done) &&
       mapEquals(other.segments, segments) &&
       other.last == last &&
       other.lit == lit &&
@@ -297,7 +315,7 @@ final class _ArtSpec {
     status,
     shades,
     ink,
-    doneN,
+    Object.hashAllUnordered(done),
     Object.hashAllUnordered(segments.entries.map((e) => (e.key, e.value))),
     last,
     lit,
@@ -438,8 +456,7 @@ final class _ArtSpec {
     canvas.drawPath(path, _stroke(shades.grassDeep, 2));
   }
 
-  /// The dotted way ahead under the drawn trail: stone to stone up to the
-  /// current one, out of the island once it is done (map §4.7).
+  /// The dotted way ahead under the drawn trail ([IslandArt.trailShare]).
   void _trail(Canvas canvas, IslandLayout layout) {
     final n = layout.n;
     final todo = _stroke(ink.trailTodo, 3);
@@ -455,11 +472,13 @@ final class _ArtSpec {
     }
     final drawn = _stroke(ink.trail, 9);
     for (var j = 0; j <= n; j++) {
-      final share =
-          segments[j] ??
-          (j == n
-              ? (exitDrawn ? 1.0 : 0.0)
-              : (j == 0 || j <= doneN ? 1.0 : 0.0));
+      final share = IslandArt.trailShare(
+        j,
+        n: n,
+        done: done,
+        segments: segments,
+        exit: exitDrawn,
+      );
       if (share <= 0) continue;
       final path = toPath(layout.segments[j]);
       if (share >= 1) {

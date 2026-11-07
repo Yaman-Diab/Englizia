@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:englizia/core/design_system/mascot/mascot_expression.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/home/presentation/home/motion/motion_timeline.dart';
@@ -63,6 +64,14 @@ final class LessonDoneMotion implements MotionTimeline {
   int get _done => moment.lesson;
   int get _next => moment.next;
 
+  /// The lessons done before this one, as the day before drew them: in an
+  /// unordered track (Emar) they may come after it.
+  Set<int> get _doneBefore => {
+    for (final (k, lesson)
+        in (moment.before.currentUnit?.lessons ?? const <HomeLesson>[]).indexed)
+      if (lesson.done) k,
+  };
+
   bool get _reach => moment.goalReached && moment.goal > 0;
 
   bool get _rolls => _reach && moment.streakTo != moment.streakFrom;
@@ -102,11 +111,12 @@ final class LessonDoneMotion implements MotionTimeline {
         ? LessonDoneBeats.next
         : LessonDoneBeats.next + LessonDoneBeats.rowsDelay;
     final unit = moment.after.currentUnit;
+    final before = _doneBefore;
     final saturation = unit == null
         ? null
         : lerp(
-            HomeRules.saturation(unit, doneOverride: _done),
-            HomeRules.saturation(unit, doneOverride: _done + 1),
+            HomeRules.saturation(unit, doneOverride: before.length),
+            HomeRules.saturation(unit, doneOverride: before.length + 1),
             phase(
               ms,
               LessonDoneBeats.fill,
@@ -119,7 +129,7 @@ final class LessonDoneMotion implements MotionTimeline {
     final sliding =
         moved && ms < msOf(LessonDoneBeats.next + AppMotion.homeTail);
     final map = MapOverrides(
-      doneN: !filled ? _done : (!moved ? _done + 1 : null),
+      done: moved ? null : (filled ? {...before, _done} : before),
       cur: !moved ? _done : null,
       segments: {
         _done + 1: phase(

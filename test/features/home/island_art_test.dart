@@ -232,6 +232,34 @@ void main() {
     });
   });
 
+  group('the trail', () {
+    test('in turn: the way in and each piece up to the current stone', () {
+      final done = {0, 1, 2};
+      expect(
+        [
+          for (var j = 0; j <= 6; j++)
+            IslandArt.trailShare(j, n: 6, done: done),
+        ],
+        [1, 1, 1, 1, 0, 0, 0],
+      );
+      expect(
+        IslandArt.trailShare(4, n: 6, done: done, segments: const {4: .5}),
+        .5,
+      );
+      expect(IslandArt.trailShare(6, n: 6, done: done, exit: true), 1);
+    });
+
+    test('out of turn (Emar): each piece out of a done stone', () {
+      expect(
+        [
+          for (var j = 0; j <= 6; j++)
+            IslandArt.trailShare(j, n: 6, done: const {0, 2}),
+        ],
+        [1, 1, 0, 1, 0, 0, 0],
+      );
+    });
+  });
+
   group('sea colours (D38)', () {
     test('each level its sea, Emar and kids their own', () {
       const sea = SeaPalette.light;
@@ -307,7 +335,7 @@ void main() {
                           tone: SeaTone.general,
                           unitIndex: slot.index,
                           saturation: .5,
-                          doneN: done,
+                          done: {for (var k = 0; k < done; k++) k},
                           segments: const {4: .5},
                           last: LastStone.lighthouse,
                           lit: done >= 5,
