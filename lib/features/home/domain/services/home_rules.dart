@@ -316,7 +316,8 @@ abstract final class HomeRules {
 
   /// What to celebrate between [before] and [after] (a return from a
   /// lesson); null for a plain swap: another track or level, nothing new, or
-  /// more than one lesson done at once.
+  /// more than one lesson done at once. A unit the phone already finished
+  /// was celebrated then: the server catching up with it is a swap.
   static HomeMoment? diff(HomeSnapshot before, HomeSnapshot after) {
     if (before.enrollment.id != after.enrollment.id ||
         before.level.id != after.level.id) {
@@ -373,8 +374,13 @@ abstract final class HomeRules {
         streakTo: streakTo,
       );
     }
+    // Another unit is current: the one before is done, and its current
+    // lesson was the only one left.
+    final left = b.lessons.where((lesson) => !lesson.done).length;
     final finished = after.units.indexWhere((unit) => unit.id == b.id);
-    if (finished < 0 || after.units[finished].status != UnitLessonStatus.done) {
+    if (left != 1 ||
+        finished < 0 ||
+        after.units[finished].status != UnitLessonStatus.done) {
       return null;
     }
     final next = after.currentUnitIndex;

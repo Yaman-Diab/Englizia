@@ -457,6 +457,29 @@ void main() {
     });
 
     test(
+      'the server catching up with a unit the phone finished: a swap',
+      () async {
+        final (_, server) = await _played(HomeMockScenario.lastLesson, {
+          'les_mock',
+        });
+        final phone = _home(
+          HomeMockScenario.lastLesson,
+        ).withPhone((id) => LessonOnPhone(done: id == 'les_mock'));
+        expect(HomeRules.diff(phone, server), isNull);
+      },
+    );
+
+    test('a unit done elsewhere with lessons left here: a swap', () async {
+      final before = _home();
+      expect(before.currentUnit!.lessons.where((l) => !l.done).length, 3);
+      final (_, after) = await _played(HomeMockScenario.lastLesson, {
+        'les_mock',
+      });
+      expect(after.currentUnitIndex, 3);
+      expect(HomeRules.diff(before, after), isNull);
+    });
+
+    test(
       'nothing new, two lessons at once, or another track: a swap',
       () async {
         expect(HomeRules.diff(_home(), _home()), isNull);
