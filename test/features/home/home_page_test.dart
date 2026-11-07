@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
+import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/goal_ring.dart';
@@ -42,6 +43,18 @@ Future<void> _steps(WidgetTester tester, Duration total) async {
   for (var t = Duration.zero; t < total; t += step) {
     await tester.pump(step);
   }
+}
+
+/// A page over home, as a lesson opens; the navigator pops it.
+Future<NavigatorState> _pushLesson(WidgetTester tester) async {
+  final navigator = tester.state<NavigatorState>(find.byType(Navigator));
+  unawaited(
+    navigator.push(
+      MaterialPageRoute<void>(builder: (_) => const SizedBox.expand()),
+    ),
+  );
+  await _steps(tester, const Duration(milliseconds: 600));
+  return navigator;
 }
 
 /// Scrolls the map by [dy] (down the map when positive) and lets it settle.
@@ -175,22 +188,73 @@ void main() {
       expect(find.byType(ConnectionStrip), findsNothing);
     });
 
-    testWidgets('back on top from a lesson, home looks again (§4.3)', (
+    testWidgets('back from a lesson, what it changed plays (§4.3)', (
       tester,
     ) async {
       final repository = FakeHomeRepository(_home());
-      await pumpHome(tester, _home(), size: _design, repository: repository);
-      final before = repository.fetches;
-      final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-      unawaited(
-        navigator.push(
-          MaterialPageRoute<void>(builder: (_) => const SizedBox.expand()),
-        ),
+      final cubit = await pumpHome(
+        tester,
+        _home(),
+        size: _design,
+        repository: repository,
       );
-      await _steps(tester, const Duration(milliseconds: 600));
+      final navigator = await _pushLesson(tester);
+      repository.home = mockHomeAfterLesson(now: homeMorning);
       navigator.pop();
       await _steps(tester, const Duration(milliseconds: 600));
+      expect(cubit.state.momentId, 1);
+      expect(cubit.state.moment, isA<LessonDoneMoment>());
+
+      await _steps(tester, const Duration(milliseconds: 3500));
+      expect(cubit.state.moment, isNull, reason: 'played');
+      expect(
+        find.byWidgetPredicate(
+          (w) => w is Stone && w.index == 3 && w.state == StoneState.done,
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('a refresh while a lesson is on top keeps its moment', (
+      tester,
+    ) async {
+      final repository = FakeHomeRepository(_home());
+      final cubit = await pumpHome(
+        tester,
+        _home(),
+        size: _design,
+        repository: repository,
+      );
+      final navigator = await _pushLesson(tester);
+      repository.home = mockHomeAfterLesson(now: homeMorning);
+      final before = repository.fetches;
+      // The phone locked and unlocked on the result screen.
+      tester.binding
+        ..handleAppLifecycleStateChanged(AppLifecycleState.inactive)
+        ..handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pump();
       expect(repository.fetches, before + 1);
+      expect(cubit.state.home, _home(), reason: 'home stays as drawn');
+
+      navigator.pop();
+      await _steps(tester, const Duration(milliseconds: 600));
+      expect(cubit.state.moment, isA<LessonDoneMoment>());
+    });
+
+    testWidgets('closing a sheet over home is no return', (tester) async {
+      final repository = FakeHomeRepository(_home());
+      await pumpHome(tester, _home(), size: _design, repository: repository);
+      await _scroll(tester, 500);
+      final before = repository.fetches;
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is CompactIsland && w.unit.number == 4),
+      );
+      await _steps(tester, const Duration(milliseconds: 1500));
+      expect(find.byType(BottomSheet), findsOneWidget);
+      await tester.tapAt(const Offset(20, 20));
+      await _steps(tester, const Duration(milliseconds: 1500));
+      expect(find.byType(BottomSheet), findsNothing);
+      expect(repository.fetches, before);
     });
 
     testWidgets('a track switch says so for a while (M11)', (tester) async {

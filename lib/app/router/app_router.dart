@@ -152,14 +152,21 @@ GoRouter createAppRouter(AppSessionController session) {
     context.go(location, extra: extra);
   }
 
+  // Tells home when a page covers it and closes again (a return).
+  final pages = RouteObserver<PageRoute<dynamic>>();
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: session,
     debugLogDiagnostics: kDebugMode,
     redirect: redirect.call,
+    observers: [pages],
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
-      GoRoute(path: AppRoutes.home, builder: (_, state) => _homeTab(state)),
+      GoRoute(
+        path: AppRoutes.home,
+        builder: (_, state) => _homeTab(state, pages),
+      ),
       GoRoute(
         path: AppRoutes.foundation,
         builder: (_, _) => const FoundationPage(),
@@ -1129,7 +1136,11 @@ String _unitLessonPath(UnitLesson lesson, {required bool kids}) =>
 /// The «تعلّم» tab (S §6.1): home, under the tabs' bar or a child's one.
 /// Its cubit, the email's and «أنا»'s (for the tracks sheet, started only
 /// when it opens) live with the route; a dev page scenario starts it afresh.
-Widget _homeTab(GoRouterState state) => KeyedSubtree(
+/// [pages] tells it when a lesson or a unit over it closes.
+Widget _homeTab(
+  GoRouterState state,
+  RouteObserver<PageRoute<dynamic>> pages,
+) => KeyedSubtree(
   key: ObjectKey(state.extra is HomeRestart ? state.extra : null),
   child: MultiBlocProvider(
     providers: [
@@ -1142,6 +1153,7 @@ Widget _homeTab(GoRouterState state) => KeyedSubtree(
       child: Builder(
         builder: (context) {
           final page = HomePage(
+            pages: pages,
             actions: HomeActions(
               openLesson: (lesson, {required kids}) =>
                   context.push<void>(_unitLessonPath(lesson, kids: kids)),

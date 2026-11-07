@@ -85,6 +85,7 @@ extension PumpApp on WidgetTester {
     Locale locale = AppLocales.arabic,
     ThemeMode themeMode = ThemeMode.light,
     Size size = defaultViewport,
+    List<NavigatorObserver> navigatorObservers = const [],
   }) async {
     setViewport(size);
     await pumpWidget(
@@ -102,6 +103,7 @@ extension PumpApp on WidgetTester {
               locale: context.locale,
               supportedLocales: context.supportedLocales,
               localizationsDelegates: context.localizationDelegates,
+              navigatorObservers: navigatorObservers,
               home: home,
             );
           },

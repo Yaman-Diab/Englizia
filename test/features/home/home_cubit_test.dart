@@ -22,19 +22,7 @@ final _morning = DateTime(2026, 11, 5, 10);
 HomeSnapshot _home([HomeMockScenario scenario = HomeMockScenario.general]) =>
     mockHome(scenario: scenario, now: _morning);
 
-/// The general home once les_it is done: 14 minutes, streak 8.
-HomeSnapshot _afterLesson() {
-  final json = mockHomeJson(now: _morning);
-  final units = json['units']! as List;
-  final unit = units[2] as Map<String, Object?>;
-  final lessons = unit['lessons']! as List;
-  (lessons[3] as Map<String, Object?>)['done'] = true;
-  final week = json['week']! as Map<String, Object?>;
-  final days = week['days']! as List;
-  (days[week['today']! as int] as Map<String, Object?>)['minutes'] = 14;
-  (json['streak']! as Map<String, Object?>)['current'] = 8;
-  return HomeModel(json).toEntity();
-}
+HomeSnapshot _afterLesson() => mockHomeAfterLesson(now: _morning);
 
 /// [scenario] with unit [index] the current one.
 HomeSnapshot _movedTo(HomeMockScenario scenario, int index) {
@@ -217,6 +205,50 @@ void main() {
       subject.momentPlayed();
       expect(subject.state.moment, isNull);
       expect(subject.state.momentId, 1);
+    });
+
+    test('a refresh while a page covers home waits for the return', () async {
+      final subject = cubit();
+      await subject.start();
+      subject.left();
+      homes.home = _afterLesson();
+
+      expect(await subject.refresh(), isTrue);
+      expect(subject.state.home, _home(), reason: 'home stays as drawn');
+      expect(subject.state.refreshing, isFalse);
+
+      await subject.returned();
+      expect(subject.state.moment, isA<LessonDoneMoment>());
+      expect(subject.state.home, _afterLesson());
+    });
+
+    test(
+      'a return without the server celebrates what came meanwhile',
+      () async {
+        final subject = cubit();
+        await subject.start();
+        subject.left();
+        homes.home = _afterLesson();
+        await subject.refresh();
+        homes.failure = const NetworkFailure();
+
+        await subject.returned();
+
+        expect(subject.state.moment, isA<LessonDoneMoment>());
+        expect(subject.state.home, _afterLesson());
+        expect(subject.state.offlineFetch, isTrue);
+      },
+    );
+
+    test('once back, a refresh shows at once', () async {
+      final subject = cubit();
+      await subject.start();
+      subject.left();
+      await subject.returned();
+      homes.home = _afterLesson();
+      await subject.refresh();
+      expect(subject.state.home, _afterLesson());
+      expect(subject.state.moment, isNull);
     });
 
     test('nothing done: a plain swap', () async {

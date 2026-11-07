@@ -92,9 +92,13 @@ final class HomeActions {
 /// Reads the [VerifyEmailCubit] for the email reminder and the [MeCubit]
 /// for the tracks sheet when the route provides them.
 class HomePage extends StatefulWidget {
-  const HomePage({required this.actions, super.key});
+  const HomePage({required this.actions, required this.pages, super.key});
 
   final HomeActions actions;
+
+  /// The navigator's page routes: a page that covers home and closes again
+  /// is a return (a lesson, a unit); a sheet or a dialog isn't one.
+  final RouteObserver<PageRoute<dynamic>> pages;
 
   /// The kids' shell and bar.
   static bool isKids(HomeState state) => state.kids;
@@ -103,7 +107,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with TickerProviderStateMixin, RouteAware {
   final _scroll = ScrollController();
   late final _stage = StageController(
     vsync: this,
@@ -119,8 +124,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   late final HomeCubit _cubit;
 
   bool _reduceMotion = false;
-  bool _wasOnTop = true;
   bool _onTop = true;
+
+  /// The route [HomePage.pages] reports on.
+  PageRoute<dynamic>? _route;
 
   /// The map as last built: the day before when a moment arrives.
   HomeMapScene? _scene;
@@ -189,15 +196,34 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _reduceMotion = AppMotion.reduceMotion(context);
-    // Back on top after a lesson: what it changed shows (§4.3).
-    final onTop = ModalRoute.isCurrentOf(context) ?? true;
-    if (onTop && !_wasOnTop) unawaited(_cubit.returned());
-    _wasOnTop = onTop;
-    _onTop = onTop;
+    _onTop = ModalRoute.isCurrentOf(context) ?? true;
+    final route = ModalRoute.of(context);
+    if (route is PageRoute<dynamic> && route != _route) {
+      widget.pages.unsubscribe(this);
+      widget.pages.subscribe(this, _route = route);
+    }
   }
 
   @override
+  void didUpdateWidget(HomePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final route = _route;
+    if (oldWidget.pages == widget.pages || route == null) return;
+    oldWidget.pages.unsubscribe(this);
+    widget.pages.subscribe(this, route);
+  }
+
+  // A lesson or a unit over home, and back: what it changed shows (§4.3).
+
+  @override
+  void didPushNext() => _cubit.left();
+
+  @override
+  void didPopNext() => unawaited(_cubit.returned());
+
+  @override
   void dispose() {
+    widget.pages.unsubscribe(this);
     _switchTimer?.cancel();
     _failedTimer?.cancel();
     _toastTimer?.cancel();

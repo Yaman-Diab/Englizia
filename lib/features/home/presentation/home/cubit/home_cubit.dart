@@ -52,6 +52,15 @@ class HomeCubit extends Cubit<HomeState> {
   StreamSubscription<bool>? _changes;
   Timer? _clock;
 
+  /// A page covers home ([left]), or a return is being compared: what shows
+  /// stays as drawn, so the return's moment plays on it, and a refresh's
+  /// answer is [_held] for the return.
+  var _away = false;
+  var _returning = 0;
+  HomeSnapshot? _held;
+
+  bool get _holding => (_away || _returning > 0) && state.home != null;
+
   /// How long a return waits for the server before celebrating what the
   /// phone knows.
   static const returnWait = Duration(seconds: 2);
@@ -101,6 +110,16 @@ class HomeCubit extends Cubit<HomeState> {
     final result = await _home.getHome();
     if (isClosed) return false;
     switch (result) {
+      case Ok(:final value) when _holding:
+        _held = value;
+        emit(
+          state.copyWith(
+            refreshing: false,
+            offlineFetch: false,
+            refreshFailed: false,
+          ),
+        );
+        return true;
       case Ok(:final value):
         _show(value);
         return true;
@@ -126,23 +145,39 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// Back on the screen from a lesson: what changed meanwhile, and what to
-  /// celebrate. Waits [returnWait] for the server, then trusts the phone.
+  /// A page covers home now (a lesson, a unit): what shows stays as it was
+  /// drawn until [returned] compares with it; a refresh meanwhile keeps
+  /// its answer for then.
+  void left() => _away = true;
+
+  /// Back on the screen from a page over it: what changed meanwhile, and
+  /// what to celebrate. Waits [returnWait] for the server, then trusts the
+  /// home last fetched, with the phone's.
   Future<void> returned() async {
+    _away = false;
     final before = state.home;
     if (before == null) {
+      _held = null;
       await refresh();
       return;
     }
-    final result = await _home.getHome().timeout(
-      returnWait,
-      onTimeout: () => const Err(UnknownFailure()),
-    );
+    _returning++;
+    final Result<HomeSnapshot> result;
+    try {
+      result = await _home.getHome().timeout(
+        returnWait,
+        onTimeout: () => const Err(UnknownFailure()),
+      );
+    } finally {
+      _returning--;
+    }
     if (isClosed) return;
-    final after = _merged(switch (result) {
+    final fetched = switch (result) {
       Ok(:final value) => value,
-      Err() => before,
-    });
+      Err() => _held,
+    };
+    _held = null;
+    final after = _merged(fetched ?? before);
     final moment = HomeRules.diff(before, after);
     final levelDone = moment is UnitDoneMoment && moment.levelDone;
     emit(
@@ -161,7 +196,7 @@ class HomeCubit extends Cubit<HomeState> {
         refreshFailed: result is Ok ? false : null,
       ),
     );
-    if (result case Ok(:final value)) _preload(value);
+    if (fetched != null) _preload(fetched);
   }
 
   /// The opening has played: not again today.

@@ -52,7 +52,8 @@ Future<HomeCubit> loadedHomeCubit(
   return cubit;
 }
 
-/// [home] on the «تعلّم» tab, as the route shows it (its tab bar left out).
+/// [home] on the «تعلّم» tab, as the route shows it (its tab bar left out),
+/// told of the pages over it as the router does.
 Future<HomeCubit> pumpHome(
   WidgetTester tester,
   HomeSnapshot home, {
@@ -64,16 +65,21 @@ Future<HomeCubit> pumpHome(
 }) async {
   final cubit = await loadedHomeCubit(home, repository: repository);
   addTearDown(cubit.close);
+  final pages = RouteObserver<PageRoute<dynamic>>();
   await tester.pumpLocalized(
     BlocProvider.value(
       value: cubit,
       child: Scaffold(
-        body: HomePage(actions: (actions ?? RecordedActions()).actions),
+        body: HomePage(
+          actions: (actions ?? RecordedActions()).actions,
+          pages: pages,
+        ),
       ),
     ),
     locale: locale,
     themeMode: themeMode,
     size: size,
+    navigatorObservers: [pages],
   );
   await settleHome(tester);
   return cubit;

@@ -43,6 +43,21 @@ HomeSnapshot mockHome({
   mockHomeJson(scenario: scenario, kids: kids, emar: emar, now: now),
 ).toEntity();
 
+/// The general home once its current lesson (les_it) is done: 14 minutes
+/// today, the streak 8.
+HomeSnapshot mockHomeAfterLesson({DateTime? now}) {
+  final json = mockHomeJson(now: now);
+  final units = json['units']! as List;
+  final unit = units[2] as Map<String, Object?>;
+  final lessons = unit['lessons']! as List;
+  (lessons[3] as Map<String, Object?>)['done'] = true;
+  final week = json['week']! as Map<String, Object?>;
+  final days = week['days']! as List;
+  (days[week['today']! as int] as Map<String, Object?>)['minutes'] = 14;
+  (json['streak']! as Map<String, Object?>)['current'] = 8;
+  return HomeModel(json).toEntity();
+}
+
 class FakeHomeRepository implements HomeRepository {
   FakeHomeRepository(this.home, {this.failure, this.kept});
 
