@@ -9,15 +9,29 @@ class GoalRing extends StatelessWidget {
   const GoalRing({
     required this.share,
     required this.color,
-    required this.child,
+    this.child,
     this.size = 48,
+    this.stroke = 4.5,
+    this.track,
     super.key,
   });
 
   final double share;
   final Color color;
   final double size;
-  final Widget child;
+  final Widget? child;
+
+  /// The ring's width, inside [size].
+  final double stroke;
+
+  /// Under the arc; the theme's outline, faded, unless given.
+  final Color? track;
+
+  static const _trackAlpha = .45;
+
+  /// The arc's sweep for [share], clockwise from 12 o'clock; none at 0, so
+  /// no lone round cap shows.
+  static double sweepOf(double share) => 2 * math.pi * share.clamp(0.0, 1.0);
 
   @override
   Widget build(BuildContext context) => SizedBox.square(
@@ -26,9 +40,10 @@ class GoalRing extends StatelessWidget {
       painter: _RingPainter(
         share: share,
         color: color,
-        track: context.scheme.outline,
+        stroke: stroke,
+        track: track ?? context.scheme.outline.withValues(alpha: _trackAlpha),
       ),
-      child: Center(child: child),
+      child: child == null ? null : Center(child: child),
     ),
   );
 }
@@ -37,15 +52,14 @@ class _RingPainter extends CustomPainter {
   const _RingPainter({
     required this.share,
     required this.color,
+    required this.stroke,
     required this.track,
   });
 
   final double share;
   final Color color;
+  final double stroke;
   final Color track;
-
-  static const _stroke = 4.5;
-  static const _trackAlpha = .45;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -54,23 +68,24 @@ class _RingPainter extends CustomPainter {
       0,
       size.width,
       size.height,
-    ).deflate(_stroke / 2);
+    ).deflate(stroke / 2);
     canvas.drawOval(
       rect,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = _stroke
-        ..color = track.withValues(alpha: _trackAlpha),
+        ..strokeWidth = stroke
+        ..color = track,
     );
-    if (share <= 0) return;
+    final sweep = GoalRing.sweepOf(share);
+    if (sweep <= 0) return;
     canvas.drawArc(
       rect,
       -math.pi / 2,
-      2 * math.pi * share.clamp(0, 1),
+      sweep,
       false,
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = _stroke
+        ..strokeWidth = stroke
         ..strokeCap = StrokeCap.round
         ..color = color,
     );
@@ -80,5 +95,6 @@ class _RingPainter extends CustomPainter {
   bool shouldRepaint(_RingPainter oldDelegate) =>
       oldDelegate.share != share ||
       oldDelegate.color != color ||
+      oldDelegate.stroke != stroke ||
       oldDelegate.track != track;
 }

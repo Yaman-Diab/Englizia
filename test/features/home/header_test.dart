@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/widgets/goal_ring.dart';
 import 'package:englizia/core/design_system/widgets/streak_flame.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/state/load_status.dart';
@@ -183,8 +184,9 @@ Future<void> _settle(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 400));
 }
 
-Finder _ringPaint() => find.byWidgetPredicate(
-  (w) => w is CustomPaint && w.painter is GoalRingPainter,
+Finder _ringPaint() => find.descendant(
+  of: find.byType(GoalRingOverlay),
+  matching: find.byType(GoalRing),
 );
 
 void main() {
@@ -689,13 +691,6 @@ void main() {
   });
 
   group('goal ring', () {
-    test('the arc sweeps clockwise by the fraction, none at 0', () {
-      expect(GoalRingPainter.sweepOf(0), 0);
-      expect(GoalRingPainter.sweepOf(.7), closeTo(2 * math.pi * .7, 1e-9));
-      expect(GoalRingPainter.sweepOf(1.4), closeTo(2 * math.pi, 1e-9));
-      expect(GoalRingPainter.sweepOf(-1), 0);
-    });
-
     test('the guide\'s face follows the fraction', () {
       expect(GoalRingOverlay.expressionFor(0), MascotExpression.welcome);
       expect(GoalRingOverlay.expressionFor(.5), MascotExpression.encourage);
@@ -750,9 +745,9 @@ void main() {
         tester.getRect(_ringPaint()),
         const Rect.fromLTWH(20, 108, 96, 96),
       );
-      final painter =
-          tester.widget<CustomPaint>(_ringPaint()).painter! as GoalRingPainter;
-      expect(painter.fraction, closeTo(.7, 1e-9));
+      final drawn = tester.widget<GoalRing>(_ringPaint());
+      expect(drawn.share, closeTo(.7, 1e-9));
+      expect(drawn.stroke, 8);
 
       await tester.pumpLocalized(
         ring(
@@ -772,9 +767,7 @@ void main() {
         ring(_metrics(), overrides: const HeaderOverrides(ringArcIn: 0)),
       );
       await _settle(tester);
-      var painter =
-          tester.widget<CustomPaint>(_ringPaint()).painter! as GoalRingPainter;
-      expect(painter.fraction, 0);
+      expect(tester.widget<GoalRing>(_ringPaint()).share, 0);
 
       await tester.pumpLocalized(
         ring(
@@ -784,9 +777,7 @@ void main() {
         ),
       );
       await _settle(tester);
-      painter =
-          tester.widget<CustomPaint>(_ringPaint()).painter! as GoalRingPainter;
-      expect(painter.fraction, 1);
+      expect(tester.widget<GoalRing>(_ringPaint()).share, 1);
       expect(find.text('12/10'), findsOneWidget);
     });
 

@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
@@ -11,6 +10,7 @@ import 'package:englizia/core/design_system/motion/listening_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/ai_spark.dart';
+import 'package:englizia/core/design_system/widgets/goal_ring.dart';
 import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
@@ -600,6 +600,11 @@ class _LessonStone extends StatelessWidget {
 
   final Stone stone;
 
+  /// The ring round a lesson left half done: stroke 6, its middle 6 out
+  /// from the disk.
+  static const _partialOut = 9.0;
+  static const _partialStroke = 6.0;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -658,16 +663,16 @@ class _LessonStone extends StatelessWidget {
       children: [
         if (partial)
           Positioned.fill(
-            left: -10,
-            top: -10,
-            right: -10,
-            bottom: -10,
-            child: CustomPaint(
-              painter: PartialRingPainter(
-                share: share,
-                track: colors.primary.surface,
-                arc: colors.primary.fill,
-              ),
+            left: -_partialOut,
+            top: -_partialOut,
+            right: -_partialOut,
+            bottom: -_partialOut,
+            child: GoalRing(
+              share: share,
+              color: colors.primary.fill,
+              track: colors.primary.surface,
+              stroke: _partialStroke,
+              size: d + 2 * _partialOut,
             ),
           ),
         Center(child: icon),
@@ -964,47 +969,4 @@ class _StationStone extends StatelessWidget {
       ),
     );
   }
-}
-
-/// The ring around a current lesson left half done: its share drawn
-/// clockwise from 12 o'clock in both directions, round-capped (map §5.1).
-class PartialRingPainter extends CustomPainter {
-  const PartialRingPainter({
-    required this.share,
-    required this.track,
-    required this.arc,
-  });
-
-  final double share;
-  final Color track;
-  final Color arc;
-
-  static const _stroke = 6.0;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final centre = size.center(Offset.zero);
-    final radius = size.shortestSide / 2 - _stroke / 2 - 1;
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = _stroke;
-    canvas.drawCircle(centre, radius, paint..color = track);
-    final sweep = share.clamp(0.0, 1.0) * 2 * math.pi;
-    if (sweep <= 0) return;
-    canvas.drawArc(
-      Rect.fromCircle(center: centre, radius: radius),
-      -math.pi / 2,
-      sweep,
-      false,
-      paint
-        ..color = arc
-        ..strokeCap = StrokeCap.round,
-    );
-  }
-
-  @override
-  bool shouldRepaint(PartialRingPainter oldDelegate) =>
-      oldDelegate.share != share ||
-      oldDelegate.track != track ||
-      oldDelegate.arc != arc;
 }

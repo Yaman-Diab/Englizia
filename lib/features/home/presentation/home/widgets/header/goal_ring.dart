@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/widgets/goal_ring.dart';
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
@@ -340,12 +341,17 @@ class _GuideMotion extends StatelessWidget {
   }
 }
 
-/// The ring's drawing; its colour changes over [AppMotion.homeRingColor].
+/// The ring's drawing in the 96 box: the core ring, stroke 8 (radius 44),
+/// round the 72 disk with a 4 gap of background between them. Its colour
+/// changes over [AppMotion.homeRingColor].
 class _RingArt extends StatelessWidget {
   const _RingArt({required this.fraction, required this.success});
 
   final double fraction;
   final bool success;
+
+  static const _stroke = 8.0;
+  static const _disk = 72.0;
 
   @override
   Widget build(BuildContext context) {
@@ -356,75 +362,23 @@ class _RingArt extends StatelessWidget {
       ),
       duration: AppMotion.resolve(context, AppMotion.homeRingColor),
       curve: AppMotion.out,
-      builder: (context, arc, _) => CustomPaint(
-        painter: GoalRingPainter(
-          fraction: fraction,
-          arc: arc ?? colors.primary.fill,
-          track: context.scheme.outline.withValues(
-            alpha: GoalRingPainter.trackAlpha,
+      builder: (context, arc, _) => GoalRing(
+        share: fraction,
+        color: arc ?? colors.primary.fill,
+        size: StageMetrics.ringBox,
+        stroke: _stroke,
+        child: SizedBox.square(
+          dimension: _disk,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: colors.primary.surface,
+            ),
           ),
-          disk: colors.primary.surface,
         ),
       ),
     );
   }
-}
-
-/// Header §4.1 in the 96 box: the track and the arc of radius 44, stroke 8,
-/// and the 72 disk inside them (a 4 gap of background between).
-class GoalRingPainter extends CustomPainter {
-  const GoalRingPainter({
-    required this.fraction,
-    required this.arc,
-    required this.track,
-    required this.disk,
-  });
-
-  final double fraction;
-  final Color arc;
-  final Color track;
-  final Color disk;
-
-  static const radius = 44.0;
-  static const stroke = 8.0;
-  static const diskRadius = 36.0;
-  static const trackAlpha = .45;
-
-  /// The arc's sweep for [fraction], clockwise from 12 o'clock; none at 0,
-  /// so no lone round cap shows.
-  static double sweepOf(double fraction) =>
-      2 * math.pi * fraction.clamp(0.0, 1.0);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final scale = size.shortestSide / StageMetrics.ringBox;
-    final centre = size.center(Offset.zero);
-    final r = radius * scale;
-    final line = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = stroke * scale;
-    canvas
-      ..drawCircle(centre, diskRadius * scale, Paint()..color = disk)
-      ..drawCircle(centre, r, line..color = track);
-    final sweep = sweepOf(fraction);
-    if (sweep <= 0) return;
-    canvas.drawArc(
-      Rect.fromCircle(center: centre, radius: r),
-      -math.pi / 2,
-      sweep,
-      false,
-      line
-        ..color = arc
-        ..strokeCap = StrokeCap.round,
-    );
-  }
-
-  @override
-  bool shouldRepaint(GoalRingPainter oldDelegate) =>
-      oldDelegate.fraction != fraction ||
-      oldDelegate.arc != arc ||
-      oldDelegate.track != track ||
-      oldDelegate.disk != disk;
 }
 
 /// The goal's six sparks around the ring (motion §1.2): each starts
