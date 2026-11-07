@@ -134,7 +134,7 @@ Not in the payload on purpose: the lesson's content (`GET /lessons/{id}`, preloa
 
 ### What the app decides itself
 
-The greeting's hours («صباح الخير» until 12:00), the streak at risk from 18:00, and the one-card-at-a-time priority (a one-time notice, the level done, the email, the level check, the deferred test) are app rules (docs/STATUS.md). The opening's once-a-day uses `week.dayStart` (04:00 by default).
+The greeting's hours («صباح الخير» until 12:00), the streak at risk from 18:00, and the one-card-at-a-time priority (a one-time notice, the level done, the email, the level check, the deferred test) are app rules (docs/STATUS.md). The opening's once-a-day uses `week.dayStart` (04:00 by default), read on the phone's wall clock.
 
 ### Errors
 

@@ -61,6 +61,33 @@ void main() {
       expect(HomeRules.dayKey(DateTime(2026, 11, 5, 0, 1), ''), '2026-11-05');
     });
 
+    test(
+      'starts at the day start on the wall clock, on a clock change too',
+      () {
+        // Every day of years with and without daylight saving where this runs:
+        // a day that changes the clock before 04:00 still starts at 04:00.
+        const oneDay = Duration(days: 1);
+        String key(DateTime d) => d.toIso8601String().substring(0, 10);
+        for (final year in const [2021, 2026]) {
+          for (
+            var day = DateTime.utc(year);
+            day.year == year;
+            day = day.add(oneDay)
+          ) {
+            for (final (hour, minute, expected) in [
+              (3, 59, key(day.subtract(oneDay))),
+              (4, 0, key(day)),
+              (4, 30, key(day)),
+            ]) {
+              final at = DateTime(day.year, day.month, day.day, hour, minute);
+              if (at.hour != hour) continue; // not on this clock that day
+              expect(HomeRules.dayKey(at, '04:00'), expected, reason: '$at');
+            }
+          }
+        }
+      },
+    );
+
     test('today rolls over on the phone at the day start (A30)', () {
       final home = _home(HomeMockScenario.goalReached);
       expect(home.todayMinutes, 12);

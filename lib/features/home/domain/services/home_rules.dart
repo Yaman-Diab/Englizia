@@ -72,12 +72,17 @@ abstract final class HomeRules {
   static const seenEventsKept = 20;
 
   /// The learner's day [now] belongs to, as `yyyy-mm-dd`: a day that starts
-  /// at [dayStart] («04:00») still counts as yesterday before it.
+  /// at [dayStart] («04:00») still counts as yesterday before it. Read on
+  /// the wall clock, so a clock change that day doesn't move its start.
   static String dayKey(DateTime now, String dayStart) {
     final parts = dayStart.split(':');
     final hours = int.tryParse(parts.first.trim()) ?? 0;
     final minutes = parts.length > 1 ? int.tryParse(parts[1].trim()) ?? 0 : 0;
-    return _dateKey(now.subtract(Duration(hours: hours, minutes: minutes)));
+    final before = now.hour * 60 + now.minute < hours * 60 + minutes;
+    // UTC only counts calendar days: local midnight may not exist.
+    return _dateKey(
+      DateTime.utc(now.year, now.month, now.day - (before ? 1 : 0)),
+    );
   }
 
   static String _dateKey(DateTime day) {
