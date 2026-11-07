@@ -155,7 +155,8 @@ class StageController extends ChangeNotifier {
   /// Scrolls the map to [target] over [duration] (header §5.6); with
   /// [foldHeader] the header folds with the same ease and ends folded as far
   /// as the map has scrolled, otherwise it follows the scroll as a finger's
-  /// would (M6's camera). Under reduce motion it jumps.
+  /// would (M6's camera). Under reduce motion it jumps. A scroll started
+  /// meanwhile takes over: this one then leaves the header to it.
   Future<void> scrollTo(
     double target,
     Duration duration, {
@@ -168,8 +169,11 @@ class StageController extends ChangeNotifier {
         .clamp(position.minScrollExtent, position.maxScrollExtent)
         .toDouble();
     _stopSnap();
+    final mine = ++_scrolls;
     programmatic = true;
-    if (foldHeader) _fold = (from: controller.offset, target: to, c0: collapse);
+    _fold = foldHeader
+        ? (from: controller.offset, target: to, c0: collapse)
+        : null;
     try {
       if (_reduceMotion() ||
           duration <= Duration.zero ||
@@ -183,14 +187,19 @@ class StageController extends ChangeNotifier {
         );
       }
     } finally {
-      programmatic = false;
-      _fold = null;
-      if (foldHeader) {
-        collapse = math.max(0.0, math.min(head, scroll));
-        _changed();
+      if (mine == _scrolls) {
+        programmatic = false;
+        _fold = null;
+        if (foldHeader) {
+          collapse = math.max(0.0, math.min(head, scroll));
+          _changed();
+        }
       }
     }
   }
+
+  /// [scrollTo]'s calls so far: only the latest ends home's scroll.
+  var _scrolls = 0;
 
   /// Puts the map at [offset] with the header at [collapse]: the opening
   /// anchor (header §5.1, c = 0), or M6's new one.

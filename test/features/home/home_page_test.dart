@@ -174,6 +174,31 @@ void main() {
       );
     });
 
+    testWidgets('the back button pressed twice goes once (bubble §13.3)', (
+      tester,
+    ) async {
+      await pumpHome(tester, _home(), size: _design);
+      await _scroll(tester, 900);
+      BackDirection? direction() => tester
+          .widget<BackToLessonButton>(find.byType(BackToLessonButton))
+          .direction;
+
+      await tester.tap(find.byType(BackToLessonButton));
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.tap(find.byType(BackToLessonButton));
+      for (var i = 0; i < 6; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(direction(), BackDirection.up, reason: 'it stays until there');
+        final ring = tester.widget<GoalRingOverlay>(
+          find.byType(GoalRingOverlay),
+        );
+        expect(ring.metrics.collapse, 114, reason: 'folded on the way');
+      }
+      await _steps(tester, const Duration(milliseconds: 1200));
+      expect(_map(tester).pixels, 114 + 310 - 10);
+      expect(direction(), isNull);
+    });
+
     testWidgets('a pull at the top asks the server again', (tester) async {
       final repository = FakeHomeRepository(_home());
       await pumpHome(tester, _home(), size: _design, repository: repository);

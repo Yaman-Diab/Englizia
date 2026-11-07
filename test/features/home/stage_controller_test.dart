@@ -215,6 +215,30 @@ void main() {
       await _idle(tester);
     });
 
+    testWidgets('a scroll started on the way takes over, the header kept '
+        'folded', (tester) async {
+      final stage = _stage(vsync: const TestVSync());
+      final controller = await _attach(tester, stage);
+      stage.jumpTo(1500, collapse: 114);
+      final first = stage.scrollTo(300, AppMotion.homeBackScroll);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 120));
+      final second = stage.scrollTo(300, AppMotion.homeBackScroll);
+      await first;
+      expect(stage.programmatic, isTrue, reason: 'the second one runs');
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        expect(controller.offset, greaterThan(300));
+        expect(stage.collapse, 114, reason: 'folded on the way up');
+      }
+      await tester.pump(AppMotion.homeBackScroll);
+      await second;
+      expect(controller.offset, 300);
+      expect(stage.programmatic, isFalse);
+      expect(stage.collapse, 114);
+      await _idle(tester);
+    });
+
     testWidgets('jump under reduce motion, kept within the map', (
       tester,
     ) async {

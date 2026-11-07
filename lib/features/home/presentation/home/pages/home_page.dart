@@ -418,11 +418,12 @@ class _HomePageState extends State<HomePage>
   }
 
   /// The back button: to today's island with the header kept folded, then
-  /// the guide flies back beside the stone (bubble §13.3).
+  /// the guide flies back beside the stone (bubble §13.3). Pressed again on
+  /// the way, it's already going.
   Future<void> _back() async {
     final scene = _scene;
     final slot = scene?.map.current;
-    if (scene == null || slot == null) return;
+    if (scene == null || slot == null || _returning) return;
     _closeCard();
     _returning = true;
     try {
