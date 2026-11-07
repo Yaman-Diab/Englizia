@@ -12,6 +12,9 @@ import 'package:flutter/material.dart';
 /// Archipelago", map §6, header §6): 40 high with an 8 scalloped edge that
 /// hangs over the sea; it sticks under the top bar once the day header has
 /// folded. The bar is the screen reader's progress bar: «2 من 8 وحدات».
+/// Large text grows the title only as far as the 40 holds it
+/// ([maxTextScale]); the title then ends in «…», and the screen reader still
+/// has all of it.
 class LevelHeader extends StatelessWidget {
   const LevelHeader({required this.home, required this.progress, super.key});
 
@@ -32,6 +35,19 @@ class LevelHeader extends StatelessWidget {
   static const _bar = 4.0;
   static const _barRadius = Radius.circular(2);
 
+  /// The title's line, which the row's height follows.
+  static const _line = 22.0;
+  static const _kidLine = 24.0;
+
+  /// What the 40 leaves the title's row, under the top and over the bar.
+  static const _rowRoom = height - _top - _barGap - _bar;
+
+  /// The largest text scale whose title line fits the row. ASSUMPTION(design):
+  /// the header keeps the design's 40 under large text (the map hangs from
+  /// it), so its title grows only this far, where the day header grows.
+  static double maxTextScale({required bool kids}) =>
+      _rowRoom / (kids ? _kidLine : _line);
+
   /// The fill never shrinks below this share, so an empty bar still shows.
   static const _leastShare = .02;
 
@@ -50,8 +66,8 @@ class LevelHeader extends StatelessWidget {
         ? _leastShare
         : math.max(_leastShare, math.min(1.0, done / total));
     final title = home.kids
-        ? texts.title.copyWith(fontSize: 17, height: 24 / 17)
-        : texts.title.copyWith(fontSize: 15, height: 22 / 15);
+        ? texts.title.copyWith(fontSize: 17, height: _kidLine / 17)
+        : texts.title.copyWith(fontSize: 15, height: _line / 15);
     return SizedBox(
       height: height + shore,
       child: Column(
@@ -70,35 +86,44 @@ class LevelHeader extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Expanded(
-                          child: Semantics(
-                            header: true,
-                            child: Text(
-                              levelTitle(home),
-                              style: title.copyWith(color: colors.textPrimary),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                    // Never taller than its room: the two texts' baselines
+                    // can ask a fraction more than the title's line.
+                    Flexible(
+                      child: MediaQuery.withClampedTextScaling(
+                        maxScaleFactor: maxTextScale(kids: home.kids),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Expanded(
+                              child: Semantics(
+                                header: true,
+                                child: Text(
+                                  levelTitle(home),
+                                  style: title.copyWith(
+                                    color: colors.textPrimary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                        const SizedBox(width: _gap),
-                        ExcludeSemantics(
-                          child: Text(
-                            count,
-                            style: texts.caption.copyWith(
-                              fontSize: 13,
-                              height: 20 / 13,
-                              color: colors.textSecondary,
+                            const SizedBox(width: _gap),
+                            ExcludeSemantics(
+                              child: Text(
+                                count,
+                                style: texts.caption.copyWith(
+                                  fontSize: 13,
+                                  height: 20 / 13,
+                                  color: colors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                softWrap: false,
+                              ),
                             ),
-                            maxLines: 1,
-                            softWrap: false,
-                          ),
+                          ],
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: _barGap),
                     Semantics(

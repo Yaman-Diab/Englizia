@@ -74,20 +74,28 @@ void main() {
       ('level complete', () => _home(scenario: HomeMockScenario.levelComplete)),
       ('ten lessons', () => _home(scenario: HomeMockScenario.lessons10)),
     ]) {
-      testLayouts(name, (tester, layout) async {
-        await pumpHome(
+      // The app's largest text scale (lib/app/app.dart) as well.
+      for (final scale in const [1.0, 1.3]) {
+        testLayouts(scale == 1 ? name : '$name, text ×$scale', (
           tester,
-          home(),
-          locale: layout.locale,
-          themeMode: layout.themeMode,
-          size: layout.size,
-        );
-        expect(tester.takeException(), isNull);
-        expect(find.byType(HomeMap), findsOneWidget);
-        expect(find.byType(LevelHeader), findsOneWidget);
-        await _scroll(tester, 600);
-        expect(tester.takeException(), isNull);
-      });
+          layout,
+        ) async {
+          tester.platformDispatcher.textScaleFactorTestValue = scale;
+          addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+          await pumpHome(
+            tester,
+            home(),
+            locale: layout.locale,
+            themeMode: layout.themeMode,
+            size: layout.size,
+          );
+          expect(tester.takeException(), isNull);
+          expect(find.byType(HomeMap), findsOneWidget);
+          expect(find.byType(LevelHeader), findsOneWidget);
+          await _scroll(tester, 600);
+          expect(tester.takeException(), isNull);
+        });
+      }
     }
   });
 
