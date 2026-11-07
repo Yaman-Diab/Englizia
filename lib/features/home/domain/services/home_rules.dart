@@ -2,6 +2,7 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
+import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:equatable/equatable.dart';
 
 /// The greeting's line, first match wins (design "Home Archipelago").
@@ -76,10 +77,45 @@ abstract final class HomeRules {
     final parts = dayStart.split(':');
     final hours = int.tryParse(parts.first.trim()) ?? 0;
     final minutes = parts.length > 1 ? int.tryParse(parts[1].trim()) ?? 0 : 0;
-    final day = now.subtract(Duration(hours: hours, minutes: minutes));
+    return _dateKey(now.subtract(Duration(hours: hours, minutes: minutes)));
+  }
+
+  static String _dateKey(DateTime day) {
     String two(int value) => value.toString().padLeft(2, '0');
     return '${day.year.toString().padLeft(4, '0')}-'
         '${two(day.month)}-${two(day.day)}';
+  }
+
+  /// [week] with today where the phone's clock has it (A30): once the
+  /// learner's day is past the server's «today», today is the day of that
+  /// date, or none of [StudyWeek.days] (`today` is then their length), with
+  /// no minutes yet. Never back: a phone's clock behind the server's day
+  /// doesn't undo it.
+  static StudyWeek rollOver(StudyWeek week, DateTime now) {
+    final days = week.days;
+    if (week.today >= days.length) return week;
+    final today = dayKey(
+      now,
+      week.dayStart.isEmpty ? defaultDayStart : week.dayStart,
+    );
+    if (_dateKey(days[week.today].date).compareTo(today) >= 0) return week;
+    final index = days.indexWhere((day) => _dateKey(day.date) == today);
+    return StudyWeek(
+      goalMinutes: week.goalMinutes,
+      days: days,
+      today: index < 0 ? days.length : index,
+      dayStart: week.dayStart,
+    );
+  }
+
+  /// [home] on the learner's day of [now]: its week rolled over on the
+  /// phone ([rollOver]), so today's minutes, the ring and the risk move on
+  /// without a fetch.
+  static HomeSnapshot asOf(HomeSnapshot home, DateTime now) {
+    final week = home.week;
+    if (week == null) return home;
+    final rolled = rollOver(week, now);
+    return identical(rolled, week) ? home : home.copyWith(week: () => rolled);
   }
 
   /// The first lesson not done; a unit review only once all the others are.

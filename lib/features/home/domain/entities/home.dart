@@ -71,9 +71,10 @@ final class HomeSnapshot extends Equatable {
 
   int get unitsDone => HomeRules.unitsDone(this);
 
+  /// 0 once today has rolled past the week's days ([HomeRules.rollOver]).
   int get todayMinutes {
     final week = this.week;
-    if (week == null || v01 || week.days.isEmpty) return 0;
+    if (week == null || v01 || week.today >= week.days.length) return 0;
     return week.days[week.today].minutes ?? 0;
   }
 

@@ -73,12 +73,7 @@ class HomeCubit extends Cubit<HomeState> {
       ),
     );
     if (kept != null) {
-      emit(
-        state.copyWith(
-          load: LoadStatus.ready,
-          home: kept.withPhone(_lessons.onPhone),
-        ),
-      );
+      emit(state.copyWith(load: LoadStatus.ready, home: _merged(kept)));
     }
     _changes ??= _connectivity.onlineChanges.listen((online) {
       if (isClosed) return;
@@ -144,10 +139,10 @@ class HomeCubit extends Cubit<HomeState> {
       onTimeout: () => const Err(UnknownFailure()),
     );
     if (isClosed) return;
-    final after = switch (result) {
-      Ok(:final value) => value.withPhone(_lessons.onPhone),
-      Err() => before.withPhone(_lessons.onPhone),
-    };
+    final after = _merged(switch (result) {
+      Ok(:final value) => value,
+      Err() => before,
+    });
     final moment = HomeRules.diff(before, after);
     final levelDone = moment is UnitDoneMoment && moment.levelDone;
     emit(
@@ -248,8 +243,12 @@ class HomeCubit extends Cubit<HomeState> {
     await _voice.start(url, onEnd: () {});
   }
 
+  /// [home] with what the phone knows, on the learner's day (A30).
+  HomeSnapshot _merged(HomeSnapshot home) =>
+      HomeRules.asOf(home.withPhone(_lessons.onPhone), state.now);
+
   void _show(HomeSnapshot fresh) {
-    final home = fresh.withPhone(_lessons.onPhone);
+    final home = _merged(fresh);
     emit(
       state.copyWith(
         load: LoadStatus.ready,
@@ -272,12 +271,21 @@ class HomeCubit extends Cubit<HomeState> {
     unawaited(_lessons.getLesson(unit.lessons[index].id));
   }
 
+  /// A new learner's day rolls today over on the phone at once (A30), then
+  /// asks the server.
   void _tick() {
     if (isClosed) return;
-    final before = _dayKey(state.now, state.home);
+    final home = state.home;
+    final before = _dayKey(state.now, home);
     final now = _now();
-    emit(state.copyWith(now: now));
-    if (_dayKey(now, state.home) != before) unawaited(refresh());
+    final newDay = _dayKey(now, home) != before;
+    emit(
+      state.copyWith(
+        now: now,
+        home: newDay && home != null ? HomeRules.asOf(home, now) : null,
+      ),
+    );
+    if (newDay) unawaited(refresh());
   }
 
   static String _dayKey(DateTime now, HomeSnapshot? home) {

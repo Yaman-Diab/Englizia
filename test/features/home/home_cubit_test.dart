@@ -306,6 +306,50 @@ void main() {
       await subject.close();
     });
 
+    testWidgets('a new day starts on the phone, even offline (A30)', (
+      tester,
+    ) async {
+      homes.home = _home(HomeMockScenario.goalReached);
+      now = DateTime(2026, 11, 6, 3, 58);
+      final subject = HomeCubit(
+        homes,
+        profiles,
+        lessons,
+        connectivity,
+        sounds,
+        now: () => now,
+      );
+      await subject.start();
+      expect(subject.state.status.kind, HomeStatusKind.goalReached);
+
+      homes.failure = const NetworkFailure();
+      now = DateTime(2026, 11, 6, 4, 1);
+      await tester.pump(HomeCubit.tick);
+      await tester.pump();
+      expect(homes.fetches, 2);
+      expect(subject.state.home!.todayMinutes, 0);
+      expect(subject.state.status, (
+        kind: HomeStatusKind.minutesLeft,
+        minutesLeft: 10,
+      ));
+
+      now = DateTime(2026, 11, 6, 19);
+      await tester.pump(HomeCubit.tick);
+      expect(subject.state.atRisk, isTrue);
+      await subject.close();
+    });
+
+    test('what was kept from another day starts it at no minutes', () async {
+      homes
+        ..kept = _home(HomeMockScenario.goalReached)
+        ..failure = const NetworkFailure();
+      now = DateTime(2026, 11, 7, 10);
+      final subject = cubit();
+      await subject.start();
+      expect(subject.state.home!.todayMinutes, 0);
+      expect(subject.state.status.kind, HomeStatusKind.minutesLeft);
+    });
+
     test('greeting, status and risk follow the clock', () async {
       homes.home = _home(HomeMockScenario.atRisk);
       now = DateTime(2026, 11, 5, 19, 30);

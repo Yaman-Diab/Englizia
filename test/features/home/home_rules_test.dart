@@ -60,6 +60,42 @@ void main() {
       );
       expect(HomeRules.dayKey(DateTime(2026, 11, 5, 0, 1), ''), '2026-11-05');
     });
+
+    test('today rolls over on the phone at the day start (A30)', () {
+      final home = _home(HomeMockScenario.goalReached);
+      expect(home.todayMinutes, 12);
+      expect(HomeRules.asOf(home, DateTime(2026, 11, 6, 3, 59)), same(home));
+
+      final next = HomeRules.asOf(home, DateTime(2026, 11, 6, 19));
+      final week = next.week!;
+      expect(week.today, home.week!.today + 1);
+      expect(week.days[week.today].date, DateTime(2026, 11, 6));
+      expect(week.days, home.week!.days);
+      expect(next.todayMinutes, 0);
+      expect(HomeRules.status(next), (
+        kind: HomeStatusKind.minutesLeft,
+        minutesLeft: 10,
+      ));
+      expect(HomeRules.atRisk(next, DateTime(2026, 11, 6, 19)), isTrue);
+    });
+
+    test('past the week\'s last day, today is none of its days', () {
+      final later = HomeRules.asOf(
+        _home(HomeMockScenario.goalReached),
+        DateTime(2026, 11, 9, 10),
+      );
+      expect(later.week!.today, later.week!.days.length);
+      expect(later.todayMinutes, 0);
+      expect(HomeRules.asOf(later, DateTime(2026, 11, 10, 10)), same(later));
+    });
+
+    test('a phone behind the server\'s day leaves its today', () {
+      final home = _home();
+      expect(HomeRules.asOf(home, DateTime(2026, 11, 5, 2)), same(home));
+      expect(HomeRules.asOf(home, DateTime(2026, 11, 3, 22)), same(home));
+      final v01 = _home(HomeMockScenario.v01);
+      expect(HomeRules.asOf(v01, DateTime(2026, 11, 9)), same(v01));
+    });
   });
 
   group('the current lesson', () {

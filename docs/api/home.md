@@ -123,7 +123,7 @@ Other frames, as deltas:
 | `…lessons[].ai` | An AI conversation: ✦ and «محادثة ذكية» |
 | `…lessons[].levelCheck` | The unit review is the level check (S §12.3): a gate instead of the lighthouse |
 | `…lessons[].resume` | `{question, questions, share}`: «تابع من حيث توقفت», «السؤال 3 من 6»; `questions` is new to the lesson's `resume` |
-| `week` | As in [me.md](me.md): today's minutes (`days[today].minutes`), the goal, the day start |
+| `week` | As in [me.md](me.md): today's minutes (`days[today].minutes`), the goal, the day start. Once the learner's day passes `today`'s date, the phone moves «today» to the next date (none past the last day, with no minutes) until the next answer |
 | `streak` | As in [me.md](me.md), plus `freezesPerWeek` (0–3, from the panel): «يُضاف واحد كل أسبوع»; 0 hides the line |
 | `review.wordsDue`, `conceptsDue`, `minutes` | «راجع اليوم: 12 كلمة و3 مفاهيم، نحو 5 دقائق» and «تدرّب»'s badge; `conceptsDue` absent while the mistakes' bank is off |
 | `cards.levelCheck` | `{lessonId}` while the level check is available and not taken: «ابدأ الفحص» opens that lesson |
