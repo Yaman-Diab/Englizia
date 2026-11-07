@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
+import 'package:englizia/features/home/data/models/home_model.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
@@ -9,6 +11,7 @@ import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/goal_ring.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/back_to_lesson_button.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/island_banner.dart';
+import 'package:englizia/features/home/presentation/home/widgets/map/kid_say_bubble.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone_card.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/compact_island.dart';
@@ -41,6 +44,13 @@ HomeSnapshot _home({
   bool kids = false,
   bool emar = false,
 }) => mockHome(scenario: scenario, kids: kids, emar: emar, now: homeMorning);
+
+/// A child's home on unit [unit] (from 0) with its first [done] lessons done.
+HomeSnapshot _kidsAt(int unit, {int done = 0}) {
+  final json = mockHomeJson(kids: true, now: homeMorning);
+  moveCurrentUnit(json, unit, done: done);
+  return HomeModel(json).toEntity();
+}
 
 ScrollPosition _map(WidgetTester tester) =>
     tester.state<ScrollableState>(find.byType(Scrollable).first).position;
@@ -346,6 +356,70 @@ void main() {
         tester.widget<SwitchStrip>(find.byType(SwitchStrip)).title,
         isNull,
       );
+    });
+  });
+
+  group('the map in motion keeps what it holds', () {
+    testWidgets('an island that rose into place keeps its stones (M1)', (
+      tester,
+    ) async {
+      // Started, the cubit has the day's opening due.
+      final cubit = await loadedHomeCubit(_home());
+      await cubit.start();
+      final pages = RouteObserver<PageRoute<dynamic>>();
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: Scaffold(
+            body: HomePage(actions: RecordedActions().actions, pages: pages),
+          ),
+        ),
+        size: _design,
+        navigatorObservers: [pages],
+      );
+      await settleHome(tester);
+      Finder pressOf(Finder of) =>
+          find.descendant(of: of, matching: find.byType(PressScale));
+      final stone = pressOf(
+        find.byWidgetPredicate(
+          (w) => w is Stone && w.state == StoneState.current,
+        ),
+      );
+      final island = pressOf(find.byType(CompactIsland).last);
+      final rising = (tester.state(stone), tester.state(island));
+      expect(cubit.state.openingDue, isTrue, reason: 'still rising');
+
+      await _steps(tester, const Duration(seconds: 2));
+      expect(cubit.state.openingDue, isFalse, reason: 'risen');
+      expect(tester.state(stone), same(rising.$1));
+      expect(tester.state(island), same(rising.$2));
+      await tester.pumpWidget(const SizedBox());
+      await cubit.close();
+    });
+
+    testWidgets('the kids\' say bubble enters once as the new island grows '
+        '(M6, M14)', (tester) async {
+      final repository = FakeHomeRepository(_kidsAt(2, done: 5));
+      await pumpHome(
+        tester,
+        _kidsAt(2, done: 5),
+        size: _design,
+        repository: repository,
+      );
+      final navigator = await _pushLesson(tester);
+      repository.home = _kidsAt(3);
+      navigator.pop();
+      final entrances = <State>{};
+      for (var i = 0; i < 120; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        final bubble = find.descendant(
+          of: find.byType(KidSayBubble),
+          matching: find.byType(TweenAnimationBuilder<double>),
+        );
+        if (bubble.evaluate().isNotEmpty) entrances.add(tester.state(bubble));
+      }
+      expect(entrances, hasLength(1));
+      await _steps(tester, const Duration(seconds: 5));
     });
   });
 

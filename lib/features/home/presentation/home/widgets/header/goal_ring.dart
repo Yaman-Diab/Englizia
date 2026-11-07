@@ -329,7 +329,7 @@ class _GuideMotion extends StatelessWidget {
     }
     dy -= AppMotion.homeGuideJumpHeight * bump(overrides.guideJump);
     dy -= _hopHeight * bump(overrides.guideHop);
-    if (dy == 0 && scale == 1 && opacity == 1) return child;
+    // The same wrappers at rest, so the guide keeps its wave and blink.
     return Opacity(
       opacity: opacity.clamp(0.0, 1.0),
       child: Transform.translate(

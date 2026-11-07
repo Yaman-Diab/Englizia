@@ -380,7 +380,7 @@ class HomeMap extends StatelessWidget {
     final unit = scene.unit!;
     final frame = scene.frame;
     final grow = overrides.islandGrow;
-    Widget group = Stack(
+    final art = Stack(
       clipBehavior: Clip.none,
       children: [
         Positioned.fill(
@@ -418,12 +418,12 @@ class HomeMap extends StatelessWidget {
           ),
       ],
     );
-    if (grow != null) {
-      group = Opacity(
-        opacity: grow.opacity.clamp(0.0, 1.0),
-        child: Transform.scale(scale: grow.scale, child: group),
-      );
-    }
+    // The same wrappers at rest: a type that changed as the grow ends would
+    // build the island again, its say bubble entering twice.
+    final group = Opacity(
+      opacity: (grow?.opacity ?? 1).clamp(0.0, 1.0),
+      child: Transform.scale(scale: grow?.scale ?? 1, child: art),
+    );
     return PositionedDirectional(
       start: 0,
       top: slot.rect.top,
@@ -869,7 +869,8 @@ class HomeMap extends StatelessWidget {
 }
 
 /// An island, or a card, rising into place: [t] of the way, from
-/// [distance] below, fading in (M1, M7).
+/// [distance] below, fading in (M1, M7). Its wrappers stay once it is there,
+/// so what rose keeps its state (a press, a pulse).
 class _Rise extends StatelessWidget {
   const _Rise({
     required this.t,
@@ -883,7 +884,6 @@ class _Rise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (t >= 1) return child;
     final e = AppMotion.homeEmphasis.transform(t.clamp(0, 1));
     return Opacity(
       opacity: e.clamp(0.0, 1.0),
