@@ -105,8 +105,12 @@ class FakeLessonRepository implements LessonRepository {
   var sends = 0;
   var cleared = 0;
 
+  /// The lessons asked for, in order.
+  final fetched = <String>[];
+
   @override
   Future<Result<Lesson>> getLesson(String lessonId) async {
+    fetched.add(lessonId);
     final failure = this.failure;
     return failure == null
         ? Ok(

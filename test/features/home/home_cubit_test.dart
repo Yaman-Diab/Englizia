@@ -105,6 +105,14 @@ void main() {
       expect(subject.state.home, isNull);
     });
 
+    test(
+      'the current lesson is fetched ahead, so «تابع» opens offline',
+      () async {
+        await cubit().start();
+        expect(lessons.fetched, ['les_it']);
+      },
+    );
+
     test('the phone\'s own progress wins over the server\'s', () async {
       lessons.phone['les_it'] = const LessonOnPhone(
         kept: true,
@@ -309,6 +317,160 @@ void main() {
       expect(subject.state.home!.currentUnit!.lessons[3].done, isTrue);
       hold.complete();
       await subject.close();
+    });
+
+    testWidgets('a slow server\'s answer still shows when it comes', (
+      tester,
+    ) async {
+      final subject = HomeCubit(
+        homes,
+        profiles,
+        lessons,
+        connectivity,
+        sounds,
+        now: () => now,
+      );
+      await subject.start();
+      final hold = Completer<void>();
+      homes
+        ..gate = hold.future
+        ..home = _afterLesson();
+      lessons.phone['les_it'] = const LessonOnPhone(done: true);
+
+      final returning = subject.returned();
+      await tester.pump(HomeCubit.returnWait);
+      await returning;
+      final moment = subject.state.moment!;
+      expect((moment.minutesFrom, moment.minutesTo), (7, 7));
+      expect(subject.state.home!.todayMinutes, 7);
+
+      hold.complete();
+      await tester.pump();
+      expect(subject.state.home!.todayMinutes, 14);
+      expect(subject.state.home!.streak!.current, 8);
+      expect(subject.state.momentId, 1, reason: 'nothing more to celebrate');
+      await subject.close();
+    });
+
+    testWidgets('a unit the phone finished celebrates once, though the '
+        'server catches up on the next return', (tester) async {
+      homes.home = _home(HomeMockScenario.lastLesson);
+      final subject = HomeCubit(
+        homes,
+        profiles,
+        lessons,
+        connectivity,
+        sounds,
+        now: () => now,
+      );
+      await subject.start();
+      final hold = Completer<void>();
+      homes
+        ..gate = hold.future
+        ..home = _movedTo(HomeMockScenario.general, 3);
+      lessons.phone['les_mock'] = const LessonOnPhone(done: true);
+
+      final returning = subject.returned();
+      await tester.pump(HomeCubit.returnWait);
+      await returning;
+      expect(subject.state.moment, isA<UnitDoneMoment>());
+      expect((subject.state.moment! as UnitDoneMoment).nextUnit, isNull);
+      subject.momentPlayed();
+
+      homes.gate = null;
+      subject.left();
+      await subject.returned();
+      expect(subject.state.home!.currentUnitIndex, 3);
+      expect(subject.state.moment, isNull);
+      expect(subject.state.momentId, 1, reason: 'M6 played once');
+
+      hold.complete();
+      await tester.pump();
+      expect(subject.state.momentId, 1);
+      await subject.close();
+    });
+
+    test('an offline return still celebrates the phone', () async {
+      final subject = cubit();
+      await subject.start();
+      homes.failure = const NetworkFailure();
+      lessons.phone['les_it'] = const LessonOnPhone(done: true);
+
+      await subject.returned();
+
+      final moment = subject.state.moment;
+      expect(moment, isA<LessonDoneMoment>());
+      moment as LessonDoneMoment;
+      expect((moment.lesson, moment.next), (3, 4));
+      expect((moment.minutesFrom, moment.minutesTo), (7, 7));
+      expect(moment.goalReached, isFalse);
+      expect(subject.state.offlineFetch, isTrue);
+      expect(subject.state.momentId, 1);
+    });
+
+    test('a return before any data just loads', () async {
+      homes
+        ..home = null
+        ..failure = const NetworkFailure();
+      final subject = cubit();
+      await subject.start();
+      expect(subject.state.load, LoadStatus.failure);
+      homes
+        ..failure = null
+        ..home = _home();
+
+      await subject.returned();
+
+      expect(subject.state.load, LoadStatus.ready);
+      expect(subject.state.home, _home());
+      expect(subject.state.moment, isNull);
+      expect(subject.state.momentId, 0);
+      expect(homes.fetches, 2);
+    });
+
+    test('a good return clears a failed refresh', () async {
+      final subject = cubit();
+      await subject.start();
+      homes.failure = const ServerFailure(statusCode: 500);
+      await subject.refresh(byUser: true);
+      expect(subject.state.refreshFailed, isTrue);
+      homes.failure = null;
+
+      await subject.returned();
+
+      expect(subject.state.refreshFailed, isFalse);
+      expect(subject.state.offlineFetch, isFalse);
+    });
+
+    test('a lesson the server hasn\'t heard of yet: the phone\'s next one is '
+        'fetched ahead', () async {
+      final subject = cubit();
+      await subject.start();
+      lessons.phone['les_it'] = const LessonOnPhone(done: true);
+
+      await subject.returned();
+
+      expect(subject.state.moment, isA<LessonDoneMoment>());
+      expect(lessons.fetched.last, 'les_chat_box');
+    });
+
+    test('a return while one is compared joins it: one moment', () async {
+      final subject = cubit();
+      await subject.start();
+      final hold = Completer<void>();
+      homes
+        ..gate = hold.future
+        ..home = _afterLesson();
+
+      final first = subject.returned();
+      subject.left();
+      final second = subject.returned();
+      hold.complete();
+      await Future.wait([first, second]);
+
+      expect(subject.state.moment, isA<LessonDoneMoment>());
+      expect(subject.state.momentId, 1);
+      expect(homes.fetches, 2);
     });
   });
 

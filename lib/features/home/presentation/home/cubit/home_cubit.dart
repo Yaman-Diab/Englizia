@@ -61,6 +61,12 @@ class HomeCubit extends Cubit<HomeState> {
 
   bool get _holding => (_away || _returning > 0) && state.home != null;
 
+  /// The return being compared: another one meanwhile joins it.
+  Future<void>? _comparing;
+
+  /// Home's fetches so far, so a late answer knows a newer one started.
+  var _fetches = 0;
+
   /// How long a return waits for the server before celebrating what the
   /// phone knows.
   static const returnWait = Duration(seconds: 2);
@@ -107,7 +113,7 @@ class HomeCubit extends Cubit<HomeState> {
         failure: state.home == null ? () => null : null,
       ),
     );
-    final result = await _home.getHome();
+    final result = await _fetch();
     if (isClosed) return false;
     switch (result) {
       case Ok(:final value) when _holding:
@@ -152,9 +158,15 @@ class HomeCubit extends Cubit<HomeState> {
 
   /// Back on the screen from a page over it: what changed meanwhile, and
   /// what to celebrate. Waits [returnWait] for the server, then trusts the
-  /// home last fetched, with the phone's.
-  Future<void> returned() async {
+  /// home last fetched, with the phone's; a later answer still shows, with
+  /// nothing to celebrate. One return is compared at a time: another one
+  /// meanwhile joins it, so a moment plays once.
+  Future<void> returned() {
     _away = false;
+    return _comparing ??= _compare().whenComplete(() => _comparing = null);
+  }
+
+  Future<void> _compare() async {
     final before = state.home;
     if (before == null) {
       _held = null;
@@ -162,11 +174,17 @@ class HomeCubit extends Cubit<HomeState> {
       return;
     }
     _returning++;
+    final fetch = _fetch();
+    final number = _fetches;
+    var late = false;
     final Result<HomeSnapshot> result;
     try {
-      result = await _home.getHome().timeout(
+      result = await fetch.timeout(
         returnWait,
-        onTimeout: () => const Err(UnknownFailure()),
+        onTimeout: () {
+          late = true;
+          return const Err(UnknownFailure());
+        },
       );
     } finally {
       _returning--;
@@ -196,7 +214,30 @@ class HomeCubit extends Cubit<HomeState> {
         refreshFailed: result is Ok ? false : null,
       ),
     );
-    if (fetched != null) _preload(fetched);
+    if (fetched != null) _preload(after);
+    if (late) unawaited(_lateAnswer(fetch, number));
+  }
+
+  /// A return's answer that came after [returnWait]: shown as a refresh's
+  /// would be, unless a newer fetch has started since.
+  Future<void> _lateAnswer(
+    Future<Result<HomeSnapshot>> fetch,
+    int number,
+  ) async {
+    final result = await fetch;
+    if (isClosed || number != _fetches) return;
+    if (result case Ok(:final value)) {
+      if (_holding) {
+        _held = value;
+      } else {
+        _show(value);
+      }
+    }
+  }
+
+  Future<Result<HomeSnapshot>> _fetch() {
+    _fetches++;
+    return _home.getHome();
   }
 
   /// The opening has played: not again today.
@@ -225,7 +266,7 @@ class HomeCubit extends Cubit<HomeState> {
       emit(state.copyWith(switching: false));
       return failure;
     }
-    final result = await _home.getHome();
+    final result = await _fetch();
     if (isClosed) return null;
     switch (result) {
       case Ok(:final value):
