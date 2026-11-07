@@ -42,7 +42,8 @@ final class GuideHop extends GuidePlacement {
   List<Object?> get props => [from, to, t];
 }
 
-/// Crossing bridge [bridge], [t] of the way.
+/// Flying over bridge [bridge], [t] of the way (eased): from beside its
+/// island's last stone, where it was parked, to the next island.
 final class GuideOnBridge extends GuidePlacement {
   const GuideOnBridge(this.bridge, this.t);
 

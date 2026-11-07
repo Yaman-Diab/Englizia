@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
@@ -45,11 +47,32 @@ HomeSnapshot _home({
   bool emar = false,
 }) => mockHome(scenario: scenario, kids: kids, emar: emar, now: homeMorning);
 
-/// A child's home on unit [unit] (from 0) with its first [done] lessons done.
-HomeSnapshot _kidsAt(int unit, {int done = 0}) {
-  final json = mockHomeJson(kids: true, now: homeMorning);
-  moveCurrentUnit(json, unit, done: done);
+/// Home on unit [unit] (from 0): with every lesson but its last done, or
+/// none when [fresh].
+HomeSnapshot _unitAt(int unit, {bool kids = false, bool fresh = false}) {
+  final json = mockHomeJson(kids: kids, now: homeMorning);
+  moveCurrentUnit(json, unit);
+  if (!fresh) {
+    final lessons = ((json['units']! as List)[unit] as Map)['lessons'] as List;
+    for (final lesson in lessons.take(lessons.length - 1)) {
+      (lesson as Map<String, Object?>)['done'] = true;
+    }
+  }
   return HomeModel(json).toEntity();
+}
+
+/// The return from [before]'s last lesson of its unit, [after] then.
+Future<void> _finishUnit(
+  WidgetTester tester,
+  HomeSnapshot before,
+  HomeSnapshot after,
+) async {
+  final repository = FakeHomeRepository(before);
+  await pumpHome(tester, before, size: _design, repository: repository);
+  final navigator = await _pushLesson(tester);
+  repository.home = after;
+  navigator.pop();
+  await tester.pump();
 }
 
 ScrollPosition _map(WidgetTester tester) =>
@@ -399,16 +422,11 @@ void main() {
 
     testWidgets('the kids\' say bubble enters once as the new island grows '
         '(M6, M14)', (tester) async {
-      final repository = FakeHomeRepository(_kidsAt(2, done: 5));
-      await pumpHome(
+      await _finishUnit(
         tester,
-        _kidsAt(2, done: 5),
-        size: _design,
-        repository: repository,
+        _unitAt(2, kids: true),
+        _unitAt(3, kids: true, fresh: true),
       );
-      final navigator = await _pushLesson(tester);
-      repository.home = _kidsAt(3);
-      navigator.pop();
       final entrances = <State>{};
       for (var i = 0; i < 120; i++) {
         await tester.pump(const Duration(milliseconds: 50));
@@ -420,6 +438,35 @@ void main() {
       }
       expect(entrances, hasLength(1));
       await _steps(tester, const Duration(seconds: 5));
+    });
+
+    testWidgets('the guide crosses the bridge from where it stood (M6)', (
+      tester,
+    ) async {
+      await _finishUnit(tester, _unitAt(2), _unitAt(3, fresh: true));
+      final guide = find.descendant(
+        of: find.byType(HomeMap),
+        matching: find.byType(Mascot),
+      );
+      String unitShown() =>
+          tester.widget<IslandBanner>(find.byType(IslandBanner)).unit.id;
+      final unit = unitShown();
+      final path = <Offset>[];
+      for (var i = 0; i < 300 && unitShown() == unit; i++) {
+        if (guide.evaluate().isNotEmpty) {
+          path.add(
+            tester.getCenter(guide) - tester.getTopLeft(find.byType(HomeMap)),
+          );
+        }
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(unitShown(), isNot(unit), reason: 'the next unit is current');
+      final steps = [
+        for (var i = 1; i < path.length; i++) (path[i] - path[i - 1]).distance,
+      ];
+      expect(steps.reduce(math.max), lessThan(30), reason: 'no jump');
+      expect((path.last - path.first).distance, greaterThan(100));
+      await _steps(tester, const Duration(seconds: 3));
     });
   });
 

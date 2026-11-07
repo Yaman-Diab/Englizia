@@ -340,6 +340,16 @@ final class MapLayout {
   IslandSlot? get current =>
       currentIndex == null ? null : islands[currentIndex!];
 
+  /// M6: where the guide lands crossing to island [k], its centre: 88 in
+  /// from the island's left and 30 down, as the design's flight over the
+  /// bridge ends. Null past the last.
+  Offset? landing(int k) {
+    if (k < 0 || k >= islands.length) return null;
+    return islands[k].rect.topLeft + _landing;
+  }
+
+  static const _landing = Offset(88, 30);
+
   /// The scroll home opens at, with the header open: the anchor, held to
   /// the content; the bottom when no island is current.
   double initialScroll({required double pt, required double view}) {

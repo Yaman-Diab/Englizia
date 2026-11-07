@@ -1,10 +1,12 @@
 import 'dart:ui';
 
+import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/sea/island_blob.dart';
 import 'package:englizia/features/home/presentation/home/geometry/island_layout.dart';
 import 'package:englizia/features/home/presentation/home/geometry/map_layout.dart';
 import 'package:englizia/features/home/presentation/home/geometry/path_commands.dart';
 import 'package:englizia/features/home/presentation/home/scene/map_frame.dart';
+import 'package:englizia/features/home/presentation/home/widgets/stage/home_map.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -554,6 +556,21 @@ void main() {
       // Out of the current island from its exit.
       expect(map.bridges[2].p0, const Offset(312, 310 + 434));
     });
+
+    test(
+      'M6: the guide flies from beside the last stone to the next island',
+      () {
+        expect(map.landing(3), const Offset(20 + 88, 832 + 30));
+        expect(map.landing(8), isNull);
+        final parked = island.spot(5).translate(0, 310);
+        expect(HomeMap.crossingAt(map, island, 2, 0), parked);
+        expect(HomeMap.crossingAt(map, island, 2, 1), map.landing(3));
+        // Over the higher end halfway.
+        final apex = HomeMap.crossingAt(map, island, 2, .5)!;
+        expect(apex.dy, closeTo(parked.dy - AppMotion.homeFlightApex, 1e-9));
+        expect(HomeMap.crossingAt(map, island, 1, .5), isNull);
+      },
+    );
 
     test('a part of a bridge by its parameter (de Casteljau)', () {
       final bridge = map.bridges[1];

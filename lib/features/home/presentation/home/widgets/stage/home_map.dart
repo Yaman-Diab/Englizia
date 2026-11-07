@@ -8,6 +8,7 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/home/presentation/home/geometry/island_layout.dart';
 import 'package:englizia/features/home/presentation/home/geometry/map_layout.dart';
+import 'package:englizia/features/home/presentation/home/motion/flight_layer.dart';
 import 'package:englizia/features/home/presentation/home/motion/loop_budget.dart';
 import 'package:englizia/features/home/presentation/home/paint/bridges_layer.dart';
 import 'package:englizia/features/home/presentation/home/paint/island_art.dart';
@@ -220,8 +221,9 @@ class HomeMap extends StatelessWidget {
   /// The parked guide (motion §2).
   static const guideSize = 44.0;
 
-  /// The guide on a bridge: lifted and leaning (map §12).
-  static const bridgeLift = 40.0;
+  /// The guide over a bridge leans this far at the middle of its flight.
+  // ASSUMPTION(design): the design leans it −8° on the bridge and not in
+  // flight; from 0 at both ends here, so neither hand-off turns it at once.
   static const bridgeLean = -8.0;
 
   /// Kids: where the guide stands by the banner, and the say bubble above.
@@ -682,15 +684,33 @@ class HomeMap extends StatelessWidget {
   /// The guide crossing a bridge, in the map's own space.
   Widget? _bridgeGuide() {
     final guide = this.guide;
-    if (guide is! GuideOnBridge) return null;
-    final bridges = scene.map.bridges;
-    if (guide.bridge < 0 || guide.bridge >= bridges.length) return null;
-    final bridge = bridges[guide.bridge];
-    final at = Offset.lerp(bridge.p0, bridge.p3, guide.t)!;
-    return _guideAt(
-      at.translate(0, guideSize / 2 - bridgeLift),
-      lean: bridgeLean,
-    );
+    final island = scene.island;
+    if (guide is! GuideOnBridge || island == null) return null;
+    final at = crossingAt(scene.map, island, guide.bridge, guide.t);
+    if (at == null) return null;
+    return _guideAt(at, lean: bridgeLean * math.sin(guide.t * math.pi));
+  }
+
+  /// M6: the guide's centre crossing from island [k], the current one, [t]
+  /// of the way (eased): a flight from beside its last stone, where it was
+  /// parked, to the next island's landing, through the point above the
+  /// higher end. Null when [k] isn't the current island or none follows.
+  static Offset? crossingAt(
+    MapLayout map,
+    IslandLayout island,
+    int k,
+    double t,
+  ) {
+    final current = map.current;
+    final to = map.landing(k + 1);
+    if (current == null || current.index != k || to == null) return null;
+    return FlightPath.at(
+      from: island.spot(island.n - 1).translate(0, current.rect.top),
+      fromSize: guideSize,
+      to: to,
+      toSize: guideSize,
+      t: t,
+    ).centre;
   }
 
   Widget? _bubble(IslandLayout island) {
