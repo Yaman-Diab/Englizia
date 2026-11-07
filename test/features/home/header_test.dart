@@ -263,7 +263,16 @@ void main() {
         find.bySemanticsLabel('أهلًا ليان. 4 أيام متتالية. 14 نجمة.'),
         findsOneWidget,
       );
-      expect(find.bySemanticsLabel('استمع'), findsOneWidget);
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('استمع')),
+        matchesSemantics(
+          label: 'استمع',
+          isButton: true,
+          hasEnabledState: true,
+          isEnabled: true,
+          hasTapAction: true,
+        ),
+      );
       expect(find.bySemanticsLabel('14 نجمة'), findsOneWidget);
       expect(find.bySemanticsLabel(RegExp('تبديل المسار')), findsNothing);
       expect(_ringPaint(), findsNothing);
