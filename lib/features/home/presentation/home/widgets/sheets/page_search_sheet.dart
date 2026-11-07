@@ -6,7 +6,7 @@ import 'package:englizia/features/home/presentation/home/widgets/sheets/home_she
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-/// Emar: where a page of the student's book is (bubble §12.3, frame 23ب).
+/// Emar: where a page of the student's book is (frame 23ب).
 /// The field starts empty every time; the hit, or null when dismissed.
 Future<PageHit?> showPageSearchSheet(
   BuildContext context, {

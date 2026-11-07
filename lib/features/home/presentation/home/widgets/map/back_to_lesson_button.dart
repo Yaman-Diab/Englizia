@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 enum BackDirection { up, down }
 
 /// The guide's face in a circle at the bottom of the end side, looking
-/// toward the current lesson when it is off screen (bubble §13, 07أ): a tap
+/// toward the current lesson when it is off screen (board 07أ): a tap
 /// takes the map back to it. The eyes alone say which way; there is no
 /// arrow.
 ///
@@ -362,7 +362,7 @@ final class BackFacePose {
   });
 
   /// The face and pupils shift 2.5 toward the look and the face tilts 4°;
-  /// looking down, the lids come half down (bubble §13.2). A glance adds
+  /// looking down, the lids come half down. A glance adds
   /// 1.6 to the face and .9 to the pupils, toward the look.
   factory BackFacePose.at(double turn, {double glance = 0, required bool up}) {
     final toward = up ? -1.0 : 1.0;

@@ -2,7 +2,7 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:flutter/material.dart';
 
 /// «تُفتح بعد الوحدة 3» over a locked island, for a moment (design "Home
-/// Archipelago", M9, map §12): its small corner at the bottom end points at
+/// Archipelago", M9): its small corner at the bottom end points at
 /// the island. A status for screen readers.
 class LockedToast extends StatelessWidget {
   const LockedToast({required this.text, super.key});

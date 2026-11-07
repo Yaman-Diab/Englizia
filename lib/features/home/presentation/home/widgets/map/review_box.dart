@@ -8,15 +8,15 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:flutter/material.dart';
 
-/// «راجع اليوم» floating in the sea (bubble §5): what is due and about how
-/// long, the whole box one button. Its height follows its content (≈ 68,
-/// D9); its float is the motion's.
+/// «راجع اليوم» floating in the sea: what is due and about how long, the whole
+/// box one button. Its height follows its content (≈ 68); its float is the
+/// motion's.
 class ReviewBox extends StatelessWidget {
   const ReviewBox({required this.review, required this.onPressed, super.key});
 
   final HomeReview review;
 
-  /// ASSUMPTION(design): opens the word review (D20, bubble A5).
+  /// ASSUMPTION(design): opens the word review.
   final VoidCallback onPressed;
 
   static const width = 198.0;

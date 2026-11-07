@@ -4,7 +4,7 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:flutter/widgets.dart';
 
 /// The sea under the whole map, deepening down to the horizon, and the
-/// horizon band from [horizonY] to the bottom (map §11). Emar and kids have
+/// horizon band from [horizonY] to the bottom. Emar and kids have
 /// their own seas; the general track's is its level's. [waves] go between
 /// the sea and the band, which covers them.
 class SeaLayer extends StatelessWidget {
@@ -32,8 +32,7 @@ class SeaLayer extends StatelessWidget {
   final Widget? waves;
 
   /// The sea of [tone] at level [cefr].
-  ///
-  /// ASSUMPTION(design): an unknown level is drawn in the A2 sea (D38).
+  /// /// ASSUMPTION(design): an unknown level is drawn in the A2 sea.
   static Color seaOf(SeaPalette sea, SeaTone tone, HomeCefr? cefr) =>
       switch (tone) {
         SeaTone.emar => sea.emar,
@@ -41,7 +40,7 @@ class SeaLayer extends StatelessWidget {
         SeaTone.general => sea.cefrSea(cefr?.name),
       };
 
-  /// The open horizon: the next level's sea, else the deep one (D38).
+  /// The open horizon: the next level's sea, else the deep one.
   static Color openHorizonOf(SeaPalette sea, HomeCefr? next) =>
       next == null ? sea.deep : sea.cefrSea(next.name);
 

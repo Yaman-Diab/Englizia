@@ -3,11 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-/// Where home's floating header stands (design "Home Archipelago", header
-/// §5): the day header [head] high folds by [collapse] as the map scrolls,
-/// the ring shrinks to the top bar, and the stage drops by [pull] while
-/// pulled. Coordinates are the right-to-left layout's physical ones, y 0 at
-/// the top of the top bar.
+/// Where home's floating header stands (design "Home Archipelago"): the day
+/// header [head] high folds by [collapse] as the map scrolls, the ring shrinks
+/// to the top bar, and the stage drops by [pull] while pulled. Coordinates are
+/// the right-to-left layout's physical ones, y 0 at the top of the top bar.
 @immutable
 final class StageMetrics {
   const StageMetrics({
@@ -32,7 +31,7 @@ final class StageMetrics {
   /// Below the safe area, above the tab bar.
   final double height;
 
-  /// The day header as measured (D3).
+  /// The day header as measured.
   final double head;
 
   /// The strip under the top bar (email, offline, refresh failed).

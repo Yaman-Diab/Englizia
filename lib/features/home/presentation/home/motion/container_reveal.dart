@@ -16,7 +16,7 @@ typedef RevealFrame = ({
   double opacity,
 });
 
-/// «تابع» (design "Home Archipelago", motion §6, D22): the bubble's rect
+/// «تابع» (design "Home Archipelago"): the bubble's rect
 /// grows to the screen under a blue cover that clears from 45 %; the lesson
 /// opens under it with the theme's own page transition, then the layer
 /// fades away. CLAUDE.md keeps per-route transitions out, so this is an
@@ -67,7 +67,7 @@ abstract final class ContainerReveal {
   /// screen, calls [push] under it, and clears once the new page is in.
   /// Until the push it takes every tap, so nothing under it opens or leaves
   /// meanwhile; when [context] is gone by then, it clears without pushing.
-  /// Under reduce motion it only calls [push] (D30).
+  /// Under reduce motion it only calls [push].
   static Future<void> run(
     BuildContext context, {
     required Rect from,

@@ -2,12 +2,12 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:flutter/material.dart';
 
-/// «المستوى التالي: B1» on the horizon (design "Home Archipelago", map §11): a
+/// «المستوى التالي: B1» on the horizon (design "Home Archipelago"): a
 /// pill on a short pole standing on the horizon line. One item of the map's
 /// list for screen readers.
 ///
 /// ASSUMPTION(design): a solid 1 frame, as the markup draws it; the board's
-/// checklist says dashed (D10).
+/// checklist says dashed.
 class HorizonFlag extends StatelessWidget {
   const HorizonFlag({required this.text, super.key});
 

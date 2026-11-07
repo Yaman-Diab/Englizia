@@ -17,7 +17,7 @@ import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:flutter/material.dart';
 
-/// What the bubble says (bubble §2.4).
+/// What the bubble says.
 enum BubbleMode { next, first, resume, suggested, extra, reviewFirst, kids }
 
 /// The bubble's mode for [state], first match: kids, the review first (back
@@ -46,7 +46,7 @@ HomeLesson? _currentLesson(HomeSnapshot home) {
 }
 
 /// The next lesson's card on the map, the one saturated block, its tail
-/// towards the current stone (bubble §2): what the lesson is, where in the
+/// towards the current stone: what the lesson is, where in the
 /// unit, and «تابع»; for kids its picture, its English name and ▶. One
 /// button: the label is the screen reader's, the drawing hidden.
 ///
@@ -73,7 +73,7 @@ class LessonBubble extends StatelessWidget {
   /// none).
   final HomeLesson? lesson;
 
-  /// Across the island and its tail (RTL frame space, D1).
+  /// Across the island and its tail (RTL frame space).
   final BubbleFrame frame;
 
   /// Its vertical centre in the stack it is placed in.
@@ -104,9 +104,8 @@ class LessonBubble extends StatelessWidget {
   );
 
   /// Its height at [width], for the island's gap: what it lays out to.
-  ///
-  /// ASSUMPTION(design): a taller bubble (two-line title, large text) widens
-  /// its gap instead of covering the rows (D4, bubble A3).
+  /// /// ASSUMPTION(design): a taller bubble (two-line title, large text) widens
+  /// its gap instead of covering the rows.
   static double measure(
     BuildContext context, {
     required BubbleMode mode,
@@ -401,7 +400,7 @@ final class _Content {
   final HomeLesson? lesson;
 }
 
-/// The bubble's text roles (bubble §2.3, §2.5): white on the strong blue.
+/// The bubble's text roles: white on the strong blue.
 final class _Styles {
   const _Styles({
     required this.label,

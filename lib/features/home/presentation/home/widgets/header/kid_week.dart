@@ -6,7 +6,7 @@ import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:flutter/material.dart';
 
-/// The kids' week (design "Home Archipelago", header §3.3): a square for
+/// The kids' week (design "Home Archipelago"): a square for
 /// each day with a star on the days learned, and the day's letter under it,
 /// today's in the strong colour. Seven equal columns; the squares shrink
 /// below 28 when the row is narrower than the design's. Decorative: the

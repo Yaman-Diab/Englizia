@@ -67,7 +67,7 @@ final class HomeState extends Equatable {
   final String? switchedTo;
 
   /// The level was completed in this session (M7 played): its card stands at
-  /// the horizon, not in the notice area (D12).
+  /// the horizon, not in the notice area.
   final bool levelJustDone;
 
   bool get offline => !online || offlineFetch;

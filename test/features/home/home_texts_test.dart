@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/fake_home_repository.dart';
 import '../../helpers/pump_app.dart';
 
-/// The texts home builds come out as the design prints them (PLAN §9).
+/// The texts home builds come out as the design prints them.
 void main() {
   setUpAll(initLocalizationForTests);
 

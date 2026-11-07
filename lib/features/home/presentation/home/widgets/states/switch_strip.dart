@@ -6,7 +6,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
-/// «انتقلت إلى …» after a track switch (header §10, M11): an inverse strip
+/// «انتقلت إلى …» after a track switch (M11): an inverse strip
 /// under the top bar. The page shows it for `AppMotion.toastHold` and then
 /// passes null.
 ///

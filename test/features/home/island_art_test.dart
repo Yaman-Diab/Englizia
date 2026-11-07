@@ -58,7 +58,7 @@ Future<void> _themeSettles(WidgetTester tester) =>
 void main() {
   setUpAll(initLocalizationForTests);
 
-  group('island colours (map §4.4, §17.3, design hexes)', () {
+  group('island colours (design hexes)', () {
     const light = (
       surface: Color(0xFFFFFFFF),
       reward: Color(0xFFFEF3C7),
@@ -209,7 +209,7 @@ void main() {
     });
   });
 
-  group('the last stone (D8)', () {
+  group('the last stone', () {
     test('a gate for the level check, a lighthouse for a unit review', () {
       final review = _unit([
         _lesson('a', LessonKind.vocabulary),
@@ -260,7 +260,7 @@ void main() {
     });
   });
 
-  group('sea colours (D38)', () {
+  group('sea colours', () {
     test('each level its sea, Emar and kids their own', () {
       const sea = SeaPalette.light;
       expect(SeaLayer.seaOf(sea, SeaTone.general, HomeCefr.preA1), sea.preA1);

@@ -12,12 +12,12 @@ import 'package:englizia/features/home/presentation/home/widgets/stage/read_orde
 import 'package:flutter/material.dart';
 
 /// Today's ring over the header, with the guide in it, shrinking to the top
-/// bar as the header folds (design "Home Archipelago", header §4, §5.2).
+/// bar as the header folds (design "Home Archipelago").
 ///
 /// It fills the stage's main area (y 0 at the top bar's top) and places the
 /// 96 box itself at [StageMetrics.ringTop], scaled by
 /// [StageMetrics.ringScale] about its top end corner. The arc runs clockwise
-/// from 12 o'clock in both directions (D1). Kids have no ring: their 80 guide
+/// from 12 o'clock in both directions. Kids have no ring: their 80 guide
 /// stands in the box. On a v0.1 server there is no ring either: the 80 guide
 /// waves in the header's ring column and fades with the greeting.
 ///
@@ -388,7 +388,7 @@ class _RingArt extends StatelessWidget {
   }
 }
 
-/// The goal's six sparks around the ring (motion §1.2): each starts
+/// The goal's six sparks around the ring: each starts
 /// [AppMotion.homeSparkStep] after the one before and runs
 /// [AppMotion.homeSparks], from radius 44 at .4 scale, through 55 at full size
 /// 40% in, to 66 at .6, fading in then out.

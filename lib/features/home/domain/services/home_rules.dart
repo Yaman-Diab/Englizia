@@ -91,7 +91,7 @@ abstract final class HomeRules {
         '${two(day.month)}-${two(day.day)}';
   }
 
-  /// [week] with today where the phone's clock has it (A30): once the
+  /// [week] with today where the phone's clock has it: once the
   /// learner's day is past the server's «today», today is the day of that
   /// date, or none of [StudyWeek.days] (`today` is then their length), with
   /// no minutes yet. Never back: a phone's clock behind the server's day
@@ -158,7 +158,7 @@ abstract final class HomeRules {
     return (kind: kind, minutesLeft: minutesLeft);
   }
 
-  /// The streak can still be kept today, and the evening has come (D15).
+  /// The streak can still be kept today, and the evening has come.
   static bool atRisk(HomeSnapshot home, DateTime now) =>
       !home.kids &&
       !home.v01 &&
@@ -167,7 +167,7 @@ abstract final class HomeRules {
       home.todayMinutes < home.goalMinutes;
 
   /// How much of an island's colour shows: done 1, locked 0, open .15, the
-  /// current one by its share of lessons done (D7).
+  /// current one by its share of lessons done.
   static double saturation(HomeUnit unit, {int? doneOverride}) {
     switch (unit.status) {
       case UnitLessonStatus.done:
@@ -217,7 +217,7 @@ abstract final class HomeRules {
       !home.v01 &&
       home.currentUnit != null;
 
-  /// One card at most, by priority (D13): a one-time notice not [seen], the
+  /// One card at most, by priority: a one-time notice not [seen], the
   /// level done, the email (a strip), the level check, the deferred test.
   /// A connection strip takes the top slot; the email then waits.
   static HomeNotices notices(
@@ -295,7 +295,7 @@ abstract final class HomeRules {
     return (from: pages.first.from, to: pages.last.to);
   }
 
-  /// The unit whose pages hold [page] (A8); in the current unit, the last
+  /// The unit whose pages hold [page]; in the current unit, the last
   /// lesson that starts at or before it.
   static PageHit? findPage(HomeSnapshot home, int page) {
     for (final (index, unit) in home.units.indexed) {

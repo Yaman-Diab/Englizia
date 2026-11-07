@@ -24,9 +24,9 @@ enum StoneState { done, current, open, locked }
 enum _Variant { lesson, last, kid, station }
 
 /// A lesson's stone on the island: a circle, the last one, a kid's picture,
-/// or the review station (map §5). Its box is its own size ([diameterOf],
+/// or the review station. Its box is its own size ([diameterOf],
 /// [lastBox], [stationSize]) and it is placed by its centre: a stone that
-/// grows (48 → 64 as it becomes current, D29) grows about it. Badges reach
+/// grows (48 → 64 as it becomes current) grows about it. Badges reach
 /// past the box; the box is the target.
 ///
 /// A tap on a stone that doesn't open its lesson shakes it and ticks the
@@ -123,7 +123,7 @@ class Stone extends StatelessWidget {
     return current ? 64 : 48;
   }
 
-  /// The last lesson's target, standing on its point (map §5.2).
+  /// The last lesson's target, standing on its point.
   static const lastBox = 52.0;
 
   static const stationSize = 54.0;
@@ -137,7 +137,7 @@ class Stone extends StatelessWidget {
   };
 }
 
-/// The chip under a stone: its kind, Emar's page, a kid's word (map §5.5).
+/// The chip under a stone: its kind, Emar's page, a kid's word.
 /// It sits 120 wide, centred under the stone; it is drawing only.
 class StoneLabel extends StatelessWidget {
   const StoneLabel({
@@ -417,7 +417,7 @@ class StoneIcon extends StatelessWidget {
 }
 
 /// The flat bottom edge of a filled stone: its colour darkened, no blur
-/// (map §5.1, `lip(c)`).
+/// (`lip(c)`).
 Color stoneLip(BuildContext context, Color fill) =>
     mixOklch(fill, context.scheme.shadow, .72);
 
@@ -503,7 +503,7 @@ Widget _breathing({required bool active, required Widget child}) => Breathing(
 );
 
 /// A circle that grows or shrinks about its centre to [diameter] with its
-/// colours (D29), inside a box of the final size.
+/// colours, inside a box of the final size.
 class _Disk extends StatelessWidget {
   const _Disk({
     required this.diameter,

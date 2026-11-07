@@ -115,7 +115,7 @@ class _StreakSheet extends StatelessWidget {
   final StudyWeek? week;
   final VoidCallback? onWeekInMe;
 
-  /// The link sits 18 − 8 under «فهمت» (bubble §12.1).
+  /// The link sits 18 − 8 under «فهمت».
   static const _aboveLink = 10.0;
 
   static String _time(String hhmm) {

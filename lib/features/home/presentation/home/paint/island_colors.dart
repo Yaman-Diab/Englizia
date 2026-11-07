@@ -3,7 +3,7 @@ import 'package:englizia/core/design_system/color_mix.dart';
 import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:flutter/widgets.dart';
 
-/// An island fill at saturation [sat] (map §4.4): [full] mixed in oklab with
+/// An island fill at saturation [sat]: [full] mixed in oklab with
 /// its layer's grey, which is [outline] at [greyPercent]% over [greyBase]
 /// (the surface 55% over the reward surface). 1 is [full], 0 the grey; the
 /// share is a whole percent, as the design writes it.

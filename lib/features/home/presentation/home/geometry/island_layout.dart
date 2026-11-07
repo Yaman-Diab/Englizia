@@ -7,7 +7,7 @@ import 'package:flutter/painting.dart';
 /// The bubble's side towards its stone, in the layout's physical space.
 enum TailSide { top, bottom, left, right }
 
-/// Where the lesson bubble sits across the island (bubble §2.1–§2.2), in the
+/// Where the lesson bubble sits across the island, in the
 /// right-to-left layout's physical x.
 final class BubbleFrame {
   const BubbleFrame({
@@ -43,11 +43,11 @@ final class BubbleFrame {
   String toString() => 'BubbleFrame($x0, $x1, tail $tailX $side)';
 }
 
-/// The current island's rows of stones, its trail and its bubble gap (map
-/// §3, design "Home Archipelago" `lay()`). Rows hold up to three stones and
-/// snake from the right; one big gap holds the bubble, before the current
-/// row (after it when that is the first). x is the right-to-left layout's
-/// physical x across the whole width ([MapFrame]), y the island's own.
+/// The current island's rows of stones, its trail and its bubble gap (design
+/// "Home Archipelago" `lay()`). Rows hold up to three stones and snake from the
+/// right; one big gap holds the bubble, before the current row (after it when
+/// that is the first). x is the right-to-left layout's physical x across the
+/// whole width ([MapFrame]), y the island's own.
 final class IslandLayout {
   const IslandLayout._({
     required this.frame,
@@ -75,8 +75,7 @@ final class IslandLayout {
   /// count once all are done). While the rows move (09ب), [rowFrom] is the
   /// old gap's row and [rowT] how far they have moved, already eased.
   /// [reviewStation] adds the review station before the current stone;
-  /// [gapExtra] widens the bubble's gap for a bubble taller than the design's
-  /// (D4).
+  /// [gapExtra] widens the bubble's gap for a bubble taller than the design's.
   factory IslandLayout.compute({
     required int lessons,
     required int current,
@@ -114,8 +113,8 @@ final class IslandLayout {
 
     final cc = math.min(n - 1, math.max(0, current));
     final currentRow = rowOf(cc);
-    // ASSUMPTION(design): one row (≤ 3 lessons) keeps a virtual gap after it
-    // (D5), so the bubble has its room; the prototype has none.
+    // ASSUMPTION(design): one row (≤ 3 lessons) keeps a virtual gap after it,
+    // so the bubble has its room; the prototype has none.
     final clear = rows == 1 ? 0 : math.max(0, currentRow - 1);
 
     List<double> rowsWithGapAfter(int gapRow) {
@@ -196,7 +195,7 @@ final class IslandLayout {
     Offset? station;
     if (reviewStation) {
       // ASSUMPTION(design): when the current stone does not start its row,
-      // the station falls back to the stone before it (map AMBIG-5).
+      // the station falls back to the stone before it.
       final row = starts.indexOf(cc);
       station = row > 0
           ? Offset(turnX(row - 1), (rowY[row - 1] + rowY[row]) / 2)
@@ -255,7 +254,7 @@ final class IslandLayout {
   static const _edge = 26.0;
 
   /// How far the parked guide stands from its stone, towards the middle, and
-  /// above it (map §12).
+  /// above it.
   static const _spotAcross = 58.0;
   static const _spotUp = 8.0;
 
@@ -287,7 +286,7 @@ final class IslandLayout {
   final double bubbleOpacity;
 
   /// n + 1 pieces of the trail: in from the top, between each two stones,
-  /// out from the last one (map §3.7).
+  /// out from the last one.
   final List<List<PathCommand>> segments;
 
   /// Where the trail leaves the island, towards the next bridge.
@@ -297,11 +296,11 @@ final class IslandLayout {
   /// review comes first.
   final Offset? station;
 
-  /// Where the grass tufts stand (map §4.5).
+  /// Where the grass tufts stand.
   final List<Offset> tufts;
 
   /// The island's banner box: its left edge is the end inset, its width the
-  /// most it may take (map §7).
+  /// most it may take.
   final Rect banner;
 
   /// Where the banner may reach: [banner] and on to [bannerReach] from the
@@ -399,7 +398,7 @@ final class IslandLayout {
       ];
     }
     // ASSUMPTION(design): across a normal row step the design's turn would
-    // double back on itself, so it meets at the middle instead (D6).
+    // double back on itself, so it meets at the middle instead.
     final middle = (a.dy + b.dy) / 2;
     return [
       MoveTo(a),

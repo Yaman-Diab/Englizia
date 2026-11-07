@@ -6,7 +6,7 @@ import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dar
 import 'package:equatable/equatable.dart';
 
 /// Where the one guide (بلبل) stands on home: one place at a time (design
-/// "Home Archipelago", motion §2).
+/// "Home Archipelago").
 sealed class GuidePlacement extends Equatable {
   const GuidePlacement();
 

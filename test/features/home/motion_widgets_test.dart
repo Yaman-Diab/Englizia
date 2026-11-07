@@ -53,9 +53,7 @@ void main() {
       );
     });
 
-    testWidgets('it shows from 30, where the ring lets it go (D26)', (
-      tester,
-    ) async {
+    testWidgets('it shows from 30, where the ring lets it go', (tester) async {
       await tester.pumpLocalized(
         _stage(const PullGuide(pull: 29, spinning: false)),
       );

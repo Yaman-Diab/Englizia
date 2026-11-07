@@ -3,7 +3,7 @@ import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// The waves' pattern drifting over the sea (map §11): a 48 × 34 tile
+/// The waves' pattern drifting over the sea: a 48 × 34 tile
 /// repeated over the map, sliding one tile along in [AppMotion.homeWaves]
 /// while [running], and lowered by [AppMotion.homeWaveParallax] of the
 /// [scroll] so it moves slower than the islands. The pattern repeats, so the

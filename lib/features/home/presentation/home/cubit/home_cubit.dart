@@ -243,7 +243,7 @@ class HomeCubit extends Cubit<HomeState> {
   }
 
   /// Nothing on the phone names the track yet (a first open): the profile
-  /// does, for the capsule over the skeleton or no data (header §2.1).
+  /// does, for the capsule over the skeleton or no data.
   Future<void> _learnTrack() async {
     final result = await _profiles.getProfile();
     if (isClosed || state.trackTitle != null) return;
@@ -324,8 +324,7 @@ class HomeCubit extends Cubit<HomeState> {
     }),
   );
 
-  /// Kids: «استمع» says the greeting, once the server sends its recording
-  /// (D36).
+  /// Kids: «استمع» says the greeting, once the server sends its recording.
   Future<void> sayGreeting() => _say(state.home?.learner.greetingAudioUrl);
 
   /// Kids: today's unit says its name (M14).
@@ -336,7 +335,7 @@ class HomeCubit extends Cubit<HomeState> {
     await _voice.start(url, onEnd: () {});
   }
 
-  /// [home] with what the phone knows, on the learner's day (A30).
+  /// [home] with what the phone knows, on the learner's day.
   HomeSnapshot _merged(HomeSnapshot home) =>
       HomeRules.asOf(home.withPhone(_lessons.onPhone), state.now);
 
@@ -364,7 +363,7 @@ class HomeCubit extends Cubit<HomeState> {
     unawaited(_lessons.getLesson(unit.lessons[index].id));
   }
 
-  /// A new learner's day rolls today over on the phone at once (A30), then
+  /// A new learner's day rolls today over on the phone at once, then
   /// asks the server.
   void _tick() {
     if (isClosed) return;

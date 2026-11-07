@@ -3,9 +3,9 @@ import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/features/home/presentation/home/motion/motion_timeline.dart';
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 
-/// M1, the day's opening (design "Home Archipelago", motion §3): the map
+/// M1, the day's opening (design "Home Archipelago"): the map
 /// fades in, each island rises in turn from the top (with its stones and
-/// labels, D21), the trail into today's stone draws, the ring fills and its
+/// labels), the trail into today's stone draws, the ring fills and its
 /// guide hops in, then the bubble pops and the review box rises.
 final class OpeningMotion implements MotionTimeline {
   const OpeningMotion({required this.islands, required this.segment});

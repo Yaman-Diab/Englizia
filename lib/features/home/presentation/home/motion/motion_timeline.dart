@@ -32,7 +32,7 @@ const MotionFrame stillFrame = (
 );
 
 /// What a motion does at a moment besides drawing (design "Home
-/// Archipelago", motion §7–§9, §16).
+/// Archipelago").
 enum MotionCue {
   /// The guide flies from the ring to the finished stone.
   flyToStone,

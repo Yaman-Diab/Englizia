@@ -7,9 +7,9 @@ import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dar
 import 'package:flutter/widgets.dart';
 
 /// The guide hanging on a thread from the top bar while the map is pulled
-/// (design "Home Archipelago", motion §14, header §12), stretched by the
+/// (design "Home Archipelago"), stretched by the
 /// pull, spinning once when let go past the threshold. It shows from
-/// [AppMotion.homePullGuideAt], where the ring lets go of it (D26). Fill the
+/// [AppMotion.homePullGuideAt], where the ring lets go of it. Fill the
 /// stage with it: it hangs from the top bar's bottom, centred.
 class PullGuide extends StatefulWidget {
   const PullGuide({required this.pull, required this.spinning, super.key});

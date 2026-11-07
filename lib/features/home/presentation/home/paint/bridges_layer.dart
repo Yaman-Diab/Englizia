@@ -5,7 +5,7 @@ import 'package:englizia/features/home/presentation/home/geometry/map_layout.dar
 import 'package:englizia/features/home/presentation/home/geometry/path_commands.dart';
 import 'package:flutter/widgets.dart';
 
-/// The dotted bridges between islands, under them (map §10): grey dots the
+/// The dotted bridges between islands, under them: grey dots the
 /// whole way, white dots over the part reached. [fills] overrides how much
 /// of bridge k is built, 0 to 1, by the curve's parameter (M6 draws one).
 /// Physical space of the right-to-left layout, mirrored in left-to-right.

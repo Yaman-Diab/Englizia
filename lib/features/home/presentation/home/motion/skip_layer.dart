@@ -3,7 +3,7 @@ import 'package:englizia/features/home/presentation/home/widgets/stage/read_orde
 import 'package:flutter/widgets.dart';
 
 /// While the unit's celebration runs (M6), a tap anywhere skips to its end
-/// (design "Home Archipelago", motion §8). A screen reader finds it as one
+/// (design "Home Archipelago"). A screen reader finds it as one
 /// button, «تخطَّ الاحتفال». Fill the stage with it, above everything.
 class SkipLayer extends StatelessWidget {
   const SkipLayer({required this.active, required this.onSkip, super.key});

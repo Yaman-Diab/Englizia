@@ -3,7 +3,7 @@ import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:englizia/features/home/presentation/home/geometry/map_layout.dart';
 import 'package:flutter/widgets.dart';
 
-/// The three clouds over a locked island's drawing (map §4.6), in its
+/// The three clouds over a locked island's drawing, in its
 /// 176 × 112 box: they drift [AppMotion.homeFogDrift] to and fro while
 /// [running], and part ±40 and fade as [clear] goes to 1 (M6). Decorative.
 class FogLayer extends StatefulWidget {

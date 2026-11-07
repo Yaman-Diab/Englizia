@@ -3,8 +3,8 @@ import 'package:englizia/core/design_system/color_mix.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:flutter/material.dart';
 
-/// Home's own sheets (bubble §11): 24 corners, a 40×4 handle, 12 20 20
-/// around and 14 between the parts. They move as every sheet does (D33).
+/// Home's own sheets: 24 corners, a 40×4 handle, 12 20 20
+/// around and 14 between the parts. They move as every sheet does.
 Future<T?> showHomeSheet<T>(
   BuildContext context, {
   required WidgetBuilder builder,
@@ -63,7 +63,7 @@ class _Handle extends StatelessWidget {
   );
 }
 
-/// A home sheet's main action (bubble §8.1, §12.3): 52 high with round
+/// A home sheet's main action: 52 high with round
 /// ends. Disabled, it keeps its white text on a faded fill.
 class HomeSheetButton extends StatelessWidget {
   const HomeSheetButton({

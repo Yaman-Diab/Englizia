@@ -12,7 +12,7 @@ import 'package:englizia/features/home/presentation/home/widgets/header/header_s
 import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:flutter/material.dart';
 
-/// The 56 top bar (design "Home Archipelago", header §2): the track capsule
+/// The 56 top bar (design "Home Archipelago"): the track capsule
 /// at the start; at the end, from the edge, the folded ring's spot, the
 /// streak flame and Emar's page search; for kids, their stars instead.
 /// With [skeleton] (no data yet, or none to show) only the capsule.
@@ -342,8 +342,7 @@ class _StreakNumber extends StatelessWidget {
 }
 
 /// ASSUMPTION(design): the snow glint after a freeze (M10) has no frames in
-/// the design: one info-tinted sheen crosses the flame, [t] of the way
-/// (D31).
+/// the design: one info-tinted sheen crosses the flame, [t] of the way.
 class _Glint extends StatelessWidget {
   const _Glint({required this.t, required this.child});
 

@@ -10,12 +10,12 @@ import 'package:flutter/material.dart';
 
 enum _NoticeKind { levelCheck, placement, freeze, broke }
 
-/// The notice slot's cards (design "Home Archipelago", header §7.2–§7.4):
+/// The notice slot's cards (design "Home Archipelago"):
 /// the level check, the deferred placement test, a freeze used and a streak
 /// ended. Each is a live region with the design's label; the freeze and broke
 /// cards carry the guide (shown while [showGuide]; [guideKey] marks its 56
 /// box for the flight to the ring) and close with an X pulled into the end
-/// corner (header §16.14). Shares its name with the core `NoticeCard`: a file
+/// corner. Shares its name with the core `NoticeCard`: a file
 /// using both imports one with a prefix.
 class NoticeCard extends StatelessWidget {
   const NoticeCard.levelCheck({required VoidCallback this.onStart, super.key})

@@ -140,13 +140,13 @@ void main() {
     }
   });
 
-  group('the stage (header §5)', () {
+  group('the stage', () {
     testWidgets('opens on today\'s island with the header open', (
       tester,
     ) async {
       await pumpHome(tester, _home(), size: _design);
       // The design's worked anchor: the island at 310, the box at its exit,
-      // rel 42 (map §9).
+      // rel 42.
       expect(_map(tester).pixels, 352);
       final ring = tester.widget<GoalRingOverlay>(find.byType(GoalRingOverlay));
       expect(ring.metrics.collapse, 0);
@@ -173,7 +173,7 @@ void main() {
       (const Locale('en'), 360 - 80.0),
     ]) {
       testWidgets('places the current stone at $x in '
-          '${locale.languageCode} (D1)', (tester) async {
+          '${locale.languageCode}', (tester) async {
         await pumpHome(tester, _home(), size: _design, locale: locale);
         final stone = tester.getCenter(_currentStone());
         expect(stone.dx, closeTo(x, .5));
@@ -195,7 +195,7 @@ void main() {
       double start(Rect r) => rtl ? r.right : 360 - r.left;
 
       testWidgets('the banner sits by its end edge in '
-          '${locale.languageCode} (map §7)', (tester) async {
+          '${locale.languageCode}', (tester) async {
         await pumpHome(tester, _home(), size: _design, locale: locale);
         final banner = tester.getRect(find.byType(IslandBanner));
         expect(end(banner), 104);
@@ -234,7 +234,7 @@ void main() {
 
       await tester.tap(find.byType(BackToLessonButton));
       await _steps(tester, const Duration(milliseconds: 1200));
-      // Today's island just under the folded header (bubble §13.3): its top
+      // Today's island just under the folded header: its top
       // 310 at the header's 114 less 10.
       expect(_map(tester).pixels, 114 + 310 - 10);
       expect(
@@ -245,9 +245,7 @@ void main() {
       );
     });
 
-    testWidgets('the back button pressed twice goes once (bubble §13.3)', (
-      tester,
-    ) async {
+    testWidgets('the back button pressed twice goes once', (tester) async {
       await pumpHome(tester, _home(), size: _design);
       await _scroll(tester, 900);
       BackDirection? direction() => tester
@@ -297,9 +295,7 @@ void main() {
       expect(find.byType(ConnectionStrip), findsNothing);
     });
 
-    testWidgets('back from a lesson, what it changed plays (§4.3)', (
-      tester,
-    ) async {
+    testWidgets('back from a lesson, what it changed plays', (tester) async {
       final repository = FakeHomeRepository(_home());
       final cubit = await pumpHome(
         tester,
@@ -602,7 +598,7 @@ void main() {
 
     for (final locale in const [Locale('ar'), Locale('en')]) {
       testWidgets('reads the header first, then the level and the map '
-          '(header §14, ${locale.languageCode})', (tester) async {
+          '(${locale.languageCode})', (tester) async {
         final handle = tester.ensureSemantics();
         await pumpHome(
           tester,
@@ -659,7 +655,7 @@ void main() {
     });
   });
 
-  group('a first open: the capsule only (header §2.1, §8.3, §8.4)', () {
+  group('a first open: the capsule only', () {
     /// Home started with nothing kept on the phone, as on a first open.
     Future<HomeCubit> firstOpen(
       WidgetTester tester,

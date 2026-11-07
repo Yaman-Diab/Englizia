@@ -156,7 +156,7 @@ final class HomeLearner extends Equatable {
   /// Kids: the greeting the listen button plays.
   final String? greetingAudioUrl;
 
-  /// The greeting's name: the first word of [name] (D35).
+  /// The greeting's name: the first word of [name].
   String get firstName {
     final words = name.trim().split(RegExp(r'\s+'));
     return words.first.isEmpty ? name : words.first;

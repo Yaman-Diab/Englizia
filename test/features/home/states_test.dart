@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/pump_app.dart';
 
-/// Home's states without a map (header §8, §10): the skeleton, nothing to
+/// Home's states without a map: the skeleton, nothing to
 /// show, the connection strips and the track-switched strip.
 void main() {
   setUpAll(initLocalizationForTests);

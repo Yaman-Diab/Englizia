@@ -17,7 +17,7 @@ enum LockedSheetAction {
   openUnit,
 }
 
-/// A locked unit's preview (bubble §8.1, frame 13): what it teaches, its
+/// A locked unit's preview (frame 13): what it teaches, its
 /// first lessons, and the unit to finish first. Null when dismissed.
 Future<LockedSheetAction?> showLockedUnitSheet(
   BuildContext context, {
@@ -35,7 +35,7 @@ class _LockedUnitSheet extends StatelessWidget {
   final HomeUnit current;
 
   /// ASSUMPTION(design): the list stops at five, leaving the unit's review
-  /// out, as the design draws it (bubble A7).
+  /// out, as the design draws it.
   static const _listed = 5;
 
   /// The link's 44 box grows to a 48 target; its text stays where the

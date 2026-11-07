@@ -18,7 +18,7 @@ typedef FlightPose = ({
 typedef SparkDot = ({Offset centre, double radius, double opacity});
 
 /// The guide's flight and the sparks' burst as pure functions of time
-/// (design "Home Archipelago", motion §1.1, §1.2).
+/// (design "Home Archipelago").
 abstract final class FlightPath {
   /// A spark's radius at full size.
   static const sparkRadius = 4.0;
@@ -125,8 +125,8 @@ final class _Burst {
   Duration get length => FlightPath.burstLength(count);
 }
 
-/// The guide's flights and the sparks' bursts over the stage (motion §1).
-/// Positions are the stage's right-to-left frame (D1): x from the left of
+/// The guide's flights and the sparks' bursts over the stage.
+/// Positions are the stage's right-to-left frame: x from the left of
 /// the right-to-left layout, y from the top of the top bar; the layer
 /// mirrors them in English. One guide: a new flight ends the one before.
 class FlightLayerController extends ChangeNotifier {
@@ -144,7 +144,8 @@ class FlightLayerController extends ChangeNotifier {
   /// The guide is in the air.
   bool get flying => _flight != null;
 
-  /// The mounted layer's context, for an overlay above home ([ContainerReveal]).
+  /// The mounted layer's context, for an overlay above home
+  /// ([ContainerReveal]).
   BuildContext? get overlayContext => _context;
 
   /// Where the flying guide is now, if it flies.
@@ -209,7 +210,7 @@ class FlightLayerController extends ChangeNotifier {
     return flight.done.future;
   }
 
-  /// [count] sparks out from [centre] (motion §1.2); done when the last one
+  /// [count] sparks out from [centre]; done when the last one
   /// fades.
   Future<void> burst(
     Offset centre,
@@ -364,7 +365,7 @@ class _FlightLayerBodyState extends State<_FlightLayerBody> {
   );
 }
 
-/// Sparks, given in the right-to-left frame, mirrored in English (D1).
+/// Sparks, given in the right-to-left frame, mirrored in English.
 class SparksPainter extends CustomPainter {
   const SparksPainter({
     required this.sparks,

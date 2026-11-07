@@ -7,8 +7,8 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/semantics.dart';
 
-/// The top slot's strip: offline with the lessons kept (header §8.1), or a
-/// refresh that failed (§8.2). The page hides "failed" after
+/// The top slot's strip: offline with the lessons kept, or a
+/// refresh that failed. The page hides "failed" after
 /// `AppMotion.homeFailedHold` or a retry that works.
 ///
 /// It takes the whole slot, the design's margins included: 4 above the 40
@@ -44,7 +44,7 @@ class ConnectionStrip extends StatelessWidget {
     final retry = onRetry;
     final failed = retry != null;
     final tone = failed ? colors.error : colors.info;
-    // ASSUMPTION(design): D39, the design's offline line; S §6.1 words it
+    // ASSUMPTION(design): the design's offline line; S §6.1 words it
     // differently (logged for the owner).
     final message = failed ? 'home_refresh_failed'.tr() : 'home_offline'.tr();
     final strip = Padding(
@@ -114,7 +114,7 @@ class ConnectionStrip extends StatelessWidget {
   }
 }
 
-/// «إعادة»: 40 drawn, a 48 target (header §16.13).
+/// «إعادة»: 40 drawn, a 48 target.
 class _RetryButton extends StatelessWidget {
   const _RetryButton({required this.onPressed});
 

@@ -10,16 +10,16 @@ import 'package:flutter/painting.dart';
 enum BoxPlace { top, exit, hide }
 
 /// The scroll home opens on, relative to the current island's top, and the
-/// review box's place (map §9, the design's `anch()`): computed once on
+/// review box's place (the design's `anch()`): computed once on
 /// open, never on scroll. The current stone, its label and the bubble stay
 /// at least 12 above the tab bar and 20 under the level header.
 final class MapAnchor {
   const MapAnchor({required this.box, required this.rel});
 
   /// [pt] is the header space above the map, [view] the scroll viewport.
-  /// [bubbleHeight] is the bubble as measured (D4); 0 takes the design's
+  /// [bubbleHeight] is the bubble as measured; 0 takes the design's
   /// reserved height. [lastLandmark]: the last stone is drawn as a lighthouse
-  /// or a gate (D8), which stands taller than a stone.
+  /// or a gate, which stands taller than a stone.
   static MapAnchor compute({
     required IslandLayout island,
     required int current,
@@ -172,7 +172,7 @@ final class BridgeCurve {
   List<PathCommand> get whole => [MoveTo(p0), CubicTo(p1, p2, p3)];
 
   /// The first [t] of it, split by the curve's parameter (de Casteljau, not
-  /// arc length, as the design draws it; motion §1.3).
+  /// arc length, as the design draws it).
   List<PathCommand> part(double t) {
     if (t <= 0) return const [];
     if (t >= 1) return whole;
@@ -186,8 +186,8 @@ final class BridgeCurve {
 }
 
 /// The map's vertical stack: the islands from the top, the current one full
-/// size, then the horizon (map §2 `geo()`, §10 bridges). Physical x of the
-/// right-to-left layout across the whole width; y from the map's top.
+/// size, then the horizon, and the bridges (the design's `geo()`). Physical x
+/// of the right-to-left layout across the whole width; y from the map's top.
 final class MapLayout {
   const MapLayout._({
     required this.islands,
@@ -322,7 +322,7 @@ final class MapLayout {
   static const compactSize = Size(176, 112);
 
   /// The review box as placed. ASSUMPTION(design): it is content-sized, about
-  /// 68 high (D9); the anchor keeps the design's room for it.
+  /// 68 high; the anchor keeps the design's room for it.
   static const reviewBoxSize = Size(198, 68);
 
   final List<IslandSlot> islands;
@@ -333,7 +333,7 @@ final class MapLayout {
   final double height;
   final List<BridgeCurve> bridges;
 
-  /// The review box, 198 wide (map §8); null when it doesn't show.
+  /// The review box, 198 wide; null when it doesn't show.
   final Rect? reviewBox;
   final MapAnchor anchor;
 

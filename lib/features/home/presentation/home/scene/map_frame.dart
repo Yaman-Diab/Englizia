@@ -3,10 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-/// The design's 360-wide frame on a screen [width] wide (D2): at most 480,
+/// The design's 360-wide frame on a screen [width] wide: at most 480,
 /// centred. Positions are physical x from the left of the right-to-left
 /// layout; a widget is placed with `PositionedDirectional(start: startOf(…))`,
-/// which mirrors in English on its own (D1).
+/// which mirrors in English on its own.
 ///
 /// ASSUMPTION(design): scaled x for stones, art points and the review
 /// station; edge-anchored insets for turns, compact islands and cards;

@@ -359,7 +359,7 @@ void main() {
       expect(mirrored.right, 314);
     });
 
-    testWidgets('measures what it lays out to (D4)', (tester) async {
+    testWidgets('measures what it lays out to', (tester) async {
       final general = mockHome();
       final partial = mockHome(scenario: HomeMockScenario.partial);
       final back = mockHome(scenario: HomeMockScenario.welcomeBack);
@@ -591,9 +591,7 @@ void main() {
       await _settle(tester);
     });
 
-    testWidgets('the new current stone grows about its centre (D29)', (
-      tester,
-    ) async {
+    testWidgets('the new current stone grows about its centre', (tester) async {
       final lesson = _current(mockHome());
       final state = ValueNotifier(StoneState.locked);
       addTearDown(state.dispose);
@@ -1025,7 +1023,7 @@ void main() {
   });
 
   group('BackToLessonButton', () {
-    test('the eyes say which way (bubble §13.2)', () {
+    test('the eyes say which way', () {
       final up = BackFacePose.at(0, up: true);
       final down = BackFacePose.at(1, up: false);
       expect((up.faceDy, up.pupilDy, up.lid), (-2.5, -2.5, 0.0));

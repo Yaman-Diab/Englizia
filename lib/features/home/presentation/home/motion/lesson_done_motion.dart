@@ -8,7 +8,7 @@ import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/home/presentation/home/motion/motion_timeline.dart';
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 
-/// When each step of M5 starts (design "Home Archipelago", motion §7), from
+/// When each step of M5 starts (design "Home Archipelago"), from
 /// the return's first frame.
 abstract final class LessonDoneBeats {
   /// The guide leaves the ring for the finished stone.
@@ -39,14 +39,13 @@ abstract final class LessonDoneBeats {
   static const goalLength = Duration(milliseconds: 720);
 }
 
-/// M5, a lesson done, and its new-row variant 09ب (motion §7, §7.1, D23,
-/// D24, D29): the ring fills, the guide flies to the finished stone, the
-/// stone fills with sparks, the trail draws on as the guide hops to the next
-/// stone, the bubble follows it, the guide flies home and, when this lesson
-/// reached today's goal, the goal step plays.
+/// M5, a lesson done, and its new-row variant 09ب: the ring fills, the guide
+/// flies to the finished stone, the stone fills with sparks, the trail draws on
+/// as the guide hops to the next stone, the bubble follows it, the guide flies
+/// home and, when this lesson reached today's goal, the goal step plays.
 ///
 /// With the header [collapsed] the guide stays on the map: it starts beside
-/// the finished stone and ends beside the next (D23).
+/// the finished stone and ends beside the next.
 final class LessonDoneMotion implements MotionTimeline {
   const LessonDoneMotion({
     required this.moment,

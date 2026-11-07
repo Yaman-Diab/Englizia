@@ -53,8 +53,7 @@ Widget kindIcon(
   size: size,
 );
 
-/// The streak kept by a lesson: «يومك», «يوميك», «أيامك السبعة», «أيامك الـ12»
-/// (D14).
+/// The streak kept by a lesson: «يومك», «يوميك», «أيامك السبعة», «أيامك الـ12».
 String yourDays(int n) {
   if (n == 1) return 'home_your_day'.tr();
   if (n == 2) return 'home_your_two_days'.tr();

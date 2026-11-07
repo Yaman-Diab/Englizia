@@ -88,7 +88,7 @@ void main() {
       },
     );
 
-    test('today rolls over on the phone at the day start (A30)', () {
+    test('today rolls over on the phone at the day start', () {
       final home = _home(HomeMockScenario.goalReached);
       expect(home.todayMinutes, 12);
       expect(HomeRules.asOf(home, DateTime(2026, 11, 6, 3, 59)), same(home));
@@ -395,7 +395,7 @@ void main() {
       expect(
         HomeRules.findPage(emar, 18),
         const PageHit.unit(1),
-        reason: 'unit 2 starts at 18 (A8)',
+        reason: 'unit 2 starts at 18',
       );
       expect(HomeRules.findPage(emar, 55), const PageHit.unit(4));
       expect(HomeRules.findPage(emar, 5), isNull);

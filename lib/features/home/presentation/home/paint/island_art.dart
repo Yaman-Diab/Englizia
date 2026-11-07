@@ -16,14 +16,14 @@ import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-/// What the current island's last stone is drawn as (D8).
+/// What the current island's last stone is drawn as.
 enum LastStone { lighthouse, gate, none }
 
 /// The last stone of [unit]: a gate for the level check, a lighthouse for a
 /// unit review, otherwise a plain stone; kids never get either.
 ///
 /// ASSUMPTION(design): the design gates its first unit; units come from the
-/// server, so the last lesson's kind decides (D8).
+/// server, so the last lesson's kind decides.
 LastStone lastStoneOf(HomeUnit unit, {required bool kids}) {
   if (kids || unit.lessons.isEmpty) return LastStone.none;
   final last = unit.lessons.last;
@@ -32,17 +32,18 @@ LastStone lastStoneOf(HomeUnit unit, {required bool kids}) {
   return LastStone.none;
 }
 
-/// An island's drawing (map §4, design `isleArt()`): its shallows, sand and
+/// An island's drawing (design `isleArt()`): its shallows, sand and
 /// grass as seeded blobs, faded by saturation, with tufts; the current one
 /// with its trail and last stone, a compact one with its medallion post and,
 /// when done, its flag. Each drawing is recorded once as a picture and kept
 /// by its inputs; only a waving flag repaints. Decorative: hidden from
 /// screen readers. Drawn in the right-to-left layout's physical space,
-/// mirrored in left-to-right ones (D1).
+/// mirrored in left-to-right ones.
 class IslandArt extends StatelessWidget {
-  /// The current island, as wide as the map and [layout] high. The lessons
-  /// in [done] are done, in any order; [segments] overrides how much of each trail piece is
-  /// drawn (0 to 1); [complete] raises the unit flag, [flagUp] of the way.
+  /// The current island, as wide as the map and [layout] high. The lessons in
+  /// [done] are done, in any order; [segments] overrides how much of each trail
+  /// piece is drawn (0 to 1); [complete] raises the unit flag, [flagUp] of the
+  /// way.
   const IslandArt.current({
     required IslandLayout this.layout,
     required this.tone,
@@ -183,7 +184,8 @@ class IslandArt extends StatelessWidget {
   }
 }
 
-/// The colours an island draws with besides its ground (§5.4 of the plan).
+/// The colours an island draws with besides its ground (its trail, last
+/// stone and flags), read once from the theme.
 @immutable
 final class _Ink {
   const _Ink({
@@ -252,7 +254,7 @@ final class _Ink {
 }
 
 /// Everything one island's picture depends on: equal specs draw the same
-/// picture, so it is recorded once and kept (map §20).
+/// picture, so it is recorded once and kept.
 @immutable
 final class _ArtSpec {
   const _ArtSpec.current({
@@ -403,8 +405,8 @@ final class _ArtSpec {
     }
   }
 
-  /// Shallows, sand edge, sand and grass, each a spit then the island
-  /// (map §4.3). Horizontal radii scale with the frame ([sx]).
+  /// Shallows, sand edge, sand and grass, each a spit then the island.
+  /// Horizontal radii scale with the frame ([sx]).
   void _ground(
     Canvas canvas, {
     required double cx,
@@ -623,8 +625,8 @@ class _ArtPainter extends CustomPainter {
       old.spec != spec || old.mirrored != mirrored;
 }
 
-/// A flag on its pole: the pennant waves about its pole side (map §14,
-/// `skewY 0 ↔ −6°`), the check inside reads the right way when mirrored.
+/// A flag on its pole: the pennant waves about its pole side (`skewY 0 ↔ −6°`),
+/// the check inside reads the right way when mirrored.
 @immutable
 final class _FlagShape {
   const _FlagShape({
@@ -654,7 +656,7 @@ final class _FlagShape {
   );
 
   /// The unit-complete flag, 60 to the end side of the last stone, risen
-  /// [up] of its 34 (map §4.7).
+  /// [up] of its 34.
   factory _FlagShape.unit(Offset stone, double up) => _FlagShape(
     pole: Path()
       ..moveTo(232, 316)

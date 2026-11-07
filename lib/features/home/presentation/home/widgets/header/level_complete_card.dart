@@ -7,9 +7,9 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/header_styles.dart';
 import 'package:flutter/material.dart';
 
-/// «أكملت مستوى A2» with «ابدأ B1» (design "Home Archipelago", header §9):
+/// «أكملت مستوى A2» with «ابدأ B1» (design "Home Archipelago"):
 /// at the horizon right after the level is done, then in the notice slot at
-/// each opening until the next level starts (D12), the same card measured. A
+/// each opening until the next level starts, the same card measured. A
 /// live region; it carries the guide while [showGuide] ([guideKey] marks its
 /// 64 box for a flight). Without a next level it has no button.
 class LevelCompleteCard extends StatelessWidget {

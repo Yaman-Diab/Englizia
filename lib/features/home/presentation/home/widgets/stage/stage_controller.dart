@@ -7,7 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 /// The floating header's state as the map scrolls, snaps and is pulled
-/// (design "Home Archipelago", header §5): scrolling down folds the day header
+/// (design "Home Archipelago"): scrolling down folds the day header
 /// one to one, the first scroll up brings it back, it never folds more than
 /// the map has scrolled, and a pause snaps it open or shut.
 class StageController extends ChangeNotifier {
@@ -25,7 +25,7 @@ class StageController extends ChangeNotifier {
   double height = 0;
   bool kids = false;
 
-  /// The day header's height (D3).
+  /// The day header's height.
   double head = 0;
   double topSlot = 0;
 
@@ -84,7 +84,7 @@ class StageController extends ChangeNotifier {
   /// The map's scroll view, which [scrollTo], [jumpTo] and [shiftScroll] move.
   void attach(ScrollController controller) => _scroll = controller;
 
-  /// The map scrolled to [st] (header §5.1).
+  /// The map scrolled to [st].
   void onScroll(double st) {
     final delta = st - scroll;
     scroll = st;
@@ -152,7 +152,7 @@ class StageController extends ChangeNotifier {
     snap.stop();
   }
 
-  /// Scrolls the map to [target] over [duration] (header §5.6); with
+  /// Scrolls the map to [target] over [duration]; with
   /// [foldHeader] the header folds with the same ease and ends folded as far
   /// as the map has scrolled, otherwise it follows the scroll as a finger's
   /// would (M6's camera). Under reduce motion it jumps. A scroll started
@@ -202,7 +202,7 @@ class StageController extends ChangeNotifier {
   var _scrolls = 0;
 
   /// Puts the map at [offset] with the header at [collapse]: the opening
-  /// anchor (header §5.1, c = 0), or M6's new one.
+  /// anchor (c = 0), or M6's new one.
   void jumpTo(double offset, {double collapse = 0}) {
     _place(offset, collapse: collapse);
     _moved = false;
@@ -227,7 +227,7 @@ class StageController extends ChangeNotifier {
   }
 
   /// Moves the map by [delta] without touching the header: the header was
-  /// measured taller or shorter than the design's (D3).
+  /// measured taller or shorter than the design's.
   void shiftScroll(double delta) {
     if (delta == 0) return;
     final controller = _scroll;

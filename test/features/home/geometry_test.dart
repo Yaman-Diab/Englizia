@@ -55,7 +55,7 @@ String _blobSvg(List<Offset> points) {
 void main() {
   final design = MapFrame(360);
 
-  group('island blob (map §4.2)', () {
+  group('island blob', () {
     test('the jitter of seeds 7 and 113', () {
       const seed7 = [
         0.9981,
@@ -118,7 +118,7 @@ void main() {
     });
   });
 
-  group('island layout (map §3, plan §11)', () {
+  group('island layout', () {
     IslandLayout lay(
       int n,
       int cur, {
@@ -226,7 +226,7 @@ void main() {
       expect(points(l).first, (312, 94));
     });
 
-    test('one row keeps a virtual gap (D5)', () {
+    test('one row keeps a virtual gap', () {
       final l = lay(3, 1);
       expect(l.rows, 1);
       expect(l.rowY, [78]);
@@ -239,7 +239,7 @@ void main() {
       expect(points(lay(1, 0)), [(196, 78)]);
     });
 
-    test('a taller bubble widens its gap (D4)', () {
+    test('a taller bubble widens its gap', () {
       final l = IslandLayout.compute(
         lessons: 6,
         current: 3,
@@ -252,7 +252,7 @@ void main() {
       expect(l.bubbleCenterY, 235);
     });
 
-    test('the default trail, exactly (map §3.7)', () {
+    test('the default trail, exactly', () {
       final segments = [for (final s in lay(6, 3).segments) svgOf(s)];
       const expected = [
         'M312 -4C312 20 312 40 312 54',
@@ -269,7 +269,7 @@ void main() {
       }
     });
 
-    test('a row turn across a normal step meets at the middle (D6)', () {
+    test('a row turn across a normal step meets at the middle', () {
       // 10 lessons: rows 0 → 1 are 96 apart.
       final turn = svgOf(lay(10, 8).segments[3]);
       _expectPath(turn, 'M80 78C26 92 26 106.8 26 126C26 145.2 26 160 80 174');
@@ -287,7 +287,7 @@ void main() {
       final l = lay(6, 3, station: true);
       expect(l.station, const Offset(26, 216));
       expect(l.spot(-1), const Offset(84, 208));
-      // Not first in its row: the stone before it (map AMBIG-5).
+      // Not first in its row: the stone before it.
       expect(lay(6, 4, station: true).station, const Offset(80, 354));
       expect(lay(6, 3).station, isNull);
     });
@@ -298,7 +298,7 @@ void main() {
       expect(l.spot(3), const Offset(138, 346));
     });
 
-    test('the bubble frame and its tail (bubble §2.1, §2.2)', () {
+    test('the bubble frame and its tail', () {
       final l = lay(6, 3);
       final frame = l.bubbleFrame(
         reviewFirst: false,
@@ -337,7 +337,7 @@ void main() {
       expect(odd.x1, 314);
     });
 
-    test('320 scales x, keeps the turn edges and every y (D2)', () {
+    test('320 scales x, keeps the turn edges and every y', () {
       final narrow = lay(6, 3, frame: MapFrame(320));
       expect(narrow.stones[0].dx, closeTo(312 * 320 / 360, 1e-9));
       expect(narrow.rowY, [78, 354]);
@@ -360,7 +360,7 @@ void main() {
       expect(turn.dx, 60 + 26);
     });
 
-    test('the banner box (map §7)', () {
+    test('the banner box', () {
       expect(lay(6, 3).banner, const Rect.fromLTWH(104, 2, 236, 48));
       final narrow = lay(6, 3, frame: MapFrame(320)).banner;
       expect(narrow.left, closeTo(104 * 320 / 360, 1e-9));
@@ -381,7 +381,7 @@ void main() {
     });
   });
 
-  group('anchor (map §9)', () {
+  group('anchor', () {
     test('the default island: box at the exit, rel 42 at VIEW 624', () {
       final island = IslandLayout.compute(
         lessons: 6,
@@ -494,7 +494,7 @@ void main() {
     });
   });
 
-  group('map layout (map §2, §10)', () {
+  group('map layout', () {
     final statuses = [
       UnitLessonStatus.done,
       UnitLessonStatus.done,
@@ -583,7 +583,7 @@ void main() {
       expect(end.dy, closeTo((220 + 3 * 267.3 + 3 * 258.7 + 306) / 8, 1e-9));
     });
 
-    test('the review box at the exit, opposite the trail (map §8)', () {
+    test('the review box at the exit, opposite the trail', () {
       // The last stone is on the start side: the box on the end side.
       expect(map.reviewBox, const Rect.fromLTWH(10, 310 + 440 - 22, 198, 68));
     });

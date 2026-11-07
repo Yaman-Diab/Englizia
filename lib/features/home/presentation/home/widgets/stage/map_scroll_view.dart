@@ -5,7 +5,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/stage_controller.dart';
 import 'package:flutter/material.dart';
 
-/// The map's scroll view (design "Home Archipelago", header §5, M12): the
+/// The map's scroll view (design "Home Archipelago", M12): the
 /// header's room, then the map; every scroll feeds the [stage], and at the
 /// very top a pull down follows the finger at [AppMotion.homePullFactor] up
 /// to [AppMotion.homePullMax]. What the pull does as it moves and when let

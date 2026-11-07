@@ -8,12 +8,12 @@ import 'package:flutter/material.dart';
 typedef StageLayerBuilder =
     Widget Function(BuildContext context, StageMetrics metrics);
 
-/// The stage's layers in the design's order (design "Home Archipelago",
-/// header §1), in main coordinates (y 0 at the top bar's top): the stage
-/// under the top bar, pulled down by `pull`, holds the map's scroll view, the
-/// day header folding by `collapse` and the level header under it; over it
-/// the pull's guide, the top bar, the ring, the guide's words, the switch
-/// strip, the back button, the flights and the skip layer.
+/// The stage's layers in the design's order (design "Home Archipelago"), in
+/// main coordinates (y 0 at the top bar's top): the stage under the top bar,
+/// pulled down by `pull`, holds the map's scroll view, the day header folding
+/// by `collapse` and the level header under it; over it the pull's guide, the
+/// top bar, the ring, the guide's words, the switch strip, the back button, the
+/// flights and the skip layer.
 ///
 /// Only the layers that follow the header rebuild as it moves; the
 /// [scrollView] is built once per change of the map. A vertical drag on the

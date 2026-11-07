@@ -59,9 +59,9 @@ final class _Track {
 /// Plays home's motions (design "Home Archipelago", M1–M14) by writing the
 /// scene's overrides; the page draws [map], [header] and [forcedGuide] each
 /// frame and keeps [island] and [mapLayout] up to date. Positions are the
-/// stage's right-to-left frame (D1). Under reduce motion every motion ends
+/// stage's right-to-left frame. Under reduce motion every motion ends
 /// on its last frame at once, with a [AppMotion.quick] fade where content
-/// swaps, and the haptics still fire (D30).
+/// swaps, and the haptics still fire.
 class HomeChoreographer extends ChangeNotifier {
   HomeChoreographer({
     required this.vsync,
@@ -173,7 +173,7 @@ class HomeChoreographer extends ChangeNotifier {
   /// The at-risk flame's wobble for the top bar (M10).
   Animation<double> get flameWobble => loops.flame;
 
-  /// M1, once a day (D21), then the cubit is told it played.
+  /// M1, once a day, then the cubit is told it played.
   Future<void> playOpening(HomeSnapshot home) async {
     if (!reduceMotion()) {
       final unit = home.currentUnit;
@@ -238,7 +238,7 @@ class HomeChoreographer extends ChangeNotifier {
   }
 
   /// M8: the guide hops between the ring and the current stone as the
-  /// header passes half folded (header §5.5).
+  /// header passes half folded.
   Future<void> modeFlip({required bool collapsed}) async {
     if (reduceMotion() ||
         busy ||
@@ -272,7 +272,7 @@ class HomeChoreographer extends ChangeNotifier {
     }
   }
 
-  /// A freeze or broke card closed (header §7.4): the map and the level
+  /// A freeze or broke card closed: the map and the level
   /// header rise [dh] into its place while the guide flies from the card's
   /// guide ([cardGuide], stage frame) to the ring and lands with a hop.
   Future<void> cardClosed({required Rect cardGuide, required double dh}) async {
@@ -398,7 +398,7 @@ class HomeChoreographer extends ChangeNotifier {
   }
 
   /// M4: the bubble ([bubble], global coordinates) grows to the screen, then
-  /// [push] (D22). Under reduce motion, or before the layer is mounted, a
+  /// [push]. Under reduce motion, or before the layer is mounted, a
   /// plain [push]. While one grows, another is ignored: one lesson opens.
   Future<void> openLesson(Rect bubble, VoidCallback push) async {
     if (busy || _revealing) return;
@@ -415,7 +415,7 @@ class HomeChoreographer extends ChangeNotifier {
     }
   }
 
-  /// A freeze was used: the flame's one glint of snow (D31).
+  /// A freeze was used: the flame's one glint of snow.
   // ASSUMPTION(design): the design gives no numbers; «أنا»'s shine is reused
   // (meShine after meShineDelay), INFO-tinted by the flame's painter.
   Future<void> freezeGlint() async {
@@ -437,7 +437,7 @@ class HomeChoreographer extends ChangeNotifier {
   void sayUnit() => _sayFor(AppMotion.homeKidReplay);
 
   /// The back-to-lesson button shows: the guide flies into it from beside
-  /// the stone (collapsed) or out of the ring (D27).
+  /// the stone (collapsed) or out of the ring.
   Future<void> backButtonShown() async {
     _guideHold = const GuideInBackButton();
     _rebuild();
@@ -680,7 +680,7 @@ class HomeChoreographer extends ChangeNotifier {
 
   /// The unit's and the level's pattern (20-40-20) and sound.
   // ASSUMPTION(design): the design's vibration lengths map to the platform's
-  // impacts (motion §18): 8–12 ms light, 20–30 ms medium.
+  // impacts: 8–12 ms light, 20–30 ms medium.
   void _celebrate(HomeCheer cheer) {
     unawaited(AppHaptics.mediumImpact());
     unawaited(_wait(hapticGap).then((_) => AppHaptics.mediumImpact()));
@@ -771,7 +771,7 @@ class HomeChoreographer extends ChangeNotifier {
   }
 
   /// The ring's guide: glad at the goal, cheering on short of it, waving
-  /// hello before the day's first minute (header §4.2).
+  /// hello before the day's first minute.
   MascotExpression _ringExpression() {
     final home = cubit.state.home;
     final f = home == null
@@ -1028,7 +1028,7 @@ class HomeChoreographer extends ChangeNotifier {
 }
 
 /// Reduce motion's end of a moment: the new day at once, its changed
-/// content fading in over [AppMotion.quick] (D30).
+/// content fading in over [AppMotion.quick].
 final class _QuickFade implements MotionTimeline {
   const _QuickFade();
 

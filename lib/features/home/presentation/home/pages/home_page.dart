@@ -133,7 +133,7 @@ class _HomePageState extends State<HomePage>
   HomeMapScene? _scene;
 
   /// The header: the design's height as last used, and how much taller it
-  /// was measured (D3).
+  /// was measured.
   double _formula = 0;
   double _extra = 0;
   double? _topSlot;
@@ -213,7 +213,7 @@ class _HomePageState extends State<HomePage>
     widget.pages.subscribe(this, route);
   }
 
-  // A lesson or a unit over home, and back: what it changed shows (§4.3).
+  // A lesson or a unit over home, and back: what it changed shows.
 
   @override
   void didPushNext() => _cubit.left();
@@ -362,11 +362,11 @@ class _HomePageState extends State<HomePage>
   static const _cloudsPerIsland = 3;
   static const _stoneReach = 40.0;
 
-  /// The back-to-lesson button (bubble §13.1): the current stone above the
+  /// The back-to-lesson button: the current stone above the
   /// level header's edge or under the view's bottom.
   void _checkBack() {
     final scene = _scene;
-    // Pressed: it stays until the map arrives (bubble §13.3).
+    // Pressed: it stays until the map arrives.
     if (scene == null || _returning) return;
     BackDirection? direction;
     final target = scene.target;
@@ -401,7 +401,7 @@ class _HomePageState extends State<HomePage>
       setState(() => _backDir = direction);
       return;
     }
-    // The guide flies into the button first, then it pops (D27).
+    // The guide flies into the button first, then it pops.
     _backShowing = true;
     try {
       await _choreo.backButtonShown();
@@ -418,7 +418,7 @@ class _HomePageState extends State<HomePage>
   }
 
   /// The back button: to today's island with the header kept folded, then
-  /// the guide flies back beside the stone (bubble §13.3). Pressed again on
+  /// the guide flies back beside the stone. Pressed again on
   /// the way, it's already going.
   Future<void> _back() async {
     final scene = _scene;
@@ -442,7 +442,7 @@ class _HomePageState extends State<HomePage>
     }
   }
 
-  /// Today's island just under the folded header (bubble §8.1, §13.3).
+  /// Today's island just under the folded header.
   double _islandOffset(HomeMapScene scene, IslandSlot slot) =>
       _stage.head +
       slot.rect.top -
@@ -451,9 +451,9 @@ class _HomePageState extends State<HomePage>
   static const _boxAbove = 62.0;
   static const _plainAbove = 10.0;
 
-  // Header sizes (D3).
+  // Header sizes.
 
-  /// The header measured taller than the design's (D3): untouched, the map
+  /// The header measured taller than the design's: untouched, the map
   /// opens on its anchor for the measured height; once moved, it shifts by
   /// the difference so nothing under the finger jumps.
   void _onHead(double measured) {
@@ -525,7 +525,7 @@ class _HomePageState extends State<HomePage>
     return box.localToGlobal(Offset.zero) & box.size;
   }
 
-  /// [key]'s box in the stage's right-to-left frame (D1).
+  /// [key]'s box in the stage's right-to-left frame.
   Rect? _stageRect(GlobalKey key) {
     final box = key.currentContext?.findRenderObject();
     final main = _mainKey.currentContext?.findRenderObject();
@@ -577,7 +577,7 @@ class _HomePageState extends State<HomePage>
       return;
     }
     if (scene.kids) {
-      // D19: no cards for kids; a done stone replays its lesson.
+      // No cards for kids; a done stone replays its lesson.
       if (state == StoneState.done) _openLesson(unit.lessons[k]);
       return;
     }
@@ -769,7 +769,7 @@ class _HomePageState extends State<HomePage>
     );
   }
 
-  /// The freeze card's one glint of snow on the flame (D31).
+  /// The freeze card's one glint of snow on the flame.
   void _glintFor(HomeNotices notices, HomeCardNotice slot) {
     final event = notices.event;
     if (slot != HomeCardNotice.freeze || event == null) return;
@@ -960,7 +960,7 @@ class _HomePageState extends State<HomePage>
   }
 
   /// Nothing to show yet: the skeleton, or no data and a retry; the top bar
-  /// keeps only its capsule (header §8).
+  /// keeps only its capsule.
   Widget _empty(HomeState state) => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
     children: [

@@ -208,7 +208,7 @@ void main() {
       expect(f.guide, const GuideBesideStone(3));
       expect(f.map.stonePop?.index, 3);
       expect(f.map.bubbleContent, inExclusiveRange(0, 1));
-      expect(f.map.segments[4], 0, reason: 'D24: no flash before 820');
+      expect(f.map.segments[4], 0, reason: 'no flash before 820');
       expect(f.map.saturation, inExclusiveRange(.5, 2 / 3));
       expect(f.expression, MascotExpression.happy);
     });
@@ -298,7 +298,7 @@ void main() {
       expect(short.frameAt(_ms(2030)).header.streak, isNull);
     });
 
-    test('collapsed, the guide stays on the map (D23)', () {
+    test('collapsed, the guide stays on the map', () {
       final folded = LessonDoneMotion(moment: _lessonDone(), collapsed: true);
       expect(folded.frameAt(Duration.zero).guide, const GuideBesideStone(3));
       expect(folded.frameAt(_ms(1000)).guide, isA<GuideHop>());
@@ -355,7 +355,7 @@ void main() {
   group('M6, a unit done (frame 10)', () {
     final moment = _unitDone();
     final motion = UnitDoneMotion(moment: moment, collapsed: false);
-    // M6's own time starts after M5's lead-in (D25).
+    // M6's own time starts after M5's lead-in.
     MotionFrame at(int ms) => motion.frameAt(_ms(680 + ms));
 
     test('the lead-in is M5\'s: the ring, the flight, the last stone', () {
@@ -955,7 +955,7 @@ void main() {
       expect(
         subject.flights.guide?.centre,
         subject.stage.metrics.ringCenter,
-        reason: 'D27: with the header open it leaves the ring',
+        reason: 'with the header open it leaves the ring',
       );
       await tester.pump();
       await tester.pump(AppMotion.homeBackFly);

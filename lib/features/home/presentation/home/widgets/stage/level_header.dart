@@ -10,7 +10,7 @@ import 'package:englizia/features/home/presentation/home/widgets/stage/read_orde
 import 'package:flutter/material.dart';
 
 /// The level's title and units bar over its shore (design "Home
-/// Archipelago", map §6, header §6): 40 high with an 8 scalloped edge that
+/// Archipelago"): 40 high with an 8 scalloped edge that
 /// hangs over the sea; it sticks under the top bar once the day header has
 /// folded. The bar is the screen reader's progress bar: «2 من 8 وحدات».
 /// Large text grows the title only as far as the 40 holds it
@@ -204,8 +204,8 @@ class _Bar extends StatelessWidget {
 }
 
 /// The level header's scalloped shore: scallops of period 120 between y 2
-/// and 7 of an 8 band, stretched across the width (map §6). The design draws
-/// it for right-to-left; [mirrored] flips it for English (D1).
+/// and 7 of an 8 band, stretched across the width. The design draws
+/// it for right-to-left; [mirrored] flips it for English.
 class ShorePainter extends CustomPainter {
   const ShorePainter({required this.color, required this.mirrored});
 

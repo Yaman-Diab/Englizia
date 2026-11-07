@@ -107,21 +107,18 @@ void main() {
       expect(subject.state.trackTitle, isNull);
     });
 
-    test(
-      'a first open names the track from the profile (header §2.1)',
-      () async {
-        homes
-          ..home = null
-          ..failure = const ServerFailure(statusCode: 500);
-        final subject = cubit();
-        await subject.start();
-        await pumpEventQueue();
-        expect(profiles.fetches, 1);
-        expect(subject.state.load, LoadStatus.failure);
-        expect(subject.state.trackTitle, 'الإنجليزية العامة');
-        expect(subject.state.kidsHint, isFalse);
-      },
-    );
+    test('a first open names the track from the profile', () async {
+      homes
+        ..home = null
+        ..failure = const ServerFailure(statusCode: 500);
+      final subject = cubit();
+      await subject.start();
+      await pumpEventQueue();
+      expect(profiles.fetches, 1);
+      expect(subject.state.load, LoadStatus.failure);
+      expect(subject.state.trackTitle, 'الإنجليزية العامة');
+      expect(subject.state.kidsHint, isFalse);
+    });
 
     test('a kept home or profile needs no profile fetch', () async {
       profiles.kept = mockProfile();
@@ -528,9 +525,7 @@ void main() {
       await subject.close();
     });
 
-    testWidgets('a new day starts on the phone, even offline (A30)', (
-      tester,
-    ) async {
+    testWidgets('a new day starts on the phone, even offline', (tester) async {
       homes.home = _home(HomeMockScenario.goalReached);
       now = DateTime(2026, 11, 6, 3, 58);
       final subject = HomeCubit(

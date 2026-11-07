@@ -17,10 +17,10 @@ import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// A done, open or locked island as one button (design "Home Archipelago",
-/// bubble §7, map §4.6, §6): its drawing, the unit's cover in the medallion,
-/// clouds and a lock while locked, and under it the unit's name with «أعد»,
-/// its pages, or when it opens. 176 × 162, the drawing in its top 112.
+/// A done, open or locked island as one button (design "Home Archipelago"): its
+/// drawing, the unit's cover in the medallion, clouds and a lock while locked,
+/// and under it the unit's name with «أعد», its pages, or when it opens. 176 ×
+/// 162, the drawing in its top 112.
 class CompactIsland extends StatelessWidget {
   const CompactIsland({
     required this.unit,

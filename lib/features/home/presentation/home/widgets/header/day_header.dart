@@ -20,13 +20,13 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-/// The day header (design "Home Archipelago", header §3, §7): the top slot
+/// The day header (design "Home Archipelago"): the top slot
 /// ([topStrip]: a connection strip or the email reminder), the greeting with
 /// today's status and the ring's column, or the kids' header, then the
 /// notice slot's card. It folds away with the map's scroll; the page
 /// translates it.
 ///
-/// Its height is measured (D3): [onHeight] gets the whole header's and
+/// Its height is measured: [onHeight] gets the whole header's and
 /// [onTopSlot] the top slot's, after each layout that changes them. At text
 /// scale 1 the minimum is the design's ([formula]); larger text grows it.
 ///
@@ -110,7 +110,7 @@ class DayHeader extends StatelessWidget {
   }) => (kids ? kidsBase : base) + topSlotOf(top) + cardSlotOf(card);
 
   /// The card the notice slot shows: none for a level just completed in this
-  /// session (its card stands at the horizon, D12), nor for a notice whose
+  /// session (its card stands at the horizon), nor for a notice whose
   /// data is missing.
   static HomeCardNotice slotCard(HomeState state, HomeNotices notices) {
     final home = state.home;
@@ -237,7 +237,7 @@ class DayHeader extends StatelessWidget {
   };
 }
 
-/// The general and Emar greeting (header §3.1), v0.1's too (§3.2).
+/// The general and Emar greeting, v0.1's too.
 class _Greeting extends StatelessWidget {
   const _Greeting({
     required this.state,
@@ -262,7 +262,7 @@ class _Greeting extends StatelessWidget {
   /// The most minutes the ring writes.
   static const _maxMinutes = 99;
 
-  /// The label of the header's group (header §14): the greeting, today's
+  /// The label of the header's group: the greeting, today's
   /// minutes, the streak; on a v0.1 server the greeting alone.
   static String semanticsOf(HomeState state, HomeSnapshot home, int minutes) {
     final spoken = greetingText(
@@ -408,7 +408,7 @@ class _Greeting extends StatelessWidget {
 }
 
 /// «5 دقائق تحافظ على أيامك السبعة», in the streak's colour, after its
-/// flame (header §3.1).
+/// flame.
 class _RiskLine extends StatelessWidget {
   const _RiskLine({required this.text});
 
@@ -440,7 +440,7 @@ class _RiskLine extends StatelessWidget {
   }
 }
 
-/// The kids' header (header §3.3): «أهلًا ليان!» with the listen button and
+/// The kids' header: «أهلًا ليان!» with the listen button and
 /// the guide's 80 place, then the streak and the week.
 class _KidsHead extends StatelessWidget {
   const _KidsHead({
@@ -573,7 +573,7 @@ class _KidsHead extends StatelessWidget {
   }
 }
 
-/// Reports its child's height after each layout that changes it (D3).
+/// Reports its child's height after each layout that changes it.
 class _Measured extends SingleChildRenderObjectWidget {
   const _Measured({required this.onSize, super.child});
 

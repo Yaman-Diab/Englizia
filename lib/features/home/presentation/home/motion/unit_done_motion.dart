@@ -10,8 +10,8 @@ import 'package:englizia/features/home/presentation/home/motion/motion_timeline.
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 
-/// When each step of M6 starts (design "Home Archipelago", motion §8), from
-/// the unit's own start, which follows M5's first steps (D25).
+/// When each step of M6 starts (design "Home Archipelago"), from
+/// the unit's own start, which follows M5's first steps.
 abstract final class UnitDoneBeats {
   /// M5's lead-in: the ring fills, the guide flies to the last stone and it
   /// fills ([LessonDoneBeats.fill]).
@@ -36,8 +36,8 @@ abstract final class UnitDoneBeats {
   static Duration get finishAt => lead + finish;
 }
 
-/// M6, the unit done (motion §8, D11, D25), with M7 when it was the level's
-/// last (§9, D32) and M14 for kids (§16): the island takes its full colour,
+/// M6, the unit done, with M7 when it was the level's
+/// last and M14 for kids: the island takes its full colour,
 /// its flag rises, sparks burst at the lighthouse, the bridge draws while
 /// the camera moves to the next island, its fog clears and its lock opens,
 /// the guide crosses, then the next unit is the current one and its island
@@ -55,8 +55,8 @@ final class UnitDoneMotion implements MotionTimeline {
 
   /// [before] with its current unit's lessons all done: from the unit's
   /// start the island, its lighthouse and the level's bar read it done.
-  // ASSUMPTION(design): the plan draws `moment.before` until the finish; the
-  // design's bar reads «3 من 8» from the unit's start, hence this day.
+  // ASSUMPTION(design): the design's code keeps the day before until the
+  // finish, but its bar reads «3 من 8» from the unit's start, hence this day.
   static HomeSnapshot allDone(HomeSnapshot before) {
     final index = before.currentUnitIndex;
     if (index < 0) return before;
@@ -111,7 +111,7 @@ final class UnitDoneMotion implements MotionTimeline {
     if (_bridge || moment.levelDone)
       (at: UnitDoneBeats.lead + UnitDoneBeats.bridge, cue: MotionCue.camera),
     (at: UnitDoneBeats.finishAt, cue: MotionCue.finish),
-    // D25: the goal step waits for the new unit.
+    // The goal step waits for the new unit.
     if (_reach) (at: UnitDoneBeats.finishAt, cue: MotionCue.goal),
     if (_kids && _bridge) (at: UnitDoneBeats.finishAt, cue: MotionCue.kidSay),
     if (moment.levelDone)
@@ -158,7 +158,7 @@ final class UnitDoneMotion implements MotionTimeline {
             ? phase(ms, finishAt, AppMotion.homeHorizon, AppMotion.out)
             : null,
         // ASSUMPTION(design): the card's rise has no curve in the design;
-        // the home's emphasis, after the horizon (D32).
+        // the home's emphasis, after the horizon.
         levelCardIn: moment.levelDone
             ? phase(
                 ms,

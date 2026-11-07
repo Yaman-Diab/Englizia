@@ -44,7 +44,7 @@ SeaTone toneOf(HomeEnrollment enrollment) {
 
 /// What the map draws, worked out once per change of the data, the header's
 /// height or a motion's frame: the snapshot drawn, its islands and the
-/// current one's stones (design "Home Archipelago", map §2, §3, §9).
+/// current one's stones (design "Home Archipelago").
 @immutable
 final class HomeMapScene {
   const HomeMapScene({
@@ -104,7 +104,7 @@ final class HomeMapScene {
     return island.stones[math.min(island.n - 1, math.max(0, current))];
   }
 
-  /// The last stone is drawn as a lighthouse or a gate (D8).
+  /// The last stone is drawn as a lighthouse or a gate.
   LastStone get lastStone {
     final unit = this.unit;
     return unit == null ? LastStone.none : lastStoneOf(unit, kids: kids);
@@ -150,10 +150,10 @@ final class HomeMapActions {
 }
 
 /// The map: sea, islands, bridges, stones and the bubble, in the design's
-/// order (map §13), as tall as the map's layout. The screen reader reads it
+/// order, as tall as the map's layout. The screen reader reads it
 /// as one group in the board's order: done units, the banner, the review
 /// box, the stones along the trail, the bubble, the lighthouse, the units
-/// ahead and the horizon (map §18).
+/// ahead and the horizon.
 ///
 /// Reads [overrides]' `isleRise`, `boxIn`, `levelCardIn` and `pulse.t` as
 /// linear progress and gives them the design's curves; `islandGrow` and the
@@ -195,7 +195,7 @@ class HomeMap extends StatelessWidget {
   /// The locked island saying when it opens (M9).
   final int? toast;
 
-  /// The level card stands at the horizon (D12).
+  /// The level card stands at the horizon.
   final bool levelCard;
 
   /// Kids: the guide says the unit's name (M14).
@@ -207,13 +207,13 @@ class HomeMap extends StatelessWidget {
   /// A stone's box, centred on its point: room for the kids' 80 with its halo.
   static const stoneBox = 96.0;
 
-  /// The last stone's target stands on its point (map §5.2).
+  /// The last stone's target stands on its point.
   static const landmarkLift = Stone.lastBox / 2;
 
-  /// The review station keeps 2 from the screen's edge (map §5.3).
+  /// The review station keeps 2 from the screen's edge.
   static const _stationLeast = 2.0 + 27;
 
-  /// The parked guide (motion §2).
+  /// The parked guide.
   static const guideSize = 44.0;
 
   /// The guide over a bridge leans this far at the middle of its flight.
@@ -226,11 +226,11 @@ class HomeMap extends StatelessWidget {
   static const kidSayEnd = 46.0;
   static const kidSayTop = -50.0;
 
-  /// The level card at the open horizon (map §11).
+  /// The level card at the open horizon.
   static const levelCardSide = 20.0;
   static const levelCardTop = 24.0;
 
-  /// The screen reader's order of the map's parts (map §18).
+  /// The screen reader's order of the map's parts.
   static const _doneOrder = 0.0;
   static const _bannerOrder = 100.0;
   static const _boxOrder = 200.0;
@@ -291,7 +291,7 @@ class HomeMap extends StatelessWidget {
           horizonY: map.horizonY,
           horizonOpen: horizonOpen,
           nextCefr: next?.cefr,
-          // Under the horizon band, which hides them (map §13).
+          // Under the horizon band, which hides them.
           waves: WavesLayer(
             height: map.height,
             scroll: scroll,
@@ -494,7 +494,7 @@ class HomeMap extends StatelessWidget {
   bool _landmark(int k, IslandLayout island) =>
       k == island.n - 1 && scene.lastStone != LastStone.none;
 
-  /// The labels sit under the stones (map §5.5, §13), their chips kept
+  /// The labels sit under the stones, their chips kept
   /// [_labelMargin] inside the frame.
   List<Widget> _labels(
     BuildContext context,
@@ -684,7 +684,7 @@ class HomeMap extends StatelessWidget {
   }
 
   /// The guide parked on the current island: beside a stone, hopping between
-  /// two, or by the kids' banner (motion §2, D28).
+  /// two, or by the kids' banner.
   Widget? _parkedGuide(IslandLayout island) => switch (guide) {
     GuideBesideStone(:final index) => _guideAt(island.spot(index)),
     GuideHop(:final from, :final to, :final t) => _guideAt(
@@ -762,7 +762,7 @@ class HomeMap extends StatelessWidget {
     );
   }
 
-  /// A stone's card, under it above the gap, over it below (map §12).
+  /// A stone's card, under it above the gap, over it below.
   Widget? _card(IslandLayout island, HomeUnit unit) {
     final k = card;
     if (k == null || k < 0 || k >= unit.lessons.length) return null;

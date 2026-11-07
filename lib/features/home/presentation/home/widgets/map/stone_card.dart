@@ -13,7 +13,7 @@ import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart'
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:flutter/material.dart';
 
-/// A stone's small card (bubble §3.1, D19): done «أعد», locked «يُفتح بعد
+/// A stone's small card: done «أعد», locked «يُفتح بعد
 /// «…»», Emar's open stone «ابدأ», and the current stone while the review
 /// comes first «يُفتح بعد «راجع اليوم»». It grows out of its stone.
 ///
@@ -22,8 +22,7 @@ import 'package:flutter/material.dart';
 /// the rect lets taps through.
 ///
 /// ASSUMPTION(design): kids get no card, Emar's open stone «ابدأ», the
-/// current stone behind the review «يُفتح بعد «راجع اليوم»», «أعد» replays
-/// (D19; bubble A4, A6, A8, A10).
+/// current stone behind the review «يُفتح بعد «راجع اليوم»», «أعد» replays.
 class StoneCard extends StatelessWidget {
   const StoneCard({
     required this.lesson,
@@ -61,8 +60,8 @@ class StoneCard extends StatelessWidget {
   /// The room [place] gives the card: more than it needs at large text.
   static const box = 300.0;
 
-  /// The card's rect beside [stone] (its centre), kept 12 inside the frame
-  /// (map §12): under it, or [above] it for a stone below the gap; [last]
+  /// The card's rect beside [stone] (its centre), kept 12 inside the frame:
+  /// under it, or [above] it for a stone below the gap; [last]
   /// for the lighthouse, which stands taller.
   static Rect place({
     required Offset stone,

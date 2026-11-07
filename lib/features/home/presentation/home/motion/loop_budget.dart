@@ -2,7 +2,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
-/// Home's ambient loops, highest priority first (motion §4).
+/// Home's ambient loops, highest priority first.
 enum HomeLoop {
   /// The flame's wobble while the streak is at risk: always counted.
   flame,

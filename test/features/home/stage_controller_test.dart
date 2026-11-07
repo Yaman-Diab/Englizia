@@ -49,7 +49,7 @@ Future<void> _idle(WidgetTester tester) async {
 }
 
 void main() {
-  group('the floating header (header §5.1)', () {
+  group('the floating header', () {
     test('folds one to one, never past the scroll', () {
       final stage = _stage();
       stage.onScroll(40);
@@ -179,7 +179,7 @@ void main() {
     });
   });
 
-  group('home\'s own scrolls (header §5.6)', () {
+  group('home\'s own scrolls', () {
     testWidgets('fold the header with the scroll, folded at the end', (
       tester,
     ) async {

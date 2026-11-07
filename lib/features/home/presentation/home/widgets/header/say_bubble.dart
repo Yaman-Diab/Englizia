@@ -9,7 +9,7 @@ import 'package:englizia/features/home/presentation/home/widgets/stage/read_orde
 import 'package:flutter/material.dart';
 
 /// What the guide says when tapped, beside the ring (design "Home
-/// Archipelago", header §4.7): 6 past the ring's end edge, 26 under its top,
+/// Archipelago"): 6 past the ring's end edge, 26 under its top,
 /// its small corner toward the ring. A live region; it fills the stage's main
 /// area and shows while [text] is set and the header is open
 /// ([StageMetrics.sayBubbleAllowed]).
@@ -117,13 +117,13 @@ class _Bubble extends StatelessWidget {
   }
 }
 
-/// The guide's line when tapped (header §4.3): «حققت هدفك اليوم!» at the
+/// The guide's line when tapped: «حققت هدفك اليوم!» at the
 /// goal, else «باقي 3 دقائق لهدفك».
 String guideSayText({required int today, required int goal}) => today >= goal
     ? 'home_say_goal'.tr()
     : 'home_say_left'.tr(args: [minutesText(goal - today)]);
 
-/// A tap on the ring's guide (header §4.3): it waves for
+/// A tap on the ring's guide: it waves for
 /// [AppMotion.homeWaveHold] and says its line for [AppMotion.homeSayHold]; a
 /// new tap starts both again. The page owns it and passes [waving] to the
 /// ring and [say] to the [SayBubble].

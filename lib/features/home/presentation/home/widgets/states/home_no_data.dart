@@ -7,10 +7,10 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
 import 'package:flutter/material.dart';
 
-/// Nothing kept and nothing loaded (header §8.3): no header and no map, the
+/// Nothing kept and nothing loaded: no header and no map, the
 /// guide over the sea and a retry. No error colours: being offline is not
 /// the learner's fault. It fills the stage between the top bar and the tab
-/// bar; ASSUMPTION(design): D40, in kids mode too (the bar is the route's
+/// bar; ASSUMPTION(design): in kids mode too (the bar is the route's
 /// shell).
 class HomeNoData extends StatelessWidget {
   const HomeNoData({required this.failure, required this.onRetry, super.key});

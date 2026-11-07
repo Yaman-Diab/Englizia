@@ -14,7 +14,7 @@ import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-/// The current island's flag on its top edge (bubble §6): the unit's cover,
+/// The current island's flag on its top edge: the unit's cover,
 /// its title and progress, «افتح الوحدة». Kids get both names, the unit's
 /// stars and the speaker that says its name.
 ///
@@ -22,7 +22,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// and grows toward the start up to [maxWidth].
 ///
 /// ASSUMPTION(design): the 6 / 4 padding sits on the medal's and the
-/// speaker's side, concentric in the pill (map AMBIG-8); the board's
+/// speaker's side, concentric in the pill; the board's
 /// physical values put it at the text's end.
 ///
 /// ASSUMPTION(design): Emar's book line runs wider in the app's font than

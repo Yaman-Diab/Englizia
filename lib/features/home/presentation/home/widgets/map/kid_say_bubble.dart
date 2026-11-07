@@ -9,7 +9,7 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:flutter/material.dart';
 
 /// Kids: the guide saying the unit's name, in Arabic then English, above
-/// the island's banner (bubble §10, M14); its small corner points down at
+/// the island's banner (M14); its small corner points down at
 /// the guide by the banner. It comes in as it is built; how long it stays is
 /// the motion's.
 class KidSayBubble extends StatelessWidget {

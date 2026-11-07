@@ -7,10 +7,10 @@ import 'package:englizia/core/design_system/color_mix.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:flutter/material.dart';
 
-/// The first load's shape (header §8.4): the greeting lines, the ring, the
+/// The first load's shape: the greeting lines, the ring, the
 /// level bar and an island with its stones and bubble cut out, with a sheen
 /// passing over it. It fills the stage between the top bar and the tab bar;
-/// ASSUMPTION(design): D40, in kids mode too (the bar is the route's shell).
+/// ASSUMPTION(design): in kids mode too (the bar is the route's shell).
 ///
 /// Flutter has no "busy" flag, so the label, a live region, says it loads.
 class HomeSkeleton extends StatefulWidget {
@@ -47,7 +47,7 @@ class _HomeSkeletonState extends State<HomeSkeleton>
   Widget build(BuildContext context) {
     final colors = context.colors;
     // SK: the border tone, faint on the background, as the markup mixes it
-    // (the board says on the surface: header §16.4).
+    // (the board says on the surface).
     final tone = mixOklab(context.scheme.outline, colors.background, .20);
     return Semantics(
       container: true,
@@ -232,7 +232,7 @@ class _Fill extends StatelessWidget {
 
 /// A band 60% of the width with a soft light across it, sweeping from −120%
 /// to 220% of its own width: the design's left to right in RTL, so right to
-/// left in English (D1). Under reduce motion it rests at 40%, as drawn.
+/// left in English. Under reduce motion it rests at 40%, as drawn.
 class _Sheen extends StatelessWidget {
   const _Sheen({required this.progress, required this.still});
 

@@ -64,7 +64,7 @@ Widget _island(HomeUnit unit, {bool kids = false, VoidCallback? onPressed}) =>
 void main() {
   setUpAll(initLocalizationForTests);
 
-  group('the level header (map §6)', () {
+  group('the level header', () {
     testLayouts('fits', (tester, layout) async {
       await _pump(
         tester,
@@ -162,7 +162,7 @@ void main() {
     });
   });
 
-  group('a compact island (bubble §7)', () {
+  group('a compact island', () {
     final general = _home();
     final done = general.units[0];
     final locked = general.units[3];
