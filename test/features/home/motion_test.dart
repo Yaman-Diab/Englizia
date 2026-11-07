@@ -992,5 +992,33 @@ void main() {
       await opening;
       expect(pushed, 1);
     });
+
+    testWidgets('M4 opens one lesson, however often «تابع» is tapped', (
+      tester,
+    ) async {
+      final (subject, _) = await make();
+      await tester.pumpLocalized(
+        Stack(
+          children: [
+            Positioned.fill(child: FlightLayer(controller: subject.flights)),
+          ],
+        ),
+      );
+      var pushed = 0;
+      const bubble = Rect.fromLTWH(40, 300, 280, 180);
+      final opening = subject.openLesson(bubble, () => pushed++);
+      await tester.pump();
+      await tester.pump(_ms(100));
+      final second = subject.openLesson(bubble, () => pushed++);
+      await tester.pump(_ms(800));
+      await Future.wait([opening, second]);
+      expect(pushed, 1);
+
+      final again = subject.openLesson(bubble, () => pushed++);
+      await tester.pump();
+      await tester.pump(_ms(800));
+      await again;
+      expect(pushed, 2, reason: 'once it is over, «تابع» opens again');
+    });
   });
 }

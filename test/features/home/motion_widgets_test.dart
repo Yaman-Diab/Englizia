@@ -246,6 +246,99 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('it takes the taps until the lesson is pushed', (tester) async {
+      var taps = 0;
+      var pushed = false;
+      late BuildContext home;
+      await tester.pumpLocalized(
+        Builder(
+          builder: (context) {
+            home = context;
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => taps++,
+              child: const SizedBox.expand(),
+            );
+          },
+        ),
+      );
+      final revealing = ContainerReveal.run(
+        home,
+        from: _bubble,
+        push: () => pushed = true,
+      );
+      await tester.pump();
+      await tester.pump(_ms(100));
+      await tester.tapAt(_bubble.center);
+      expect(taps, 0, reason: 'a second «تابع» doesn\'t reach home');
+      await tester.pump(_ms(300));
+      expect(pushed, isTrue);
+      await tester.tapAt(_bubble.center);
+      expect(taps, 1);
+      await tester.pump(_ms(500));
+      await revealing;
+    });
+
+    testWidgets('home gone before the push: nothing opens, it clears', (
+      tester,
+    ) async {
+      var pushed = false;
+      late BuildContext home;
+      final shown = ValueNotifier(true);
+      addTearDown(shown.dispose);
+      await tester.pumpLocalized(
+        ValueListenableBuilder(
+          valueListenable: shown,
+          builder: (context, on, _) => on
+              ? Builder(
+                  builder: (context) {
+                    home = context;
+                    return const SizedBox.expand();
+                  },
+                )
+              : const SizedBox.shrink(),
+        ),
+      );
+      final revealing = ContainerReveal.run(
+        home,
+        from: _bubble,
+        push: () => pushed = true,
+      );
+      await tester.pump();
+      await tester.pump(_ms(100));
+      shown.value = false;
+      await tester.pump();
+      await tester.pump(_ms(300));
+      await tester.pump(_ms(500));
+      await revealing;
+      await tester.pump();
+      expect(pushed, isFalse);
+      expect(_revealShown(), isFalse);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a push that fails still clears it', (tester) async {
+      late BuildContext home;
+      await tester.pumpLocalized(
+        Builder(
+          builder: (context) {
+            home = context;
+            return const SizedBox.expand();
+          },
+        ),
+      );
+      final revealing = ContainerReveal.run(
+        home,
+        from: _bubble,
+        push: () => throw StateError('no route'),
+      ).then<Object?>((_) => null, onError: (Object error) => error);
+      await tester.pump();
+      await tester.pump(_ms(400));
+      expect(await revealing, isA<StateError>());
+      await tester.pump();
+      expect(_revealShown(), isFalse);
+    });
+
     testWidgets('under reduce motion it only opens the lesson', (tester) async {
       var pushed = false;
       late BuildContext home;
@@ -270,6 +363,8 @@ void main() {
     });
   });
 }
+
+const _bubble = Rect.fromLTWH(20, 300, 280, 180);
 
 bool _revealShown() => find
     .byWidgetPredicate((w) => w is CustomPaint && w.painter is RevealPainter)

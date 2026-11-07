@@ -65,6 +65,8 @@ abstract final class ContainerReveal {
 
   /// Grows [from] (global coordinates: the bubble's box on the screen) to the
   /// screen, calls [push] under it, and clears once the new page is in.
+  /// Until the push it takes every tap, so nothing under it opens or leaves
+  /// meanwhile; when [context] is gone by then, it clears without pushing.
   /// Under reduce motion it only calls [push] (D30).
   static Future<void> run(
     BuildContext context, {
@@ -86,41 +88,57 @@ abstract final class ContainerReveal {
     final clock = ValueNotifier(Duration.zero);
     final done = Completer<void>();
     var pushed = false;
-    late final Ticker ticker;
     final entry = OverlayEntry(
-      builder: (context) => IgnorePointer(
-        child: ExcludeSemantics(
-          child: ValueListenableBuilder(
-            valueListenable: clock,
-            builder: (context, t, _) => CustomPaint(
-              painter: RevealPainter(
-                from: local,
-                t: t,
-                surface: context.colors.surface,
-                cover: context.colors.primaryStrong,
+      builder: (context) => ExcludeSemantics(
+        child: ValueListenableBuilder(
+          valueListenable: clock,
+          builder: (context, t, _) => IgnorePointer(
+            ignoring: t >= pushAt,
+            child: AbsorbPointer(
+              child: CustomPaint(
+                painter: RevealPainter(
+                  from: local,
+                  t: t,
+                  surface: context.colors.surface,
+                  cover: context.colors.primaryStrong,
+                ),
+                child: const SizedBox.expand(),
               ),
-              child: const SizedBox.expand(),
             ),
           ),
         ),
       ),
     );
-    ticker = Ticker((elapsed) {
+    final ticker = Ticker((elapsed) {
+      if (done.isCompleted) return;
       clock.value = elapsed;
       if (!pushed && elapsed >= pushAt) {
         pushed = true;
-        push();
+        if (!context.mounted) {
+          done.complete();
+          return;
+        }
+        try {
+          push();
+        } catch (error, stackTrace) {
+          // The layer goes all the same; the failure reaches the caller.
+          done.completeError(error, stackTrace);
+          return;
+        }
       }
-      if (elapsed >= length && !done.isCompleted) done.complete();
+      if (elapsed >= length) done.complete();
     });
     overlay.insert(entry);
     unawaited(ticker.start());
-    await done.future;
-    ticker.dispose();
-    entry
-      ..remove()
-      ..dispose();
-    clock.dispose();
+    try {
+      await done.future;
+    } finally {
+      ticker.dispose();
+      entry
+        ..remove()
+        ..dispose();
+      clock.dispose();
+    }
   }
 }
 

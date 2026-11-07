@@ -135,6 +135,7 @@ class HomeChoreographer extends ChangeNotifier {
   bool _kidSaying = false;
   bool _spinning = false;
   bool _busy = false;
+  bool _revealing = false;
   bool _wasFlying = false;
   double _pullSeen = 0;
   GuidePlacement? _guideHold;
@@ -398,15 +399,20 @@ class HomeChoreographer extends ChangeNotifier {
 
   /// M4: the bubble ([bubble], global coordinates) grows to the screen, then
   /// [push] (D22). Under reduce motion, or before the layer is mounted, a
-  /// plain [push].
+  /// plain [push]. While one grows, another is ignored: one lesson opens.
   Future<void> openLesson(Rect bubble, VoidCallback push) async {
-    if (busy) return;
+    if (busy || _revealing) return;
     final context = flights.overlayContext;
     if (reduceMotion() || context == null || !context.mounted) {
       push();
       return;
     }
-    await ContainerReveal.run(context, from: bubble, push: push);
+    _revealing = true;
+    try {
+      await ContainerReveal.run(context, from: bubble, push: push);
+    } finally {
+      _revealing = false;
+    }
   }
 
   /// A freeze was used: the flame's one glint of snow (D31).
