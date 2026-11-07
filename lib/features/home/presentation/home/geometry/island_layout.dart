@@ -68,6 +68,7 @@ final class IslandLayout {
     required this.station,
     required this.tufts,
     required this.banner,
+    required this.bannerRoom,
   });
 
   /// The layout for [lessons] stones, [current] the one to do now (the
@@ -241,6 +242,12 @@ final class IslandLayout {
               math.min(236, bannerEnd - bannerStart),
               48,
             ),
+      bannerRoom: Rect.fromLTRB(
+        frame.fromEnd(bannerReach),
+        2,
+        bannerEnd,
+        kids ? 66 : 50,
+      ),
     );
   }
 
@@ -296,6 +303,14 @@ final class IslandLayout {
   /// The island's banner box: its left edge is the end inset, its width the
   /// most it may take (map §7).
   final Rect banner;
+
+  /// Where the banner may reach: [banner] and on to [bannerReach] from the
+  /// frame's end, for Emar's book line where the design's width would cut
+  /// it (IslandBanner).
+  final Rect bannerRoom;
+
+  /// The nearest the banner comes to the frame's end edge.
+  static const bannerReach = 20.0;
 
   /// The last stone, which may be drawn as a lighthouse or a gate.
   Offset get lastStone => stones[n - 1];

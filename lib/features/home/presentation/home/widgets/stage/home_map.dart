@@ -401,7 +401,7 @@ class HomeMap extends StatelessWidget {
             flagWave: loops.isOn(HomeLoop.flags),
           ),
         ),
-        _banner(island, unit),
+        _banner(context, island, unit),
         ..._labels(context, island, unit),
         ..._stones(island, unit),
         ?_parkedGuide(island),
@@ -436,15 +436,23 @@ class HomeMap extends StatelessWidget {
     );
   }
 
-  Widget _banner(IslandLayout island, HomeUnit unit) {
+  /// The banner by its end edge, growing toward the start; one too wide for
+  /// that (Emar's book line) goes on toward the end of its room.
+  Widget _banner(BuildContext context, IslandLayout island, HomeUnit unit) {
     final rect = island.banner;
+    final room = island.bannerRoom;
     return PositionedDirectional(
-      end: rect.left,
-      top: rect.top,
-      child: Semantics(
-        sortKey: const OrdinalSortKey(_bannerOrder),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: rect.width),
+      start: scene.frame.startOf(room),
+      end: room.left,
+      top: room.top,
+      height: room.height,
+      child: CustomSingleChildLayout(
+        delegate: _EndPlaced(
+          end: rect.left - room.left,
+          direction: Directionality.of(context),
+        ),
+        child: Semantics(
+          sortKey: const OrdinalSortKey(_bannerOrder),
           child: scene.kids
               ? IslandBanner.kid(
                   unit: unit,
@@ -885,4 +893,32 @@ class _Rise extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Puts its child [end] from its own end edge, or nearer it where the child
+/// is too wide to fit there, its start edge then at its own start.
+final class _EndPlaced extends SingleChildLayoutDelegate {
+  const _EndPlaced({required this.end, required this.direction});
+
+  final double end;
+  final TextDirection direction;
+
+  @override
+  BoxConstraints getConstraintsForChild(BoxConstraints constraints) =>
+      constraints.loosen();
+
+  @override
+  Offset getPositionForChild(Size size, Size childSize) {
+    final fromEnd = math.max(0.0, math.min(end, size.width - childSize.width));
+    return Offset(
+      direction == TextDirection.rtl
+          ? fromEnd
+          : size.width - fromEnd - childSize.width,
+      0,
+    );
+  }
+
+  @override
+  bool shouldRelayout(_EndPlaced oldDelegate) =>
+      oldDelegate.end != end || oldDelegate.direction != direction;
 }

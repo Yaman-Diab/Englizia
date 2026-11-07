@@ -8,6 +8,7 @@ import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/goal_ring.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/back_to_lesson_button.dart';
+import 'package:englizia/features/home/presentation/home/widgets/map/island_banner.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone_card.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/compact_island.dart';
@@ -20,6 +21,7 @@ import 'package:englizia/features/home/presentation/home/widgets/states/home_no_
 import 'package:englizia/features/home/presentation/home/widgets/states/home_skeleton.dart';
 import 'package:englizia/features/home/presentation/home/widgets/states/switch_strip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -146,6 +148,41 @@ void main() {
         if (locale.languageCode == 'ar') {
           expect(stone.dy, closeTo(56 + 154 + 310 + 354 - 352, .5));
         }
+      });
+    }
+
+    for (final (locale, book) in [
+      (const Locale('ar'), 'كتاب الطالب، الصفحات 30 إلى 41'),
+      (const Locale('en'), 'Student\'s book, pages 30 to 41'),
+    ]) {
+      final rtl = locale.languageCode == 'ar';
+      // A box's end edge from the screen's end, its start edge likewise.
+      double end(Rect r) => rtl ? r.left : 360 - r.right;
+      double start(Rect r) => rtl ? r.right : 360 - r.left;
+
+      testWidgets('the banner sits by its end edge in '
+          '${locale.languageCode} (map §7)', (tester) async {
+        await pumpHome(tester, _home(), size: _design, locale: locale);
+        final banner = tester.getRect(find.byType(IslandBanner));
+        expect(end(banner), 104);
+        expect(banner.width, lessThanOrEqualTo(236));
+      });
+
+      testWidgets('Emar\'s book line grows its banner on toward the end in '
+          '${locale.languageCode}', (tester) async {
+        await pumpHome(
+          tester,
+          _home(emar: true),
+          size: _design,
+          locale: locale,
+        );
+        final banner = tester.getRect(find.byType(IslandBanner));
+        expect(find.text(book), findsOneWidget);
+        final line = tester.renderObject<RenderParagraph>(find.text(book));
+        expect(line.didExceedMaxLines, isFalse, reason: 'not cut');
+        expect(banner.width, greaterThan(236));
+        expect(start(banner), 340);
+        expect(end(banner), inInclusiveRange(20, 104));
       });
     }
 

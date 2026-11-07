@@ -8,6 +8,7 @@ import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
+import 'package:englizia/features/home/presentation/home/geometry/island_layout.dart';
 import 'package:englizia/features/home/presentation/home/scene/map_frame.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,11 @@ import 'package:flutter_svg/flutter_svg.dart';
 /// ASSUMPTION(design): the 6 / 4 padding sits on the medal's and the
 /// speaker's side, concentric in the pill (map AMBIG-8); the board's
 /// physical values put it at the text's end.
+///
+/// ASSUMPTION(design): Emar's book line runs wider in the app's font than
+/// in the design's, past the 236: the banner then grows on toward the
+/// frame's end (`IslandLayout.bannerReach`), and only where even that
+/// can't hold it (large text) does it say just its pages.
 class IslandBanner extends StatelessWidget {
   const IslandBanner({
     required this.unit,
@@ -74,11 +80,27 @@ class IslandBanner extends StatelessWidget {
   /// The room it keeps from the frame's start edge at its widest.
   static const _startInset = 20.0;
 
+  static const _medal = 36.0;
+  static const _padding = EdgeInsetsDirectional.fromSTEB(6, 0, 12, 0);
+  static const _border = 1.0;
+
+  /// The pill around its text: the padding, the border, the medal and its
+  /// gap.
+  static double get _chrome =>
+      _padding.horizontal + 2 * _border + _medal + AppSpacing.sm;
+
   double _maxWidth(BuildContext context) {
     final frame = MapFrame(MediaQuery.sizeOf(context).width);
     final room =
         frame.fromStart(_startInset) - frame.scaled(endInset(kids: kids));
     return maxWidth ?? (kids ? room : math.min(236, room));
+  }
+
+  /// The widest Emar's book line may make it.
+  double _widest(BuildContext context) {
+    final frame = MapFrame(MediaQuery.sizeOf(context).width);
+    return maxWidth ??
+        frame.fromStart(_startInset) - frame.fromEnd(IslandLayout.bannerReach);
   }
 
   @override
@@ -99,18 +121,27 @@ class IslandBanner extends StatelessWidget {
         : 'unit_book_pages'.tr(
             namedArgs: {'from': '${pages.from}', 'to': '${pages.to}'},
           );
-    // Emar: the book's line, or only its pages where the whole line would
-    // be cut (the app's font runs wider than the design's).
-    final shortPages = pages == null
-        ? null
-        : 'home_pages'.tr(
-            namedArgs: {'from': '${pages.from}', 'to': '${pages.to}'},
-          );
     final subStyle = texts.caption.copyWith(
       fontSize: 12,
       height: 16 / 12,
       color: colors.textSecondary,
     );
+    // Emar: the book's line, wider than the design's 236 where it needs
+    // it, or only its pages where even that would cut it.
+    var width = _maxWidth(context);
+    var sub = progress;
+    if (emar && pages != null && pagesText != null) {
+      final needs = (_textWidth(context, pagesText, subStyle) + _chrome)
+          .ceilToDouble();
+      if (needs <= math.max(width, _widest(context))) {
+        sub = pagesText;
+        width = math.max(width, needs);
+      } else {
+        sub = 'home_pages'.tr(
+          namedArgs: {'from': '${pages.from}', 'to': '${pages.to}'},
+        );
+      }
+    }
     final label = emar && pagesText != null
         ? 'home_banner_semantics_pages'.tr(
             namedArgs: {
@@ -138,50 +169,45 @@ class IslandBanner extends StatelessWidget {
             scale: AppMotion.scaleSmall,
             child: Container(
               height: height,
-              constraints: BoxConstraints(maxWidth: _maxWidth(context)),
-              padding: const EdgeInsetsDirectional.fromSTEB(6, 0, 12, 0),
+              constraints: BoxConstraints(maxWidth: width),
+              padding: _padding,
               decoration: BoxDecoration(
                 color: colors.surface,
-                border: Border.all(color: context.scheme.outline),
+                border: Border.all(
+                  color: context.scheme.outline,
+                  width: _border,
+                ),
                 borderRadius: BorderRadius.circular(height / 2),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  UnitMedal(url: unit.coverUrl, size: 36),
+                  UnitMedal(url: unit.coverUrl, size: _medal),
                   const SizedBox(width: AppSpacing.sm),
                   Flexible(
-                    child: LayoutBuilder(
-                      builder: (context, box) => Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            unitTitle(unit),
-                            maxLines: 1,
-                            softWrap: false,
-                            overflow: TextOverflow.ellipsis,
-                            style: texts.captionStrong.copyWith(
-                              fontSize: 12,
-                              height: 17 / 12,
-                              color: colors.textPrimary,
-                            ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          unitTitle(unit),
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: texts.captionStrong.copyWith(
+                            fontSize: 12,
+                            height: 17 / 12,
+                            color: colors.textPrimary,
                           ),
-                          Text(
-                            switch ((emar, pagesText, shortPages)) {
-                              (true, final long?, final short?) =>
-                                _fits(context, long, subStyle, box.maxWidth)
-                                    ? long
-                                    : short,
-                              _ => progress,
-                            },
-                            maxLines: 1,
-                            softWrap: false,
-                            overflow: TextOverflow.ellipsis,
-                            style: subStyle,
-                          ),
-                        ],
-                      ),
+                        ),
+                        Text(
+                          sub,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: subStyle,
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -193,21 +219,21 @@ class IslandBanner extends StatelessWidget {
     );
   }
 
-  static bool _fits(
-    BuildContext context,
-    String text,
-    TextStyle style,
-    double width,
-  ) {
+  /// [text] on one line in [style], as a [Text] here lays it out.
+  static double _textWidth(BuildContext context, String text, TextStyle style) {
     final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
+      text: TextSpan(
+        text: text,
+        style: DefaultTextStyle.of(context).style.merge(style),
+      ),
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
+      locale: Localizations.maybeLocaleOf(context),
       maxLines: 1,
     )..layout();
-    final fits = painter.width <= width;
+    final width = painter.width;
     painter.dispose();
-    return fits;
+    return width;
   }
 
   Widget _kid(BuildContext context) {

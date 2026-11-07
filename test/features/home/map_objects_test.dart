@@ -14,6 +14,7 @@ import 'package:englizia/features/home/presentation/home/widgets/map/review_box.
 import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -858,9 +859,33 @@ void main() {
   });
 
   group('IslandBanner', () {
-    testWidgets('Emar keeps only its pages where the book line would be cut', (
-      tester,
-    ) async {
+    for (final size in [const Size(360, 800), narrowViewport]) {
+      testWidgets('Emar\'s book line grows it past 236 at ${size.width}', (
+        tester,
+      ) async {
+        final emar = mockHome(emar: true).currentUnit!;
+        await tester.pumpLocalized(
+          Center(
+            child: IslandBanner(unit: emar, emar: true, onOpen: () {}),
+          ),
+          size: size,
+        );
+        expect(find.text('كتاب الطالب، الصفحات 30 إلى 41'), findsOneWidget);
+        final sub = tester.renderObject<RenderParagraph>(
+          find.text('كتاب الطالب، الصفحات 30 إلى 41'),
+        );
+        expect(sub.didExceedMaxLines, isFalse, reason: 'not cut');
+        final width = tester.getSize(find.byType(IslandBanner)).width;
+        expect(width, greaterThan(236));
+        expect(width, lessThanOrEqualTo(size.width - 40));
+        expect(tester.takeException(), isNull);
+      });
+    }
+
+    testWidgets('Emar keeps only its pages where even that would cut the '
+        'book line', (tester) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
       final emar = mockHome(emar: true).currentUnit!;
       await tester.pumpLocalized(
         Center(

@@ -364,6 +364,12 @@ void main() {
       expect(narrow.left, closeTo(104 * 320 / 360, 1e-9));
       expect(narrow.right, closeTo(300, 1e-9));
       expect(lay(6, 3, kids: true).banner, const Rect.fromLTRB(64, 2, 340, 66));
+      // Emar's book line may take it on to 20 from the frame's end.
+      expect(lay(6, 3).bannerRoom, const Rect.fromLTRB(20, 2, 340, 50));
+      expect(
+        lay(6, 3, frame: MapFrame(600)).bannerRoom,
+        const Rect.fromLTRB(60 + 20, 2, 60 + 480 - 20, 50),
+      );
     });
 
     test('tufts stand at the design points', () {
