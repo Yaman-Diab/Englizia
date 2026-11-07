@@ -98,11 +98,39 @@ void main() {
       homes
         ..home = null
         ..failure = const NetworkFailure();
+      profiles.failure = const NetworkFailure();
       final subject = cubit();
       await subject.start();
       expect(subject.state.load, LoadStatus.failure);
       expect(subject.state.failure, const NetworkFailure());
       expect(subject.state.home, isNull);
+      expect(subject.state.trackTitle, isNull);
+    });
+
+    test(
+      'a first open names the track from the profile (header §2.1)',
+      () async {
+        homes
+          ..home = null
+          ..failure = const ServerFailure(statusCode: 500);
+        final subject = cubit();
+        await subject.start();
+        await pumpEventQueue();
+        expect(profiles.fetches, 1);
+        expect(subject.state.load, LoadStatus.failure);
+        expect(subject.state.trackTitle, 'الإنجليزية العامة');
+        expect(subject.state.kidsHint, isFalse);
+      },
+    );
+
+    test('a kept home or profile needs no profile fetch', () async {
+      profiles.kept = mockProfile();
+      await cubit().start();
+      profiles.kept = null;
+      homes.kept = _home();
+      await cubit().start();
+      await pumpEventQueue();
+      expect(profiles.fetches, 0);
     });
 
     test(

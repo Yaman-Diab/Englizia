@@ -89,6 +89,8 @@ class HomeCubit extends Cubit<HomeState> {
     );
     if (kept != null) {
       emit(state.copyWith(load: LoadStatus.ready, home: _merged(kept)));
+    } else if (track == null) {
+      unawaited(_learnTrack());
     }
     _changes ??= _connectivity.onlineChanges.listen((online) {
       if (isClosed) return;
@@ -238,6 +240,21 @@ class HomeCubit extends Cubit<HomeState> {
   Future<Result<HomeSnapshot>> _fetch() {
     _fetches++;
     return _home.getHome();
+  }
+
+  /// Nothing on the phone names the track yet (a first open): the profile
+  /// does, for the capsule over the skeleton or no data (header §2.1).
+  Future<void> _learnTrack() async {
+    final result = await _profiles.getProfile();
+    if (isClosed || state.trackTitle != null) return;
+    if (result case Ok(value: Profile(:final active?))) {
+      emit(
+        state.copyWith(
+          trackTitle: () => active.title,
+          kidsHint: active.audience == TrackAudience.child,
+        ),
+      );
+    }
   }
 
   /// The opening has played: not again today.

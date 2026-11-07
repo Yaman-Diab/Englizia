@@ -16,12 +16,17 @@ import 'package:englizia/features/home/presentation/home/widgets/stage/horizon_f
 import 'package:englizia/features/home/presentation/home/widgets/stage/level_header.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/locked_toast.dart';
 import 'package:englizia/features/home/presentation/home/widgets/states/connection_strip.dart';
+import 'package:englizia/features/home/presentation/home/widgets/states/home_no_data.dart';
+import 'package:englizia/features/home/presentation/home/widgets/states/home_skeleton.dart';
 import 'package:englizia/features/home/presentation/home/widgets/states/switch_strip.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_home_repository.dart';
+import '../../helpers/fake_lesson_repository.dart';
 import '../../helpers/fake_profile_repository.dart';
+import '../../helpers/fakes.dart';
 import '../../helpers/home_harness.dart';
 import '../../helpers/pump_app.dart';
 
@@ -437,6 +442,58 @@ void main() {
       await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
+    });
+  });
+
+  group('a first open: the capsule only (header §2.1, §8.3, §8.4)', () {
+    /// Home started with nothing kept on the phone, as on a first open.
+    Future<HomeCubit> firstOpen(
+      WidgetTester tester,
+      FakeHomeRepository homes,
+    ) async {
+      final cubit = HomeCubit(
+        homes,
+        FakeProfileRepository(mockProfile()),
+        FakeLessonRepository(),
+        FakeConnectivityService(),
+        FakeSoundPlayer(),
+        now: () => homeMorning,
+      );
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: Scaffold(
+            body: HomePage(
+              actions: RecordedActions().actions,
+              pages: RouteObserver<PageRoute<dynamic>>(),
+            ),
+          ),
+        ),
+        size: _design,
+      );
+      unawaited(cubit.start());
+      await tester.pump();
+      return cubit;
+    }
+
+    testWidgets('while it loads', (tester) async {
+      final homes = FakeHomeRepository(_home())
+        ..gate = Completer<void>().future;
+      final cubit = await firstOpen(tester, homes);
+      expect(find.byType(HomeSkeleton), findsOneWidget);
+      expect(find.text('الإنجليزية العامة'), findsOneWidget);
+      await cubit.close();
+    });
+
+    testWidgets('with no data', (tester) async {
+      final homes = FakeHomeRepository(
+        null,
+        failure: const ServerFailure(statusCode: 500),
+      );
+      final cubit = await firstOpen(tester, homes);
+      expect(find.byType(HomeNoData), findsOneWidget);
+      expect(find.text('الإنجليزية العامة'), findsOneWidget);
+      await cubit.close();
     });
   });
 

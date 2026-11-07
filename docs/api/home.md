@@ -100,7 +100,7 @@ Other frames, as deltas:
 | `learner.emailVerified`, `signIn` | `email`, `google`, `apple` or `guest` (new here). The reminder itself comes from the account's state on the phone |
 | `learner.stars` | Kids: the stars earned in all |
 | `learner.greetingAudio` | Kids: what «استمع» in the header plays; null plays nothing |
-| `enrollment.id`, `trackId`, `title` | The active track: the capsule, the switch strip |
+| `enrollment.id`, `trackId`, `title` | The active track: the capsule, the switch strip. Before a first home has come, the capsule reads the profile's active track ([me.md](me.md)) |
 | `enrollment.audience` | `self`, `child`, `schoolStudent`: the sea's family |
 | `enrollment.kidsMode` | The kids' layout |
 | `enrollment.ordered` | `false`: nothing locked, «الدرس المقترح», open islands (Emar) |
