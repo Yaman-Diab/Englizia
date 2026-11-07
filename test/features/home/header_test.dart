@@ -21,6 +21,7 @@ import 'package:englizia/features/home/presentation/home/widgets/header/say_bubb
 import 'package:englizia/features/home/presentation/home/widgets/header/top_bar.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_home_repository.dart';
@@ -581,6 +582,76 @@ void main() {
       await tester.tap(find.bySemanticsLabel('ابدأ'));
       expect(started, 2);
       handle.dispose();
+    });
+
+    for (final locale in AppLocales.supported) {
+      testWidgets('the offers keep their words whole at 320dp with the '
+          'largest text (${locale.languageCode})', (tester) async {
+        tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+        addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+        for (final card in [
+          NoticeCard.levelCheck(onStart: () {}),
+          NoticeCard.placement(minutes: (min: 12, max: 15), onStart: () {}),
+        ]) {
+          await tester.pumpLocalized(
+            Material(
+              child: Padding(
+                padding: const EdgeInsetsDirectional.all(20),
+                child: Align(alignment: Alignment.topCenter, child: card),
+              ),
+            ),
+            locale: locale,
+            size: narrowViewport,
+          );
+          await _settle(tester);
+          expect(tester.takeException(), isNull);
+          final texts = find.descendant(
+            of: find.byWidget(card),
+            matching: find.byType(RichText),
+          );
+          for (final text in texts.evaluate()) {
+            final paragraph = text.renderObject! as RenderParagraph;
+            expect(
+              paragraph.size.width,
+              greaterThanOrEqualTo(
+                paragraph.getMinIntrinsicWidth(double.infinity) - .5,
+              ),
+              reason: paragraph.text.toPlainText(),
+            );
+          }
+        }
+      });
+    }
+
+    testWidgets('an offer\'s button goes under its texts where it would '
+        'squeeze them', (tester) async {
+      Future<(Rect, Rect)> layout(Size size, double scale) async {
+        tester.platformDispatcher.textScaleFactorTestValue = scale;
+        await tester.pumpLocalized(
+          Material(
+            child: Padding(
+              padding: const EdgeInsetsDirectional.all(20),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: NoticeCard.levelCheck(onStart: () {}),
+              ),
+            ),
+          ),
+          locale: AppLocales.english,
+          size: size,
+        );
+        await _settle(tester);
+        return (
+          tester.getRect(find.text('A short check to see if your level fits')),
+          tester.getRect(find.text('Start the check')),
+        );
+      }
+
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      final (body, button) = await layout(defaultViewport, 1);
+      expect(button.top, lessThan(body.bottom), reason: 'beside');
+      final (squeezed, under) = await layout(narrowViewport, 1.3);
+      expect(under.top, greaterThan(squeezed.bottom), reason: 'under');
     });
 
     testWidgets('level complete: kicker, title, start', (tester) async {

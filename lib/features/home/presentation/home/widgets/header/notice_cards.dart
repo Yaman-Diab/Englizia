@@ -284,7 +284,8 @@ class _Card extends StatelessWidget {
 }
 
 /// The level check and the deferred test: an icon in a disk, the texts, a
-/// small outlined button.
+/// small outlined button. Where a word of the texts wouldn't fit beside the
+/// button (a narrow screen with large text), the button goes under them.
 class _Offer extends StatelessWidget {
   const _Offer({
     required this.icon,
@@ -305,11 +306,66 @@ class _Offer extends StatelessWidget {
   static const _disk = 40.0;
   static const _icon = 22.0;
   static const _button = 40.0;
+  static const _buttonSide = 14.0;
+  static const _gap = 12.0;
+
+  /// Under the texts, the button keeps this from them.
+  // ASSUMPTION(design): the design has the button beside the texts only.
+  static const _under = 6.0;
+
+  /// Whether the texts beside a button reading [action] in [width] keep
+  /// every word whole.
+  static bool _fitsBeside(
+    BuildContext context, {
+    required double width,
+    required List<(String, TextStyle)> texts,
+    required String action,
+    required TextStyle actionStyle,
+  }) {
+    double measure(String text, TextStyle style, {required bool word}) {
+      final painter = TextPainter(
+        text: TextSpan(text: text, style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout();
+      final width = word ? painter.minIntrinsicWidth : painter.width;
+      painter.dispose();
+      return width;
+    }
+
+    final button = measure(action, actionStyle, word: false) + 2 * _buttonSide;
+    final column = width - _disk - 2 * _gap - button;
+    return texts.every(
+      (text) => measure(text.$1, text.$2, word: true) <= column,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final scheme = context.scheme;
+    final titleStyle = _title(context);
+    final bodyStyle = _sub(context);
+    final actionStyle = context.texts.captionStrong.copyWith(
+      height: 1,
+      color: colors.primary.text,
+    );
+    final button = HeaderTap(
+      label: action,
+      onTap: onStart,
+      margin: const EdgeInsetsDirectional.symmetric(vertical: 4),
+      builder: (context, pressed) => Container(
+        height: _button,
+        padding: const EdgeInsetsDirectional.symmetric(horizontal: _buttonSide),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: pressed ? scheme.surfaceContainerHigh : colors.surface,
+          borderRadius: BorderRadius.circular(_button / 2),
+          border: Border.all(color: scheme.outline, width: 1.5),
+        ),
+        child: Text(action, maxLines: 1, softWrap: false, style: actionStyle),
+      ),
+    );
     return Semantics(
       container: true,
       liveRegion: true,
@@ -322,63 +378,65 @@ class _Offer extends StatelessWidget {
           vertical: 10,
         ),
         decoration: _cardDecoration(colors.surface, scheme.outline),
-        child: Row(
-          children: [
-            ExcludeSemantics(
-              child: Container(
-                width: _disk,
-                height: _disk,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.primary.surface,
-                ),
-                child: AppIconView(
-                  icon,
-                  size: _icon,
-                  color: colors.primaryStrong,
-                ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final beside = _fitsBeside(
+              context,
+              width: constraints.maxWidth,
+              texts: [(title, titleStyle), (body, bodyStyle)],
+              action: action,
+              actionStyle: actionStyle,
+            );
+            final texts = ExcludeSemantics(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(title, style: titleStyle),
+                  Text(body, style: bodyStyle),
+                ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: ExcludeSemantics(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title, style: _title(context)),
-                    Text(body, style: _sub(context)),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            HeaderTap(
-              label: action,
-              onTap: onStart,
-              margin: const EdgeInsetsDirectional.symmetric(vertical: 4),
-              builder: (context, pressed) => Container(
-                height: _button,
-                padding: const EdgeInsetsDirectional.symmetric(horizontal: 14),
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: pressed ? scheme.surfaceContainerHigh : colors.surface,
-                  borderRadius: BorderRadius.circular(_button / 2),
-                  border: Border.all(color: scheme.outline, width: 1.5),
-                ),
-                child: Text(
-                  action,
-                  maxLines: 1,
-                  softWrap: false,
-                  style: context.texts.captionStrong.copyWith(
-                    height: 1,
-                    color: colors.primary.text,
+            );
+            return Row(
+              crossAxisAlignment: beside
+                  ? CrossAxisAlignment.center
+                  : CrossAxisAlignment.start,
+              children: [
+                ExcludeSemantics(
+                  child: Container(
+                    width: _disk,
+                    height: _disk,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: colors.primary.surface,
+                    ),
+                    child: AppIconView(
+                      icon,
+                      size: _icon,
+                      color: colors.primaryStrong,
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ],
+                const SizedBox(width: _gap),
+                if (beside) ...[
+                  Expanded(child: texts),
+                  const SizedBox(width: _gap),
+                  button,
+                ] else
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        texts,
+                        const SizedBox(height: _under),
+                        button,
+                      ],
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
