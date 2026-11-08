@@ -58,7 +58,7 @@ The common errors (`docs/api/README.md`); no endpoint-specific codes.
 
 ## `GET /api/v1/app/tracks/{trackId}/levels`
 
-Published levels of one track, in display order, with their effective settings. Used by the onboarding grade step (tracks whose entry method is `gradeSelection`) and later by the home and "Me" screens. Available without a token, like the track list. Mock: `assets/mock/tracks/levels_<trackId>.json`.
+Published levels of one track, in display order, with their effective settings. Used by the onboarding grade step (tracks whose entry method is `gradeSelection`) and by "Me"'s «تغيير الصف»; home gets its level inside `GET /api/v1/app/home` ([home.md](home.md)). Available without a token, like the track list. Mock: `assets/mock/tracks/levels_<trackId>.json`.
 
 ### Response `200`
 
@@ -95,7 +95,7 @@ Not in this list on purpose: feature overrides per level, and the three "you wil
 
 ## `GET /api/v1/app/levels/{levelId}/units`
 
-Published units of one level, in display order. "Preparing" (S §4.4) reads the first one right after the account is created, to name it ("جهّزنا وحدتك الأولى" with its title and topic); the home screen will read the rest. Sent with a token. Mock: `assets/mock/tracks/units_<levelId>.json` for `lvl_gen_prea1` and `lvl_emar_07`, `units_default.json` for any other level.
+Published units of one level, in display order. "Preparing" (S §4.4) reads the first one right after the account is created, to name it ("جهّزنا وحدتك الأولى" with its title and topic); home gets every unit of the level inside `GET /api/v1/app/home` instead ([home.md](home.md)). Sent with a token. Mock: `assets/mock/tracks/units_<levelId>.json` for `lvl_gen_prea1` and `lvl_emar_07`, `units_default.json` for any other level.
 
 ### Response `200`
 

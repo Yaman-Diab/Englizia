@@ -124,8 +124,8 @@ Other frames, as deltas:
 | `…lessons[].levelCheck` | The unit review is the level check (S §12.3): a gate instead of the lighthouse |
 | `…lessons[].resume` | `{question, questions, share}`: «تابع من حيث توقفت», «السؤال 3 من 6»; `questions` is new to the lesson's `resume` |
 | `week` | As in [me.md](me.md): today's minutes (`days[today].minutes`), the goal, the day start. Once the learner's day passes `today`'s date, the phone moves «today» to the next date (none past the last day, with no minutes) until the next answer |
-| `streak` | As in [me.md](me.md), plus `freezesPerWeek` (0–3, from the panel): «يُضاف واحد كل أسبوع»; 0 hides the line |
-| `review.wordsDue`, `conceptsDue`, `minutes` | «راجع اليوم: 12 كلمة و3 مفاهيم، نحو 5 دقائق» and «تدرّب»'s badge; `conceptsDue` absent while the mistakes' bank is off |
+| `streak` | As in [me.md](me.md), plus `freezesPerWeek` (0–3, from the panel): «يُضاف واحد كل أسبوع»; 0 hides the line, and a missing one reads as 1 (docs/STATUS.md D-096) |
+| `review.wordsDue`, `conceptsDue`, `minutes` | «راجع اليوم: 12 كلمة و3 مفاهيم، نحو 5 دقائق» and «تدرّب»'s badge on home; `conceptsDue` absent while the mistakes' bank is off. ASSUMPTION(api): the same counts as the word bank's due words, which give the badge on «تدرّب» itself; the two mocks disagree (docs/STATUS.md D-103) |
 | `cards.levelCheck` | `{lessonId}` while the level check is available and not taken: «ابدأ الفحص» opens that lesson |
 | `cards.placement` | `{estimatedMinutes {min, max}}` while the placement test is put off: «اختبر مستواك» |
 | `events[]` | `{id, kind, on, streak, freezesLeft?}`, `kind` `freezeUsed` or `streakBroken`; unknown kinds are skipped. Shown once, then remembered on the phone (the last 20 ids) |
@@ -134,7 +134,7 @@ Not in the payload on purpose: the lesson's content (`GET /lessons/{id}`, preloa
 
 ### What the app decides itself
 
-The greeting's hours («صباح الخير» until 12:00), the streak at risk from 18:00, and the one-card-at-a-time priority (a one-time notice, the level done, the email, the level check, the deferred test) are app rules (docs/STATUS.md). The opening's once-a-day uses `week.dayStart` (04:00 by default), read on the phone's wall clock.
+The greeting's hours («صباح الخير» until 12:00) and the streak at risk from 18:00 until the learner's day starts (`week.dayStart`, 04:00 by default) are app rules (docs/STATUS.md D-096). The one-card-at-a-time priority (a one-time notice, the level done, the email, the level check, the deferred test) is the design's, applied by `HomeRules.notices`. The opening's once-a-day uses `week.dayStart` (04:00 by default), read on the phone's wall clock.
 
 Back from a lesson, the app waits 2 s for this endpoint before celebrating what the phone knows (a completion still on its way counts); an answer that comes later is shown without a celebration.
 
