@@ -68,6 +68,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the preferences, the password and deleting the account | mock (`PUT /api/v1/app/me` confirmed) |
+| [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
 
 ## Headers sent on every request
@@ -123,6 +124,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/placement/attempts/{id}/result` | GET | — | `{levelId, levels, skills}` ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/placement/attempts/{id}/accept` | POST | `{levelId}` | none ([placement.md](placement.md)) | proposed, mock |
 | `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
+| `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/password/forgot` | POST | `{email}` | none; the same answer whether or not the email has an account ([auth.md](auth.md)) | proposed, mock |

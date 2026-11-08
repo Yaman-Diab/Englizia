@@ -83,4 +83,8 @@ abstract interface class LessonRepository {
 
   /// Whether it opens offline, was completed here, and where it left off.
   LessonOnPhone onPhone(String lessonId);
+
+  /// Forgets the lessons completed while the app runs, so a dev scenario
+  /// that starts the home afresh doesn't show them done.
+  void forgetCompletions();
 }

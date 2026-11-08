@@ -24,14 +24,14 @@ final class ProfileModel {
       whatsapp: json.readString('whatsapp'),
       tracks: [
         for (final item in json.readList('tracks') ?? const <Object?>[])
-          ?_track(item),
+          ?trackOf(item),
       ],
       lessonsDone: json.readInt('lessonsDone') ?? 0,
       learningDays: json.readInt('learningDays') ?? 0,
       wordsSaved: json.readInt('wordsSaved'),
-      streak: _streak(json.readMap('streak')),
+      streak: streakOf(json.readMap('streak')),
       points: _points(json.readMap('points')),
-      week: _week(json.readMap('week')),
+      week: weekOf(json.readMap('week')),
       placement: _placement(json.readMap('placement')),
       wordBank: _wordBank(json.readMap('wordBank')),
       stars: json.readInt('stars'),
@@ -75,7 +75,9 @@ final class ProfileModel {
     'schoolStudent': TrackAudience.schoolStudent,
   };
 
-  static ProfileTrack? _track(Object? item) {
+  /// One of `tracks[]`; null when it can't be read. Home reads its
+  /// `enrollments[]` the same way.
+  static ProfileTrack? trackOf(Object? item) {
     if (item is! Map<String, Object?>) return null;
     final enrollmentId = item.readString('enrollmentId');
     final trackId = item.readString('trackId');
@@ -97,7 +99,8 @@ final class ProfileModel {
     );
   }
 
-  static Streak? _streak(Map<String, Object?>? json) {
+  /// Null without a current streak.
+  static Streak? streakOf(Map<String, Object?>? json) {
     final current = json?.readInt('current');
     if (json == null || current == null) return null;
     return Streak(
@@ -115,7 +118,8 @@ final class ProfileModel {
     return Points(total: total, week: json.readInt('week') ?? 0);
   }
 
-  static StudyWeek? _week(Map<String, Object?>? json) {
+  /// Null without a goal or a day.
+  static StudyWeek? weekOf(Map<String, Object?>? json) {
     final goal = json?.readInt('goalMinutes');
     if (json == null || goal == null || goal <= 0) return null;
     final days = <StudyDay>[];

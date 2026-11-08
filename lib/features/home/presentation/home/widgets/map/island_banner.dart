@@ -1,0 +1,452 @@
+import 'dart:math' as math;
+
+import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/design_system/app_spacing.dart';
+import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/color_mix.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
+import 'package:englizia/core/design_system/kids/kid_parts.dart';
+import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/core/design_system/motion/press_scale.dart';
+import 'package:englizia/features/home/domain/entities/home.dart';
+import 'package:englizia/features/home/presentation/home/geometry/island_layout.dart';
+import 'package:englizia/features/home/presentation/home/scene/map_frame.dart';
+import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+/// The current island's flag on its top edge: the unit's cover,
+/// its title and progress, «افتح الوحدة». Kids get both names, the unit's
+/// stars and the speaker that says its name.
+///
+/// It is placed by its end edge ([endInset] from the frame's end, scaled)
+/// and grows toward the start up to [maxWidth].
+///
+/// ASSUMPTION(design): the 6 / 4 padding sits on the medal's and the
+/// speaker's side, concentric in the pill; the board's
+/// physical values put it at the text's end.
+///
+/// ASSUMPTION(design): Emar's book line runs wider in the app's font than
+/// in the design's, past the 236: the banner then grows on toward the
+/// frame's end (`IslandLayout.bannerReach`), and only where even that
+/// can't hold it (large text) does it say just its pages.
+class IslandBanner extends StatelessWidget {
+  const IslandBanner({
+    required this.unit,
+    required this.emar,
+    required this.onOpen,
+    this.maxWidth,
+    super.key,
+  }) : kids = false,
+       speaking = false,
+       onListen = null;
+
+  const IslandBanner.kid({
+    required this.unit,
+    required this.speaking,
+    required VoidCallback this.onListen,
+    required this.onOpen,
+    this.maxWidth,
+    super.key,
+  }) : kids = true,
+       emar = false;
+
+  final HomeUnit unit;
+  final bool kids;
+
+  /// The sub line is the unit's book pages instead of its lessons done.
+  final bool emar;
+
+  /// The guide is saying the unit's name: the speaker wears its ring.
+  final bool speaking;
+  final VoidCallback? onListen;
+
+  /// Opens the unit's screen.
+  final VoidCallback onOpen;
+
+  /// The widest it grows; by default what the screen's frame leaves (236 at
+  /// 360, kids 276).
+  final double? maxWidth;
+
+  /// The design's distance from the frame's end (left in right-to-left),
+  /// to scale with the frame.
+  static double endInset({required bool kids}) => kids ? 64 : 104;
+
+  /// Below the island's top edge.
+  static const fromTop = 2.0;
+
+  static const height = 48.0;
+  static const kidHeight = 64.0;
+
+  /// The room it keeps from the frame's start edge at its widest.
+  static const _startInset = 20.0;
+
+  static const _medal = 36.0;
+  static const _padding = EdgeInsetsDirectional.fromSTEB(6, 0, 12, 0);
+  static const _border = 1.0;
+
+  /// The pill around its text: the padding, the border, the medal and its
+  /// gap.
+  static double get _chrome =>
+      _padding.horizontal + 2 * _border + _medal + AppSpacing.sm;
+
+  double _maxWidth(BuildContext context) {
+    final frame = MapFrame(MediaQuery.sizeOf(context).width);
+    final room =
+        frame.fromStart(_startInset) - frame.scaled(endInset(kids: kids));
+    return maxWidth ?? (kids ? room : math.min(236, room));
+  }
+
+  /// The widest Emar's book line may make it.
+  double _widest(BuildContext context) {
+    final frame = MapFrame(MediaQuery.sizeOf(context).width);
+    return maxWidth ??
+        frame.fromStart(_startInset) - frame.fromEnd(IslandLayout.bannerReach);
+  }
+
+  @override
+  Widget build(BuildContext context) =>
+      kids ? _kid(context) : _general(context);
+
+  Widget _general(BuildContext context) {
+    final colors = context.colors;
+    final texts = context.texts;
+    final n = unit.lessons.length;
+    final progress = 'unit_progress'.plural(
+      n,
+      namedArgs: {'done': '${math.min(unit.doneCount, n)}'},
+    );
+    final pages = unit.bookPages;
+    final pagesText = pages == null
+        ? null
+        : 'unit_book_pages'.tr(
+            namedArgs: {'from': '${pages.from}', 'to': '${pages.to}'},
+          );
+    final subStyle = texts
+        .sized(texts.caption, size: 12, line: 16, running: false)
+        .copyWith(color: colors.textSecondary);
+    // Emar: the book's line, wider than the design's 236 where it needs
+    // it, or only its pages where even that would cut it.
+    var width = _maxWidth(context);
+    var sub = progress;
+    if (emar && pages != null && pagesText != null) {
+      final needs = (_textWidth(context, pagesText, subStyle) + _chrome)
+          .ceilToDouble();
+      if (needs <= math.max(width, _widest(context))) {
+        sub = pagesText;
+        width = math.max(width, needs);
+      } else {
+        sub = 'home_pages'.tr(
+          namedArgs: {'from': '${pages.from}', 'to': '${pages.to}'},
+        );
+      }
+    }
+    final label = emar && pagesText != null
+        ? 'home_banner_semantics_pages'.tr(
+            namedArgs: {
+              'number': '${unit.number}',
+              'name': unit.title,
+              'progress': progress,
+              'pages': pagesText,
+            },
+          )
+        : 'home_banner_semantics'.tr(
+            namedArgs: {
+              'number': '${unit.number}',
+              'name': unit.title,
+              'progress': progress,
+            },
+          );
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onOpen,
+        child: ExcludeSemantics(
+          child: PressScale(
+            scale: AppMotion.scaleSmall,
+            child: Container(
+              height: height,
+              constraints: BoxConstraints(maxWidth: width),
+              padding: _padding,
+              decoration: BoxDecoration(
+                color: colors.surface,
+                border: Border.all(
+                  color: context.scheme.outline,
+                  width: _border,
+                ),
+                borderRadius: BorderRadius.circular(height / 2),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  UnitMedal(url: unit.coverUrl, size: _medal),
+                  const SizedBox(width: AppSpacing.sm),
+                  Flexible(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          unitTitle(unit),
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: texts
+                              .sized(
+                                texts.captionStrong,
+                                size: 12,
+                                line: 17,
+                                running: false,
+                              )
+                              .copyWith(color: colors.textPrimary),
+                        ),
+                        Text(
+                          sub,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: subStyle,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// [text] on one line in [style], as a [Text] here lays it out.
+  static double _textWidth(BuildContext context, String text, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: DefaultTextStyle.of(context).style.merge(style),
+      ),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      locale: Localizations.maybeLocaleOf(context),
+      maxLines: 1,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
+  }
+
+  Widget _kid(BuildContext context) {
+    final colors = context.colors;
+    final texts = context.texts;
+    final en = unit.titleEn ?? '';
+    final stars = unit.stars ?? 0;
+    return Container(
+      height: kidHeight,
+      constraints: BoxConstraints(maxWidth: _maxWidth(context)),
+      padding: const EdgeInsetsDirectional.fromSTEB(4, 0, 16, 0),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        border: Border.all(color: context.scheme.outline),
+        borderRadius: BorderRadius.circular(kidHeight / 2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Semantics(
+            button: true,
+            label: 'home_listen_unit'.tr(
+              namedArgs: {'ar': unit.title, 'en': en},
+            ),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: onListen,
+              child: AnimatedContainer(
+                duration: AppMotion.resolve(context, AppMotion.bubbleIn),
+                curve: AppMotion.out,
+                width: AppSizes.kidsMinTapTarget,
+                height: AppSizes.kidsMinTapTarget,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.info.fill,
+                  boxShadow: [
+                    BoxShadow(
+                      color: speaking
+                          ? colors.info.surface
+                          : colors.info.surface.withValues(alpha: 0),
+                      spreadRadius: speaking ? 4 : 0,
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: AppIconView(
+                  AppIcon.volume,
+                  color: colors.surface,
+                  size: 26,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          Flexible(
+            child: Semantics(
+              button: true,
+              label: 'home_kid_banner_semantics'.tr(
+                namedArgs: {
+                  'ar': unit.title,
+                  'en': en,
+                  'stars': 'home_stars_of_five'.plural(stars),
+                },
+              ),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: onOpen,
+                child: ExcludeSemantics(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      minHeight: AppSizes.kidsMinTapTarget,
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.baseline,
+                          textBaseline: TextBaseline.alphabetic,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                unit.title,
+                                maxLines: 1,
+                                softWrap: false,
+                                overflow: TextOverflow.ellipsis,
+                                style: texts
+                                    .sized(
+                                      texts.bodyStrong,
+                                      size: 16,
+                                      line: 22,
+                                      running: false,
+                                    )
+                                    .copyWith(color: colors.textPrimary),
+                              ),
+                            ),
+                            if (en.isNotEmpty) ...[
+                              const SizedBox(width: 6),
+                              Flexible(
+                                child: Text(
+                                  en,
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  overflow: TextOverflow.ellipsis,
+                                  textDirection: TextDirection.ltr,
+                                  style: texts
+                                      .sized(
+                                        texts.kidsCard,
+                                        size: 16,
+                                        line: 22,
+                                        running: false,
+                                      )
+                                      .copyWith(color: colors.textSecondary),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: AppSpacing.xxs),
+                        UnitStars(stars: stars, size: AppSizes.iconSm),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A unit's cover in a circle, centre-cropped; the unit flag on the
+/// illustration ground when it has none. A unit not open yet is drawn pale:
+/// [saturation] and [opacity] below 1, the flag as well as a cover.
+class UnitMedal extends StatelessWidget {
+  const UnitMedal({
+    required this.url,
+    required this.size,
+    this.saturation = 1,
+    this.opacity = 1,
+    super.key,
+  });
+
+  final String? url;
+  final double size;
+  final double saturation;
+  final double opacity;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final url = this.url;
+    final medal = SizedBox.square(
+      dimension: size,
+      child: ColoredBox(
+        color: colors.primary.surface,
+        child: url == null || url.isEmpty
+            ? Center(
+                child: AppIconView(
+                  AppIcon.unitFlag,
+                  color: colors.primary.fill,
+                  size: size / 2,
+                ),
+              )
+            : url.startsWith('http')
+            ? Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              )
+            : SvgPicture.asset(url, fit: BoxFit.cover),
+      ),
+    );
+    return ExcludeSemantics(
+      child: ClipOval(
+        child: saturation >= 1 && opacity >= 1
+            ? medal
+            : ColorFiltered(
+                colorFilter: ColorFilter.matrix(
+                  saturateMatrix(saturation, alpha: opacity),
+                ),
+                child: medal,
+              ),
+      ),
+    );
+  }
+}
+
+/// A unit's five stars: [stars] filled, the rest empty. Decorative.
+class UnitStars extends StatelessWidget {
+  const UnitStars({required this.stars, required this.size, super.key});
+
+  final int stars;
+  final double size;
+
+  static const count = 5;
+
+  @override
+  Widget build(BuildContext context) => ExcludeSemantics(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < count; i++) ...[
+          if (i > 0) const SizedBox(width: AppSpacing.xxs),
+          KidStar(size: size, filled: i < stars),
+        ],
+      ],
+    ),
+  );
+}

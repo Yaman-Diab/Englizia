@@ -83,7 +83,7 @@ The common errors (`docs/api/README.md`). Creating a guest needs a connection; t
 
 ## `POST /api/v1/auth/guest/upgrade`
 
-Turns the guest account of this phone into a member account **in place**: same account id, same progress, points and streak. Sent with the guest's own access token (the normal `Authorization` header), from "create an account" in «أنا» (for now the temporary home). The body is register's `RegisterRequest`:
+Turns the guest account of this phone into a member account **in place**: same account id, same progress, points and streak. Sent with the guest's own access token (the normal `Authorization` header), from "create an account" on «أنا»'s guest card (or the dev page's account card). The body is register's `RegisterRequest`:
 
 ```json
 {

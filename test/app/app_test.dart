@@ -15,7 +15,6 @@ import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
-import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/forgot_password/pages/forgot_password_page.dart';
 import 'package:englizia/features/account/presentation/new_password/pages/new_password_page.dart';
@@ -23,6 +22,8 @@ import 'package:englizia/features/account/presentation/password_changed/pages/pa
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
+import 'package:englizia/features/home/domain/repositories/home_repository.dart';
+import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/lessons/presentation/explain/widgets/explain_sheet.dart';
@@ -39,17 +40,18 @@ import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/repositories/track_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import '../helpers/fake_accounts.dart';
+import '../helpers/fake_home_repository.dart';
 import '../helpers/fake_http_adapter.dart';
 import '../helpers/fake_lesson_repository.dart';
 import '../helpers/fake_placement_repository.dart';
 import '../helpers/fake_settings_repository.dart';
 import '../helpers/fake_track_repository.dart';
 import '../helpers/fakes.dart';
+import '../helpers/home_harness.dart';
 import '../helpers/platform_mocks.dart';
 import '../helpers/pump_app.dart';
 
@@ -57,14 +59,39 @@ void main() {
   setUpAll(initLocalizationForTests);
 
   setUp(() async {
+    // A phone held upright, as the app only turns that way.
+    final view = TestWidgetsFlutterBinding.ensureInitialized()
+        .platformDispatcher
+        .implicitView!;
+    view
+      ..physicalSize = defaultViewport
+      ..devicePixelRatio = 1;
+    addTearDown(view.reset);
     mockPlatformPlugins();
     await configureDependencies();
     // The app listens to it from the start, and the plugin has no test side.
+    // Home answers with the bundled general track.
     sl
       ..unregister<ConnectivityService>()
-      ..registerLazySingleton<ConnectivityService>(FakeConnectivityService.new);
+      ..registerLazySingleton<ConnectivityService>(FakeConnectivityService.new)
+      ..unregister<HomeRepository>()
+      ..registerLazySingleton<HomeRepository>(
+        () => FakeHomeRepository(mockHome()),
+      );
   });
   tearDown(() => sl.reset());
+
+  /// The dev page, pushed over home as its long press does in mock mode.
+  Future<void> openDevPage(WidgetTester tester) async {
+    unawaited(
+      GoRouter.of(
+        tester.element(find.byType(HomePage)),
+      ).push<void>(AppRoutes.foundation),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.byType(FoundationPage), findsOneWidget);
+  }
 
   for (final locale in AppLocales.supported) {
     for (final size in [defaultViewport, narrowViewport]) {
@@ -242,7 +269,7 @@ void main() {
       await tester.tap(find.text('password_changed_continue'.tr()));
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     });
 
     testWidgets('no session: sign in by hand, with the email there', (
@@ -332,7 +359,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(PasswordChangedPage), findsNothing);
       expect(find.byType(NewPasswordPage), findsNothing);
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     });
   });
 
@@ -351,7 +378,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     expect(find.byType(WelcomePage), findsNothing);
-    expect(find.byType(FoundationPage), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
   });
 
   testWidgets('a guest account leaves welcome for home too', (tester) async {
@@ -376,7 +403,7 @@ void main() {
 
     expect(sl<AppSessionController>().status, SessionStatus.guest);
     expect(find.byType(WelcomePage), findsNothing);
-    expect(find.byType(FoundationPage), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
   });
 
   testWidgets(
@@ -412,7 +439,7 @@ void main() {
       await tester.tap(find.byType(AppButton));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     },
   );
 
@@ -447,7 +474,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       unawaited(
         GoRouter.of(
-          tester.element(find.byType(FoundationPage)),
+          tester.element(find.byType(HomePage)),
         ).push<void>(AppRoutes.exercisesOf('les')),
       );
       await tester.pump();
@@ -468,7 +495,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       expect(find.byType(ExercisePage), findsNothing);
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     });
 
     testWidgets('the last answer replaces the lesson with its end', (
@@ -572,7 +599,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
 
       GoRouter.of(
-        tester.element(find.byType(FoundationPage)),
+        tester.element(find.byType(HomePage)),
       ).go(AppRoutes.onboardingPlacement);
       await tester.pump();
       await tester.settleEntrance(const Duration(seconds: 2));
@@ -609,7 +636,7 @@ void main() {
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
       GoRouter.of(
-        tester.element(find.byType(FoundationPage)),
+        tester.element(find.byType(HomePage)),
       ).go(AppRoutes.onboardingPlacement);
       await tester.pump();
       await tester.settleEntrance(const Duration(seconds: 2));
@@ -617,7 +644,7 @@ void main() {
       await tester.tap(find.text('placement_skip_plain'.tr()));
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     });
 
     testWidgets('a whole test: questions, then the result, then home', (
@@ -628,7 +655,7 @@ void main() {
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
       GoRouter.of(
-        tester.element(find.byType(FoundationPage)),
+        tester.element(find.byType(HomePage)),
       ).go(AppRoutes.placementQuestions);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
@@ -653,7 +680,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       await tester.pump();
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
       expect(find.byType(PlacementResultPage), findsNothing);
     });
 
@@ -663,12 +690,12 @@ void main() {
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
       GoRouter.of(
-        tester.element(find.byType(FoundationPage)),
+        tester.element(find.byType(HomePage)),
       ).go(AppRoutes.placementResult);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(PlacementResultPage), findsNothing);
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
     });
 
     testWidgets('with no session, it sends to welcome', (tester) async {
@@ -752,7 +779,7 @@ void main() {
       await tester.pump(const Duration(seconds: 3));
       await tester.pump();
 
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
       expect(find.byType(VerifyEmailSheet), findsOneWidget);
       expect(accounts.linkResends, 1);
       // Ends what the sent link started.
@@ -769,8 +796,11 @@ void main() {
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 2));
       await tester.pump(const Duration(seconds: 1));
+      // Home's top slot, as the learner has done a lesson.
+      expect(find.byType(HomePage), findsOneWidget);
       expect(find.text('verify_reminder'.tr()), findsOneWidget);
-      // The row sits low on the temporary home.
+      // The row sits low on the dev page.
+      await openDevPage(tester);
       await tester.scrollUntilVisible(
         find.text('account_email_unverified'.tr()),
         200,
@@ -787,7 +817,7 @@ void main() {
       await sl<AppSessionController>().signIn(guestTokens);
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 2));
-      expect(find.byType(FoundationPage), findsOneWidget);
+      expect(find.byType(HomePage), findsOneWidget);
       expect(find.text('verify_reminder'.tr()), findsNothing);
       expect(accounts.emailReads, 0);
     });
@@ -800,7 +830,6 @@ void main() {
     sl
       ..unregister<AccountRepository>()
       ..registerLazySingleton<AccountRepository>(() => accounts);
-    // Tall enough for the whole temporary home, account card included.
     tester.setViewport(const Size(400, 1400));
     await tester.pumpWidget(
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
@@ -810,6 +839,11 @@ void main() {
     await sl<AppSessionController>().signIn(guestTokens);
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
+    await openDevPage(tester);
+    await tester.scrollUntilVisible(
+      find.text('account_guest_create'.tr()),
+      300,
+    );
 
     await tester.tap(find.text('account_guest_create'.tr()));
     await tester.pump();
@@ -829,7 +863,7 @@ void main() {
     expect(accounts.upgrades, hasLength(1));
     expect(accounts.accounts, isEmpty);
     expect(sl<AppSessionController>().status, SessionStatus.member);
-    expect(find.byType(FoundationPage), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
     expect(find.byType(PreparingPage), findsNothing);
   });
 
@@ -861,7 +895,7 @@ void main() {
 
     expect(accounts.signIns.single, ('user@example.com', 'password1'));
     expect(sl<AppSessionController>().status, SessionStatus.member);
-    expect(find.byType(FoundationPage), findsOneWidget);
+    expect(find.byType(HomePage), findsOneWidget);
   });
 
   testWidgets('preparing without its arguments goes elsewhere', (tester) async {
@@ -902,6 +936,7 @@ void main() {
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
     expect(await sentLanguage(), 'ar');
+    await openDevPage(tester);
 
     await tester.tap(find.text('English'));
     await tester.pumpUntilLocalized();
@@ -915,13 +950,7 @@ void main() {
     tester,
   ) async {
     final handle = tester.ensureSemantics();
-    await tester.pumpLocalized(
-      BlocProvider(
-        create: (_) => sl<SettingsCubit>(),
-        child: const FoundationPage(),
-      ),
-      size: narrowViewport,
-    );
+    await pumpHome(tester, mockHome(now: homeMorning), size: narrowViewport);
 
     await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));

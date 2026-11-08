@@ -7,6 +7,7 @@ import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/app/shell/tab_shell.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
+import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/links/external_link.dart';
@@ -34,6 +35,8 @@ import 'package:englizia/features/account/presentation/verify_email/cubit/verify
 import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
+import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
+import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
@@ -149,17 +152,35 @@ GoRouter createAppRouter(AppSessionController session) {
     context.go(location, extra: extra);
   }
 
+  // Tells home when a page covers it and closes again (a return).
+  final pages = RouteObserver<PageRoute<dynamic>>();
+
+  // The dev page's last restart of home: a later way there without one
+  // keeps the home it started.
+  HomeRestart? homeRestart;
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: session,
     debugLogDiagnostics: kDebugMode,
     redirect: redirect.call,
+    observers: [pages],
     routes: [
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, state) =>
-            FoundationPage(sendEmailLink: state.extra is SendEmailLinkRequest),
+        builder: (_, state) => _homeTab(
+          state,
+          pages,
+          restart: homeRestart = switch (state.extra) {
+            final HomeRestart restart => restart,
+            _ => homeRestart,
+          },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.foundation,
+        builder: (_, _) => const FoundationPage(),
       ),
       GoRoute(
         path: AppRoutes.welcome,
@@ -365,7 +386,7 @@ GoRouter createAppRouter(AppSessionController session) {
                   ..start(path: args.path, account: args.session),
             child: PreparingPage(
               name: args.name,
-              // ASSUMPTION(design): no lesson screen yet; home stands in.
+              // Home opens on the first lesson's bubble (D-045).
               onStartLesson: () => leave(context, AppRoutes.home),
               onStartTest: () => leave(
                 context,
@@ -385,7 +406,7 @@ GoRouter createAppRouter(AppSessionController session) {
             create: (_) => sl<KidWelcomeCubit>()..start(args.session),
             child: KidWelcomePage(
               childName: args.path.childName ?? '',
-              // ASSUMPTION(design): no lesson screen yet; home stands in.
+              // Home opens on the first lesson's bubble (D-045).
               onPlay: () => leave(context, AppRoutes.home),
             ),
           );
@@ -652,7 +673,7 @@ GoRouter createAppRouter(AppSessionController session) {
           ],
           child: KidLessonPage(
             onExit: () => _back(context),
-            // The kids' home and unit aren't built yet.
+            // Home, which shows what the lesson changed (D-087).
             onNext: () => context.go(AppRoutes.home),
           ),
         ),
@@ -845,7 +866,6 @@ GoRouter createAppRouter(AppSessionController session) {
           child: KidTabShell(
             current: KidTab.words,
             onSelect: (tab) => switch (tab) {
-              // The kids' home and «أنا» aren't built yet.
               KidTab.learn => context.go(AppRoutes.home),
               KidTab.words => null,
               KidTab.me => context.go(AppRoutes.me),
@@ -917,7 +937,6 @@ GoRouter createAppRouter(AppSessionController session) {
                     ? KidTabShell(
                         current: KidTab.me,
                         onSelect: (tab) => switch (tab) {
-                          // The kids' home isn't built yet.
                           KidTab.learn => context.go(AppRoutes.home),
                           KidTab.words => context.go(AppRoutes.kidsWords),
                           KidTab.me => null,
@@ -1125,7 +1144,79 @@ String _unitLessonPath(UnitLesson lesson, {required bool kids}) =>
       _ => AppRoutes.exercisesOf(lesson.id),
     };
 
-/// The tabs' bar: «تعلّم» is the temporary home for now.
+/// The «تعلّم» tab (S §6.1): home, under the tabs' bar or a child's one.
+/// Its cubit, the email's and «أنا»'s (for the tracks sheet, started only
+/// when it opens) live with the route; a dev page scenario ([restart])
+/// starts it afresh. [pages] tells it when a lesson or a unit over it closes.
+Widget _homeTab(
+  GoRouterState state,
+  RouteObserver<PageRoute<dynamic>> pages, {
+  required HomeRestart? restart,
+}) => KeyedSubtree(
+  key: ObjectKey(restart),
+  child: MultiBlocProvider(
+    providers: [
+      BlocProvider(create: (_) => sl<HomeCubit>()..start()),
+      BlocProvider(create: (_) => sl<VerifyEmailCubit>()..load()),
+      BlocProvider(create: (_) => sl<MeCubit>()),
+    ],
+    child: VerifyEmailHost(
+      sendLink: state.extra is SendEmailLinkRequest,
+      child: Builder(
+        builder: (context) {
+          // Its cubit's key: the page stays when the bar becomes a child's.
+          final page = HomePage(
+            key: GlobalObjectKey(context.read<HomeCubit>()),
+            pages: pages,
+            actions: HomeActions(
+              openLesson: (lesson, {required kids}) =>
+                  context.push<void>(_unitLessonPath(lesson, kids: kids)),
+              openUnit: (unitId) =>
+                  context.push<void>(AppRoutes.unitOf(unitId)),
+              openReview: () => context.push<void>(
+                context.read<HomeCubit>().state.kids
+                    ? AppRoutes.kidsReview
+                    : AppRoutes.practiceReview,
+              ),
+              openPlacement: () =>
+                  context.push<void>(AppRoutes.onboardingPlacement),
+              openMe: () => context.go(AppRoutes.me),
+              joinTrack: (track) => context.push<void>(
+                AppRoutes.meJoin,
+                extra: track.title.of(context.locale.languageCode),
+              ),
+              openDev: AppConfig.isMock
+                  ? () => context.push<void>(AppRoutes.foundation)
+                  : null,
+            ),
+          );
+          return BlocSelector<HomeCubit, HomeState, ({bool kids, int badge})>(
+            selector: (state) =>
+                (kids: HomePage.isKids(state), badge: state.badge),
+            builder: (context, tab) => tab.kids
+                ? KidTabShell(
+                    current: KidTab.learn,
+                    onSelect: (tab) => switch (tab) {
+                      KidTab.learn => null,
+                      KidTab.words => context.go(AppRoutes.kidsWords),
+                      KidTab.me => context.go(AppRoutes.me),
+                    },
+                    child: page,
+                  )
+                : TabShell(
+                    current: AppTab.learn,
+                    badges: {AppTab.practice: tab.badge},
+                    onSelect: (tab) => _openTab(context, tab),
+                    child: page,
+                  ),
+          );
+        },
+      ),
+    ),
+  ),
+);
+
+/// The tabs' bar.
 void _openTab(BuildContext context, AppTab tab) => switch (tab) {
   AppTab.learn => context.go(AppRoutes.home),
   AppTab.practice => context.go(AppRoutes.practice),

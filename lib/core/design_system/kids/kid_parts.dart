@@ -117,9 +117,12 @@ class KidRoundButton extends StatelessWidget {
         ? colors.info.fill
         : colors.surface;
     final ink = primary || info ? colors.surface : colors.primaryStrong;
+    // The tap is the node's own: excludeSemantics drops the detector's.
     return Semantics(
       button: true,
+      enabled: onPressed != null,
       label: label,
+      onTap: onPressed,
       excludeSemantics: true,
       child: PressScale(
         child: GestureDetector(
@@ -303,6 +306,7 @@ class KidGuideButton extends StatelessWidget {
     return Semantics(
       button: true,
       label: label ?? 'kid_say_again'.tr(),
+      onTap: onPressed,
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onPressed,
@@ -374,6 +378,7 @@ class _ExitSheet extends StatelessWidget {
       child: Semantics(
         button: true,
         label: leave ? 'kid_leave'.tr() : 'kid_stay'.tr(),
+        onTap: () => Navigator.of(context).pop(leave),
         excludeSemantics: true,
         child: PressScale(
           child: GestureDetector(

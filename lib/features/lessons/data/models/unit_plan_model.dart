@@ -17,7 +17,7 @@ final class UnitPlanModel {
     final id = json.readString('id');
     final lessons = [
       for (final item in json.readList('lessons') ?? const <Object?>[])
-        ?_lesson(item),
+        ?lessonOf(item),
     ];
     if (id == null || lessons.isEmpty) {
       throw const FormatException('Unit without an id or lessons');
@@ -49,7 +49,9 @@ final class UnitPlanModel {
     );
   }
 
-  static UnitLesson? _lesson(Object? item) {
+  /// One of `lessons[]`; null when it can't be read. Home reads the
+  /// current unit's lessons the same way.
+  static UnitLesson? lessonOf(Object? item) {
     if (item is! Map<String, Object?>) return null;
     final id = item.readString('id');
     final title = item.readString('title');

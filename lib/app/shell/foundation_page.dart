@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/core/config/app_config.dart';
@@ -8,27 +10,34 @@ import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
+import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/presentation/account/cubit/account_cubit.dart';
 import 'package:englizia/features/account/presentation/account/widgets/account_card.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/verify_email_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_banner.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_row.dart';
+import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
+import 'package:englizia/features/home/data/datasources/home_remote_data_source.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/me/domain/repositories/profile_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-/// Temporary home: lets you check theme, language and direction on a device,
-/// and holds the account card until «أنا» exists. Replaced by the "Learn"
-/// tab in v0.1.
-class FoundationPage extends StatelessWidget {
-  const FoundationPage({this.sendEmailLink = false, super.key});
+/// Route `extra` of home from the dev page: starts it afresh, so a scenario
+/// shows from its first load.
+final class HomeRestart {
+  HomeRestart();
+}
 
-  /// Opened by an expired link's «أرسل رابطًا جديدًا»: sends one at once.
-  final bool sendEmailLink;
+/// The dev page (`/dev`, reached from home's top bar by a long press in mock
+/// mode): theme, language and direction on a device, the email's row and the
+/// account card, and in mock mode the scenarios of home and the other mocks.
+class FoundationPage extends StatelessWidget {
+  const FoundationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,11 +50,11 @@ class FoundationPage extends StatelessWidget {
       body: BlocProvider(
         create: (_) => sl<VerifyEmailCubit>()..load(),
         child: VerifyEmailHost(
-          sendLink: sendEmailLink,
           child: ListView(
             padding: const EdgeInsetsDirectional.all(AppSpacing.screenGutter),
             children: [
-              // Here until home has its place for it, under its top bar.
+              // Home shows it after the first lesson; here, as soon as it
+              // applies.
               const VerifyEmailBanner(),
               Text('foundation_title'.tr(), style: texts.title),
               const SizedBox(height: AppSpacing.sm),
@@ -125,8 +134,80 @@ class FoundationPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xl),
-              // Until the unit screen opens lessons, a way to try the exercises.
               if (AppConfig.isMock) ...[
+                Text('foundation_home_title'.tr(), style: texts.bodyStrong),
+                const SizedBox(height: AppSpacing.sm),
+                for (final (scenario, label) in [
+                  (HomeMockScenario.general, 'foundation_home_general'.tr()),
+                  (HomeMockScenario.firstDay, 'foundation_home_first_day'.tr()),
+                  (HomeMockScenario.partial, 'foundation_home_partial'.tr()),
+                  (HomeMockScenario.goalReached, 'foundation_home_goal'.tr()),
+                  (HomeMockScenario.atRisk, 'foundation_home_risk'.tr()),
+                  (HomeMockScenario.welcomeBack, 'foundation_home_back'.tr()),
+                  (HomeMockScenario.freezeUsed, 'foundation_home_freeze'.tr()),
+                  (HomeMockScenario.streakBroken, 'foundation_home_broke'.tr()),
+                  (HomeMockScenario.levelCheck, 'foundation_home_check'.tr()),
+                  (
+                    HomeMockScenario.placementDeferred,
+                    'foundation_home_test'.tr(),
+                  ),
+                  (
+                    HomeMockScenario.lastLesson,
+                    'foundation_home_last_lesson'.tr(),
+                  ),
+                  (HomeMockScenario.lastUnit, 'foundation_home_last_unit'.tr()),
+                  (
+                    HomeMockScenario.levelComplete,
+                    'foundation_home_level_done'.tr(),
+                  ),
+                  (HomeMockScenario.newRow, 'foundation_home_new_row'.tr()),
+                  (
+                    HomeMockScenario.lessons4,
+                    'foundation_home_lessons'.tr(args: ['4']),
+                  ),
+                  (
+                    HomeMockScenario.lessons8,
+                    'foundation_home_lessons'.tr(args: ['8']),
+                  ),
+                  (
+                    HomeMockScenario.lessons10,
+                    'foundation_home_lessons'.tr(args: ['10']),
+                  ),
+                  (HomeMockScenario.offline, 'foundation_home_offline'.tr()),
+                  (
+                    HomeMockScenario.offlineEmpty,
+                    'foundation_home_offline_empty'.tr(),
+                  ),
+                  (
+                    HomeMockScenario.refreshFails,
+                    'foundation_home_refresh_fails'.tr(),
+                  ),
+                  (HomeMockScenario.slow, 'foundation_home_slow'.tr()),
+                  (HomeMockScenario.v01, 'foundation_home_v01'.tr()),
+                ]) ...[
+                  OutlinedButton(
+                    onPressed: () => unawaited(_tryHome(context, scenario)),
+                    child: Text(label),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                OutlinedButton(
+                  onPressed: () async {
+                    await sl<ProfileRepository>().switchTrack(_emar);
+                    await sl<SettingsStorageService>().removeHome();
+                    if (context.mounted) _home(context);
+                  },
+                  child: Text('foundation_home_emar'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                OutlinedButton(
+                  onPressed: () async {
+                    await sl<SettingsStorageService>().setHomeOpeningDay(null);
+                    if (context.mounted) _home(context);
+                  },
+                  child: Text('foundation_home_opening'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.lg),
                 OutlinedButton(
                   onPressed: () =>
                       context.push(AppRoutes.exercisesOf('les_mock')),
@@ -223,7 +304,6 @@ class FoundationPage extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.lg),
               ],
-              // Here until «أنا» has its account section.
               const VerifyEmailRow(),
               BlocProvider(
                 create: (_) => sl<AccountCubit>(),
@@ -236,6 +316,26 @@ class FoundationPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// The mock's enrollment of the Emar curriculum.
+  static const _emar = 'enr_emar';
+
+  static void _home(BuildContext context) =>
+      context.go(AppRoutes.home, extra: HomeRestart());
+
+  /// Home as [scenario]'s frame, from its first load, its one-time notices
+  /// unseen again; nothing kept shows first, but offline shows what was.
+  static Future<void> _tryHome(
+    BuildContext context,
+    HomeMockScenario scenario,
+  ) async {
+    final settings = sl<SettingsStorageService>();
+    sl<HomeMockControls>().scenario = scenario;
+    sl<LessonRepository>().forgetCompletions();
+    await settings.setHomeSeenEvents(const []);
+    if (scenario != HomeMockScenario.offline) await settings.removeHome();
+    if (context.mounted) _home(context);
   }
 }
 

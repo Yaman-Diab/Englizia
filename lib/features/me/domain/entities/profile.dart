@@ -174,7 +174,8 @@ final class StudyWeek extends Equatable {
   final int goalMinutes;
   final List<StudyDay> days;
 
-  /// The index of today in [days].
+  /// The index of today in [days]; their length when today isn't one of
+  /// them (a week rolled over on the phone past its last day).
   final int today;
 
   /// «4:00», when a new day begins.

@@ -2,6 +2,10 @@
 abstract final class AppRoutes {
   static const splash = '/splash';
   static const home = '/';
+
+  /// The dev page: theme, language, the mocks' scenarios (reached from home
+  /// in mock mode only).
+  static const foundation = '/dev';
   static const welcome = '/welcome';
   static const onboardingLanguage = '/onboarding/language';
   static const onboardingAudience = '/onboarding/audience';

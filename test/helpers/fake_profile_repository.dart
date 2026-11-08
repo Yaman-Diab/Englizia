@@ -59,8 +59,11 @@ class FakeProfileRepository implements ProfileRepository {
   @override
   Profile? get keptProfile => kept;
 
+  var fetches = 0;
+
   @override
   Future<Result<Profile>> getProfile() async {
+    fetches++;
     if (failure case final failure?) return Err(failure);
     return Ok(profile);
   }

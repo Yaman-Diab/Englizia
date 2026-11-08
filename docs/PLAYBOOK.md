@@ -197,6 +197,7 @@ untestable — `sl<>()` belongs only in `BlocProvider.create` and the compositio
 - File soft limit ~300 lines; `build()` ~60–80 lines; >150 lines is a review blocker → extract private widgets per visual section.
 - No banner separator comments (`// ------`). Let file names and class names speak.
 - Comments: current *why* in 1–3 lines, English. Bug stories → commits/PRs; decisions → ADRs.
+- A comment cites only what the repo or the design holds: a STATUS row (`D-045`), an ADR, a requirements section (`S §6.1`), the design's frame or board (`frame 13`, `M6`). Never a working plan's own ids, which no reader can follow.
 - Grep-able assumption tag: `// ASSUMPTION(api): <what> — confirm in docs/api/<area>.md`.
 
 ---

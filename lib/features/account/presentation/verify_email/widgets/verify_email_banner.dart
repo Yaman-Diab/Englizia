@@ -38,6 +38,13 @@ class _VerifyEmailBannerState extends State<VerifyEmailBanner> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Home mounts it only once the reminder applies.
+    _follow(context.read<VerifyEmailCubit>().state);
+  }
+
+  @override
   void dispose() {
     _appear?.cancel();
     super.dispose();
