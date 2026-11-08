@@ -110,6 +110,8 @@ final class UnitDoneMotion implements MotionTimeline {
     (at: UnitDoneBeats.lead, cue: MotionCue.unitDone),
     if (_bridge || moment.levelDone)
       (at: UnitDoneBeats.lead + UnitDoneBeats.bridge, cue: MotionCue.camera),
+    if (_bridge)
+      (at: UnitDoneBeats.lead + UnitDoneBeats.fog, cue: MotionCue.unlock),
     (at: UnitDoneBeats.finishAt, cue: MotionCue.finish),
     // The goal step waits for the new unit.
     if (_reach) (at: UnitDoneBeats.finishAt, cue: MotionCue.goal),

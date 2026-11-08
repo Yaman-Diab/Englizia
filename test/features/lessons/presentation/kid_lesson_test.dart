@@ -107,7 +107,7 @@ void main() {
 
       expect(subject.state.step, 1);
       expect(subject.state.progress, 1);
-      expect(sounds.played, contains(AppSound.achievement));
+      expect(sounds.played, contains(AppSound.kidsStar));
     });
 
     test(
@@ -201,6 +201,12 @@ void main() {
         KidLessonCubit.firstStar + KidLessonCubit.starGap * 5,
       );
       expect(subject.state.stars, KidLessonCubit.starCount);
+      // One celebration for the five stars, not five sounds piled up.
+      expect(
+        sounds.played.where((s) => s == AppSound.lessonComplete),
+        hasLength(1),
+      );
+      expect(sounds.played, isNot(contains(AppSound.achievement)));
 
       subject.again();
       expect(subject.state.stage, KidStage.playing);

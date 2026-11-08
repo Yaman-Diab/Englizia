@@ -1,6 +1,8 @@
 import 'package:dio/dio.dart';
+import 'package:englizia/core/audio/asset_sound_player.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/device_volume.dart';
+import 'package:englizia/core/audio/just_audio_backend.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/audio/sound_player.dart';
@@ -73,8 +75,13 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     ..registerLazySingleton<NotificationPermission>(
       () => const PlatformNotificationPermission(),
     )
-    // Silent until sounds are turned on (ADR 9).
-    ..registerLazySingleton<SoundPlayer>(() => const SilentSoundPlayer())
+    // The app's sounds (ADR 9), off with the «المؤثرات الصوتية» setting.
+    ..registerLazySingleton<SoundPlayer>(
+      () => AssetSoundPlayer(
+        JustAudioBackend(),
+        enabled: () => sl<SettingsStorageService>().soundEffects,
+      ),
+    )
     ..registerLazySingleton<ClipPlayer>(
       () => SilentClipPlayer(
         failsFirstLoad: AppConfig.isMock,
@@ -85,7 +92,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     )
     ..registerLazySingleton<SpeechListener>(DeviceSpeechListener.new)
     ..registerLazySingleton<MicPermission>(() => const PlatformMicPermission())
-    ..registerFactory(() => MicCubit(sl(), sl()))
+    ..registerFactory(() => MicCubit(sl(), sl(), sounds: sl()))
     ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
     ..registerLazySingleton<MailApp>(() => const PlatformMailApp())
     ..registerLazySingleton<ExternalLink>(() => const PlatformExternalLink())

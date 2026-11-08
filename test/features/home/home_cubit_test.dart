@@ -91,6 +91,8 @@ void main() {
         await subject.start();
         expect(subject.state.home, isNull);
         expect(subject.state.kids, isTrue);
+        // The kids' sounds follow, before any data.
+        expect(sounds.kidsMode, isTrue);
       },
     );
 

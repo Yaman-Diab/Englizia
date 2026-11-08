@@ -21,6 +21,7 @@ void registerPlacementDependencies(GetIt sl) {
     ..registerFactory(() => PlacementIntroCubit(sl(), sl(), sl(), sl()))
     ..registerFactory(() => PlacementTestCubit(sl(), sl()))
     ..registerFactoryParam<PlacementResultCubit, String, void>(
-      (attemptId, _) => PlacementResultCubit(sl(), attemptId: attemptId),
+      (attemptId, _) =>
+          PlacementResultCubit(sl(), attemptId: attemptId, sounds: sl()),
     );
 }

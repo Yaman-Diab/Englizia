@@ -20,7 +20,7 @@ void registerPracticeDependencies(GetIt sl) {
       () => PracticeRepositoryImpl(sl(), sl()),
     )
     ..registerFactory(() => PracticeCubit(sl()))
-    ..registerFactory(() => ReviewCubit(sl(), sl()))
+    ..registerFactory(() => ReviewCubit(sl(), sl(), sounds: sl()))
     ..registerFactory(() => MyWordsCubit(sl(), sl()))
     ..registerFactory(() => KidWordsCubit(sl(), sl()));
 }

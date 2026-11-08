@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/play_sound.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -78,6 +80,7 @@ class _MatchingBodyState extends State<MatchingBody> {
     final picked = _picked;
     if (picked == null || picked.side == side) {
       AppHaptics.selectionClick();
+      playSound(AppSound.tap);
       setState(() {
         _picked = picked != null && picked.same(side, pair)
             ? null
@@ -93,6 +96,7 @@ class _MatchingBodyState extends State<MatchingBody> {
 
   void _matched(PairsDraft draft, MatchPair pair) {
     AppHaptics.lightImpact();
+    playSound(AppSound.correct);
     final next = PairsDraft(
       total: draft.total,
       matched: {...draft.matched, pair.id},

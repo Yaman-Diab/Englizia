@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/concept.dart';
@@ -260,6 +261,27 @@ void main() {
       expect(subject.state.stage, ConceptStage.done);
       expect(subject.state.count(OutcomeKind.mastered), 1);
       expect(subject.mastered, {'c_doesnt'});
+    });
+
+    test('a station passed rings right, a wrong one wrong, a mastery '
+        'its achievement', () async {
+      final sounds = FakeSoundPlayer();
+      final subject = ConceptSessionCubit(concepts, player, sounds: sounds)
+        ..start();
+      addTearDown(subject.close);
+
+      await answer(subject, plays);
+      expect(sounds.played, [AppSound.correct]);
+      subject.nextConcept();
+      await answer(subject, doesnt);
+      expect(sounds.played, [
+        AppSound.correct,
+        AppSound.correct,
+        AppSound.achievement,
+      ]);
+      subject.nextConcept();
+      await answer(subject, rained);
+      expect(sounds.played.last, AppSound.incorrect);
     });
 
     test(

@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/play_sound.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -41,6 +43,7 @@ class _SaveStarState extends State<SaveStar> {
     if (!widget.saved) {
       setState(() => _saves++);
       AppHaptics.lightImpact();
+      playSound(AppSound.saveWord);
     }
     widget.onTap();
   }

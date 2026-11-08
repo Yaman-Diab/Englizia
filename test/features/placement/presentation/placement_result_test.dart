@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
@@ -28,6 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fake_placement_repository.dart';
+import '../../../helpers/fakes.dart';
 import '../../../helpers/pump_app.dart';
 
 class _DiskBundle extends CachingAssetBundle {
@@ -220,6 +222,24 @@ void main() {
       expect(cubit.state.view, PlacementResultView.ready);
       expect(cubit.state.retrying, isFalse);
     });
+
+    test(
+      'the result arrives with its achievement, offline with none',
+      () async {
+        final sounds = FakeSoundPlayer();
+        final cubit = PlacementResultCubit(
+          _with(const [Err(NetworkFailure()), Ok(testResult)]),
+          attemptId: 'att',
+          sounds: sounds,
+        );
+        addTearDown(cubit.close);
+
+        await cubit.load();
+        expect(sounds.played, isEmpty);
+        await cubit.load();
+        expect(sounds.played, [AppSound.achievement]);
+      },
+    );
 
     test('another failure leaves a retry', () async {
       final cubit = cubitWith(

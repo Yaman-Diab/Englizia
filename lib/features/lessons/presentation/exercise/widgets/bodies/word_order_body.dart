@@ -1,4 +1,6 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/play_sound.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
@@ -43,6 +45,7 @@ class _WordOrderBodyState extends State<WordOrderBody> {
 
   void _send(List<WordChip> placed, ChipMove move) {
     AppHaptics.selectionClick();
+    playSound(AppSound.tap);
     _stage.currentState!.move([
       move,
     ], () => widget.answer.onDraft(SequenceDraft(placed, needed: _needed)));

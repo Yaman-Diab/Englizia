@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,7 +44,12 @@ final class MicState extends Equatable {
 /// business with it (ADR 11). The level changes many times a second, so
 /// it goes on [levels], never through the state.
 class MicCubit extends Cubit<MicState> {
-  MicCubit(this._listener, this._permission) : super(const MicState());
+  MicCubit(
+    this._listener,
+    this._permission, {
+    SoundPlayer sounds = const SilentSoundPlayer(),
+  }) : _sounds = sounds,
+       super(const MicState());
 
   /// Stops by itself after this much silence, or this long (S §7.5).
   static const _silence = Duration(seconds: 2);
@@ -50,6 +57,7 @@ class MicCubit extends Cubit<MicState> {
 
   final SpeechListener _listener;
   final MicPermission _permission;
+  final SoundPlayer _sounds;
   final _levels = StreamController<double>.broadcast();
   Timer? _clock;
 
@@ -86,6 +94,18 @@ class MicCubit extends Cubit<MicState> {
       return;
     }
     emit(const MicState(phase: MicPhase.listening));
+    // Heard to its end before the engine records, so it isn't recorded;
+    // then nothing sounds until it stops.
+    await _sounds.play(AppSound.micOn);
+    if (isClosed) return;
+    if (state.phase != MicPhase.listening) {
+      // Stopped before it began: heard nothing, ready again.
+      if (state.phase == MicPhase.thinking) {
+        emit(const MicState(phase: MicPhase.notHeard));
+      }
+      return;
+    }
+    final release = _sounds.holdQuiet();
     _clock = Timer.periodic(const Duration(seconds: 1), (_) {
       if (!isClosed && state.phase == MicPhase.listening) {
         emit(MicState(phase: MicPhase.listening, seconds: state.seconds + 1));
@@ -96,6 +116,8 @@ class MicCubit extends Cubit<MicState> {
       limit: limit ?? _limit,
       onLevel: _levels.add,
     );
+    release();
+    unawaited(_sounds.play(AppSound.micOff));
     _clock?.cancel();
     if (isClosed || state.phase == MicPhase.idle) return;
     emit(

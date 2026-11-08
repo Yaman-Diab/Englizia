@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/play_sound.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/kids/kid_parts.dart';
@@ -208,13 +210,16 @@ class DayHeader extends StatelessWidget {
   }
 
   Widget _card(HomeSnapshot home, HomeCardNotice slot) => switch (slot) {
-    HomeCardNotice.freeze => NoticeCard.freeze(
-      event: notices.event!,
-      streak: home.streak!,
-      perWeek: home.freezesPerWeek,
-      showGuide: cardGuide,
-      guideKey: cardGuideKey,
-      onClose: onCloseEvent,
+    HomeCardNotice.freeze => SoundOnShow(
+      sound: AppSound.freeze,
+      child: NoticeCard.freeze(
+        event: notices.event!,
+        streak: home.streak!,
+        perWeek: home.freezesPerWeek,
+        showGuide: cardGuide,
+        guideKey: cardGuideKey,
+        onClose: onCloseEvent,
+      ),
     ),
     HomeCardNotice.broke => NoticeCard.broke(
       event: notices.event!,

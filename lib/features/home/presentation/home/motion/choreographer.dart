@@ -651,6 +651,14 @@ class HomeChoreographer extends ChangeNotifier {
               run: () => _camera(m.nextUnit),
               essential: null,
             ),
+            // Not when skipped: right after the unit's own, it would crowd it.
+            MotionCue.unlock => (
+              at: cue.at,
+              run: () {
+                if (!cubit.isClosed) cubit.cheer(HomeCheer.island);
+              },
+              essential: null,
+            ),
             MotionCue.finish => (
               at: cue.at,
               run: _finishScroll,

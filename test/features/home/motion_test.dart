@@ -425,6 +425,8 @@ void main() {
         (_ms(320), MotionCue.flyToStone),
         (_ms(680), MotionCue.unitDone),
         (_ms(1280), MotionCue.camera),
+        // The fog starts to clear: the island's own sound.
+        (_ms(1830), MotionCue.unlock),
         (_ms(2630), MotionCue.finish),
         (_ms(2630), MotionCue.goal),
       ]);
