@@ -72,7 +72,7 @@ Everything «أنا» shows, in one response. Needs a session. The phone keeps t
 | `stars` | Kids only: the stars earned in all |
 | `streak` | Days in a row the daily goal was reached; `freezes` of `maxFreezes` left, and the weekday (`1` Monday … `7` Sunday) the next one is added. Absent before v1.0 |
 | `points` | XP in all and this week. Absent before v1.0 |
-| `week.days[]` | The week's days in the order shown (the server's week start): `minutes`, or `frozen`, or neither for a day still to come. `today` is its index |
+| `week.days[]` | The week from Saturday to Friday that holds today (seven days, the first Saturday): `minutes`, or `frozen`, or neither for a day still to come. `today` is its index, Saturday being 0. Decided by the owner, 2026-11-08; the freezes are also added on Saturday morning (SV §17.7) |
 | `week.goalMinutes`, `dayStart` | The daily goal and when a day starts (`HH:mm`), both from the effective settings |
 | `placement` | The last placement test: the level, when, when it can be taken again, and the whole wait (`waitDays`) for the ring |
 | `wordBank` | The bank's words and those due today, for its row |
@@ -121,7 +121,7 @@ The appearance, sound effects, vibration and video quality stay on the phone. Th
 
 1. Is one profile endpoint acceptable, or should «أنا» read the account, the tracks and the stats separately?
 2. Confirm the streak's freezes: how many, how often one is added, and that one is used automatically.
-3. Confirm the week's start and that `days` come in the order to show.
+3. Confirm that the week starts on Saturday (the owner's decision, 2026-11-08) and that `days` are that week, seven days in the order to show.
 4. Confirm switching the active track and changing the grade, and that progress is kept per enrollment and per level.
 5. Confirm the preferences, the password change and the deletion above, and the error codes for a wrong password.
 6. Joining another track from «أنا» (`«انضم»`) needs its own flow per entry method: an endpoint to enrol, and whether the placement test or the grade step runs inside the app.
