@@ -10,6 +10,7 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/count_up.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
+import 'package:englizia/core/design_system/motion/when_seen.dart';
 import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/streak_flame.dart';
@@ -67,9 +68,16 @@ class MeNumber extends StatelessWidget {
       fontFeatures: const [FontFeature.tabularFigures()],
     );
     if (!count) return Text(_format.format(value), style: style);
-    return CountUp(
-      value: value,
-      builder: (context, shown) => Text(_format.format(shown), style: style),
+    // Zero until it is in sight, then it counts, as the design has it: a
+    // number that counted while off-screen is a number nobody saw move.
+    return WhenSeen(
+      builder: (context, seen) => seen
+          ? CountUp(
+              value: value,
+              builder: (context, shown) =>
+                  Text(_format.format(shown), style: style),
+            )
+          : Text(_format.format(0), style: style),
     );
   }
 }
@@ -800,15 +808,20 @@ class _StreakCard extends StatelessWidget {
         ? AppIconView(AppIcon.flame, size: _flame - 12, color: colors.border)
         : const StreakFlame(size: _flame - 8);
     if (count && !broken && !reduce) {
-      flame = flame
-          .animate(delay: AppMotion.fast)
-          .scaleXY(end: 1.14, duration: AppMotion.meFlameBeat * .25)
-          .then()
-          .scaleXY(end: 1 / 1.14, duration: AppMotion.meFlameBeat * .25)
-          .then()
-          .scaleXY(end: 1.08, duration: AppMotion.meFlameBeat * .25)
-          .then()
-          .scaleXY(end: 1 / 1.08, duration: AppMotion.meFlameBeat * .25);
+      final still = flame;
+      flame = WhenSeen(
+        builder: (context, seen) => seen
+            ? still
+                  .animate(delay: AppMotion.fast)
+                  .scaleXY(end: 1.14, duration: AppMotion.meFlameBeat * .25)
+                  .then()
+                  .scaleXY(end: 1 / 1.14, duration: AppMotion.meFlameBeat * .25)
+                  .then()
+                  .scaleXY(end: 1.08, duration: AppMotion.meFlameBeat * .25)
+                  .then()
+                  .scaleXY(end: 1 / 1.08, duration: AppMotion.meFlameBeat * .25)
+            : still,
+      );
     }
     Widget capsule = Container(
       height: _capsule,
@@ -838,12 +851,17 @@ class _StreakCard extends StatelessWidget {
       ),
     );
     if (count && !reduce) {
-      capsule = capsule
-          .animate(delay: AppMotion.meShineDelay)
-          .shimmer(
-            duration: AppMotion.meShine,
-            color: colors.surface.withValues(alpha: .75),
-          );
+      final still = capsule;
+      capsule = WhenSeen(
+        builder: (context, seen) => seen
+            ? still
+                  .animate(delay: AppMotion.meShineDelay)
+                  .shimmer(
+                    duration: AppMotion.meShine,
+                    color: colors.surface.withValues(alpha: .75),
+                  )
+            : still,
+      );
     }
     final points = this.points;
     return Semantics(
@@ -1119,41 +1137,45 @@ class WeekCard extends StatelessWidget {
                 excludeSemantics: true,
                 child: SizedBox(
                   height: _chart,
-                  child: Stack(
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          for (final (index, day) in week.days.indexed) ...[
-                            if (index > 0) const SizedBox(width: AppSpacing.xs),
-                            Expanded(
-                              child: _DayColumn(
-                                day: day,
-                                today: index == week.today,
-                                goal: week.goalMinutes,
-                                height: math.min(
-                                  _top,
-                                  (day.minutes ?? 0) * perMinute,
+                  // The whole chart grows together, once it is in sight.
+                  child: WhenSeen(
+                    builder: (context, seen) => Stack(
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            for (final (index, day) in week.days.indexed) ...[
+                              if (index > 0)
+                                const SizedBox(width: AppSpacing.xs),
+                              Expanded(
+                                child: _DayColumn(
+                                  day: day,
+                                  today: index == week.today,
+                                  goal: week.goalMinutes,
+                                  height: math.min(
+                                    _top,
+                                    (day.minutes ?? 0) * perMinute,
+                                  ),
+                                  delay: AppMotion.stagger * index,
+                                  grow: grow && !reduce && seen,
+                                  label: _weekdayShort(day.date),
                                 ),
-                                delay: AppMotion.stagger * index,
-                                grow: grow && !reduce,
-                                label: _weekdayShort(day.date),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
-                      ),
-                      PositionedDirectional(
-                        start: 0,
-                        end: 0,
-                        bottom: 87,
-                        child: _GoalLine(
-                          label: 'me_goal_line'.tr(
-                            args: ['${week.goalMinutes}'],
+                        ),
+                        PositionedDirectional(
+                          start: 0,
+                          end: 0,
+                          bottom: 87,
+                          child: _GoalLine(
+                            label: 'me_goal_line'.tr(
+                              args: ['${week.goalMinutes}'],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -1695,24 +1717,38 @@ class TestsCard extends StatelessWidget {
                       children: [
                         SizedBox.square(
                           dimension: _ring,
-                          child: TweenAnimationBuilder<double>(
-                            tween: Tween(begin: draw ? 0 : share, end: share),
-                            duration: AppMotion.resolve(
-                              context,
-                              AppMotion.countUp,
-                            ),
-                            curve: AppMotion.smoothOut,
-                            builder: (context, value, child) => CustomPaint(
-                              painter: _WaitRing(
-                                share: value,
-                                track: colors.info.surface,
-                                fill: colors.info.fill,
-                              ),
-                              child: child,
-                            ),
-                            child: Center(
-                              child: Text('$left', style: texts.bodyStrong),
-                            ),
+                          // The key matters: a builder already in the tree
+                          // only animates when its end changes, so the ring
+                          // is built afresh the moment it is in sight.
+                          child: WhenSeen(
+                            builder: (context, seen) =>
+                                TweenAnimationBuilder<double>(
+                                  key: ValueKey(seen),
+                                  tween: Tween(
+                                    begin: draw && seen ? 0 : share,
+                                    end: share,
+                                  ),
+                                  duration: AppMotion.resolve(
+                                    context,
+                                    AppMotion.countUp,
+                                  ),
+                                  curve: AppMotion.smoothOut,
+                                  builder: (context, value, child) =>
+                                      CustomPaint(
+                                        painter: _WaitRing(
+                                          share: value,
+                                          track: colors.info.surface,
+                                          fill: colors.info.fill,
+                                        ),
+                                        child: child,
+                                      ),
+                                  child: Center(
+                                    child: Text(
+                                      '$left',
+                                      style: texts.bodyStrong,
+                                    ),
+                                  ),
+                                ),
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
