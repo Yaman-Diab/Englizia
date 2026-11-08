@@ -18,3 +18,22 @@ int hour12(int hour) => hour % 12 == 0 ? 12 : hour % 12;
 
 /// "ص" / "م" (AM / PM) for a 0–23 [hour].
 String clockPeriod(int hour) => hour < 12 ? 'time_am'.tr() : 'time_pm'.tr();
+
+/// "أكتوبر 2026", "October 2026", in Latin digits.
+String formatMonthYear(DateTime date, String languageCode) =>
+    latinDigits(DateFormat.yMMMM(languageCode).format(date));
+
+/// "25 سبتمبر 2026", "September 25, 2026", in Latin digits.
+String formatDay(DateTime date, String languageCode) =>
+    latinDigits(DateFormat.yMMMMd(languageCode).format(date));
+
+/// Arabic-Indic and Persian digits as Latin ones.
+String latinDigits(String text) => String.fromCharCodes([
+  for (final rune in text.runes)
+    if (rune >= 0x660 && rune <= 0x669)
+      0x30 + rune - 0x660
+    else if (rune >= 0x6F0 && rune <= 0x6F9)
+      0x30 + rune - 0x6F0
+    else
+      rune,
+]);

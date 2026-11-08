@@ -21,6 +21,12 @@ abstract final class ApiEndpoints {
 
   // Confirmed in docs/api/openapi.json.
   static const me = '/api/v1/app/me';
+
+  // ASSUMPTION(api): proposed, docs/api/me.md.
+  static const profile = '/api/v1/app/me/profile';
+
+  // ASSUMPTION(api): proposed, docs/api/me.md.
+  static const activeEnrollment = '/api/v1/app/me/active-enrollment';
   // ASSUMPTION(api): docs/api/auth.md.
   static const emailResend = '/api/v1/auth/email/resend';
   // ASSUMPTION(api): docs/api/auth.md.

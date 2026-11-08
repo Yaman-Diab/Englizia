@@ -1,0 +1,32 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "name": "ليان",
+    "email": "user@example.com",
+    "emailVerified": true,
+    "learningSince": "2026-10-01",
+    "whatsapp": "+000000000000",
+    "tracks": [
+      {
+        "enrollmentId": "enr_kids",
+        "trackId": "trk_kids",
+        "title": "الأطفال",
+        "audience": "child",
+        "levelId": "lvl_kids_s2",
+        "levelLabel": "Starter 2",
+        "levelName": "",
+        "unit": 2,
+        "units": 6,
+        "unitCover": "assets/mock/lessons/kids/red.svg",
+        "active": true
+      }
+    ],
+    "lessonsDone": 9,
+    "learningDays": 11,
+    "wordsSaved": 24,
+    "stars": 86
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}

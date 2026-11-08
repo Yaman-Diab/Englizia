@@ -14,7 +14,8 @@
       "displayGroup": {
         "ar": "الحلقة الأولى",
         "en": "Primary, cycle 1"
-      }
+      },
+      "kidsMode": true
     },
     {
       "id": "lvl_emar_02",
@@ -28,7 +29,8 @@
       "displayGroup": {
         "ar": "الحلقة الأولى",
         "en": "Primary, cycle 1"
-      }
+      },
+      "kidsMode": true
     },
     {
       "id": "lvl_emar_03",
@@ -42,7 +44,8 @@
       "displayGroup": {
         "ar": "الحلقة الأولى",
         "en": "Primary, cycle 1"
-      }
+      },
+      "kidsMode": true
     },
     {
       "id": "lvl_emar_04",
@@ -56,7 +59,8 @@
       "displayGroup": {
         "ar": "الحلقة الأولى",
         "en": "Primary, cycle 1"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_05",
@@ -70,7 +74,8 @@
       "displayGroup": {
         "ar": "الحلقة الأولى",
         "en": "Primary, cycle 1"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_06",
@@ -84,7 +89,8 @@
       "displayGroup": {
         "ar": "الحلقة الأولى",
         "en": "Primary, cycle 1"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_07",
@@ -98,7 +104,8 @@
       "displayGroup": {
         "ar": "الحلقة الثانية",
         "en": "Primary, cycle 2"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_08",
@@ -112,7 +119,8 @@
       "displayGroup": {
         "ar": "الحلقة الثانية",
         "en": "Primary, cycle 2"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_09",
@@ -126,7 +134,8 @@
       "displayGroup": {
         "ar": "الحلقة الثانية",
         "en": "Primary, cycle 2"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_10",
@@ -140,7 +149,8 @@
       "displayGroup": {
         "ar": "الثانوية",
         "en": "Secondary"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_11",
@@ -154,7 +164,8 @@
       "displayGroup": {
         "ar": "الثانوية",
         "en": "Secondary"
-      }
+      },
+      "kidsMode": false
     },
     {
       "id": "lvl_emar_12",
@@ -168,7 +179,8 @@
       "displayGroup": {
         "ar": "الثانوية",
         "en": "Secondary"
-      }
+      },
+      "kidsMode": false
     }
   ],
   "error": null,

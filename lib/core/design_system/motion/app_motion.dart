@@ -165,6 +165,20 @@ abstract final class AppMotion {
   static const kidCurrentPulse = Duration(milliseconds: 1600);
   static const skeletonPulse = Duration(milliseconds: 1400);
 
+  /// «أنا» (Me v2 design): the band's waves drift once on the day's first
+  /// view, the flame beats and the freeze capsule shines; the week's bars
+  /// grow one after another; the current island's ring pulses; a new track
+  /// is told for a while; a copy says so for a while.
+  static const meWaves = Duration(milliseconds: 3200);
+  static const meWavesCurve = Cubic(.3, .6, .4, 1);
+  static const meFlameBeat = Duration(milliseconds: 900);
+  static const meShine = Duration(milliseconds: 700);
+  static const meShineDelay = Duration(milliseconds: 750);
+  static const meBarGrow = slow;
+  static const meIslandPulse = Duration(milliseconds: 1800);
+  static const meSwitchHold = Duration(milliseconds: 2600);
+  static const meCopiedHold = Duration(seconds: 2);
+
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);
 

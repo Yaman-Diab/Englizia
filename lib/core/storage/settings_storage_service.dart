@@ -30,6 +30,8 @@ final class SettingsStorageService {
   static const _talkKey = 'account.talk';
   static const _unitsKey = 'account.units';
   static const _unitsSeenKey = 'account.units_seen';
+  static const _profileKey = 'account.profile';
+  static const _meSeenKey = 'account.me_seen_day';
 
   final SharedPreferences _prefs;
 
@@ -194,6 +196,20 @@ final class SettingsStorageService {
     await _prefs.setStringList(_unitsSeenKey, ids);
   }
 
+  /// The learner's profile («أنا») as JSON, to show at once and offline.
+  String? get profile => _prefs.getString(_profileKey);
+
+  Future<void> setProfile(String json) async {
+    await _prefs.setString(_profileKey, json);
+  }
+
+  /// The last day «أنا» was seen, as `yyyy-mm-dd`.
+  String? get meSeenDay => _prefs.getString(_meSeenKey);
+
+  Future<void> setMeSeenDay(String day) async {
+    await _prefs.setString(_meSeenKey, day);
+  }
+
   /// Forgets what belongs to the account in use, when another may follow.
   /// Never fails its caller: starting or ending a session must go on.
   Future<void> clearAccountData() async {
@@ -212,6 +228,8 @@ final class SettingsStorageService {
       await _prefs.remove(_talkKey);
       await _prefs.remove(_unitsKey);
       await _prefs.remove(_unitsSeenKey);
+      await _prefs.remove(_profileKey);
+      await _prefs.remove(_meSeenKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

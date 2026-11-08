@@ -7,6 +7,7 @@ import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/links/external_link.dart';
 import 'package:englizia/core/mail/mail_app.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/app_headers_interceptor.dart';
@@ -85,6 +86,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     ..registerFactory(() => MicCubit(sl(), sl()))
     ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
     ..registerLazySingleton<MailApp>(() => const PlatformMailApp())
+    ..registerLazySingleton<ExternalLink>(() => const PlatformExternalLink())
     ..registerFactory(() => SettingsCubit(sl()));
 }
 

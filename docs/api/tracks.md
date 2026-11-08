@@ -89,8 +89,9 @@ Published levels of one track, in display order, with their effective settings. 
 | `schoolGrade` | int 1–12 · `null` | School grade for curriculum tracks | yes (big number on the grade cell; falls back to `order`) |
 | `cefr` | `"preA1"` … `"c1"` · `null` | CEFR link, required when the entry method is the placement test | later (placement) |
 | `displayGroup` | `{ar, en}` · `null` | Group heading on the grade screen ("الحلقة الأولى"); levels without one go under no heading | yes |
+| `kidsMode` | bool | The level opens in kids mode (a panel setting per level); «تغيير الصف» marks it «وضع الأطفال». Default `false` | yes ([me.md](me.md)) |
 
-Not in this list on purpose: kids mode and feature overrides per level, and the three "you will be able to…" sentences; they arrive with the level detail when a screen needs them.
+Not in this list on purpose: feature overrides per level, and the three "you will be able to…" sentences; they arrive with the level detail when a screen needs them.
 
 ## `GET /api/v1/app/levels/{levelId}/units`
 

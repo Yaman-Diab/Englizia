@@ -23,6 +23,18 @@ import UIKit
       UIApplication.shared.open(mail) { opened in result(opened) }
     }
     FlutterMethodChannel(
+      name: "englizia/links",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    ).setMethodCallHandler { call, result in
+      guard call.method == "open", let text = call.arguments as? String,
+        let link = URL(string: text)
+      else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      UIApplication.shared.open(link) { opened in result(opened) }
+    }
+    FlutterMethodChannel(
       name: "englizia/screen_awake",
       binaryMessenger: engineBridge.applicationRegistrar.messenger()
     ).setMethodCallHandler { call, result in
