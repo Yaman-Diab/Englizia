@@ -75,14 +75,20 @@ abstract final class HomeRules {
   /// at [dayStart] («04:00») still counts as yesterday before it. Read on
   /// the wall clock, so a clock change that day doesn't move its start.
   static String dayKey(DateTime now, String dayStart) {
-    final parts = dayStart.split(':');
-    final hours = int.tryParse(parts.first.trim()) ?? 0;
-    final minutes = parts.length > 1 ? int.tryParse(parts[1].trim()) ?? 0 : 0;
-    final before = now.hour * 60 + now.minute < hours * 60 + minutes;
+    final before = _beforeDayStart(now, dayStart);
     // UTC only counts calendar days: local midnight may not exist.
     return _dateKey(
       DateTime.utc(now.year, now.month, now.day - (before ? 1 : 0)),
     );
+  }
+
+  /// [now] on the wall clock is before [dayStart] («04:00»): still the
+  /// learner's day before.
+  static bool _beforeDayStart(DateTime now, String dayStart) {
+    final parts = dayStart.split(':');
+    final hours = int.tryParse(parts.first.trim()) ?? 0;
+    final minutes = parts.length > 1 ? int.tryParse(parts[1].trim()) ?? 0 : 0;
+    return now.hour * 60 + now.minute < hours * 60 + minutes;
   }
 
   static String _dateKey(DateTime day) {
@@ -158,13 +164,19 @@ abstract final class HomeRules {
     return (kind: kind, minutesLeft: minutesLeft);
   }
 
-  /// The streak can still be kept today, and the evening has come.
-  static bool atRisk(HomeSnapshot home, DateTime now) =>
-      !home.kids &&
-      !home.v01 &&
-      now.hour >= riskFromHour &&
-      (home.streak?.current ?? 0) > 0 &&
-      home.todayMinutes < home.goalMinutes;
+  /// The streak can still be kept today, and the evening has come: from
+  /// [riskFromHour] until the next day starts.
+  static bool atRisk(HomeSnapshot home, DateTime now) {
+    final start = home.week?.dayStart ?? '';
+    final evening =
+        now.hour >= riskFromHour ||
+        _beforeDayStart(now, start.isEmpty ? defaultDayStart : start);
+    return !home.kids &&
+        !home.v01 &&
+        evening &&
+        (home.streak?.current ?? 0) > 0 &&
+        home.todayMinutes < home.goalMinutes;
+  }
 
   /// How much of an island's colour shows: done 1, locked 0, open .15, the
   /// current one by its share of lessons done.
@@ -184,20 +196,20 @@ abstract final class HomeRules {
     }
   }
 
-  /// Units done: those before the current one, and the current one once its
-  /// every lesson is; every done unit when none is current.
+  /// Units done: every done one (on an unordered track some after the
+  /// current one too), and the current one once its every lesson is.
   static int unitsDone(HomeSnapshot home) {
     final current = home.currentUnitIndex;
-    final count = home.units.length;
-    if (current < 0) {
-      return home.units
-          .where((unit) => unit.status == UnitLessonStatus.done)
-          .length;
+    var done = 0;
+    for (final (index, unit) in home.units.indexed) {
+      if (index == current) {
+        final lessons = unit.lessons;
+        if (lessons.isNotEmpty && lessons.every((l) => l.done)) done++;
+      } else if (unit.status == UnitLessonStatus.done) {
+        done++;
+      }
     }
-    final lessons = home.units[current].lessons;
-    final finished = lessons.isNotEmpty && lessons.every((l) => l.done);
-    final done = current + (finished ? 1 : 0);
-    return done > count ? count : done;
+    return done;
   }
 
   /// Back after a while with something due: the review is the path's first

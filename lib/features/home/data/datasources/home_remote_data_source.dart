@@ -24,12 +24,20 @@ final class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
       HomeModel(asJsonMap(await _client.get(ApiEndpoints.home)));
 }
 
+/// The mock server, with what the dev page and the cubit's clock reach.
+abstract interface class HomeMockControls implements HomeRemoteDataSource {
+  HomeMockScenario get scenario;
+  set scenario(HomeMockScenario value);
+
+  DateTime now();
+}
+
 /// Mock mode (`env/mock.json`): the bundled home of the active enrollment,
 /// its week moved to this one, played as the design's [scenario]. It acts as
 /// the server would: a lesson completed on the phone becomes done, its
 /// minutes count today, the streak grows when the goal is reached, and a unit
 /// finished opens the next. Deleted once the endpoint is confirmed.
-final class HomeFakeDataSource implements HomeRemoteDataSource {
+final class HomeFakeDataSource implements HomeMockControls {
   HomeFakeDataSource(
     this._bundle, {
     required Future<String?> Function() activeEnrollmentId,
@@ -63,9 +71,11 @@ final class HomeFakeDataSource implements HomeRemoteDataSource {
   var _calls = 0;
   var _scenario = HomeMockScenario.general;
 
+  @override
   HomeMockScenario get scenario => _scenario;
 
   /// Starts [value] afresh, for every track.
+  @override
   set scenario(HomeMockScenario value) {
     _scenario = value;
     _homes.clear();
@@ -74,6 +84,7 @@ final class HomeFakeDataSource implements HomeRemoteDataSource {
   }
 
   /// The scenario's clock: the evening for [HomeMockScenario.atRisk].
+  @override
   DateTime now() {
     final now = _now();
     return _scenario == HomeMockScenario.atRisk

@@ -13,7 +13,7 @@ void registerHomeDependencies(GetIt sl) {
   if (AppConfig.isMock) {
     // The mock follows the active track wherever it is switched, and counts
     // the lessons completed on this phone as the server would.
-    sl.registerLazySingleton(
+    sl.registerLazySingleton<HomeMockControls>(
       () => HomeFakeDataSource(
         rootBundle,
         kids: AppConfig.isKidsMock,
@@ -30,7 +30,7 @@ void registerHomeDependencies(GetIt sl) {
     ..registerLazySingleton<HomeRepository>(
       () => HomeRepositoryImpl(
         AppConfig.isMock
-            ? sl<HomeFakeDataSource>()
+            ? sl<HomeMockControls>()
             : HomeRemoteDataSourceImpl(sl()),
         settings: sl(),
       ),
@@ -43,7 +43,7 @@ void registerHomeDependencies(GetIt sl) {
         sl(),
         sl(),
         player: sl(),
-        now: AppConfig.isMock ? () => sl<HomeFakeDataSource>().now() : null,
+        now: AppConfig.isMock ? () => sl<HomeMockControls>().now() : null,
       ),
     );
 }

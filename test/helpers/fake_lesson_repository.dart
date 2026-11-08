@@ -241,4 +241,7 @@ class FakeLessonRepository implements LessonRepository {
   @override
   LessonOnPhone onPhone(String lessonId) =>
       phone[lessonId] ?? const LessonOnPhone();
+
+  @override
+  void forgetCompletions() => phone.clear();
 }

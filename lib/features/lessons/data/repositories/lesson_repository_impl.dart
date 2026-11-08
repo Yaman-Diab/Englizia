@@ -426,6 +426,9 @@ final class LessonRepositoryImpl implements LessonRepository {
   }
 
   @override
+  void forgetCompletions() => _completedHere.clear();
+
+  @override
   Future<void> clearProgress(String lessonId) async {
     final store = _store();
     store.lessons.remove(lessonId);

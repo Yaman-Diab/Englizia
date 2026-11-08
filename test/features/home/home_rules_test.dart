@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
 import 'package:englizia/features/home/data/datasources/home_remote_data_source.dart';
+import 'package:englizia/features/home/data/models/home_model.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/domain/services/home_rules.dart';
@@ -229,6 +230,12 @@ void main() {
       expect(HomeRules.atRisk(mockHome(kids: true), _evening), isFalse);
       expect(HomeRules.atRisk(_home(HomeMockScenario.v01), _evening), isFalse);
     });
+
+    test('the risk lasts until the learner\'s day starts', () {
+      final risk = _home(HomeMockScenario.atRisk);
+      expect(HomeRules.atRisk(risk, DateTime(2026, 11, 6, 1, 30)), isTrue);
+      expect(HomeRules.atRisk(risk, DateTime(2026, 11, 6, 4)), isFalse);
+    });
   });
 
   group('the islands', () {
@@ -255,6 +262,13 @@ void main() {
         HomeMockScenario.lastLesson,
       ).withPhone((_) => const LessonOnPhone(done: true));
       expect(allDone.unitsDone, 3, reason: 'the current one, all done');
+      final emar = mockHomeJson(emar: true, now: _morning);
+      ((emar['units']! as List)[4] as Map<String, Object?>)['status'] = 'done';
+      expect(
+        HomeModel(emar).toEntity().unitsDone,
+        3,
+        reason: 'an unordered track counts a unit done after the current one',
+      );
     });
 
     test('the review: a box in the sea, or the first station', () {
@@ -354,6 +368,73 @@ void main() {
       );
     });
 
+    test('the track\'s last level done: no card, the email shows', () {
+      final last = _home(HomeMockScenario.levelComplete);
+      final home = last.copyWith(
+        level: HomeLevel(
+          id: last.level.id,
+          label: last.level.label,
+          name: last.level.name,
+          cefr: last.level.cefr,
+          completed: true,
+        ),
+      );
+      expect(notices(home).card, HomeCardNotice.none);
+      expect(notices(home, email: true).top, HomeTopNotice.email);
+    });
+
+    test('a one-time notice beats the level done', () {
+      final home = _home(HomeMockScenario.levelComplete).copyWith(
+        events: [
+          HomeEvent(
+            id: 'ev',
+            kind: HomeEventKind.freezeUsed,
+            on: _morning,
+            streak: 7,
+            freezesLeft: 1,
+          ),
+        ],
+      );
+      expect(notices(home, email: true), (
+        top: HomeTopNotice.none,
+        card: HomeCardNotice.freeze,
+        event: home.events.single,
+      ));
+    });
+
+    test('the level check beats the deferred test', () {
+      final home = _home().copyWith(
+        cards: const HomeCards(
+          levelCheckLessonId: 'les_mock',
+          placementMinutes: (min: 12, max: 15),
+        ),
+      );
+      expect(notices(home).card, HomeCardNotice.levelCheck);
+    });
+
+    test('a seen notice gives way to the next not seen', () {
+      final home = _home().copyWith(
+        events: [
+          HomeEvent(
+            id: 'a',
+            kind: HomeEventKind.streakBroken,
+            on: _morning,
+            streak: 3,
+          ),
+          HomeEvent(
+            id: 'b',
+            kind: HomeEventKind.freezeUsed,
+            on: _morning,
+            streak: 7,
+            freezesLeft: 0,
+          ),
+        ],
+      );
+      final next = notices(home, seen: {'a'});
+      expect(next.event?.id, 'b');
+      expect(next.card, HomeCardNotice.freeze);
+    });
+
     test('kids never get one-time notices', () {
       final kids = mockHome(kids: true);
       final withEvent = kids.copyWith(
@@ -401,6 +482,44 @@ void main() {
       expect(HomeRules.findPage(emar, 5), isNull);
       expect(HomeRules.findPage(emar, 78), isNull);
     });
+
+    test('in the current unit, before any lesson\'s page: the unit', () {
+      final emar = mockHome(emar: true);
+      final unit = emar.units[2];
+      // The current unit (pages 30-41) with the lessons [paged] keeps.
+      HomeSnapshot withPages(bool Function(int lesson) paged) => emar.copyWith(
+        units: [
+          for (final (i, u) in emar.units.indexed)
+            i != 2
+                ? u
+                : u.copyWith(
+                    lessons: [
+                      for (final (k, lesson) in unit.lessons.indexed)
+                        paged(k)
+                            ? lesson
+                            : HomeLesson(
+                                base: UnitLesson(
+                                  id: lesson.id,
+                                  kind: lesson.kind,
+                                  title: lesson.title,
+                                  done: lesson.done,
+                                ),
+                              ),
+                    ],
+                  ),
+        ],
+      );
+      expect(
+        HomeRules.findPage(withPages((k) => k > 0), 31),
+        const PageHit.unit(2),
+        reason: 'the first lesson with a page starts at 32',
+      );
+      expect(
+        HomeRules.findPage(withPages((_) => false), 39),
+        const PageHit.unit(2),
+        reason: 'lessons without pages',
+      );
+    });
   });
 
   group('what a return celebrates', () {
@@ -432,7 +551,35 @@ void main() {
       expect(moment, isA<UnitDoneMoment>());
       moment as UnitDoneMoment;
       expect((moment.unit, moment.nextUnit, moment.levelDone), (2, 3, false));
+      expect(
+        (
+          moment.minutesFrom,
+          moment.minutesTo,
+          moment.goal,
+          moment.streakFrom,
+          moment.streakTo,
+        ),
+        (7, 17, 10, 7, 8),
+      );
+      expect(moment.goalReached, isTrue);
       expect(after.currentUnit?.lessons.first.id, 'les_market_words');
+    });
+
+    test('a lesson done out of order: a swap', () async {
+      final (before, after) = await _played(HomeMockScenario.general, {
+        'les_chat_box',
+      });
+      expect(HomeRules.diff(before, after), isNull);
+    });
+
+    test('the same track on another level: a swap', () async {
+      final (before, after) = await _played(HomeMockScenario.general, {
+        'les_it',
+      });
+      final moved = after.copyWith(
+        level: const HomeLevel(id: 'lvl_gen_b1', label: 'B1'),
+      );
+      expect(HomeRules.diff(before, moved), isNull);
     });
 
     test('the level\'s last unit done completes the level', () async {

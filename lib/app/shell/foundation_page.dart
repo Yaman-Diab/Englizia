@@ -194,6 +194,7 @@ class FoundationPage extends StatelessWidget {
                 OutlinedButton(
                   onPressed: () async {
                     await sl<ProfileRepository>().switchTrack(_emar);
+                    await sl<SettingsStorageService>().removeHome();
                     if (context.mounted) _home(context);
                   },
                   child: Text('foundation_home_emar'.tr()),
@@ -324,18 +325,16 @@ class FoundationPage extends StatelessWidget {
       context.go(AppRoutes.home, extra: HomeRestart());
 
   /// Home as [scenario]'s frame, from its first load, its one-time notices
-  /// unseen again; the skeleton and "no data" need nothing kept.
+  /// unseen again; nothing kept shows first, but offline shows what was.
   static Future<void> _tryHome(
     BuildContext context,
     HomeMockScenario scenario,
   ) async {
     final settings = sl<SettingsStorageService>();
-    sl<HomeFakeDataSource>().scenario = scenario;
+    sl<HomeMockControls>().scenario = scenario;
+    sl<LessonRepository>().forgetCompletions();
     await settings.setHomeSeenEvents(const []);
-    if (scenario == HomeMockScenario.offlineEmpty ||
-        scenario == HomeMockScenario.slow) {
-      await settings.removeHome();
-    }
+    if (scenario != HomeMockScenario.offline) await settings.removeHome();
     if (context.mounted) _home(context);
   }
 }

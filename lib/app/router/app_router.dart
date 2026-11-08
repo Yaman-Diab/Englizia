@@ -155,6 +155,10 @@ GoRouter createAppRouter(AppSessionController session) {
   // Tells home when a page covers it and closes again (a return).
   final pages = RouteObserver<PageRoute<dynamic>>();
 
+  // The dev page's last restart of home: a later way there without one
+  // keeps the home it started.
+  HomeRestart? homeRestart;
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
     refreshListenable: session,
@@ -165,7 +169,14 @@ GoRouter createAppRouter(AppSessionController session) {
       GoRoute(path: AppRoutes.splash, builder: (_, _) => const SplashPage()),
       GoRoute(
         path: AppRoutes.home,
-        builder: (_, state) => _homeTab(state, pages),
+        builder: (_, state) => _homeTab(
+          state,
+          pages,
+          restart: homeRestart = switch (state.extra) {
+            final HomeRestart restart => restart,
+            _ => homeRestart,
+          },
+        ),
       ),
       GoRoute(
         path: AppRoutes.foundation,
@@ -1135,13 +1146,14 @@ String _unitLessonPath(UnitLesson lesson, {required bool kids}) =>
 
 /// The «تعلّم» tab (S §6.1): home, under the tabs' bar or a child's one.
 /// Its cubit, the email's and «أنا»'s (for the tracks sheet, started only
-/// when it opens) live with the route; a dev page scenario starts it afresh.
-/// [pages] tells it when a lesson or a unit over it closes.
+/// when it opens) live with the route; a dev page scenario ([restart])
+/// starts it afresh. [pages] tells it when a lesson or a unit over it closes.
 Widget _homeTab(
   GoRouterState state,
-  RouteObserver<PageRoute<dynamic>> pages,
-) => KeyedSubtree(
-  key: ObjectKey(state.extra is HomeRestart ? state.extra : null),
+  RouteObserver<PageRoute<dynamic>> pages, {
+  required HomeRestart? restart,
+}) => KeyedSubtree(
+  key: ObjectKey(restart),
   child: MultiBlocProvider(
     providers: [
       BlocProvider(create: (_) => sl<HomeCubit>()..start()),
@@ -1152,7 +1164,9 @@ Widget _homeTab(
       sendLink: state.extra is SendEmailLinkRequest,
       child: Builder(
         builder: (context) {
+          // Its cubit's key: the page stays when the bar becomes a child's.
           final page = HomePage(
+            key: GlobalObjectKey(context.read<HomeCubit>()),
             pages: pages,
             actions: HomeActions(
               openLesson: (lesson, {required kids}) =>

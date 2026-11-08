@@ -67,6 +67,10 @@ class HomeCubit extends Cubit<HomeState> {
   /// Home's fetches so far, so a late answer knows a newer one started.
   var _fetches = 0;
 
+  /// The homes shown from a fetch so far, so a return knows a newer one
+  /// (another track) showed meanwhile.
+  var _shown = 0;
+
   /// How long a return waits for the server before celebrating what the
   /// phone knows.
   static const returnWait = Duration(seconds: 2);
@@ -145,7 +149,11 @@ class HomeCubit extends Cubit<HomeState> {
             state.copyWith(
               refreshing: false,
               refreshFailed: byUser ? true : null,
-              offlineFetch: !byUser && failure is NetworkFailure ? true : null,
+              offlineFetch: failure is! NetworkFailure
+                  ? false
+                  : byUser
+                  ? null
+                  : true,
             ),
           );
         }
@@ -176,6 +184,7 @@ class HomeCubit extends Cubit<HomeState> {
       return;
     }
     _returning++;
+    final shown = _shown;
     final fetch = _fetch();
     final number = _fetches;
     var late = false;
@@ -197,6 +206,7 @@ class HomeCubit extends Cubit<HomeState> {
       Err() => _held,
     };
     _held = null;
+    if (shown != _shown) return;
     final after = _merged(fetched ?? before);
     final moment = HomeRules.diff(before, after);
     final levelDone = moment is UnitDoneMoment && moment.levelDone;
@@ -211,12 +221,13 @@ class HomeCubit extends Cubit<HomeState> {
         offlineFetch: switch (result) {
           Ok() => false,
           Err(failure: NetworkFailure()) => true,
-          Err() => null,
+          Err() when late => null,
+          Err() => false,
         },
         refreshFailed: result is Ok ? false : null,
       ),
     );
-    if (fetched != null) _preload(after);
+    _preload(after);
     if (late) unawaited(_lateAnswer(fetch, number));
   }
 
@@ -283,6 +294,7 @@ class HomeCubit extends Cubit<HomeState> {
       emit(state.copyWith(switching: false));
       return failure;
     }
+    _keepProfile();
     final result = await _fetch();
     if (isClosed) return null;
     switch (result) {
@@ -312,10 +324,14 @@ class HomeCubit extends Cubit<HomeState> {
     final result = await _profiles.changeLevel(home.enrollment.id, next.id);
     if (isClosed) return null;
     if (result case Err(:final failure)) return failure;
+    _keepProfile();
     emit(state.copyWith(levelJustDone: false));
     await refresh();
     return null;
   }
+
+  /// The kept profile follows a switch made here, so «أنا» opens on it.
+  void _keepProfile() => unawaited(_profiles.getProfile());
 
   void cheer(HomeCheer cheer) => unawaited(
     _sounds.play(switch (cheer) {
@@ -340,6 +356,7 @@ class HomeCubit extends Cubit<HomeState> {
       HomeRules.asOf(home.withPhone(_lessons.onPhone), state.now);
 
   void _show(HomeSnapshot fresh) {
+    _shown++;
     final home = _merged(fresh);
     emit(
       state.copyWith(
@@ -363,18 +380,20 @@ class HomeCubit extends Cubit<HomeState> {
     unawaited(_lessons.getLesson(unit.lessons[index].id));
   }
 
-  /// A new learner's day rolls today over on the phone at once, then
-  /// asks the server.
+  /// A new learner's day rolls today over on the phone at once, opens
+  /// with the day's opening again, then asks the server.
   void _tick() {
     if (isClosed) return;
     final home = state.home;
     final before = _dayKey(state.now, home);
     final now = _now();
-    final newDay = _dayKey(now, home) != before;
+    final today = _dayKey(now, home);
+    final newDay = today != before;
     emit(
       state.copyWith(
         now: now,
         home: newDay && home != null ? HomeRules.asOf(home, now) : null,
+        openingDue: newDay ? !_home.openingShownOn(today) : null,
       ),
     );
     if (newDay) unawaited(refresh());

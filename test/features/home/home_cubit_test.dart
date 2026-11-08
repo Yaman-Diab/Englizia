@@ -167,6 +167,27 @@ void main() {
       await tomorrow.start();
       expect(tomorrow.state.openingDue, isTrue);
     });
+
+    testWidgets('a new day while open opens again', (tester) async {
+      now = DateTime(2026, 11, 6, 3, 58);
+      final subject = HomeCubit(
+        homes,
+        profiles,
+        lessons,
+        connectivity,
+        sounds,
+        now: () => now,
+      );
+      await subject.start();
+      subject.openingPlayed();
+      expect(subject.state.openingDue, isFalse);
+
+      now = DateTime(2026, 11, 6, 4, 1);
+      await tester.pump(HomeCubit.tick);
+      await tester.pump();
+      expect(subject.state.openingDue, isTrue);
+      await subject.close();
+    });
   });
 
   group('refreshing', () {
@@ -183,6 +204,19 @@ void main() {
       homes.failure = null;
       expect(await subject.refresh(), isTrue);
       expect(subject.state.offline, isFalse);
+    });
+
+    test('a server error after an offline fetch ends the strip', () async {
+      homes
+        ..kept = _home()
+        ..failure = const NetworkFailure();
+      final subject = cubit();
+      await subject.start();
+      expect(subject.state.offlineFetch, isTrue);
+
+      homes.failure = const ServerFailure(statusCode: 500);
+      await subject.refresh();
+      expect(subject.state.offlineFetch, isFalse);
     });
 
     test('a refresh asked for that fails says so, until dismissed', () async {
@@ -631,6 +665,31 @@ void main() {
       expect(subject.state.openingDue, isFalse);
     });
 
+    test('a return outrun by a track switch keeps the new track', () async {
+      final subject = cubit();
+      await subject.start();
+      final emar = profiles.profile.tracks.last;
+      final hold = Completer<void>();
+      homes.gate = hold.future;
+      subject.left();
+      final returning = subject.returned();
+      homes
+        ..gate = null
+        ..home = mockHome(emar: true, now: _morning);
+      final fetches = profiles.fetches;
+
+      expect(await subject.switchTrack(emar), isNull);
+      expect(subject.state.home?.enrollment.id, 'enr_emar');
+      homes.home = _afterLesson();
+      hold.complete();
+      await returning;
+      await pumpEventQueue();
+
+      expect(subject.state.home?.enrollment.id, 'enr_emar');
+      expect(subject.state.moment, isNull);
+      expect(profiles.fetches, fetches + 1, reason: 'the kept profile updates');
+    });
+
     test('a switch that fails changes nothing', () async {
       final subject = cubit();
       await subject.start();
@@ -649,6 +708,63 @@ void main() {
       expect(await subject.startNextLevel(), isNull);
       expect(profiles.levels, [('enr_general', 'lvl_gen_b1')]);
       expect(homes.fetches, 2);
+    });
+
+    test('the switch went through but home did not come', () async {
+      final subject = cubit();
+      await subject.start();
+      final title = subject.state.trackTitle;
+      final emar = profiles.profile.tracks.last;
+      homes.failure = const NetworkFailure();
+
+      expect(await subject.switchTrack(emar), const NetworkFailure());
+
+      expect(profiles.switches, [emar.enrollmentId]);
+      expect(subject.state.switching, isFalse);
+      expect(subject.state.switches, 0);
+      expect(subject.state.home?.enrollment.id, 'enr_general');
+      expect(subject.state.trackTitle, title);
+    });
+
+    test('a next level that fails changes nothing', () async {
+      homes.home = _home(HomeMockScenario.lastUnit);
+      final subject = cubit();
+      await subject.start();
+      homes.home = _home(HomeMockScenario.levelComplete);
+      await subject.returned();
+      expect(subject.state.levelJustDone, isTrue);
+      final fetches = homes.fetches;
+      profiles.writeFailure = const ServerFailure(statusCode: 500);
+
+      expect(
+        await subject.startNextLevel(),
+        const ServerFailure(statusCode: 500),
+      );
+
+      expect(profiles.levels, isEmpty);
+      expect(homes.fetches, fetches);
+      expect(subject.state.levelJustDone, isTrue);
+    });
+
+    test('the level card closes on the next level or another track', () async {
+      homes.home = _home(HomeMockScenario.lastUnit);
+      final subject = cubit();
+      await subject.start();
+      homes.home = _home(HomeMockScenario.levelComplete);
+      await subject.returned();
+      expect(subject.state.levelJustDone, isTrue);
+
+      expect(await subject.startNextLevel(), isNull);
+      expect(subject.state.levelJustDone, isFalse);
+
+      homes.home = _home(HomeMockScenario.lastUnit);
+      await subject.refresh();
+      homes.home = _home(HomeMockScenario.levelComplete);
+      await subject.returned();
+      expect(subject.state.levelJustDone, isTrue);
+      homes.home = mockHome(emar: true, now: _morning);
+      expect(await subject.switchTrack(profiles.profile.tracks.last), isNull);
+      expect(subject.state.levelJustDone, isFalse);
     });
   });
 
