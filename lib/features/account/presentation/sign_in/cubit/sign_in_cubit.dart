@@ -104,7 +104,7 @@ class SignInCubit extends Cubit<SignInState> {
 
   /// When the server asks to wait but does not say how long.
   // ASSUMPTION(api): `Retry-After` on 429 is requested (docs/api/README.md,
-  // request 8); the design's five minutes until then.
+  // request 7); the design's five minutes until then.
   static const defaultWait = Duration(minutes: 5);
 
   void emailChanged(String value) {

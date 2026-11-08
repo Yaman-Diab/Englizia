@@ -5,6 +5,8 @@ import 'package:englizia/core/network/api_endpoints.dart';
 import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/core/network/token_response.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:flutter/services.dart';
 
@@ -24,7 +26,14 @@ abstract interface class ProfileRemoteDataSource {
 
   Future<void> savePreferences(Map<String, Object?> request);
 
-  Future<void> changePassword(String current, String next);
+  /// The server ends the account's sessions and answers with one for this
+  /// phone (`TokenResponse`), or none.
+  Future<AuthTokens?> changePassword({
+    required String current,
+    required String next,
+    String? deviceId,
+    String? platform,
+  });
 
   Future<void> deleteAccount(String? password);
 }
@@ -73,10 +82,27 @@ final class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       _client.put(ApiEndpoints.preferences, data: request);
 
   @override
-  Future<void> changePassword(String current, String next) => _client.post(
-    ApiEndpoints.changePassword,
-    data: {'currentPassword': current, 'newPassword': next},
-  );
+  Future<AuthTokens?> changePassword({
+    required String current,
+    required String next,
+    String? deviceId,
+    String? platform,
+  }) async {
+    final body = await _client.post(
+      ApiEndpoints.changePassword,
+      data: {
+        'currentPassword': current,
+        'newPassword': next,
+        'deviceId': deviceId,
+        'platform': platform,
+      },
+    );
+    try {
+      return TokenResponse.parse(body, now: DateTime.now());
+    } on FormatException {
+      return null;
+    }
+  }
 
   // ASSUMPTION(api): `DELETE /api/v1/app/me`, docs/api/me.md.
   @override
@@ -221,9 +247,16 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
 
   /// The mock's password is `password`, so a wrong one can be seen.
   @override
-  Future<void> changePassword(String current, String next) async {
+  Future<AuthTokens?> changePassword({
+    required String current,
+    required String next,
+    String? deviceId,
+    String? platform,
+  }) async {
     await Future<void>.delayed(latency);
     if (current != mockPassword) throw _wrong('currentPassword');
+    // The mock's session carries on; the server's is replaced.
+    return null;
   }
 
   @override

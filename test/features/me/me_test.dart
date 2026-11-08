@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/me/data/datasources/profile_remote_data_source.dart';
@@ -18,6 +19,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/fake_profile_repository.dart';
 import '../../helpers/fake_track_repository.dart';
+import '../../helpers/fakes.dart';
 import '../../helpers/pump_app.dart';
 
 class _Remote implements ProfileRemoteDataSource {
@@ -50,7 +52,12 @@ class _Remote implements ProfileRemoteDataSource {
   Future<void> savePreferences(Map<String, Object?> request) async {}
 
   @override
-  Future<void> changePassword(String current, String next) async {}
+  Future<AuthTokens?> changePassword({
+    required String current,
+    required String next,
+    String? deviceId,
+    String? platform,
+  }) async => null;
 
   @override
   Future<void> deleteAccount(String? password) async {}
@@ -115,7 +122,11 @@ void main() {
         await SharedPreferences.getInstance(),
       );
       final remote = _Remote();
-      final repository = ProfileRepositoryImpl(remote, settings: settings);
+      final repository = ProfileRepositoryImpl(
+        remote,
+        settings: settings,
+        tokens: FakeTokenStorage(),
+      );
 
       expect(repository.keptProfile, isNull);
       expect(await repository.getProfile(), isA<Ok<Object?>>());

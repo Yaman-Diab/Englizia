@@ -1,5 +1,6 @@
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/device_platform.dart';
 import 'package:englizia/features/me/data/datasources/profile_remote_data_source.dart';
 import 'package:englizia/features/me/data/repositories/profile_repository_impl.dart';
 import 'package:englizia/features/me/domain/repositories/profile_repository.dart';
@@ -16,7 +17,12 @@ void registerMeDependencies(GetIt sl) {
           : ProfileRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<ProfileRepository>(
-      () => ProfileRepositoryImpl(sl(), settings: sl()),
+      () => ProfileRepositoryImpl(
+        sl(),
+        settings: sl(),
+        tokens: sl(),
+        devicePlatform: devicePlatform(),
+      ),
     )
     ..registerFactory(() => PreferencesCubit(sl(), sl(), sl(), sl()))
     ..registerFactory(

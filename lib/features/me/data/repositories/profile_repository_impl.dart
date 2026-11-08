@@ -5,6 +5,7 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
+import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/me/data/datasources/profile_remote_data_source.dart';
 import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
@@ -14,10 +15,17 @@ final class ProfileRepositoryImpl implements ProfileRepository {
   ProfileRepositoryImpl(
     this._remote, {
     required SettingsStorageService settings,
-  }) : _settings = settings;
+    required TokenStorage tokens,
+    this.devicePlatform,
+  }) : _settings = settings,
+       _tokens = tokens;
 
   final ProfileRemoteDataSource _remote;
   final SettingsStorageService _settings;
+  final TokenStorage _tokens;
+
+  /// The server's `DevicePlatform` for this phone, or null when it has none.
+  final String? devicePlatform;
 
   @override
   Profile? get keptProfile {
@@ -74,7 +82,21 @@ final class ProfileRepositoryImpl implements ProfileRepository {
   Future<Result<void>> changePassword({
     required String current,
     required String next,
-  }) => guard(() => _remote.changePassword(current, next));
+  }) => guard(() async {
+    final tokens = await _remote.changePassword(
+      current: current,
+      next: next,
+      deviceId: _settings.deviceId,
+      platform: devicePlatform,
+    );
+    // The server ends the account's sessions, this phone's own included, and
+    // answers with the one to carry on with.
+    if (tokens == null) return;
+    await _tokens.write(tokens);
+    if (tokens.deviceId case final id? when id != _settings.deviceId) {
+      await _settings.setDeviceId(id);
+    }
+  });
 
   @override
   Future<Result<void>> deleteAccount({String? password}) =>

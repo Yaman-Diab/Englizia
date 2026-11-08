@@ -10,4 +10,8 @@ abstract final class ApiErrorCodes {
   /// 401 from the refresh endpoint: the refresh token is invalid, expired
   /// or revoked; the session is over.
   static const refreshTokenInvalid = 'auth.refresh_token_invalid';
+
+  /// 400 from a link's token (recovery or the email's confirmation): expired,
+  /// used already or unknown, one answer for all three.
+  static const linkInvalid = 'auth.reset_token_invalid';
 }

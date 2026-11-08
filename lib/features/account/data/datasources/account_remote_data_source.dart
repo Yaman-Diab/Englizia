@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/json_reader.dart';
@@ -127,7 +128,7 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
 
   @override
   Future<void> changeEmail(String email) =>
-      _client.put(ApiEndpoints.emailChange, data: {'email': email});
+      _client.put(ApiEndpoints.emailChange, data: {'newEmail': email});
 
   @override
   Future<void> verifyEmail(String token) => _client.post(
@@ -141,6 +142,13 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
 AccountEmail _email(Map<String, Object?> user) => AccountEmail(
   email: user.readString('email'),
   verified: user.readBool('emailVerified') ?? false,
+);
+
+/// The dev server's answer to a link expired, used or unknown: 400 with
+/// `auth.reset_token_invalid` (`test/fixtures/api/auth_link_invalid.json`).
+const _linkInvalid = ApiException(
+  statusCode: ApiStatusCodes.badRequest,
+  code: ApiErrorCodes.linkInvalid,
 );
 
 /// Mock mode (`env/mock.json`): the contract's examples from bundled assets
@@ -225,7 +233,7 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   Future<void> verifyPasswordLink(String token) async {
     await Future<void>.delayed(latency);
     if (token == expiredResetToken) {
-      throw const ApiException(statusCode: ApiStatusCodes.gone);
+      throw _linkInvalid;
     }
   }
 
@@ -270,7 +278,7 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   Future<void> verifyEmail(String token) async {
     await Future<void>.delayed(latency);
     if (token == expiredResetToken) {
-      throw const ApiException(statusCode: ApiStatusCodes.gone);
+      throw _linkInvalid;
     }
     _verified = true;
   }

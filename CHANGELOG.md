@@ -71,6 +71,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - If the phone can't save your sign-in after creating an account, "preparing" says so and tries again, instead of signing you out the next time you open the app.
 - Signing in again on the same phone no longer counts as a new device: the app keeps the id the server gave it.
 - The app talks to the dev server (`api-dev.engleazia.com`): it reads the server's response and error format, and renews the sign-in shortly before it expires instead of waiting for a request to fail.
+- Password recovery, confirming the email, correcting it and changing the password work with the dev server: an expired link says so instead of showing a form error, and changing the password keeps you signed in on this phone. An iPhone tells the server it is one.
 - The guide moves with more life: each expression idles its own way, and changing expression overshoots slightly and swaps the face behind a blink.
 - The level step's guide gives a confident thumbs-up when you know some English.
 - The app is named Engleazia (Arabic name unchanged).
