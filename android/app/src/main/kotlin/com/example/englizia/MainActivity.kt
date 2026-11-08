@@ -39,13 +39,29 @@ class MainActivity : FlutterActivity() {
         false
     }
 
-    /** Lets the learner pick among the mail apps; false when there is none. */
+    /**
+     * Opens the mail app, or lets the learner pick when there are several;
+     * false when there is none. Each opens as the launcher opens it, in its own
+     * task: a mail app's Back from its inbox sends its task to the background,
+     * and inside ours it would take the app with it.
+     */
     private fun openMailApp(): Boolean {
         val mail = Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_APP_EMAIL)
+        val apps = packageManager.queryIntentActivities(mail, 0)
+            .map { it.activityInfo.packageName }
+            .distinct()
+            .mapNotNull { packageManager.getLaunchIntentForPackage(it) }
+            .onEach { it.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
         // A chooser with nothing to choose would show an empty sheet.
-        if (packageManager.queryIntentActivities(mail, 0).isEmpty()) return false
+        if (apps.isEmpty()) return false
+        val open = if (apps.size == 1) {
+            apps.first()
+        } else {
+            Intent.createChooser(apps.first(), null)
+                .putExtra(Intent.EXTRA_INITIAL_INTENTS, apps.drop(1).toTypedArray())
+        }
         return try {
-            startActivity(Intent.createChooser(mail, null))
+            startActivity(open)
             true
         } catch (_: ActivityNotFoundException) {
             false
