@@ -8,6 +8,9 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:flutter/services.dart';
 
+/// Days in a study week: Saturday to Friday.
+const _weekLength = 7;
+
 abstract interface class ProfileRemoteDataSource {
   Future<ProfileModel> getProfile();
 
@@ -107,7 +110,10 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
     return _profile = moveToToday(asJsonMap(ApiClient.unwrap(body)), _now());
   }
 
-  /// The week's days end around [now], and the next test is still days off.
+  /// The week runs from Saturday to Friday and holds [now]: its days are
+  /// this week's, and each keeps the minutes the bundled JSON has at the same
+  /// distance from its «today». Days the JSON doesn't have come with no
+  /// minutes. The next test is still days off.
   static Map<String, Object?> moveToToday(
     Map<String, Object?> json,
     DateTime now,
@@ -118,15 +124,21 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
     final week = json.readMap('week');
     final placement = json.readMap('placement');
     final days = week?.readList('days') ?? const <Object?>[];
-    final todayIndex = week?.readInt('today') ?? 0;
+    final oldToday = week?.readInt('today') ?? 0;
+    // Saturday is 0 and Friday 6: the week's first day is Saturday.
+    final todayIndex = (today.weekday + 1) % _weekLength;
     return {
       ...json,
       if (week != null)
         'week': {
           ...week,
+          'today': todayIndex,
           'days': [
-            for (final (index, item) in days.indexed)
-              {...asJsonMap(item), 'date': day(index - todayIndex)},
+            for (var index = 0; index < _weekLength; index++)
+              {
+                ...?_bundledDay(days, index - todayIndex + oldToday),
+                'date': day(index - todayIndex),
+              },
           ],
         },
       if (placement != null)
@@ -137,6 +149,10 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
         },
     };
   }
+
+  /// The bundled day at [index] of its week, or null past its ends.
+  static Map<String, Object?>? _bundledDay(List<Object?> days, int index) =>
+      index >= 0 && index < days.length ? asJsonMap(days[index]) : null;
 
   @override
   Future<ProfileModel> getProfile() async {
