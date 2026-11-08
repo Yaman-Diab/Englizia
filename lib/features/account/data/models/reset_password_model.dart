@@ -1,8 +1,8 @@
 import 'package:englizia/core/network/token_response.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 
-/// Setting a new password from a recovery link; contract in docs/api/auth.md.
-// ASSUMPTION(api): proposed, not confirmed (docs/api/auth.md).
+/// Setting a new password from a recovery link: `ResetPasswordRequest` in
+/// docs/api/openapi.json.
 abstract final class ResetPasswordModel {
   static Map<String, Object?> request({
     required String token,
@@ -11,7 +11,7 @@ abstract final class ResetPasswordModel {
     String? deviceId,
   }) => {
     'token': token,
-    'password': password,
+    'newPassword': password,
     'deviceId': deviceId,
     'platform': platform,
   };

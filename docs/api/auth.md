@@ -1,6 +1,6 @@
 # Accounts and sessions
 
-Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/account/`); nothing is confirmed by the backend team yet.
+Status: mixed. **Live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, password recovery, the password change and the email's confirmation; the app uses all but Google and Apple (STATUS D-001). **Proposed**, mock only (`assets/mock/account/`): the guest account and its upgrade. The real answers the app was checked against are in `test/fixtures/api/auth_*.json`.
 Decision: guest mode is back by the owner's decision (2026-10-27, ADR 10), as a **server-side guest account**. This reverses student doc §4.3 ("no guest mode") and server doc §26's table row ("no guest accounts"); both documents need updating, and the backend needs a guest account type.
 
 ## `POST /api/v1/auth/guest`
@@ -101,39 +101,43 @@ Status: **proposed**, mock (the mock answers like register). The app never upgra
 
 ## `POST /api/v1/auth/password/forgot`
 
-Step 1 of password recovery (S §5.2): `{ "email": "user@example.com" }`, sent without a token. The server mails a link to set a new password (valid one hour, once) **if** the email has an account, and answers the same way either way (`202`, empty `data`), so no screen can tell which emails are registered. It limits requests per email and per device; the app treats `429` as sent too. Other errors (connection, server) show a retry.
+Step 1 of password recovery (S §5.2): `ForgotPasswordRequest { "email": "user@example.com" }`, sent without a token. The server mails a link to set a new password (valid one hour, once) **if** the email has an account, and answers the same way either way (`202`, empty `data`), so no screen can tell which emails are registered. An address that isn't one is a `400 validation.failed` on `email`. It limits requests per email and per device; the app treats `429` as sent too. Other errors (connection, server) show a retry.
 
 "Check your email" sends the same request again after a growing wait the app keeps (1, 2, then 5 minutes, S §5.2), so the server's own limit should allow at least that. The link must open the app directly (App Links and Universal Links, not Firebase Dynamic Links, which are shut down).
 
-Status: **proposed**, mock (always sent).
+Status: **live**, used (the mock always sends).
 
 ## The link in the recovery email
 
 `https://engleazia.com/reset-password?token=<token>&email=<email>` opens the app's "set a new password" screen (S §5.2), which shows the email while the token is checked, and hands it to "forgot your password" when the link has expired. A link without a token counts as expired; without an email the screen only leaves that line out. Host and path are **proposed** (`android/app/src/main/AndroidManifest.xml`, STATUS D-024): the server needs `/.well-known/assetlinks.json` on that host for Android and an apple-app-site-association file for iOS. A browser that opens the link without the app needs a page of its own, the backend's to decide.
 
-## `POST /api/v1/auth/password/reset/verify`
+## `POST /api/v1/auth/password/reset/check`
 
-`{ "token": "..." }`, sent without a session token, when the screen opens and before the field shows. `200`, empty `data`, for a good link. `410` for one expired, used already or unknown: the same answer for all three.
+`CheckResetTokenRequest { "token": "..." }`, sent without a session token, when the screen opens and before the field shows. `200` with `ResetTokenInfo { email }` for a good link; the app shows the link's own email and doesn't read this one. A link expired, used already or unknown is one answer for all three: `400` with `auth.reset_token_invalid` (`test/fixtures/api/auth_link_invalid.json`), which the app reads as an expired link wherever it comes, not as a form error (`FailureMapper`).
 
-Status: **proposed**, mock (any token but `expired` is good).
+Status: **live**, used (the mock: any token but `expired` is good, and `expired` answers as the server does).
 
 ## `POST /api/v1/auth/password/reset`
 
-`{ "token", "password", "deviceId", "platform" }`, sent without a session token. The token works once. Success ends the account's other sessions and answers with a `TokenResponse`, the session that signs the learner in on this phone; a `200` with no tokens means the password changed but no session started, and the learner signs in by hand. `410` as above, `400` (`validation.failed`, naming `password`) for a password the server refuses.
+`ResetPasswordRequest { "token", "newPassword", "deviceId", "platform" }`, sent without a session token. The token works once. Success ends the account's other sessions and answers with a `TokenResponse`, the session that signs the learner in on this phone; a `200` with no tokens means the password changed but no session started, and the learner signs in by hand. `400 auth.reset_token_invalid` as above, `400 validation.failed` naming `newPassword` for a password the server refuses (`test/fixtures/api/auth_password_reset_validation_failed.json`).
 
-Status: **proposed**, mock (answers like register; the token `offline` fails with no connection, and `no-session` answers with no tokens).
+Status: **live**, used (the mock answers like register; the token `offline` fails with no connection, and `no-session` answers with no tokens).
 
 ## Confirming the email
 
-The first link goes out by itself when an account is made with an email (S §5.3). The app reads the state from `GET /api/v1/app/me` (live: `email`, `emailVerified`), when home opens and on coming back to the app, so confirming on another device is noticed. It shows nothing with no `email` or with `emailVerified: true`, so **accounts from Google and Apple must arrive with `emailVerified: true`**, as nothing else tells the app how an account was made.
+The first link goes out by itself when an account is made with an email (S §5.3). The app reads the state from `GET /api/v1/app/me` (live: `email`, `emailVerified`), when home opens and on coming back to the app, so confirming on another device is noticed. It shows nothing with no `email` or with `emailVerified: true`, so **accounts from Google and Apple must arrive with `emailVerified: true`**. `UserDto.authMethods` now says how an account signs in; the app doesn't read it yet.
 
-The link is `https://engleazia.com/verify-email?token=<token>`, valid and opening the app like the recovery link (STATUS D-024). All three below are **proposed**, mock:
+The link is `https://engleazia.com/verify-email?token=<token>`, valid and opening the app like the recovery link (STATUS D-024). All three below are **live**, used:
 
-- `POST /api/v1/auth/email/verify`: `{ "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `410` for a link expired, used or unknown.
-- `POST /api/v1/auth/email/resend`: with the session, no body. Sends the link again. The app waits 1, 2, then 5 minutes between tries, so the server's limit should allow that; `429` counts as sent.
-- `PUT /api/v1/auth/email`: `{ "email": "..." }`, with the session. Corrects the address and sends a link there. `409` when it has an account, `400` (`validation.failed`) when refused.
+- `POST /api/v1/auth/email/verify`: `VerifyEmailRequest { "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `400 auth.reset_token_invalid` for a link expired, used or unknown: the recovery's code, read the same way (`test/fixtures/api/auth_email_verify_link_invalid.json`).
+- `POST /api/v1/auth/email/resend`: with the session, no body. Sends the link again (`202`). The app waits 1, 2, then 5 minutes between tries, so the server's limit should allow that; `429` counts as sent. `409` is likely an email confirmed already, which the next read of `/app/me` shows.
+- `PUT /api/v1/auth/email`: `ChangeEmailRequest { "newEmail": "..." }`, with the session. Corrects the address and sends a link there (`202`). `409` when it has an account, `400` (`validation.failed`) when refused.
 
 Questions for the backend team: whether correcting the email will ask for the password again after some time (it would need a step the design doesn't draw, STATUS D-052), and whether the 3 days a hidden reminder stays hidden should be a setting of the panel.
+
+## `POST /api/v1/auth/google` and `POST /api/v1/auth/apple`
+
+Live, not used yet: the app's side needs the final application ID, which Google's and Apple's sign-in are bound to (STATUS D-001). Google takes `GoogleSignInRequest { idToken, deviceId, platform }`; Apple takes `AppleSignInRequest { identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform }`, with `POST /api/v1/auth/apple/callback` for the web flow Android needs. Both answer with a `TokenResponse` whose `isNewUser` says the sign-in made the account, when the onboarding answers belong with it. A refused Google token is `401 auth.google_token_invalid`.
 
 ## `POST /api/v1/auth/logout`
 

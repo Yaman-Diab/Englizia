@@ -143,7 +143,7 @@ void main() {
       await repository().changeEmail(' new@example.com ');
       expect(adapter.requests.last.method, 'PUT');
       expect(adapter.requests.last.path, '/api/v1/auth/email');
-      expect(adapter.requests.last.data, {'email': 'new@example.com'});
+      expect(adapter.requests.last.data, {'newEmail': 'new@example.com'});
     });
 
     test('an email with an account is a conflict', () async {

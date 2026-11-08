@@ -21,8 +21,8 @@ final class NewAccount extends Equatable {
 
 /// The rules the form checks before sending; the server checks them again.
 abstract final class AccountRules {
-  /// S §4.3. ASSUMPTION(api): the server's own minimum is not in
-  /// docs/api/openapi.json yet (docs/api/README.md, request 7).
+  /// S §4.3, and the server's own minimum: register refuses fewer with
+  /// `minimum_length` (`test/fixtures/api/auth_register_validation_failed.json`).
   static const passwordMinLength = 8;
 
   /// ASSUMPTION(api): no limit in docs/api/openapi.json; long enough for a

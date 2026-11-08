@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/network_exception.dart';
@@ -35,6 +36,10 @@ abstract final class FailureMapper {
   static Failure fromApiException(ApiException e) {
     final code = e.code;
     final message = e.detail ?? e.title;
+    // A link's token is refused with a 400, which would read as a form error.
+    if (code == ApiErrorCodes.linkInvalid) {
+      return LinkExpiredFailure(code: code, serverMessage: message);
+    }
     return switch (e.statusCode) {
       ApiStatusCodes.badRequest ||
       ApiStatusCodes.unprocessableEntity => ValidationFailure(

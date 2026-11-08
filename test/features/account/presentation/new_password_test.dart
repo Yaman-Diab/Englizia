@@ -85,7 +85,7 @@ void main() {
 
       expect(result, isA<Ok<void>>());
       final request = adapter.requests.single;
-      expect(request.path, '/api/v1/auth/password/reset/verify');
+      expect(request.path, '/api/v1/auth/password/reset/check');
       expect(request.data, {'token': 't-1'});
     });
 
@@ -110,7 +110,7 @@ void main() {
       expect(request.path, '/api/v1/auth/password/reset');
       expect(request.data, {
         'token': 't-1',
-        'password': goodPassword,
+        'newPassword': goodPassword,
         'deviceId': 'device-1',
         'platform': 'android',
       });

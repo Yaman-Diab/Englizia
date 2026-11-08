@@ -1,5 +1,6 @@
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/device_platform.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
@@ -13,7 +14,6 @@ import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cub
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/verify_email_cubit.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
 
@@ -59,14 +59,7 @@ void registerAccountDependencies(GetIt sl) {
         installationId: sl<SettingsStorageService>().installationId,
         savedDeviceId: () => sl<SettingsStorageService>().deviceId,
         saveDeviceId: sl<SettingsStorageService>().setDeviceId,
-        devicePlatform: _devicePlatform(),
+        devicePlatform: devicePlatform(),
       ),
     );
 }
-
-// ASSUMPTION(api): `DevicePlatform` has no `ios` yet (docs/api/README.md,
-// request 1), so an iPhone sends null, which the contract allows.
-String? _devicePlatform() => switch (defaultTargetPlatform) {
-  TargetPlatform.android => 'android',
-  _ => null,
-};

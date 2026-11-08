@@ -12,11 +12,11 @@ abstract final class ApiEndpoints {
   static const guestAccount = '/api/v1/auth/guest';
   // ASSUMPTION(api): docs/api/auth.md.
   static const upgradeGuest = '/api/v1/auth/guest/upgrade';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
   static const forgotPassword = '/api/v1/auth/password/forgot';
-  // ASSUMPTION(api): docs/api/auth.md.
-  static const verifyPasswordLink = '/api/v1/auth/password/reset/verify';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
+  static const verifyPasswordLink = '/api/v1/auth/password/reset/check';
+  // Confirmed in docs/api/openapi.json.
   static const resetPassword = '/api/v1/auth/password/reset';
 
   // Confirmed in docs/api/openapi.json.
@@ -34,13 +34,13 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): proposed, docs/api/me.md.
   static const preferences = '/api/v1/app/me/preferences';
 
-  // ASSUMPTION(api): proposed, docs/api/me.md.
+  // Confirmed in docs/api/openapi.json.
   static const changePassword = '/api/v1/auth/password/change';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
   static const emailResend = '/api/v1/auth/email/resend';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
   static const emailChange = '/api/v1/auth/email';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
   static const emailVerify = '/api/v1/auth/email/verify';
 
   // ASSUMPTION(api): docs/api/tracks.md.
