@@ -152,7 +152,7 @@ class StoneCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Row(
               children: [
-                StoneIcon(
+                AppIconView(
                   AppIcon.lock,
                   color: colors.textPrimary,
                   size: 14,

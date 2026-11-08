@@ -3,10 +3,10 @@ import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/home/presentation/home/widgets/map/island_banner.dart';
 import 'package:englizia/features/home/presentation/home/widgets/sheets/home_sheet.dart';
 import 'package:englizia/features/lessons/presentation/complete/widgets/kind_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// What the locked unit's preview was left with.
 enum LockedSheetAction {
@@ -244,37 +244,6 @@ class _Medal extends StatelessWidget {
   static const _saturation = .3;
 
   @override
-  Widget build(BuildContext context) {
-    final url = this.url;
-    return ExcludeSemantics(
-      child: ClipOval(
-        child: SizedBox.square(
-          dimension: _size,
-          child: ColoredBox(
-            color: context.colors.primary.surface,
-            child: url == null || url.isEmpty
-                ? null
-                : ColorFiltered(
-                    colorFilter: _saturate(_saturation),
-                    child: url.startsWith('http')
-                        ? Image.network(
-                            url,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                          )
-                        : SvgPicture.asset(url, fit: BoxFit.cover),
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// CSS `saturate(s)`: 0 grey, 1 as drawn.
-  static ColorFilter _saturate(double s) => ColorFilter.matrix([
-    .213 + .787 * s, .715 - .715 * s, .072 - .072 * s, 0, 0, //
-    .213 - .213 * s, .715 + .285 * s, .072 - .072 * s, 0, 0, //
-    .213 - .213 * s, .715 - .715 * s, .072 + .928 * s, 0, 0, //
-    0, 0, 0, 1, 0,
-  ]);
+  Widget build(BuildContext context) =>
+      UnitMedal(url: url, size: _size, saturation: _saturation);
 }

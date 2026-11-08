@@ -54,7 +54,7 @@ class HomeNoData extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // ASSUMPTION(design): the design drops the guide's ground
-                  // shadow too, which `Mascot` always draws for now.
+                  // shadow too, which `Mascot` always draws (D-102).
                   const ExcludeSemantics(
                     child: Mascot(
                       expression: MascotExpression.understand,

@@ -1,3 +1,4 @@
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
@@ -13,6 +14,7 @@ import 'package:englizia/features/home/presentation/home/widgets/map/lesson_bubb
 import 'package:englizia/features/home/presentation/home/widgets/map/review_box.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone_card.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -104,7 +106,7 @@ Widget _board(HomeSnapshot home, HomeSnapshot kids) {
                         state: _stateOf(unit, k),
                         emar: false,
                         offline: true,
-                        pulse: false,
+                        pulse: null,
                         hit: k == 0,
                         pop: 1,
                         onPressed: none,
@@ -127,7 +129,7 @@ Widget _board(HomeSnapshot home, HomeSnapshot kids) {
                   state: _stateOf(kidUnit, k),
                   onPressed: none,
                 ),
-              Stone.station(review: review, pulse: false, onPressed: none),
+              Stone.station(review: review, pulse: null, onPressed: none),
             ],
           ),
           const SizedBox(height: 16),
@@ -289,6 +291,22 @@ void main() {
       );
     });
 
+    testWidgets('Emar\'s page stays on the unit line at large text', (
+      tester,
+    ) async {
+      tester.platformDispatcher.textScaleFactorTestValue = 1.3;
+      addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
+      await tester.pumpLocalized(
+        _bubble(mockHome(emar: true), width: 250),
+        size: narrowViewport,
+      );
+      final line = tester.renderObject<RenderParagraph>(
+        find.text('الوحدة 3، يوم في المزرعة · ص 36'),
+      );
+      expect(line.didExceedMaxLines, isFalse, reason: 'the page not cut');
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('kids: the picture, the English name and ▶', (tester) async {
       final kids = mockHome(kids: true);
       final lesson = _current(kids);
@@ -442,7 +460,7 @@ void main() {
                     state: _stateOf(unit, k),
                     emar: false,
                     offline: false,
-                    pulse: false,
+                    pulse: null,
                     hit: false,
                     pop: 1,
                     onPressed: () => taps.add(k),
@@ -500,6 +518,83 @@ void main() {
       await _settle(tester);
     });
 
+    testWidgets('offline: a lesson not on the phone says it needs a '
+        'connection', (tester) async {
+      final unit = mockHome().currentUnit!;
+      final k = unit.lessons.indexWhere((lesson) => !lesson.kept);
+      expect(k, isNot(-1));
+      final lesson = unit.lessons[k];
+      await tester.pumpLocalized(
+        Center(
+          child: Stone.lesson(
+            lesson: lesson,
+            index: k,
+            state: StoneState.open,
+            emar: false,
+            offline: true,
+            pulse: null,
+            hit: false,
+            pop: 1,
+            onPressed: () {},
+          ),
+        ),
+      );
+
+      expect(find.bySemanticsLabel(RegExp('يحتاج اتصالًا\$')), findsOneWidget);
+      expect(find.bySemanticsLabel(RegExp('متاح\$')), findsNothing);
+    });
+
+    testWidgets('offline: the cloud badge on a lesson not kept, never on '
+        'the current one', (tester) async {
+      final unit = mockHome().currentUnit!;
+      final done = unit.lessons.first;
+      expect((done.done, done.kept), (true, false));
+      Future<int> clouds(
+        HomeLesson lesson, {
+        StoneState state = StoneState.done,
+        bool offline = true,
+      }) async {
+        await tester.pumpLocalized(
+          Center(
+            child: Stone.lesson(
+              lesson: lesson,
+              index: 0,
+              state: state,
+              emar: false,
+              offline: offline,
+              pulse: null,
+              hit: false,
+              pop: 1,
+              onPressed: () {},
+            ),
+          ),
+        );
+        return find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is AppIconView && widget.icon == AppIcon.cloudOff,
+            )
+            .evaluate()
+            .length;
+      }
+
+      expect(await clouds(done), 1);
+      expect(
+        await clouds(done.withPhone(const LessonOnPhone(kept: true))),
+        0,
+        reason: 'kept on the phone',
+      );
+      expect(
+        await clouds(
+          unit.lessons[unit.currentLesson],
+          state: StoneState.current,
+        ),
+        0,
+        reason: 'the current lesson',
+      );
+      expect(await clouds(done, offline: false), 0);
+    });
+
     testWidgets('Emar: its page, suggested, open', (tester) async {
       final unit = mockHome(emar: true).currentUnit!;
       final current = unit.currentLesson;
@@ -515,7 +610,7 @@ void main() {
                 state: StoneState.current,
                 emar: true,
                 offline: false,
-                pulse: true,
+                pulse: kAlwaysCompleteAnimation,
                 hit: false,
                 pop: 1,
                 onPressed: () {},
@@ -526,7 +621,7 @@ void main() {
                 state: StoneState.open,
                 emar: true,
                 offline: false,
-                pulse: false,
+                pulse: null,
                 hit: true,
                 pop: 1,
                 onPressed: () {},
@@ -569,7 +664,11 @@ void main() {
                   state: _stateOf(unit, k),
                   onPressed: () {},
                 ),
-              Stone.station(review: review, pulse: true, onPressed: () {}),
+              Stone.station(
+                review: review,
+                pulse: kAlwaysCompleteAnimation,
+                onPressed: () {},
+              ),
             ],
           ),
         ),
@@ -605,7 +704,7 @@ void main() {
               state: value,
               emar: false,
               offline: false,
-              pulse: false,
+              pulse: null,
               hit: false,
               pop: 1,
               onPressed: () {},

@@ -202,6 +202,14 @@ final class UnitDoneMotion implements MotionTimeline {
                 AppMotion.homeFogClear,
                 AppMotion.out,
               ),
+        lockOpen: next == null
+            ? 0
+            : phase(
+                ms,
+                lead + UnitDoneBeats.fog,
+                AppMotion.homeLockOpen,
+                AppMotion.easeIn,
+              ),
         guideExpression: MascotExpression.happy,
       );
     }

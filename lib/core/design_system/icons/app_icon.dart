@@ -265,6 +265,7 @@ class AppIconView extends StatelessWidget {
     this.icon, {
     required this.color,
     this.size = defaultSize,
+    this.stroke = defaultStroke,
     super.key,
   });
 
@@ -272,13 +273,24 @@ class AppIconView extends StatelessWidget {
   final Color color;
   final double size;
 
+  /// The line width in the icon's 24 box, where a design draws it other than
+  /// at 2.
+  final double stroke;
+
+  static const defaultStroke = 2.0;
+
   static const defaultSize = 24.0;
 
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
       child: SvgPicture.string(
-        icon.svg,
+        stroke == defaultStroke
+            ? icon.svg
+            : icon.svg.replaceFirst(
+                'stroke-width="2"',
+                'stroke-width="$stroke"',
+              ),
         width: size,
         height: size,
         colorFilter: ColorFilter.mode(color, BlendMode.srcIn),

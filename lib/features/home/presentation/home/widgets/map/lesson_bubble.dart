@@ -160,7 +160,12 @@ class LessonBubble extends StatelessWidget {
         ? 0.0
         : measure.width(question, styles.question) + AppSpacing.sm;
     final unitRow = math.max(
-      measure.height(content.unitLine, styles.unit, inner - questionWidth, 1),
+      measure.height(
+        content.unitLine,
+        styles.unit,
+        inner - questionWidth,
+        _Bubble.unitLines,
+      ),
       question == null
           ? 0.0
           : measure.height(question, styles.question, inner, 1),
@@ -421,7 +426,15 @@ final class _Styles {
     final colors = context.colors;
     final white = colors.onPrimaryStrong;
     final soft = white.withValues(alpha: .9);
-    final textWidth = width - 2 * _Bubble.padX - _Bubble.gap - _Bubble.disk;
+    final inner = width - 2 * _Bubble.padX;
+    final textWidth = inner - _Bubble.gap - _Bubble.disk;
+    final question = texts
+        .sized(texts.captionStrong, size: 12, line: 16, running: false)
+        .copyWith(color: white);
+    final asked = content.question;
+    final unitWidth = asked == null
+        ? inner
+        : inner - _Measure(context).width(asked, question) - AppSpacing.sm;
     TextStyle fitted(String text, double size, double line, double width) =>
         texts
             .sizedFor(
@@ -445,12 +458,8 @@ final class _Styles {
         20,
         textWidth - (content.ai ? _Bubble.spark + AppSpacing.xs : 0),
       ),
-      unit: texts
-          .sized(texts.caption, size: 12, line: 16, running: false)
-          .copyWith(color: soft),
-      question: texts
-          .sized(texts.captionStrong, size: 12, line: 16, running: false)
-          .copyWith(color: white),
+      unit: fitted(content.unitLine, 12, 16, unitWidth),
+      question: question,
       cta: texts
           .sized(texts.button, size: 16, line: 16, running: false)
           .copyWith(color: colors.primaryStrong),
@@ -557,6 +566,9 @@ class _Bubble extends StatelessWidget {
   static const labelLines = 2;
   static const titleLines = 2;
   static const metaLines = 2;
+
+  /// The unit's line wraps rather than lose Emar's page at large text.
+  static const unitLines = 2;
   static const radius = 24.0;
   static const tail = 18.0;
 
@@ -760,7 +772,7 @@ class _Bubble extends StatelessWidget {
                     child: Text(
                       content.unitLine,
                       style: styles.unit,
-                      maxLines: 1,
+                      maxLines: unitLines,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

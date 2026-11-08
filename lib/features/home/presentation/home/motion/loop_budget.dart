@@ -74,14 +74,12 @@ final class HomeLoops extends ChangeNotifier {
       _box = AnimationController(
         vsync: vsync,
         duration: AppMotion.homeBoxFloat,
-      ),
-      _flag = AnimationController(vsync: vsync, duration: AppMotion.homeFlag);
+      );
 
   final AnimationController _flame;
   final AnimationController _pulse;
   final AnimationController _breath;
   final AnimationController _box;
-  final AnimationController _flag;
   Set<HomeLoop> _on = const {};
 
   /// The flame's tilt, −1 to 1: times [AppMotion.homeFlameTilt] degrees about
@@ -111,12 +109,6 @@ final class HomeLoops extends ChangeNotifier {
     CurveTween(curve: AppMotion.inOut),
   );
 
-  /// A flag's wave, 0 to 1: skewed [AppMotion.homeFlagSkew] degrees at 1,
-  /// about its pole.
-  late final Animation<double> flag = _flag.drive(
-    CurveTween(curve: AppMotion.inOut),
-  );
-
   /// The loops that run now.
   Set<HomeLoop> get on => _on;
 
@@ -130,7 +122,6 @@ final class HomeLoops extends ChangeNotifier {
     _drive(_pulse, HomeLoop.stonePulse, reverse: true);
     _drive(_breath, HomeLoop.guideBreath, reverse: false);
     _drive(_box, HomeLoop.reviewBox, reverse: true);
-    _drive(_flag, HomeLoop.flags, reverse: true);
     notifyListeners();
   }
 
@@ -138,7 +129,7 @@ final class HomeLoops extends ChangeNotifier {
   void rest() {
     run(const {});
     _flame.value = .5;
-    for (final c in [_pulse, _breath, _box, _flag]) {
+    for (final c in [_pulse, _breath, _box]) {
       c.value = 0;
     }
   }
@@ -157,7 +148,7 @@ final class HomeLoops extends ChangeNotifier {
 
   @override
   void dispose() {
-    for (final c in [_flame, _pulse, _breath, _box, _flag]) {
+    for (final c in [_flame, _pulse, _breath, _box]) {
       c.dispose();
     }
     super.dispose();

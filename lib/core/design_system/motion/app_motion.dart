@@ -44,6 +44,9 @@ abstract final class AppMotion {
   /// Tooltips. Same as CSS `ease-out`.
   static const out = Curves.easeOut;
 
+  /// Things leaving: slow start, gone at full speed. Same as CSS `ease-in`.
+  static const easeIn = Curves.easeIn;
+
   /// Loops: shimmer, skeleton pulse, spinner.
   static const linear = Curves.linear;
 

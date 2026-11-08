@@ -400,6 +400,14 @@ void main() {
       expect(crossing.t, inExclusiveRange(.5, 1));
     });
 
+    test('beat 3: the lock opens eased in, before the fog has cleared', () {
+      expect(at(1100).map.lockOpen, 0);
+      final f = at(1500);
+      expect(f.map.lockOpen, inExclusiveRange(0, f.map.clouds));
+      expect(at(1600).map.lockOpen, 1);
+      expect(at(1600).map.clouds, lessThan(1));
+    });
+
     test('beat 4: unit 4 current, its island grows, the bubble pops', () {
       final f = at(2100);
       expect(f.map.snapshot, isNull);
@@ -422,6 +430,18 @@ void main() {
       ]);
       expect(motion.busyUntil, _ms(2630));
       expect(motion.length, _ms(2630 + 720));
+    });
+
+    test('short of the goal: no goal step, ended by the bubble', () {
+      final short = UnitDoneMotion(
+        moment: _unitDone(from: 2, to: 5),
+        collapsed: false,
+      );
+      expect(short.moment.goalReached, isFalse);
+      expect(short.cues.map((c) => c.cue), isNot(contains(MotionCue.goal)));
+      // The bubble's 200 wait and 300 pop outlast the island's 360 growth.
+      expect(short.length, _ms(2630 + 200 + 300));
+      expect(short.frameAt(_ms(2630 + 100)).header.ringSuccess, isNull);
     });
 
     test('M7 follows the level\'s last unit', () {
@@ -730,7 +750,10 @@ void main() {
       tester,
     ) async {
       listenToHaptics(tester);
-      final (subject, _) = await make(reduce: true);
+      final (subject, cubit) = await make(reduce: true);
+      homes.home = mockHomeAfterLesson(now: _morning);
+      await cubit.returned();
+      expect(cubit.state.moment, isA<LessonDoneMoment>());
       final island = layout();
       final playing = subject.playMoment(
         _lessonDone(),
@@ -745,11 +768,58 @@ void main() {
         'HapticFeedbackType.lightImpact',
         'HapticFeedbackType.mediumImpact',
       ]);
+      expect(sounds.played, [AppSound.goalReached]);
       await tester.pump();
       await tester.pump(AppMotion.quick);
       await playing;
       expect(subject.map, MapOverrides.none);
+      expect(cubit.state.moment, isNull);
     });
+
+    for (final (name, moment, mediums, played) in [
+      (
+        'M6 ends on the next unit',
+        _unitDone(),
+        3,
+        [AppSound.achievement, AppSound.goalReached],
+      ),
+      (
+        'M7 ends on the level done',
+        _unitDone(
+          before: _home(HomeMockScenario.lastUnit),
+          unit: 7,
+          nextUnit: null,
+          levelDone: true,
+        ),
+        5,
+        [AppSound.achievement, AppSound.goalReached, AppSound.achievement],
+      ),
+    ]) {
+      testWidgets('reduce motion: $name, the patterns and sounds stay', (
+        tester,
+      ) async {
+        listenToHaptics(tester);
+        final (subject, _) = await make(reduce: true);
+        final island = layout();
+        final playing = subject.playMoment(
+          moment,
+          layout: island,
+          map: mapOf(island),
+        );
+        expect(subject.busy, isFalse);
+        expect(subject.skippable, isFalse);
+        await tester.pump();
+        await tester.pump(AppMotion.quick + _ms(400));
+        await playing;
+        expect(
+          taps.where((t) => t == 'HapticFeedbackType.mediumImpact').length,
+          mediums,
+        );
+        expect(sounds.played, played);
+        expect(subject.map, MapOverrides.none);
+        expect(subject.forcedGuide, isNull);
+      });
+    }
 
     testWidgets('reduce motion: the opening is only marked as played', (
       tester,

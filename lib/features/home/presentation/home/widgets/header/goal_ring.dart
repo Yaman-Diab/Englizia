@@ -286,7 +286,7 @@ class _GuidePresence extends StatelessWidget {
   Widget build(BuildContext context) => AnimatedOpacity(
     opacity: here ? 1 : 0,
     duration: AppMotion.quick,
-    curve: Curves.ease,
+    curve: AppMotion.out,
     child: child,
   );
 }

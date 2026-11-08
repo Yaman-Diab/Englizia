@@ -31,6 +31,19 @@ class Shake extends StatefulWidget {
   /// The account designs' shake, dying out.
   static const defaultOffsets = [0.0, -7.0, 6.0, -4.0, 2.0, 0.0];
 
+  /// The offset [t] of the way through a shake of [offsets] in equal legs,
+  /// [curve] easing the whole: for a shake a motion drives itself.
+  static double offsetAt(
+    List<double> offsets,
+    double t, {
+    Curve curve = AppMotion.out,
+  }) {
+    if (offsets.length < 2) return offsets.firstOrNull ?? 0;
+    final position = curve.transform(t.clamp(0.0, 1.0)) * (offsets.length - 1);
+    final i = position.floor().clamp(0, offsets.length - 2);
+    return lerpDouble(offsets[i], offsets[i + 1], position - i)!;
+  }
+
   @override
   State<Shake> createState() => _ShakeState();
 }
@@ -58,21 +71,16 @@ class _ShakeState extends State<Shake> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  double _offsetAt(double t) {
-    final offsets = widget.offsets;
-    if (offsets.length < 2) return offsets.firstOrNull ?? 0;
-    final position = AppMotion.out.transform(t) * (offsets.length - 1);
-    final i = position.floor().clamp(0, offsets.length - 2);
-    return lerpDouble(offsets[i], offsets[i + 1], position - i)!;
-  }
-
   @override
   Widget build(BuildContext context) {
     final direction = Directionality.of(context) == TextDirection.rtl ? -1 : 1;
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) => Transform.translate(
-        offset: Offset(direction * _offsetAt(_controller.value), 0),
+        offset: Offset(
+          direction * Shake.offsetAt(widget.offsets, _controller.value),
+          0,
+        ),
         child: child,
       ),
       child: widget.child,

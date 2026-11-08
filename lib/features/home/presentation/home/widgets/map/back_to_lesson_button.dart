@@ -225,7 +225,7 @@ class _BackToLessonButtonState extends State<BackToLessonButton>
   ({double scale, double opacity}) _presenceFrame(double t) {
     if (_reduce) return (scale: 1, opacity: AppMotion.out.transform(t));
     if (_hiding) {
-      final e = Curves.easeIn.transform(1 - t);
+      final e = AppMotion.easeIn.transform(1 - t);
       return (scale: lerpDouble(1, _from, e)!, opacity: 1 - e);
     }
     if (t >= 1) return (scale: 1, opacity: 1);

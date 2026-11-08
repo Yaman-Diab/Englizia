@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' show lerpDouble;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_theme_context.dart';
@@ -7,15 +6,16 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
+import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/geometry/map_layout.dart';
 import 'package:englizia/features/home/presentation/home/paint/fog_layer.dart';
 import 'package:englizia/features/home/presentation/home/paint/island_art.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/home/presentation/home/widgets/map/island_banner.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// A done, open or locked island as one button (design "Home Archipelago"): its
 /// drawing, the unit's cover in the medallion, clouds and a lock while locked,
@@ -30,6 +30,7 @@ class CompactIsland extends StatelessWidget {
     required this.onPressed,
     this.shake = 0,
     this.clear = 0,
+    this.lockOpen = 0,
     this.flagWave = false,
     this.fogRunning = false,
     this.labels = true,
@@ -45,8 +46,11 @@ class CompactIsland extends StatelessWidget {
   /// M9's shake, 0 to 1 of [AppMotion.homeShake]; 0 at rest.
   final double shake;
 
-  /// M6: how far the clouds have parted and the lock has opened, 0 to 1.
+  /// M6: how far the clouds have parted, 0 to 1.
   final double clear;
+
+  /// M6: how far the lock has opened, 0 to 1, on its own beat.
+  final double lockOpen;
 
   /// The done flag's pennant waves; the clouds drift (the loop budget's).
   final bool flagWave;
@@ -91,13 +95,13 @@ class CompactIsland extends StatelessWidget {
 
   /// The design's shake: offsets in equal legs, in the right-to-left layout's
   /// physical space.
-  static double shakeOffset(double t) {
-    const offsets = AppMotion.homeIslandShakeOffsets;
-    if (t <= 0 || t >= 1) return 0;
-    final at = AppMotion.inOut.transform(t) * (offsets.length - 1);
-    final i = at.floor().clamp(0, offsets.length - 2);
-    return lerpDouble(offsets[i], offsets[i + 1], at - i)!;
-  }
+  static double shakeOffset(double t) => t <= 0 || t >= 1
+      ? 0
+      : Shake.offsetAt(
+          AppMotion.homeIslandShakeOffsets,
+          t,
+          curve: AppMotion.inOut,
+        );
 
   /// [shakeOffset] as drawn, the right-to-left layout's offset mirrored.
   static Offset shakeOf(BuildContext context, double shake) {
@@ -138,7 +142,7 @@ class CompactIsland extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final lockOpacity = _open ? 0.0 : 1 - clear;
+    final lockOpacity = _open ? 0.0 : 1 - lockOpen;
     return Transform.translate(
       offset: shakeOf(context, shake),
       child: Semantics(
@@ -167,14 +171,18 @@ class CompactIsland extends StatelessWidget {
                         flagWave: flagWave,
                       ),
                     ),
-                    if (unit.coverUrl case final cover?)
-                      PositionedDirectional(
-                        start: medal.dx - coverRadius,
-                        top: medal.dy - coverRadius,
-                        width: coverRadius * 2,
-                        height: coverRadius * 2,
-                        child: _Cover(url: cover, faded: _locked),
+                    PositionedDirectional(
+                      start: medal.dx - coverRadius,
+                      top: medal.dy - coverRadius,
+                      width: coverRadius * 2,
+                      height: coverRadius * 2,
+                      child: UnitMedal(
+                        url: unit.coverUrl,
+                        size: coverRadius * 2,
+                        saturation: _locked ? _lockedSaturation : 1,
+                        opacity: _locked ? _lockedOpacity : 1,
                       ),
+                    ),
                     if (_locked)
                       PositionedDirectional(
                         start: 0,
@@ -189,7 +197,10 @@ class CompactIsland extends StatelessWidget {
                         top: lockTop,
                         width: lockSize,
                         height: lockSize,
-                        child: _LockBadge(opening: clear, opacity: lockOpacity),
+                        child: _LockBadge(
+                          opening: lockOpen,
+                          opacity: lockOpacity,
+                        ),
                       ),
                     if (labels)
                       PositionedDirectional(
@@ -256,46 +267,6 @@ class CompactIslandLabels extends StatelessWidget {
   );
 }
 
-/// The unit's cover in the medallion, a centre crop; faded while locked.
-class _Cover extends StatelessWidget {
-  const _Cover({required this.url, required this.faded});
-
-  final String url;
-  final bool faded;
-
-  /// CSS `saturate(s)` with the alpha scaled by `a`.
-  static List<double> _matrix(double s, double a) => [
-    .213 + .787 * s, .715 - .715 * s, .072 - .072 * s, 0, 0, //
-    .213 - .213 * s, .715 + .285 * s, .072 - .072 * s, 0, 0, //
-    .213 - .213 * s, .715 - .715 * s, .072 + .928 * s, 0, 0, //
-    0, 0, 0, a, 0,
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final Widget image = url.startsWith('http')
-        ? Image.network(
-            url,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => const SizedBox.shrink(),
-          )
-        : SvgPicture.asset(url, fit: BoxFit.cover);
-    return ClipOval(
-      child: faded
-          ? ColorFiltered(
-              colorFilter: ColorFilter.matrix(
-                _matrix(
-                  CompactIsland._lockedSaturation,
-                  CompactIsland._lockedOpacity,
-                ),
-              ),
-              child: image,
-            )
-          : image,
-    );
-  }
-}
-
 class _LockBadge extends StatelessWidget {
   const _LockBadge({required this.opening, required this.opacity});
 
@@ -351,9 +322,11 @@ class _Labels extends StatelessWidget {
     final texts = context.texts;
     final done = unit.status == UnitLessonStatus.done;
     final pages = unit.bookPages;
+    // Straight on the sea with no chip: the secondary text colour is under
+    // 4.5:1 on the light seas, so these lines take the primary one.
     final sub = texts
         .sized(texts.caption, size: 12, line: 16, running: false)
-        .copyWith(color: colors.textSecondary);
+        .copyWith(color: colors.textPrimary);
     final english = unit.titleEn;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -373,7 +346,7 @@ class _Labels extends StatelessWidget {
             english,
             style: texts
                 .sized(texts.kidsCard, size: 15, line: 20, running: false)
-                .copyWith(color: colors.textSecondary),
+                .copyWith(color: colors.textPrimary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textDirection: TextDirection.ltr,

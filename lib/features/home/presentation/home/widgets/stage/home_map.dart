@@ -374,6 +374,9 @@ class HomeMap extends StatelessWidget {
           kids: scene.kids,
           shake: _shakeOf(slot),
           clear: overrides.cloudsIsland == slot.index ? overrides.clouds : 0,
+          lockOpen: overrides.cloudsIsland == slot.index
+              ? overrides.lockOpen
+              : 0,
           flagWave: done && loops.isOn(HomeLoop.flags),
           fogRunning: loops.isOn(HomeLoop.clouds),
           labels: false,
@@ -563,6 +566,7 @@ class HomeMap extends StatelessWidget {
                     locked: state == StoneState.locked,
                     kids: scene.kids,
                     within: within(rect),
+                    reach: _labelReach(island, k, unit.lessons.length),
                   ),
                 ),
               ),
@@ -572,6 +576,27 @@ class HomeMap extends StatelessWidget {
   }
 
   static const _labelMargin = 4.0;
+
+  /// Stones this close in y have their labels on one row.
+  static const _sameRow = 24.0;
+
+  /// The least gap between two chips on a row.
+  static const _chipGap = 6.0;
+
+  /// The room for stone [k]'s chip: the distance to the nearest of the
+  /// unit's first [count] stones on its row, less a gap. Each of two
+  /// neighbours keeps to it, so their chips never meet.
+  static double? _labelReach(IslandLayout island, int k, int count) {
+    final point = island.stones[k];
+    double? reach;
+    for (final (j, other) in island.stones.indexed) {
+      if (j == k || j >= count) continue;
+      if ((other.dy - point.dy).abs() >= _sameRow) continue;
+      final room = (other.dx - point.dx).abs() - _chipGap;
+      reach = reach == null ? room : math.min(reach, room);
+    }
+    return reach;
+  }
 
   Widget _centred(Offset point, Widget child) {
     final rect = Rect.fromCenter(
@@ -589,7 +614,7 @@ class HomeMap extends StatelessWidget {
   }
 
   List<Widget> _stones(IslandLayout island, HomeUnit unit) {
-    final pulsing = loops.isOn(HomeLoop.stonePulse);
+    final pulsing = loops.isOn(HomeLoop.stonePulse) ? loops.pulse : null;
     final pulse = overrides.pulse;
     final pop = overrides.stonePop;
     final station = island.station;
@@ -637,10 +662,11 @@ class HomeMap extends StatelessWidget {
                 emar: scene.emar,
                 offline: offline,
                 pulse:
-                    pulsing &&
                     state == StoneState.current &&
-                    !scene.reviewFirst &&
-                    scene.bubbleFrame != null,
+                        !scene.reviewFirst &&
+                        scene.bubbleFrame != null
+                    ? pulsing
+                    : null,
                 hit: overrides.hit == k,
                 pop: pop != null && pop.index == k ? pop.t : 1,
                 onPressed: () => actions.onStone(k),
@@ -665,11 +691,19 @@ class HomeMap extends StatelessWidget {
       width: guideSize,
       height: guideSize,
     );
-    Widget guide = Mascot(
-      expression: guideExpression,
-      size: guideSize,
-      sparkles: false,
-      animate: loops.isOn(HomeLoop.guideBreath),
+    // The guide only breathes on the map (M2): up 1.5 and back each 3200.
+    Widget guide = AnimatedBuilder(
+      animation: loops.breath,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, -AppMotion.homeBreathLift * loops.breath.value),
+        child: child,
+      ),
+      child: Mascot(
+        expression: guideExpression,
+        size: guideSize,
+        sparkles: false,
+        animate: false,
+      ),
     );
     if (lean != 0) {
       guide = Transform.rotate(angle: lean * math.pi / 180, child: guide);

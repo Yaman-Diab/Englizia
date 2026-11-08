@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/color_mix.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -371,40 +372,57 @@ class IslandBanner extends StatelessWidget {
 }
 
 /// A unit's cover in a circle, centre-cropped; the unit flag on the
-/// illustration ground when it has none.
+/// illustration ground when it has none. A unit not open yet is drawn pale:
+/// [saturation] and [opacity] below 1, the flag as well as a cover.
 class UnitMedal extends StatelessWidget {
-  const UnitMedal({required this.url, required this.size, super.key});
+  const UnitMedal({
+    required this.url,
+    required this.size,
+    this.saturation = 1,
+    this.opacity = 1,
+    super.key,
+  });
 
   final String? url;
   final double size;
+  final double saturation;
+  final double opacity;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final url = this.url;
+    final medal = SizedBox.square(
+      dimension: size,
+      child: ColoredBox(
+        color: colors.primary.surface,
+        child: url == null || url.isEmpty
+            ? Center(
+                child: AppIconView(
+                  AppIcon.unitFlag,
+                  color: colors.primary.fill,
+                  size: size / 2,
+                ),
+              )
+            : url.startsWith('http')
+            ? Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => const SizedBox.shrink(),
+              )
+            : SvgPicture.asset(url, fit: BoxFit.cover),
+      ),
+    );
     return ExcludeSemantics(
       child: ClipOval(
-        child: SizedBox.square(
-          dimension: size,
-          child: ColoredBox(
-            color: colors.primary.surface,
-            child: url == null || url.isEmpty
-                ? Center(
-                    child: AppIconView(
-                      AppIcon.unitFlag,
-                      color: colors.primary.fill,
-                      size: size / 2,
-                    ),
-                  )
-                : url.startsWith('http')
-                ? Image.network(
-                    url,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const SizedBox.shrink(),
-                  )
-                : SvgPicture.asset(url, fit: BoxFit.cover),
-          ),
-        ),
+        child: saturation >= 1 && opacity >= 1
+            ? medal
+            : ColorFiltered(
+                colorFilter: ColorFilter.matrix(
+                  saturateMatrix(saturation, alpha: opacity),
+                ),
+                child: medal,
+              ),
       ),
     );
   }

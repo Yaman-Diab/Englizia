@@ -127,6 +127,7 @@ final class MapOverrides extends Equatable {
     this.flagUp,
     this.cloudsIsland,
     this.clouds = 0,
+    this.lockOpen = 0,
     this.rowFrom,
     this.rowT = 1,
     this.tail,
@@ -164,6 +165,9 @@ final class MapOverrides extends Equatable {
   /// M6: the island whose clouds clear (and lock opens), [clouds] of the way.
   final int? cloudsIsland;
   final double clouds;
+
+  /// M6: how far that island's lock has opened (it lifts, turns and fades).
+  final double lockOpen;
 
   /// 09ب: the rows move from the gap after [rowFrom], [rowT] of the way.
   final int? rowFrom;
@@ -216,6 +220,7 @@ final class MapOverrides extends Equatable {
     double? flagUp,
     int? cloudsIsland,
     double? clouds,
+    double? lockOpen,
     int? rowFrom,
     double? rowT,
     ({int a, int b, double t})? tail,
@@ -246,6 +251,7 @@ final class MapOverrides extends Equatable {
     flagUp: flagUp ?? this.flagUp,
     cloudsIsland: cloudsIsland ?? this.cloudsIsland,
     clouds: clouds ?? this.clouds,
+    lockOpen: lockOpen ?? this.lockOpen,
     rowFrom: rowFrom ?? this.rowFrom,
     rowT: rowT ?? this.rowT,
     tail: tail ?? this.tail,
@@ -279,6 +285,7 @@ final class MapOverrides extends Equatable {
     flagUp,
     cloudsIsland,
     clouds,
+    lockOpen,
     rowFrom,
     rowT,
     tail,

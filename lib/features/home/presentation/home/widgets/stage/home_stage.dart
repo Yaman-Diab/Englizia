@@ -1,8 +1,11 @@
+import 'dart:math' as math;
+
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/stage_controller.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 /// Builds a layer of the stage from where the header stands this frame.
 typedef StageLayerBuilder =
@@ -98,7 +101,12 @@ class HomeStage extends StatelessWidget {
                 child: Stack(
                   clipBehavior: Clip.none,
                   children: [
-                    Positioned.fill(child: map!),
+                    Positioned.fill(
+                      child: _UnderHeader(
+                        top: metrics.pt - metrics.collapse,
+                        child: map!,
+                      ),
+                    ),
                     PositionedDirectional(
                       top: 0,
                       start: 0,
@@ -202,4 +210,42 @@ class _DragToScrollState extends State<_DragToScroll> {
     onVerticalDragCancel: () => _drag?.cancel(),
     child: widget.child,
   );
+}
+
+/// The map under the headers: to a screen reader what lies above [top] is
+/// off screen (hidden, so it scrolls it into view), though it is painted
+/// there under the opaque headers.
+class _UnderHeader extends SingleChildRenderObjectWidget {
+  const _UnderHeader({required this.top, super.child});
+
+  final double top;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderUnderHeader(top);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderUnderHeader renderObject,
+  ) => renderObject.top = top;
+}
+
+class _RenderUnderHeader extends RenderProxyBox {
+  _RenderUnderHeader(this._top);
+
+  double _top;
+  set top(double value) {
+    if (value == _top) return;
+    _top = value;
+    markNeedsSemanticsUpdate();
+  }
+
+  // What is seen, for semantics only: nodes outside it are kept, hidden.
+  @override
+  Rect? describeApproximatePaintClip(RenderObject child) =>
+      Rect.fromLTRB(0, math.max(0, _top), size.width, size.height);
+
+  @override
+  Rect? describeSemanticsClip(RenderObject? child) => Offset.zero & size;
 }

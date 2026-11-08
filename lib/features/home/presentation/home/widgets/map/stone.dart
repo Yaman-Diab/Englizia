@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
@@ -6,7 +7,6 @@ import 'package:englizia/core/design_system/color_mix.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
-import 'package:englizia/core/design_system/motion/listening_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/ai_spark.dart';
@@ -16,7 +16,6 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// A stone's state on the trail.
 enum StoneState { done, current, open, locked }
@@ -56,7 +55,7 @@ class Stone extends StatelessWidget {
     super.key,
   }) : index = -1,
        offline = false,
-       pulse = false,
+       pulse = null,
        hit = false,
        pop = 1,
        review = null,
@@ -70,7 +69,7 @@ class Stone extends StatelessWidget {
   }) : index = -1,
        emar = false,
        offline = false,
-       pulse = false,
+       pulse = null,
        hit = false,
        pop = 1,
        review = null,
@@ -103,8 +102,9 @@ class Stone extends StatelessWidget {
   /// No connection: a lesson not kept on the phone is dimmed with a cloud.
   final bool offline;
 
-  /// The bubble's target breathes (M2, when the loop budget allows).
-  final bool pulse;
+  /// The bubble's target breathes on this clock, 0 to 1 (M2, the loop
+  /// budget's pulse); null keeps it still.
+  final Animation<double>? pulse;
 
   /// Emar's page search found it: two rings.
   final bool hit;
@@ -149,6 +149,7 @@ class StoneLabel extends StatelessWidget {
     required this.locked,
     required this.kids,
     this.within,
+    this.reach,
     super.key,
   }) : station = false;
 
@@ -162,6 +163,7 @@ class StoneLabel extends StatelessWidget {
       locked = false,
       kids = false,
       within = null,
+      reach = null,
       station = true;
 
   final HomeLesson? lesson;
@@ -177,6 +179,13 @@ class StoneLabel extends StatelessWidget {
   /// near the frame's edge keeps its chip on screen, shifted no further
   /// than it must.
   final ({double min, double max})? within;
+
+  /// The widest its chip may grow: the room to the nearest stone on its
+  /// row, so two chips never meet at large text. Null: nothing beside it.
+  final double? reach;
+
+  /// A chip squeezed by its neighbours still shows a few letters.
+  static const _leastReach = 48.0;
 
   static const width = 120.0;
   static const _subWidth = 96.0;
@@ -233,6 +242,13 @@ class StoneLabel extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
                 radius: 8,
                 english: kids,
+                maxWidth: switch (reach) {
+                  final reach? => math.min(
+                    _Chip._oneLine,
+                    math.max(_leastReach, reach),
+                  ),
+                  null => _Chip._oneLine,
+                },
                 within: within,
               ),
               if (last && locked && !kids) ...[
@@ -387,35 +403,6 @@ class _RenderCentredWithin extends RenderShiftedBox {
   }
 }
 
-/// An [AppIcon] at the design's own stroke where it differs from 2 (the done
-/// check at 3, the badges' lock at 2.6). Decorative.
-class StoneIcon extends StatelessWidget {
-  const StoneIcon(
-    this.icon, {
-    required this.color,
-    required this.size,
-    this.stroke = 2,
-    super.key,
-  });
-
-  final AppIcon icon;
-  final Color color;
-  final double size;
-  final double stroke;
-
-  @override
-  Widget build(BuildContext context) => ExcludeSemantics(
-    child: SvgPicture.string(
-      stroke == 2
-          ? icon.svg
-          : icon.svg.replaceFirst('stroke-width="2"', 'stroke-width="$stroke"'),
-      width: size,
-      height: size,
-      colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
-    ),
-  );
-}
-
 /// The flat bottom edge of a filled stone: its colour darkened, no blur
 /// (`lip(c)`).
 Color stoneLip(BuildContext context, Color fill) =>
@@ -493,14 +480,15 @@ double _popScale(double t) {
   )!;
 }
 
-/// The breathing of the bubble's target (M2): 1 ↔ 1.06, a leg each way.
-Widget _breathing({required bool active, required Widget child}) => Breathing(
-  active: active,
-  duration: AppMotion.homePulse * 2,
-  growth: AppMotion.homePulseScale - 1,
-  fade: 1,
-  child: child,
-);
+/// The breathing of the bubble's target (M2): 1 ↔ 1.06 on [pulse]. Always
+/// the same widget, so starting or stopping it keeps the tap's state.
+Widget _breathing({required Animation<double>? pulse, required Widget child}) =>
+    ScaleTransition(
+      scale: (pulse ?? kAlwaysDismissedAnimation).drive(
+        Tween(begin: 1, end: AppMotion.homePulseScale),
+      ),
+      child: child,
+    );
 
 /// A circle that grows or shrinks about its centre to [diameter] with its
 /// colours, inside a box of the final size.
@@ -635,7 +623,7 @@ class _LessonStone extends StatelessWidget {
       ],
     ];
     final icon = done
-        ? StoneIcon(AppIcon.check, color: colors.surface, size: 22, stroke: 3)
+        ? AppIconView(AppIcon.check, color: colors.surface, size: 22, stroke: 3)
         : kindIcon(
             lesson,
             color: current ? colors.onPrimaryStrong : colors.textSecondary,
@@ -692,7 +680,7 @@ class _LessonStone extends StatelessWidget {
               size: 20,
               fill: colors.surface,
               bordered: true,
-              child: StoneIcon(
+              child: AppIconView(
                 AppIcon.cloudOff,
                 color: colors.textSecondary,
                 size: 12,
@@ -708,7 +696,7 @@ class _LessonStone extends StatelessWidget {
               size: 20,
               fill: colors.surface,
               bordered: true,
-              child: StoneIcon(
+              child: AppIconView(
                 AppIcon.lock,
                 color: colors.textSecondary,
                 size: 11,
@@ -723,9 +711,15 @@ class _LessonStone extends StatelessWidget {
       child: Opacity(
         opacity: dimmed ? .45 : 1,
         child: _breathing(
-          active: stone.pulse,
+          pulse: stone.pulse,
           child: _Tap(
-            label: _lessonLabel(lesson, stone.index, state, emar: stone.emar),
+            label: _lessonLabel(
+              lesson,
+              stone.index,
+              state,
+              emar: stone.emar,
+              offline: dimmed,
+            ),
             shakes: !current,
             onPressed: stone.onPressed,
             child: disk,
@@ -741,14 +735,18 @@ String _lessonLabel(
   int index,
   StoneState state, {
   required bool emar,
+  required bool offline,
 }) {
-  final status = switch (state) {
-    StoneState.done => 'unit_status_done'.tr(),
-    StoneState.current =>
-      emar ? 'home_bubble_suggested'.tr() : 'unit_status_current'.tr(),
-    StoneState.open => 'unit_status_open'.tr(),
-    StoneState.locked => 'unit_status_locked'.tr(),
-  };
+  // Like the unit screen: a lesson it can't open now says why, not its state.
+  final status = offline
+      ? 'unit_status_offline'.tr()
+      : switch (state) {
+          StoneState.done => 'unit_status_done'.tr(),
+          StoneState.current =>
+            emar ? 'home_bubble_suggested'.tr() : 'unit_status_current'.tr(),
+          StoneState.open => 'unit_status_open'.tr(),
+          StoneState.locked => 'unit_status_locked'.tr(),
+        };
   final page = lesson.page;
   if (emar && page != null) {
     return 'home_stone_semantics_page'.tr(
@@ -795,7 +793,7 @@ class _LastStone extends StatelessWidget {
       StoneState.done => _Badge(
         size: 22,
         fill: colors.success.fill,
-        child: StoneIcon(
+        child: AppIconView(
           AppIcon.check,
           color: colors.surface,
           size: 12,
@@ -806,7 +804,7 @@ class _LastStone extends StatelessWidget {
         size: 22,
         fill: colors.surface,
         bordered: true,
-        child: StoneIcon(
+        child: AppIconView(
           AppIcon.lock,
           color: colors.textSecondary,
           size: 12,
@@ -906,7 +904,7 @@ class _KidStone extends StatelessWidget {
               size: 26,
               fill: colors.surface,
               bordered: true,
-              child: StoneIcon(
+              child: AppIconView(
                 AppIcon.lock,
                 color: colors.textSecondary,
                 size: 14,
@@ -939,7 +937,7 @@ class _StationStone extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     return _breathing(
-      active: stone.pulse,
+      pulse: stone.pulse,
       child: _Tap(
         label: 'home_station_semantics'.tr(args: [reviewLine(stone.review!)]),
         shakes: false,

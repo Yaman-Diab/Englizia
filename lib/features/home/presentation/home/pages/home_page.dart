@@ -261,6 +261,17 @@ class _HomePageState extends State<HomePage>
       final moment = state.moment;
       if (moment != null) _play(moment);
     }
+    // Once played, a new day re-arms the opening; it plays on the map
+    // already anchored.
+    if (!state.openingDue) {
+      _openingStarted = false;
+    } else if (!_openingStarted) {
+      final home = state.home;
+      if (home != null && _anchoredFor == _anchorKey(home)) {
+        _openingStarted = true;
+        unawaited(_choreo.playOpening(home));
+      }
+    }
     _budget();
     _checkBack();
   }
@@ -481,7 +492,7 @@ class _HomePageState extends State<HomePage>
   /// Once per enrollment and level, after the first layout: the map opens on
   /// today's island with the header open, then the day's opening plays.
   void _scheduleAnchor(HomeSnapshot home) {
-    final key = '${home.enrollment.id}|${home.level.id}';
+    final key = _anchorKey(home);
     if (_anchoredFor == key || _anchoring) return;
     _anchoring = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -493,7 +504,8 @@ class _HomePageState extends State<HomePage>
         return;
       }
       _toAnchor();
-      _anchoredFor = key;
+      // The map shows from the next frame, on its anchor.
+      setState(() => _anchoredFor = key);
       _checkBack();
       _budget();
       final state = _cubit.state;
@@ -504,6 +516,9 @@ class _HomePageState extends State<HomePage>
       }
     });
   }
+
+  static String _anchorKey(HomeSnapshot home) =>
+      '${home.enrollment.id}|${home.level.id}';
 
   /// Today's island where the design opens it, the header open.
   void _toAnchor() {
@@ -690,8 +705,8 @@ class _HomePageState extends State<HomePage>
   Future<void> _openTracks() async {
     final me = context.read<MeCubit?>();
     if (me == null) return;
-    await me.openTracks();
-    if (!mounted) return;
+    // The sheet follows the cubit, so it opens without waiting for it.
+    unawaited(me.openTracks());
     final track = await showTracksSheet(
       context,
       onJoin: widget.actions.joinTrack,
@@ -1082,7 +1097,9 @@ class _HomePageState extends State<HomePage>
       child: HomeStage(
         stage: _stage,
         scrollController: _scroll,
-        mapOpacity: overrides.mapOpacity,
+        // Hidden until it stands on its anchor: the first frame of an open
+        // or a switch never shows the level's top.
+        mapOpacity: _anchoredFor == _anchorKey(home) ? overrides.mapOpacity : 0,
         contentShift: _choreo.header.contentShift,
         scrollView: MapScrollView(
           controller: _scroll,

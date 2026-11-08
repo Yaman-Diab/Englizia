@@ -21,6 +21,7 @@ import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/home/presentation/home/scene/map_frame.dart';
 import 'package:englizia/features/home/presentation/home/scene/stage_metrics.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/stage_controller.dart';
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
@@ -114,8 +115,6 @@ class HomeChoreographer extends ChangeNotifier {
 
   /// The two taps of a unit or level done (20-40-20) are this far apart.
   static const hapticGap = Duration(milliseconds: 40);
-
-  static const _easeIn = FlippedCurve(AppMotion.out);
 
   late final MotionClock _clock;
   final _tracks = <_Track>[];
@@ -324,7 +323,12 @@ class HomeChoreographer extends ChangeNotifier {
           length: AppMotion.homeSwitchOut,
           onFrame: (t) => _fade =
               1 -
-              phase(msOf(t), Duration.zero, AppMotion.homeSwitchOut, _easeIn),
+              phase(
+                msOf(t),
+                Duration.zero,
+                AppMotion.homeSwitchOut,
+                AppMotion.easeIn,
+              ),
         ),
       );
     }
@@ -946,11 +950,12 @@ class HomeChoreographer extends ChangeNotifier {
   }
 
   void _tick() {
+    final before = _shown;
     for (final track in [..._tracks]) {
       _advance(track);
     }
     if (_tracks.isEmpty) _clock.stop();
-    _rebuild();
+    _rebuild(unless: before);
   }
 
   void _advance(_Track track) {
@@ -987,7 +992,22 @@ class HomeChoreographer extends ChangeNotifier {
     if (notify) _rebuild();
   }
 
-  void _rebuild() {
+  /// Everything home draws from this, to tell a frame that changes nothing.
+  List<Object?> get _shown => [
+    _map,
+    _header,
+    forcedGuide,
+    guideExpression,
+    _busy,
+    skippable,
+    _kidSaying,
+    _spinning,
+  ];
+
+  /// Recomputes the overrides and tells home, unless all it shows is still
+  /// [unless]: a frame of a track that draws nothing (a hold, a wait)
+  /// rebuilds nothing.
+  void _rebuild({List<Object?>? unless}) {
     if (_disposed) return;
     final base = _seq.map;
     final shake = _shake;
@@ -1003,6 +1023,7 @@ class HomeChoreographer extends ChangeNotifier {
       guideHop: _guideHop == 0 ? null : _guideHop,
       freezeGlint: _glint,
     );
+    if (unless != null && listEquals(unless, _shown)) return;
     notifyListeners();
   }
 

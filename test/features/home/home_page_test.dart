@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/error/failure.dart';
@@ -8,13 +9,18 @@ import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart
 import 'package:englizia/features/home/data/models/home_model.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
+import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
+import 'package:englizia/features/home/presentation/home/geometry/island_layout.dart';
+import 'package:englizia/features/home/presentation/home/geometry/map_layout.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/home/presentation/home/paint/fog_layer.dart';
+import 'package:englizia/features/home/presentation/home/scene/map_frame.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/goal_ring.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/back_to_lesson_button.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/island_banner.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/kid_say_bubble.dart';
+import 'package:englizia/features/home/presentation/home/widgets/map/lesson_bubble.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone_card.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/compact_island.dart';
@@ -59,6 +65,15 @@ HomeSnapshot _unitAt(int unit, {bool kids = false, bool fresh = false}) {
       (lesson as Map<String, Object?>)['done'] = true;
     }
   }
+  return HomeModel(json).toEntity();
+}
+
+/// Home whose current unit has three lessons, the middle one today's: an
+/// island of one row.
+HomeSnapshot _threeLessons() {
+  final json = mockHomeJson(now: homeMorning);
+  final unit = (json['units']! as List)[2] as Map<String, Object?>;
+  unit['lessons'] = (unit['lessons']! as List).sublist(2, 5);
   return HomeModel(json).toEntity();
 }
 
@@ -114,6 +129,7 @@ void main() {
       ('kids', () => _home(kids: true)),
       ('level complete', () => _home(scenario: HomeMockScenario.levelComplete)),
       ('ten lessons', () => _home(scenario: HomeMockScenario.lessons10)),
+      ('three lessons', _threeLessons),
     ]) {
       // The app's largest text scale (lib/app/app.dart) as well.
       for (final scale in const [1.0, 1.3]) {
@@ -154,6 +170,22 @@ void main() {
       expect(tester.getTopLeft(find.byType(LevelHeader)).dy, 56 + 114);
     });
 
+    testWidgets('one row of stones: the bubble under them', (tester) async {
+      final home = _threeLessons();
+      expect(home.currentUnit!.currentLesson, 1);
+      await pumpHome(tester, home, size: _design);
+      expect(tester.takeException(), isNull);
+      final stones = find.byWidgetPredicate((w) => w is Stone);
+      final bottom = [
+        for (final stone in stones.evaluate())
+          tester.getRect(find.byWidget(stone.widget)).bottom,
+      ].reduce(math.max);
+      expect(
+        tester.getRect(find.byType(LessonBubble)).top,
+        greaterThan(bottom),
+      );
+    });
+
     testWidgets('folds as the map scrolls; the level header sticks', (
       tester,
     ) async {
@@ -177,11 +209,32 @@ void main() {
         await pumpHome(tester, _home(), size: _design, locale: locale);
         final stone = tester.getCenter(_currentStone());
         expect(stone.dx, closeTo(x, .5));
-        // Row 1 at 354 of the island at 310, under the header's 154 (the
-        // English header wraps: measured taller, anchored again).
-        if (locale.languageCode == 'ar') {
-          expect(stone.dy, closeTo(56 + 154 + 310 + 354 - 352, .5));
-        }
+        // The English header wraps: measured taller, the map is anchored
+        // again for it.
+        final m = tester
+            .widget<GoalRingOverlay>(find.byType(GoalRingOverlay))
+            .metrics;
+        if (locale.languageCode == 'ar') expect(m.pt, 154);
+        final anchor = MapAnchor.compute(
+          island: IslandLayout.compute(
+            lessons: 6,
+            current: 3,
+            kids: false,
+            frame: MapFrame(360),
+          ),
+          current: 3,
+          kids: false,
+          reviewBox: true,
+          reviewStation: false,
+          partial: false,
+          pt: m.pt,
+          view: m.view,
+          bubbleHeight: tester.getSize(find.byType(LessonBubble)).height,
+        );
+        final pixels = _map(tester).pixels;
+        expect(pixels, 310 + anchor.rel);
+        // Row 1 at 354 of the island at 310, under the header.
+        expect(stone.dy, closeTo(56 + m.pt + 310 + 354 - pixels, .5));
       });
     }
 
@@ -230,7 +283,7 @@ void main() {
         find.byType(BackToLessonButton),
       );
       expect(button.direction, BackDirection.up);
-      expect(button.lessonTitle, isNotEmpty);
+      expect(button.lessonTitle, 'يوم في حياة سارة');
 
       await tester.tap(find.byType(BackToLessonButton));
       await _steps(tester, const Duration(milliseconds: 1200));
@@ -243,6 +296,66 @@ void main() {
             .direction,
         isNull,
       );
+    });
+
+    for (final (locale, rect, pixels) in [
+      (const Locale('ar'), const Rect.fromLTRB(18, 604, 74, 660), 414.0),
+      (const Locale('en'), const Rect.fromLTRB(286, 604, 342, 660), 437.0),
+    ]) {
+      testWidgets('the back button points down from the map\'s top, by the '
+          'start edge (${locale.languageCode})', (tester) async {
+        await pumpHome(tester, _home(), size: _design, locale: locale);
+        await _scroll(tester, -2000);
+        expect(_map(tester).pixels, 0);
+        expect(_backDirection(tester), BackDirection.down);
+        expect(tester.getRect(find.byType(BackToLessonButton)), rect);
+
+        await tester.tap(find.byType(BackToLessonButton));
+        await _steps(tester, const Duration(milliseconds: 1200));
+        // Today's island just under the folded header, measured taller in
+        // English.
+        expect(_map(tester).pixels, pixels);
+        expect(_backDirection(tester), isNull);
+      });
+    }
+
+    testWidgets('the back button hides while a moment plays', (tester) async {
+      final repository = FakeHomeRepository(_home());
+      final cubit = await pumpHome(
+        tester,
+        _home(),
+        size: _design,
+        repository: repository,
+      );
+      await _scroll(tester, 900);
+      expect(_backDirection(tester), BackDirection.up);
+      final navigator = await _pushLesson(tester);
+      repository.home = mockHomeAfterLesson(now: homeMorning);
+      navigator.pop();
+      var played = false;
+      for (var i = 0; i < 80; i++) {
+        await tester.pump(const Duration(milliseconds: 50));
+        if (cubit.state.moment == null) continue;
+        played = true;
+        expect(_backDirection(tester), isNull, reason: 'at ${i * 50} ms');
+      }
+      expect(played, isTrue);
+      await _steps(tester, const Duration(seconds: 3));
+    });
+
+    testWidgets('back first: the button returns to today\'s island', (
+      tester,
+    ) async {
+      final home = _home(scenario: HomeMockScenario.welcomeBack);
+      expect(HomeRules.reviewFirst(home), isTrue);
+      await pumpHome(tester, home, size: _design);
+      expect(_backDirection(tester), isNull);
+      await _scroll(tester, 900);
+      expect(_backDirection(tester), BackDirection.up);
+      await tester.tap(find.byType(BackToLessonButton));
+      await _steps(tester, const Duration(milliseconds: 1200));
+      expect(_map(tester).pixels, 114 + 310 - 10);
+      expect(_backDirection(tester), isNull);
     });
 
     testWidgets('the back button pressed twice goes once', (tester) async {
@@ -291,8 +404,59 @@ void main() {
       await tester.drag(find.byType(CustomScrollView), const Offset(0, 300));
       await _steps(tester, const Duration(seconds: 1));
       expect(find.byType(ConnectionStrip), findsOneWidget);
+      expect(find.text('تعذّر التحديث'), findsOneWidget);
       await _steps(tester, const Duration(seconds: 4));
       expect(find.byType(ConnectionStrip), findsNothing);
+    });
+
+    testWidgets('offline with a kept home: the strip, and a cloud on the '
+        'lessons not on the phone', (tester) async {
+      final cubit = HomeCubit(
+        FakeHomeRepository(
+          null,
+          failure: const NetworkFailure(),
+          kept: _home(),
+        ),
+        FakeProfileRepository(mockProfile()),
+        FakeLessonRepository(),
+        FakeConnectivityService(),
+        FakeSoundPlayer(),
+        now: () => homeMorning,
+      );
+      await tester.pumpLocalized(
+        BlocProvider.value(
+          value: cubit,
+          child: Scaffold(
+            body: HomePage(
+              actions: RecordedActions().actions,
+              pages: RouteObserver<PageRoute<dynamic>>(),
+            ),
+          ),
+        ),
+        size: _design,
+      );
+      unawaited(cubit.start());
+      await settleHome(tester);
+      await _steps(tester, const Duration(seconds: 2));
+
+      expect(find.text('لا يوجد اتصال. الدروس المحمّلة تعمل.'), findsOneWidget);
+      final cloud = find.byWidgetPredicate(
+        (w) => w is AppIconView && w.icon == AppIcon.cloudOff,
+      );
+      final stones = find.byWidgetPredicate(
+        (w) => w is Stone && w.state != StoneState.current,
+      );
+      expect(
+        find.descendant(of: stones, matching: cloud),
+        findsWidgets,
+        reason: 'no lesson is kept',
+      );
+      expect(
+        find.descendant(of: _currentStone(), matching: cloud),
+        findsNothing,
+      );
+      await tester.pumpWidget(const SizedBox());
+      await cubit.close();
     });
 
     testWidgets('back from a lesson, what it changed plays', (tester) async {
@@ -489,11 +653,106 @@ void main() {
       await tester.tap(locked);
       await tester.pump(const Duration(milliseconds: 100));
       expect(find.byType(LockedToast), findsOneWidget);
-      expect(find.text('تُفتح بعد الوحدة 3'), findsWidgets);
-      await _steps(tester, const Duration(milliseconds: 900));
+      expect(
+        find.descendant(
+          of: find.byType(LockedToast),
+          matching: find.text('تُفتح بعد الوحدة 3'),
+        ),
+        findsOneWidget,
+      );
+      var shook = false;
+      for (var i = 0; i < 8; i++) {
+        await tester.pump(const Duration(milliseconds: 40));
+        shook |= tester.widget<CompactIsland>(locked).shake > 0;
+      }
+      expect(shook, isTrue, reason: 'the island shakes');
+      await _steps(tester, const Duration(milliseconds: 600));
       expect(find.byType(LockedToast), findsNothing);
       expect(find.byType(BottomSheet), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(BottomSheet),
+          matching: find.text('الوحدة 4 · في السوق'),
+        ),
+        findsOneWidget,
+        reason: 'unit 4\'s sheet',
+      );
     });
+
+    testWidgets('a locked island\'s sheet goes to today\'s island', (
+      tester,
+    ) async {
+      await pumpHome(tester, _home(), size: _design);
+      await _scroll(tester, 500);
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is CompactIsland && w.unit.number == 4),
+      );
+      await _steps(tester, const Duration(milliseconds: 1500));
+      await tester.tap(find.text('اذهب إلى الوحدة 3'));
+      await _steps(tester, const Duration(milliseconds: 1500));
+      expect(find.byType(BottomSheet), findsNothing);
+      // As the back button goes: the island just under the folded header.
+      expect(_map(tester).pixels, 114 + 310 - 10);
+    });
+
+    testWidgets('a locked island\'s sheet opens its unit', (tester) async {
+      final actions = RecordedActions();
+      final home = _home();
+      await pumpHome(tester, home, size: _design, actions: actions);
+      await _scroll(tester, 500);
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is CompactIsland && w.unit.number == 4),
+      );
+      await _steps(tester, const Duration(milliseconds: 1500));
+      await tester.tap(find.text('اعرض محتوى الوحدة'));
+      await _steps(tester, const Duration(milliseconds: 600));
+      expect(actions.units, [home.units[3].id]);
+    });
+
+    testWidgets('reduce motion: a locked island previews at once', (
+      tester,
+    ) async {
+      tester.platformDispatcher.accessibilityFeaturesTestValue =
+          const FakeAccessibilityFeatures(disableAnimations: true);
+      addTearDown(
+        tester.platformDispatcher.clearAccessibilityFeaturesTestValue,
+      );
+      await pumpHome(tester, _home(), size: _design);
+      await _scroll(tester, 500);
+      await tester.tap(
+        find.byWidgetPredicate((w) => w is CompactIsland && w.unit.number == 4),
+      );
+      await tester.pump(const Duration(milliseconds: 100));
+      expect(find.byType(BottomSheet), findsOneWidget);
+      await _steps(tester, const Duration(milliseconds: 600));
+    });
+
+    for (final (page, pixels, stone) in [
+      ('39', 478.0, 4),
+      ('45', 786.0, null),
+      ('10', 0.0, null),
+    ]) {
+      testWidgets('a page found scrolls to it: $page', (tester) async {
+        await pumpHome(tester, _home(emar: true), size: _design);
+        expect(_map(tester).pixels, 352);
+        await tester.tap(find.bySemanticsLabel('ابحث برقم الصفحة'));
+        await _steps(tester, const Duration(milliseconds: 600));
+        await tester.enterText(find.byType(TextField), page);
+        await tester.pump();
+        await tester.tap(find.text('اذهب'));
+        var marked = false;
+        for (var i = 0; i < 40; i++) {
+          await tester.pump(const Duration(milliseconds: 50));
+          marked |= find
+              .byWidgetPredicate((w) => w is Stone && w.index == 4 && w.hit)
+              .evaluate()
+              .isNotEmpty;
+        }
+        expect(_map(tester).pixels, pixels);
+        expect(marked, stone != null, reason: 'the lesson\'s stone marked');
+        await _steps(tester, const Duration(seconds: 3));
+      });
+    }
 
     testWidgets('a done stone opens its card; a scroll closes it', (
       tester,
@@ -628,6 +887,22 @@ void main() {
       });
     }
 
+    testWidgets('an island under the headers is off screen to it', (
+      tester,
+    ) async {
+      final handle = tester.ensureSemantics();
+      await pumpHome(tester, _home(), size: _design);
+      SemanticsData data(Pattern label) =>
+          tester.getSemantics(find.bySemanticsLabel(label)).getSemanticsData();
+      expect(
+        data(RegExp('^الوحدة 2،')).flagsCollection.isHidden,
+        isTrue,
+        reason: 'drawn behind the day header',
+      );
+      expect(data(RegExp('^الدرس 4،')).flagsCollection.isHidden, isFalse);
+      handle.dispose();
+    });
+
     testWidgets('the guide comes after the flame and before the level', (
       tester,
     ) async {
@@ -720,3 +995,10 @@ void main() {
 
 Finder _currentStone() =>
     find.byWidgetPredicate((w) => w is Stone && w.state == StoneState.current);
+
+/// Where the back button points; null while it is hidden or gone.
+BackDirection? _backDirection(WidgetTester tester) {
+  final button = find.byType(BackToLessonButton);
+  if (button.evaluate().isEmpty) return null;
+  return tester.widget<BackToLessonButton>(button).direction;
+}

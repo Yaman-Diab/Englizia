@@ -43,6 +43,15 @@ Color mixOklch(Color a, Color b, double aShare) {
   return _Oklab(l, c * math.cos(h), c * math.sin(h), alpha).toColor();
 }
 
+/// CSS `saturate(s)` as a [ColorFilter.matrix] list: 0 grey, 1 as drawn, the
+/// alpha scaled by [alpha] (CSS `opacity` on the same element).
+List<double> saturateMatrix(double s, {double alpha = 1}) => [
+  .213 + .787 * s, .715 - .715 * s, .072 - .072 * s, 0, 0, //
+  .213 - .213 * s, .715 + .285 * s, .072 - .072 * s, 0, 0, //
+  .213 - .213 * s, .715 - .715 * s, .072 + .928 * s, 0, 0, //
+  0, 0, 0, alpha, 0,
+];
+
 /// Below this chroma a colour counts as grey: its hue is powerless.
 const _grey = 1e-4;
 
