@@ -10,6 +10,7 @@ import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/complete/widgets/complete_hero.dart';
@@ -18,7 +19,6 @@ import 'package:englizia/features/lessons/presentation/complete/widgets/kind_ico
 import 'package:englizia/features/lessons/presentation/complete/widgets/today_card.dart';
 import 'package:englizia/features/lessons/presentation/complete/widgets/unit_chain.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A quiet, honest celebration with the learner's real numbers, then the next
@@ -59,7 +59,7 @@ class _LessonCompletePageState extends State<LessonCompletePage> {
   @override
   void initState() {
     super.initState();
-    unawaited(HapticFeedback.lightImpact());
+    unawaited(AppHaptics.lightImpact());
   }
 
   @override
@@ -146,7 +146,7 @@ class _LessonCompletePageState extends State<LessonCompletePage> {
                 before.result == null && now.result != null,
             listener: (_, state) {
               if (state.result?.goal?.justMet ?? false) {
-                unawaited(HapticFeedback.mediumImpact());
+                unawaited(AppHaptics.mediumImpact());
                 _bringGoalIntoView();
               }
             },

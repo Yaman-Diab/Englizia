@@ -15,6 +15,19 @@ abstract interface class ProfileRepository {
   /// Another level of the same track: an Emar learner's grade.
   Future<Result<void>> changeLevel(String enrollmentId, String levelId);
 
+  Future<Result<Preferences>> getPreferences();
+
+  /// Saves on the server; the screen has already shown the change.
+  Future<Result<void>> savePreferences(Preferences preferences);
+
+  Future<Result<void>> changePassword({
+    required String current,
+    required String next,
+  });
+
+  /// For good. A password account confirms with its password.
+  Future<Result<void>> deleteAccount({String? password});
+
   /// True the first time «أنا» is seen on [day]: the band and the numbers
   /// move only then.
   bool firstViewOn(DateTime day);

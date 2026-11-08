@@ -7,13 +7,13 @@ import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/chip_stage.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 const _rowHeight = 56.0;
 
@@ -49,7 +49,7 @@ class _SentenceOrderBodyState extends State<SentenceOrderBody> {
     final at = slots.indexOf(null);
     if (at < 0) return;
     slots[at] = chip;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move([
       ChipMove(
         from: ChipStageState.bank(chip.id),
@@ -62,7 +62,7 @@ class _SentenceOrderBodyState extends State<SentenceOrderBody> {
   void _takeBack(int index, WordChip chip) {
     final slots = [..._slots];
     slots[index] = null;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move([
       ChipMove(
         from: ChipStageState.placed(chip.id),

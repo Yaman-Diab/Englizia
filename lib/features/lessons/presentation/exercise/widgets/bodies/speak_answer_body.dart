@@ -9,6 +9,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
@@ -16,7 +17,6 @@ import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/a
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/clip_button.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/mic_block.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A question to answer in the learner's own words, spoken or typed. What was
@@ -103,7 +103,7 @@ class _SpeakAnswerBodyState extends State<SpeakAnswerBody>
     widget.clip.onStop();
     switch (await mic.access()) {
       case MicAccess.granted:
-        unawaited(HapticFeedback.selectionClick());
+        unawaited(AppHaptics.selectionClick());
         await mic.listen();
       case MicAccess.denied:
         mic.showDenied();

@@ -15,6 +15,7 @@ import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/design_system/widgets/said_word.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/mic_block.dart';
@@ -23,7 +24,6 @@ import 'package:englizia/features/lessons/presentation/shadowing/widgets/shadowi
 import 'package:englizia/features/lessons/presentation/video/lesson_player.dart';
 import 'package:englizia/features/lessons/presentation/widgets/karaoke_text.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Shadowing (requirements v3.0 §9, design "Shadowing"): a sentence, its model
@@ -95,7 +95,7 @@ class _ShadowingPageState extends State<ShadowingPage>
     if (mic.state.phase == MicPhase.thinking) return;
     switch (await mic.access()) {
       case MicAccess.granted:
-        unawaited(HapticFeedback.selectionClick());
+        unawaited(AppHaptics.selectionClick());
         await _listen();
       case MicAccess.denied:
         mic.showDenied();

@@ -7,6 +7,7 @@ import 'package:englizia/app/shell/pending_page.dart';
 import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/app/shell/tab_shell.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
+import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/links/external_link.dart';
 import 'package:englizia/core/router/app_redirect.dart';
@@ -60,8 +61,12 @@ import 'package:englizia/features/lessons/presentation/unit/cubit/unit_cubit.dar
 import 'package:englizia/features/lessons/presentation/unit/pages/unit_page.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/pages/vocab_lesson_page.dart';
+import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/me/presentation/me/cubit/me_cubit.dart';
 import 'package:englizia/features/me/presentation/me/pages/me_page.dart';
+import 'package:englizia/features/me/presentation/settings/cubit/preferences_cubit.dart';
+import 'package:englizia/features/me/presentation/settings/pages/account_pages.dart';
+import 'package:englizia/features/me/presentation/settings/pages/settings_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -933,7 +938,66 @@ GoRouter createAppRouter(AppSessionController session) {
       // design yet.
       GoRoute(
         path: AppRoutes.meSettings,
-        builder: (_, _) => PendingPage(title: 'me_settings'.tr()),
+        builder: (context, _) => MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => sl<MeCubit>()..start()),
+            BlocProvider(create: (_) => sl<PreferencesCubit>()..start()),
+            BlocProvider(create: (_) => sl<VerifyEmailCubit>()..load()),
+            BlocProvider(create: (_) => sl<AccountCubit>()),
+          ],
+          child: Builder(
+            builder: (context) => SettingsPage(
+              actions: SettingsActions(
+                onBack: () => _back(context),
+                onWhatsApp: (number) => sl<ExternalLink>().open(
+                  Uri.https('wa.me', number.replaceAll(RegExp('[^0-9]'), '')),
+                ),
+                onPrivacy: () => context.push<void>(AppRoutes.legalPrivacy),
+                onTerms: () => context.push<void>(AppRoutes.legalTerms),
+                onSignOut: context.read<AccountCubit>().signOut,
+                onCreateAccount: () => context.push<void>(AppRoutes.signUp),
+                onVerifyEmail: () => showVerifyEmailSheet(context),
+                onPassword: () =>
+                    context.push<bool>(AppRoutes.meSettingsPassword),
+                onDelete: () => context.push<void>(
+                  AppRoutes.meSettingsDelete,
+                  extra:
+                      context.read<MeCubit>().state.profile?.signIn ??
+                      SignInMethod.email,
+                ),
+                version: sl<AppInfo>().version,
+              ),
+            ),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.meSettingsPassword,
+        builder: (context, _) => BlocProvider(
+          create: (_) => sl<PreferencesCubit>(),
+          child: PasswordPage(
+            onBack: () => _back(context),
+            onSaved: () => context.pop(true),
+          ),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.meSettingsDelete,
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<PreferencesCubit>(),
+          child: DeleteAccountPage(
+            signIn: state.extra is SignInMethod
+                ? state.extra! as SignInMethod
+                : SignInMethod.email,
+            onBack: () => _back(context),
+            // Signing in again with Google or Apple isn't built (D-031).
+            onReauthenticate: () async {
+              await context.push<void>(AppRoutes.signInWithProvider);
+              return false;
+            },
+            onDone: session.signOut,
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.meJoin,

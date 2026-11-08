@@ -14,6 +14,7 @@ import 'package:englizia/core/design_system/sea_palette.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/streak_flame.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/me/presentation/me/widgets/sea_art.dart';
 import 'package:flutter/foundation.dart' show Unicode;
@@ -467,7 +468,7 @@ class GuestCard extends StatelessWidget {
           AppButton(
             label: 'me_create_account'.tr(),
             onPressed: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selectionClick();
               onCreateAccount();
             },
           ),
@@ -875,7 +876,7 @@ class _StreakCard extends StatelessWidget {
           ),
           child: InkWell(
             onTap: () {
-              HapticFeedback.selectionClick();
+              AppHaptics.selectionClick();
               onPressed();
             },
             child: Column(
@@ -1506,7 +1507,7 @@ class WordBankRow extends StatelessWidget {
         ),
         child: InkWell(
           onTap: () {
-            HapticFeedback.selectionClick();
+            AppHaptics.selectionClick();
             onPressed();
           },
           child: ConstrainedBox(

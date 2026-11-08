@@ -1,6 +1,6 @@
 # Me: the learner's profile
 
-Status: **proposed**, except `PUT /api/v1/app/me`, which the dev server's OpenAPI confirms. The app runs on this contract in mock mode (`assets/mock/me/`, a child's with `env/mock_kids.json`); nothing else is confirmed by the backend team yet.
+Status: **proposed**, except `PUT /api/v1/app/me` (the name), which the dev server's OpenAPI confirms. The app runs on this contract in mock mode (`assets/mock/me/`, a child's with `env/mock_kids.json`); nothing else is confirmed by the backend team yet.
 Requirements: student doc §19.1 («أنا»), §13.5 (kids), §15 (streak and freezes), §12 (the placement test's result and its wait), §14 (Emar's grades). Design `Me v2`.
 
 ## `GET /api/v1/app/me/profile`
@@ -93,10 +93,35 @@ The common errors (`README.md`).
 
 «تغيير الصف»: `{ "levelId": "lvl_emar_08" }` moves an Emar learner to another grade, which keeps its own progress. The grades come from `GET /api/v1/app/tracks/{trackId}/levels` with `kidsMode` per level ([tracks.md](tracks.md)). Proposed, on the endpoint [placement.md](placement.md) already uses.
 
+## `GET /api/v1/app/me/preferences`, `PUT /api/v1/app/me/preferences`
+
+The settings that follow the account (S §19.2, design `Settings`). Each is saved as it changes: the app sends the whole object with the change. Proposed.
+
+```json
+{ "dailyGoalMinutes": 10, "reminderTime": "20:00", "notifications": true }
+```
+
+| Field | Meaning |
+|---|---|
+| `dailyGoalMinutes` | One of the panel's daily goals (`dailyGoal.options` in the effective settings) |
+| `reminderTime` | `HH:mm` in the learner's time zone, or `null` for none |
+| `notifications` | Every kind of notification, or none (ADR 16): the goal's reminder, the warning before the streak breaks, a teacher's reply |
+
+The appearance, sound effects, vibration and video quality stay on the phone. The profile also says how the learner signs in, `signIn`: `email` (a password to change), `google` or `apple`.
+
+## `POST /api/v1/auth/password/change`
+
+«تغيير كلمة المرور»: `{ "currentPassword": "…", "newPassword": "…" }`, the new one by the sign-up rule. A wrong current password is a `400` validation error on `currentPassword` (`error.details`). `204`. Proposed.
+
+## `DELETE /api/v1/app/me`
+
+«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
+
 ## Questions for the backend team
 
 1. Is one profile endpoint acceptable, or should «أنا» read the account, the tracks and the stats separately?
 2. Confirm the streak's freezes: how many, how often one is added, and that one is used automatically.
 3. Confirm the week's start and that `days` come in the order to show.
 4. Confirm switching the active track and changing the grade, and that progress is kept per enrollment and per level.
-5. Joining another track from «أنا» (`«انضم»`) needs its own flow per entry method: an endpoint to enrol, and whether the placement test or the grade step runs inside the app.
+5. Confirm the preferences, the password change and the deletion above, and the error codes for a wrong password.
+6. Joining another track from «أنا» (`«انضم»`) needs its own flow per entry method: an endpoint to enrol, and whether the placement test or the grade step runs inside the app.

@@ -38,6 +38,22 @@ class _Remote implements ProfileRemoteDataSource {
 
   @override
   Future<void> changeLevel(String enrollmentId, String levelId) async {}
+
+  @override
+  Future<Map<String, Object?>> getPreferences() async => const {
+    'dailyGoalMinutes': 15,
+    'notifications': false,
+    'reminderTime': '07:30',
+  };
+
+  @override
+  Future<void> savePreferences(Map<String, Object?> request) async {}
+
+  @override
+  Future<void> changePassword(String current, String next) async {}
+
+  @override
+  Future<void> deleteAccount(String? password) async {}
 }
 
 void main() {

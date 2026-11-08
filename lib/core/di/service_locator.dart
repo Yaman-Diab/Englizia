@@ -6,6 +6,7 @@ import 'package:englizia/core/audio/mic_permission.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:englizia/core/config/app_config.dart';
+import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/links/external_link.dart';
 import 'package:englizia/core/mail/mail_app.dart';
@@ -36,6 +37,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
   final packageInfo = await PackageInfo.fromPlatform();
 
   sl
+    ..registerSingleton(AppInfo(version: packageInfo.version))
     ..registerLazySingleton(() => SettingsStorageService(prefs))
     ..registerLazySingleton<TokenStorage>(SecureTokenStorage.new)
     ..registerLazySingleton(CurrentLanguage.new)

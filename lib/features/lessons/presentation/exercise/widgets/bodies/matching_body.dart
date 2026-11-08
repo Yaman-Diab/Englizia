@@ -5,13 +5,13 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/answer_card.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/lesson_picture.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 enum _Side { meaning, word }
 
@@ -77,7 +77,7 @@ class _MatchingBodyState extends State<MatchingBody> {
     if (draft.matched.contains(pair.id)) return;
     final picked = _picked;
     if (picked == null || picked.side == side) {
-      HapticFeedback.selectionClick();
+      AppHaptics.selectionClick();
       setState(() {
         _picked = picked != null && picked.same(side, pair)
             ? null
@@ -92,7 +92,7 @@ class _MatchingBodyState extends State<MatchingBody> {
   }
 
   void _matched(PairsDraft draft, MatchPair pair) {
-    HapticFeedback.lightImpact();
+    AppHaptics.lightImpact();
     final next = PairsDraft(
       total: draft.total,
       matched: {...draft.matched, pair.id},
@@ -115,7 +115,7 @@ class _MatchingBodyState extends State<MatchingBody> {
   }
 
   void _mismatched(PairsDraft draft, _Pick first, _Pick second) {
-    HapticFeedback.mediumImpact();
+    AppHaptics.mediumImpact();
     // The first mistake of a pair counts, and only the first (S §7.3).
     widget.answer.onDraft(
       PairsDraft(

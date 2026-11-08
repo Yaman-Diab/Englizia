@@ -55,6 +55,32 @@ final class ProfileRepositoryImpl implements ProfileRepository {
       guard(() => _remote.changeLevel(enrollmentId, levelId));
 
   @override
+  Future<Result<Preferences>> getPreferences() => guard(() async {
+    final preferences = ProfileModel.preferences(
+      await _remote.getPreferences(),
+    );
+    if (preferences == null) {
+      throw const FormatException('Preferences without a goal');
+    }
+    return preferences;
+  });
+
+  @override
+  Future<Result<void>> savePreferences(Preferences preferences) => guard(
+    () => _remote.savePreferences(ProfileModel.preferencesToJson(preferences)),
+  );
+
+  @override
+  Future<Result<void>> changePassword({
+    required String current,
+    required String next,
+  }) => guard(() => _remote.changePassword(current, next));
+
+  @override
+  Future<Result<void>> deleteAccount({String? password}) =>
+      guard(() => _remote.deleteAccount(password));
+
+  @override
   bool firstViewOn(DateTime day) {
     final key = DateTime(
       day.year,

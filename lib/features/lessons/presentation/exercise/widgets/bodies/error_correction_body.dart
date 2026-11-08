@@ -8,13 +8,13 @@ import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/core/design_system/widgets/word_line.dart';
+import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/bodies/body_props.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/chip_stage.dart';
 import 'package:englizia/features/lessons/presentation/exercise/widgets/shared/word_chip.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 /// One mistake in the sentence: tap it, then choose the correction, which flies
 /// into its place. Right only with the right word and the right correction
@@ -44,7 +44,7 @@ class _ErrorCorrectionBodyState extends State<ErrorCorrectionBody> {
   bool get _locked => widget.answer.evaluation != null;
 
   void _pickWord(String tokenId) {
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     final draft = _draft;
     widget.answer.onDraft(
       CorrectionDraft(
@@ -57,7 +57,7 @@ class _ErrorCorrectionBodyState extends State<ErrorCorrectionBody> {
   void _pickCorrection(WordChip chip) {
     final tokenId = _draft?.tokenId;
     if (tokenId == null) return;
-    HapticFeedback.selectionClick();
+    AppHaptics.selectionClick();
     _stage.currentState!.move(
       [
         ChipMove(

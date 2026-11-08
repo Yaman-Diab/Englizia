@@ -50,6 +50,8 @@ abstract final class AppRoutes {
   static const talkScenario = '/talk/scenarios/:scenarioId';
   static const me = '/me';
   static const meSettings = '/me/settings';
+  static const meSettingsPassword = '/me/settings/password';
+  static const meSettingsDelete = '/me/settings/delete';
   static const meJoin = '/me/join';
   static const unitStart = '/units/next';
 
