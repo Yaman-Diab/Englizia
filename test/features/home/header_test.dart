@@ -690,6 +690,103 @@ void main() {
     });
   });
 
+  group('the one guide', () {
+    GuidePlacement guide({
+      bool flying = false,
+      bool collapsed = false,
+      bool hasCurrentIsland = true,
+      bool backButton = false,
+      double pull = 0,
+      bool levelCardShown = false,
+      HomeCardNotice card = HomeCardNotice.none,
+      GuidePlacement? forced,
+    }) => resolveGuide(
+      flying: flying,
+      collapsed: collapsed,
+      hasCurrentIsland: hasCurrentIsland,
+      backButton: backButton,
+      pull: pull,
+      levelCardShown: levelCardShown,
+      card: card,
+      current: 3,
+      forced: forced,
+    );
+
+    test('forced, flying, then the collapsed map', () {
+      expect(
+        guide(forced: const GuideHop(1, 2, .5), flying: true, collapsed: true),
+        const GuideHop(1, 2, .5),
+      );
+      expect(guide(flying: true, collapsed: true), const GuideFlying());
+      expect(guide(collapsed: true), const GuideBesideStone(3));
+      expect(
+        guide(collapsed: true, backButton: true, pull: 40),
+        const GuideInBackButton(),
+      );
+    });
+
+    test('collapsed with no current island: the pull, then the card', () {
+      expect(
+        guide(
+          collapsed: true,
+          hasCurrentIsland: false,
+          card: HomeCardNotice.levelDone,
+        ),
+        const GuideOnCard(),
+      );
+      expect(
+        guide(collapsed: true, hasCurrentIsland: false),
+        const GuideInRing(),
+      );
+    });
+
+    test('hanging from the pull\'s threshold, over a card', () {
+      expect(guide(pull: AppMotion.homePullGuideAt - .1), const GuideInRing());
+      expect(
+        guide(pull: AppMotion.homePullGuideAt, card: HomeCardNotice.freeze),
+        const GuideHanging(),
+      );
+    });
+
+    test('on a freeze, broke or level card; in the ring otherwise', () {
+      for (final card in [
+        HomeCardNotice.freeze,
+        HomeCardNotice.broke,
+        HomeCardNotice.levelDone,
+      ]) {
+        expect(guide(card: card), const GuideOnCard(), reason: '$card');
+      }
+      expect(guide(levelCardShown: true), const GuideOnCard());
+      expect(guide(card: HomeCardNotice.levelCheck), const GuideInRing());
+      expect(guide(card: HomeCardNotice.placement), const GuideInRing());
+    });
+
+    test('the ring shows the minutes once the guide left, header open', () {
+      const away = GuideInBackButton();
+      expect(ringShowsMinutes(kids: false, guide: away, m: _metrics()), isTrue);
+      expect(
+        ringShowsMinutes(
+          kids: false,
+          guide: away,
+          m: _metrics(collapse: DayHeader.base / 2),
+        ),
+        isFalse,
+      );
+      expect(
+        ringShowsMinutes(kids: true, guide: away, m: _metrics(kids: true)),
+        isFalse,
+      );
+      expect(
+        ringShowsMinutes(
+          kids: false,
+          guide: const GuideInRing(),
+          m: _metrics(),
+        ),
+        isFalse,
+      );
+    });
+  });
+
   group('goal ring', () {
     test('the guide\'s face follows the fraction', () {
       expect(GoalRingOverlay.expressionFor(0), MascotExpression.welcome);

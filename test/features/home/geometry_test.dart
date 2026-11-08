@@ -233,6 +233,14 @@ void main() {
       expect(l.height, 344);
       expect(l.bubbleCenterY, 225);
       expect(points(l), [(312, 78), (196, 78), (80, 78)]);
+      expect(l.exit, const Offset(80, 338));
+      final frame = l.bubbleFrame(
+        reviewFirst: false,
+        targetX: l.stones[1].dx,
+        targetRow: 0,
+      );
+      expect((frame.x0, frame.x1, frame.tailX), (46, 340, 196 - 46 - 9));
+      expect(frame.side, TailSide.top, reason: 'the stones stand above it');
       final kids = lay(2, 0, kids: true);
       expect(kids.height, 350);
       expect(kids.bubbleCenterY, 235);
@@ -470,6 +478,35 @@ void main() {
       );
       expect(anchor.box, isNull);
       expect(anchor.rel, -10);
+    });
+
+    test('other sizes: one row, two rows of two, four rows', () {
+      ({BoxPlace? box, double rel}) anchor(int n, int cur, {bool box = true}) {
+        final a = MapAnchor.compute(
+          island: IslandLayout.compute(
+            lessons: n,
+            current: cur,
+            kids: false,
+            frame: design,
+          ),
+          current: cur,
+          kids: false,
+          reviewBox: box,
+          reviewStation: false,
+          partial: false,
+          pt: 154,
+          view: 624,
+          bubbleHeight: 170,
+        );
+        return (box: a.box, rel: a.rel);
+      }
+
+      // A one-row island is short enough for the box on top.
+      expect(anchor(3, 1), (box: BoxPlace.top, rel: -58 - 20));
+      expect(anchor(3, 1, box: false), (box: null, rel: -10));
+      expect(anchor(4, 2), (box: BoxPlace.exit, rel: 42));
+      expect(anchor(10, 8), (box: BoxPlace.exit, rel: 222));
+      expect(anchor(10, 8, box: false), (box: null, rel: 215));
     });
 
     test('first lesson, no box: the banner shows whole', () {
