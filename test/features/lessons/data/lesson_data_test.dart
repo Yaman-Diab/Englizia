@@ -25,6 +25,7 @@ import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/entities/teacher_question.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
@@ -1576,6 +1577,31 @@ void main() {
       videoId: 'v',
       positionSeconds: 5,
       ranges: [(0, 5)],
+    );
+
+    test(
+      'a unit learns from the phone: kept, where it stopped, done',
+      () async {
+        expect(repository.onPhone('les'), const LessonOnPhone());
+
+        await repository.getLesson('les');
+        final total = remote.lesson.readList('exercises')!.length;
+        await repository.saveProgress(
+          'les',
+          const ExerciseProgress(done: {'q1', 'q2'}),
+        );
+        final phone = repository.onPhone('les');
+        expect(phone.kept, isTrue);
+        expect(phone.done, isFalse);
+        expect(phone.resume, LessonResume(question: 3, share: 2 / total));
+
+        remote.offline = true;
+        await repository.completeLesson(finished);
+        expect(repository.onPhone('les').done, isTrue, reason: 'still waiting');
+        remote.offline = false;
+        await repository.sendSaved();
+        expect(repository.onPhone('les').done, isTrue, reason: 'sent');
+      },
     );
 
     test('the reader remembers its settings and its tip', () async {

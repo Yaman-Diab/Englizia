@@ -9,7 +9,10 @@ import 'package:flutter/material.dart';
 
 /// A thin band, not an error: it isn't the learner's mistake, and «تحقق» works.
 class OfflineBand extends StatelessWidget {
-  const OfflineBand({super.key});
+  const OfflineBand({this.message, super.key});
+
+  /// What still works offline; by default, the lesson's.
+  final String? message;
 
   static const _iconSize = 18.0;
 
@@ -35,7 +38,7 @@ class OfflineBand extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  'lesson_offline'.tr(),
+                  message ?? 'lesson_offline'.tr(),
                   style: context.texts.caption.copyWith(
                     color: colors.info.text,
                   ),

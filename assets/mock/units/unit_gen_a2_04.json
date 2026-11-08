@@ -1,0 +1,70 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "unit_gen_a2_04",
+    "number": 4,
+    "title": "في السوق",
+    "levelLabel": "A2",
+    "cover": "assets/mock/units/market.svg",
+    "kidsMode": false,
+    "ordered": true,
+    "goals": [
+      "تسأل عن الأسعار وتجيب",
+      "تعدّ حتى مئة",
+      "تطلب ما تريد بأدب"
+    ],
+    "concepts": [
+      {
+        "id": "c_how_much",
+        "name": "How much / How many"
+      }
+    ],
+    "lockedBy": {
+      "id": "unit_gen_a2_03",
+      "number": 3,
+      "title": "يوم في المزرعة"
+    },
+    "lessons": [
+      {
+        "id": "les_market_words",
+        "kind": "vocabulary",
+        "title": "كلمات السوق",
+        "minutes": 5
+      },
+      {
+        "id": "les_market_video",
+        "kind": "interactiveVideo",
+        "title": "جولة في السوق",
+        "minutes": 6
+      },
+      {
+        "id": "les_market_grammar",
+        "kind": "grammarVideo",
+        "title": "كم الثمن؟",
+        "minutes": 7
+      },
+      {
+        "id": "les_market_text",
+        "kind": "interactiveText",
+        "title": "قائمة أمي",
+        "minutes": 6
+      },
+      {
+        "id": "les_market_chat",
+        "kind": "conversation",
+        "title": "كم ثمن هذا؟",
+        "minutes": 5,
+        "scenarioId": "sc_how_much"
+      },
+      {
+        "id": "les_market_review",
+        "kind": "unitReview",
+        "title": "مراجعة الوحدة",
+        "minutes": 10
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}

@@ -14,6 +14,7 @@ import 'package:englizia/features/lessons/domain/entities/kid_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
@@ -229,4 +230,11 @@ class FakeLessonRepository implements LessonRepository {
     cleared++;
     saved.remove(lessonId);
   }
+
+  /// What [onPhone] says of each lesson; by default nothing.
+  final phone = <String, LessonOnPhone>{};
+
+  @override
+  LessonOnPhone onPhone(String lessonId) =>
+      phone[lessonId] ?? const LessonOnPhone();
 }

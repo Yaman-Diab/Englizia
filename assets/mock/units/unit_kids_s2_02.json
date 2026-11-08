@@ -1,0 +1,72 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "unit_kids_s2_02",
+    "number": 2,
+    "title": "يوم في المزرعة",
+    "levelLabel": "Starter 2",
+    "cover": "assets/mock/units/farm.svg",
+    "kidsMode": true,
+    "ordered": true,
+    "titleAudio": "https://example.com/mock/kids/unit_farm.mp3",
+    "lessons": [
+      {
+        "id": "les_kid",
+        "kind": "vocabulary",
+        "title": "Animals",
+        "done": true,
+        "stars": 5,
+        "image": "assets/mock/lessons/kids/cow.svg",
+        "audio": "https://example.com/mock/kids/cow_title.mp3"
+      },
+      {
+        "id": "les_kid_media",
+        "kind": "vocabulary",
+        "title": "Farm song",
+        "done": true,
+        "stars": 4,
+        "image": "assets/mock/lessons/kids/duck.svg",
+        "audio": "https://example.com/mock/kids/duck_title.mp3"
+      },
+      {
+        "id": "les_kid_cat",
+        "kind": "vocabulary",
+        "title": "My cat",
+        "done": true,
+        "stars": 3,
+        "image": "assets/mock/lessons/kids/cat.svg",
+        "audio": "https://example.com/mock/kids/cat_title.mp3"
+      },
+      {
+        "id": "les_kid_eggs",
+        "kind": "vocabulary",
+        "title": "Eggs",
+        "done": false,
+        "stars": 0,
+        "image": "assets/mock/lessons/kids/egg.svg",
+        "audio": "https://example.com/mock/kids/egg_title.mp3"
+      },
+      {
+        "id": "les_kid_hello",
+        "kind": "vocabulary",
+        "title": "Hello!",
+        "done": false,
+        "stars": 0,
+        "image": "assets/mock/lessons/kids/bird.svg",
+        "audio": "https://example.com/mock/kids/bird_title.mp3"
+      },
+      {
+        "id": "les_kid_play",
+        "kind": "vocabulary",
+        "title": "Play",
+        "done": false,
+        "stars": 0,
+        "image": "assets/mock/lessons/kids/dog.svg",
+        "audio": "https://example.com/mock/kids/dog_title.mp3"
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}

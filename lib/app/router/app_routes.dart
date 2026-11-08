@@ -27,6 +27,7 @@ abstract final class AppRoutes {
   static const newPassword = '/reset-password';
   static const passwordChanged = '/reset-password/done';
 
+  static const unit = '/units/:unitId';
   static const lessonGrammar = '/lessons/:lessonId/grammar';
   static const lessonText = '/lessons/:lessonId/text';
   static const lessonVideo = '/lessons/:lessonId/video';
@@ -49,6 +50,8 @@ abstract final class AppRoutes {
   static const talkScenario = '/talk/scenarios/:scenarioId';
   static const me = '/me';
   static const unitStart = '/units/next';
+
+  static String unitOf(String unitId) => '/units/$unitId';
 
   static String grammarOf(String lessonId) => '/lessons/$lessonId/grammar';
 

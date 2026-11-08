@@ -166,6 +166,8 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
         'les_voc' => vocabularyAsset,
         'les_kid' => kidAsset,
         'les_kid_media' => kidMediaAsset,
+        // The kids' unit's other lessons.
+        _ when lessonId.startsWith('les_kid') => kidAsset,
         _ => asset,
       }),
     );

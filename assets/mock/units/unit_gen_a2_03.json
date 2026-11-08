@@ -1,0 +1,80 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "unit_gen_a2_03",
+    "number": 3,
+    "title": "يوم في المزرعة",
+    "levelLabel": "A2",
+    "cover": "assets/mock/units/farm.svg",
+    "kidsMode": false,
+    "ordered": true,
+    "goals": [
+      "تصف يومًا في الريف",
+      "تستخدم المضارع البسيط للعادات",
+      "تطلب وتعطي تعليمات بسيطة"
+    ],
+    "concepts": [
+      {
+        "id": "c_present_simple",
+        "name": "المضارع البسيط"
+      },
+      {
+        "id": "c_articles",
+        "name": "a / an"
+      }
+    ],
+    "next": {
+      "id": "unit_gen_a2_04",
+      "number": 4,
+      "title": "في السوق"
+    },
+    "lessons": [
+      {
+        "id": "les_voc",
+        "kind": "vocabulary",
+        "title": "كلمات المزرعة",
+        "minutes": 5,
+        "done": true
+      },
+      {
+        "id": "les_iv",
+        "kind": "interactiveVideo",
+        "title": "صباح في المزرعة",
+        "minutes": 6,
+        "done": true
+      },
+      {
+        "id": "les_gv",
+        "kind": "grammarVideo",
+        "title": "المضارع البسيط",
+        "minutes": 8,
+        "done": true
+      },
+      {
+        "id": "les_it",
+        "kind": "interactiveText",
+        "title": "يوم في حياة سارة",
+        "minutes": 7,
+        "done": false
+      },
+      {
+        "id": "les_chat_box",
+        "kind": "conversation",
+        "title": "الصندوق القابل للكسر",
+        "minutes": 5,
+        "done": false,
+        "scenarioId": "sc_fragile_box"
+      },
+      {
+        "id": "les_mock",
+        "kind": "unitReview",
+        "title": "مراجعة الوحدة",
+        "minutes": 10,
+        "done": false
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000-0000-0000-0000-000000000000"
+}

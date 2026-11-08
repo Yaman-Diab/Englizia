@@ -283,12 +283,16 @@ class KidGuideButton extends StatelessWidget {
     required this.speaking,
     required this.expression,
     required this.onPressed,
+    this.label,
     super.key,
   });
 
   final bool speaking;
   final MascotExpression expression;
   final VoidCallback onPressed;
+
+  /// What pressing it says; by default, the instruction again.
+  final String? label;
 
   static const _guide = 64.0;
   static const _bubble = 30.0;
@@ -298,7 +302,7 @@ class KidGuideButton extends StatelessWidget {
     final colors = context.colors;
     return Semantics(
       button: true,
-      label: 'kid_say_again'.tr(),
+      label: label ?? 'kid_say_again'.tr(),
       excludeSemantics: true,
       child: GestureDetector(
         onTap: onPressed,

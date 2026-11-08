@@ -30,6 +30,7 @@ import 'package:englizia/features/account/presentation/verify_email/cubit/email_
 import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/complete/pages/lesson_complete_page.dart';
 import 'package:englizia/features/lessons/presentation/concepts/cubit/concept_session_cubit.dart';
@@ -51,6 +52,8 @@ import 'package:englizia/features/lessons/presentation/reader/pages/interactive_
 import 'package:englizia/features/lessons/presentation/reader/pages/interactive_video_page.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing_cubit.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/pages/shadowing_page.dart';
+import 'package:englizia/features/lessons/presentation/unit/cubit/unit_cubit.dart';
+import 'package:englizia/features/lessons/presentation/unit/pages/unit_page.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/pages/vocab_lesson_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -734,8 +737,8 @@ GoRouter createAppRouter(AppSessionController session) {
               ),
               null => context.push(AppRoutes.unitStart),
             },
-            // The unit's screen isn't built yet.
-            onBack: () => context.go(AppRoutes.home),
+            // Back to the unit it was opened from.
+            onBack: () => _back(context),
             onWords: () => context.push(AppRoutes.savedWords),
           ),
         ),
@@ -877,6 +880,21 @@ GoRouter createAppRouter(AppSessionController session) {
         path: AppRoutes.unitStart,
         builder: (_, _) => PendingPage(title: 'lesson_done_next_unit'.tr()),
       ),
+      // After `unitStart`, so «/units/next» isn't taken for a unit's id.
+      GoRoute(
+        path: AppRoutes.unit,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              sl<UnitCubit>(param1: state.pathParameters['unitId'])..start(),
+          child: UnitPage(
+            onBack: () => _back(context),
+            onOpen: (lesson, {required kids}) =>
+                context.push(_unitLessonPath(lesson, kids: kids)),
+            onUnit: (unit) =>
+                context.pushReplacement(AppRoutes.unitOf(unit.id)),
+          ),
+        ),
+      ),
       GoRoute(
         path: AppRoutes.verifyEmail,
         builder: (context, state) {
@@ -964,6 +982,19 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
 
 void _back(BuildContext context) =>
     context.canPop() ? context.pop() : context.go(AppRoutes.home);
+
+/// Where a unit's lesson opens, by its kind.
+String _unitLessonPath(UnitLesson lesson, {required bool kids}) =>
+    switch (lesson.kind) {
+      _ when kids => AppRoutes.kidsOf(lesson.id),
+      LessonKind.vocabulary => AppRoutes.vocabularyOf(lesson.id),
+      LessonKind.interactiveVideo => AppRoutes.videoOf(lesson.id),
+      LessonKind.grammarVideo => AppRoutes.grammarOf(lesson.id),
+      LessonKind.interactiveText => AppRoutes.textOf(lesson.id),
+      LessonKind.conversation when lesson.scenarioId != null =>
+        AppRoutes.talkScenarioOf(lesson.scenarioId!),
+      _ => AppRoutes.exercisesOf(lesson.id),
+    };
 
 /// The tabs' bar: «تعلّم» is the temporary home for now.
 void _openTab(BuildContext context, AppTab tab) => switch (tab) {
