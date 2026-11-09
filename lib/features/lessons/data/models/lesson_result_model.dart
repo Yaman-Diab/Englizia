@@ -55,6 +55,9 @@ NextStep? _next(Map<String, Object?>? json) {
     title: json.readString('title') ?? '',
     lessonId: json.readString('lessonId'),
     lessonKind: _kind(json.readString('lessonKind')),
+    // ASSUMPTION(api): `next.scenarioId`, as a unit's lessons have it
+    // (docs/api/lessons.md).
+    scenarioId: json.readString('scenarioId'),
     unitNumber: json.readInt('unitNumber'),
   );
 }
