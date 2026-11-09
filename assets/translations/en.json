@@ -1537,5 +1537,7 @@
   "foundation_home_refresh_fails": "Refresh fails",
   "foundation_home_slow": "Loading skeleton",
   "foundation_home_v01": "Version 0.1",
-  "foundation_home_opening": "Replay the opening"
+  "foundation_home_opening": "Replay the opening",
+  "video_capture_title": "The video is hidden while the screen is recorded",
+  "video_capture_body": "It comes back when the recording or screen sharing stops."
 }

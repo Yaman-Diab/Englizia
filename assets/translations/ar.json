@@ -1808,5 +1808,7 @@
   "foundation_home_refresh_fails": "فشل التحديث",
   "foundation_home_slow": "هيكل التحميل",
   "foundation_home_v01": "نسخة v0.1",
-  "foundation_home_opening": "أعد حركة الافتتاح"
+  "foundation_home_opening": "أعد حركة الافتتاح",
+  "video_capture_title": "الفيديو مخفي أثناء تسجيل الشاشة",
+  "video_capture_body": "يعود حين يتوقف التسجيل أو عرض الشاشة."
 }

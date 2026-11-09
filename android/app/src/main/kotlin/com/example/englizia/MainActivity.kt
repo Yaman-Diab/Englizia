@@ -29,6 +29,18 @@ class MainActivity : FlutterActivity() {
                 }
                 result.success(null)
             }
+        // While a lesson's video shows: no screenshot, no recording (they come
+        // out black), and no preview among the recent apps.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/screen_secure")
+            .setMethodCallHandler { call, result ->
+                if (call.method != "set") return@setMethodCallHandler result.notImplemented()
+                if (call.arguments == true) {
+                    window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                } else {
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                }
+                result.success(null)
+            }
     }
 
     /** Views a link in the app that handles it (WhatsApp, the browser). */

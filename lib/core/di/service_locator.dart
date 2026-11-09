@@ -20,6 +20,7 @@ import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/dio_factory.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
+import 'package:englizia/core/security/screen_protection.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/core/storage/secure_token_storage.dart';
@@ -97,6 +98,8 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     ..registerFactory(() => MicCubit(sl(), sl(), sounds: sl()))
     ..registerLazySingleton<DeviceVolume>(PlatformDeviceVolume.new)
     ..registerLazySingleton<MailApp>(() => const PlatformMailApp())
+    // A lesson's video out of screenshots and recordings (ADR 18).
+    ..registerLazySingleton<ScreenProtection>(PlatformScreenProtection.new)
     ..registerLazySingleton<ExternalLink>(() => const PlatformExternalLink())
     ..registerFactory(() => SettingsCubit(sl()));
 }
