@@ -98,6 +98,15 @@
           "en": "Just {minutes} minutes keeps your streak going"
         }
       }
+    },
+    "appVersion": {
+      "android": {
+        "minVersion": "0.0.1",
+        "updateUrl": "https://play.google.com/store/apps/details?id=com.example.englizia"
+      },
+      "ios": {
+        "minVersion": "0.0.1"
+      }
     }
   },
   "error": null,

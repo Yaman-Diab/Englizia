@@ -1,4 +1,5 @@
 import 'package:englizia/core/config/app_config.dart';
+import 'package:englizia/core/session/device_platform.dart';
 import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
 import 'package:englizia/features/settings/data/repositories/settings_repository_impl.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
@@ -13,6 +14,6 @@ void registerSettingsDependencies(GetIt sl) {
           : SettingsRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<SettingsRepository>(
-      () => SettingsRepositoryImpl(sl()),
+      () => SettingsRepositoryImpl(sl(), sl(), platform: devicePlatform()),
     );
 }

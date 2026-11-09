@@ -7,12 +7,16 @@ import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
+import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
 import 'package:englizia/features/settings/data/models/effective_settings_model.dart';
 import 'package:englizia/features/settings/data/repositories/settings_repository_impl.dart';
+import 'package:englizia/features/settings/domain/entities/app_version.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fake_settings_repository.dart';
@@ -122,7 +126,10 @@ void main() {
   test('the challenge needs its question', () {
     final json = example();
     json.readMap('motivation')!.remove('challengeQuestion');
-    expect(() => EffectiveSettingsModel.fromJson(json), throwsFormatException);
+    expect(
+      () => EffectiveSettingsModel.fromJson(json).entity,
+      throwsFormatException,
+    );
   });
 
   test('the lesson length is optional', () {
@@ -136,15 +143,19 @@ void main() {
 
   test('incomplete settings are rejected', () {
     expect(
-      () => EffectiveSettingsModel.fromJson(example()..remove('motivation')),
+      () => EffectiveSettingsModel.fromJson(
+        example()..remove('motivation'),
+      ).entity,
       throwsFormatException,
     );
     expect(
-      () => EffectiveSettingsModel.fromJson(example()..remove('notifications')),
+      () => EffectiveSettingsModel.fromJson(
+        example()..remove('notifications'),
+      ).entity,
       throwsFormatException,
     );
     expect(
-      () => EffectiveSettingsModel.fromJson(const {}),
+      () => EffectiveSettingsModel.fromJson(const {}).entity,
       throwsFormatException,
     );
   });
@@ -173,9 +184,20 @@ void main() {
   });
 
   group('SettingsRepositoryImpl', () {
+    late SharedPreferences prefs;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
+    });
+
     test('maps errors through the error funnel and retries them', () async {
       final source = _FlakyDataSource(failures: 1);
-      final repository = SettingsRepositoryImpl(source);
+      final repository = SettingsRepositoryImpl(
+        source,
+        SettingsStorageService(prefs),
+        platform: 'android',
+      );
 
       final first = await repository.getSettings();
       expect((first as Err).failure, isA<NetworkFailure>());
@@ -186,12 +208,103 @@ void main() {
 
     test('keeps a success for the session', () async {
       final source = _FlakyDataSource();
-      final repository = SettingsRepositoryImpl(source);
+      final repository = SettingsRepositoryImpl(
+        source,
+        SettingsStorageService(prefs),
+        platform: 'android',
+      );
 
       await repository.getSettings();
       await repository.getSettings();
 
       expect(source.calls, 1);
+    });
+  });
+
+  group('versions', () {
+    test("the example has each platform's minimum and store page", () {
+      final model = EffectiveSettingsModel.fromJson(example());
+      expect(
+        model.versionsFor('android'),
+        VersionPolicy(
+          minimum: const AppVersion(0, 0, 1),
+          updateUrl: Uri.parse(
+            'https://play.google.com/store/apps/details?id=com.example.englizia',
+          ),
+        ),
+      );
+      expect(
+        model.versionsFor('ios'),
+        const VersionPolicy(minimum: AppVersion(0, 0, 1)),
+      );
+      expect(model.versionsFor(null), VersionPolicy.none);
+    });
+
+    test("a value that isn't valid is left out alone", () {
+      final json = example()
+        ..['appVersion'] = {
+          'android': {
+            'minVersion': '1.x',
+            'recommendedVersion': '2.1',
+            'updateUrl': 'market://details?id=x',
+          },
+        };
+      expect(
+        EffectiveSettingsModel.fromJson(json).versionsFor('android'),
+        const VersionPolicy(recommended: AppVersion(2, 1)),
+      );
+    });
+
+    test('read even when another group is incomplete', () {
+      final json = example()..remove('motivation');
+      expect(
+        EffectiveSettingsModel.fromJson(json).versionsFor('ios').minimum,
+        const AppVersion(0, 0, 1),
+      );
+    });
+  });
+
+  group('SettingsRepositoryImpl versions', () {
+    late SharedPreferences prefs;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
+    });
+
+    SettingsRepositoryImpl repository(SettingsRemoteDataSource source) =>
+        SettingsRepositoryImpl(
+          source,
+          SettingsStorageService(prefs),
+          platform: 'android',
+        );
+
+    test(
+      'kept on the phone, and served from there without a connection',
+      () async {
+        expect(
+          ((await repository(_FlakyDataSource()).getVersionPolicy())
+                  as Ok<VersionPolicy>)
+              .value
+              .minimum,
+          const AppVersion(0, 0, 1),
+        );
+
+        final offline = await repository(
+          _FlakyDataSource(failures: 1),
+        ).getVersionPolicy();
+        expect(
+          (offline as Ok<VersionPolicy>).value.minimum,
+          const AppVersion(0, 0, 1),
+        );
+      },
+    );
+
+    test('an error with no connection and nothing kept', () async {
+      final result = await repository(
+        _FlakyDataSource(failures: 1),
+      ).getVersionPolicy();
+      expect((result as Err).failure, isA<NetworkFailure>());
     });
   });
 }

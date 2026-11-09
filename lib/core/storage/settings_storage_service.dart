@@ -36,6 +36,8 @@ final class SettingsStorageService {
   static const _profileKey = 'account.profile';
   static const _meSeenKey = 'account.me_seen_day';
   static const _homeKey = 'account.home';
+  static const _versionPolicyKey = 'app.version_policy';
+  static const _updateReminderDayKey = 'app.update_reminder_day';
   static const _homeOpeningDayKey = 'account.home_opening_day';
   static const _homeSeenEventsKey = 'account.home_seen_events';
 
@@ -229,6 +231,21 @@ final class SettingsStorageService {
   }
 
   /// Home («تعلّم») as last received, as JSON, to show at once and offline.
+  /// The last versions the server sent for this phone, so an open without a
+  /// connection still stops an app too old to run. Not account data.
+  String? get versionPolicy => _prefs.getString(_versionPolicyKey);
+
+  Future<void> setVersionPolicy(String json) async {
+    await _prefs.setString(_versionPolicyKey, json);
+  }
+
+  /// The day ("yyyy-MM-dd") the update reminder last showed: once a day.
+  String? get updateReminderDay => _prefs.getString(_updateReminderDayKey);
+
+  Future<void> setUpdateReminderDay(String day) async {
+    await _prefs.setString(_updateReminderDayKey, day);
+  }
+
   String? get home => _prefs.getString(_homeKey);
 
   Future<void> setHome(String json) async {
