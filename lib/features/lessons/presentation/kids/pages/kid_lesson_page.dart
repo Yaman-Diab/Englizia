@@ -13,6 +13,7 @@ import 'package:englizia/core/design_system/motion/shake.dart';
 import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/security/protected_video.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/kid_lesson.dart';
 import 'package:englizia/features/lessons/presentation/kids/cubit/kid_lesson_cubit.dart';
@@ -546,7 +547,10 @@ class _VideoPictureState extends State<_VideoPicture> {
   late final Widget _picture = widget.cubit.engine.view();
 
   @override
-  Widget build(BuildContext context) => _picture;
+  Widget build(BuildContext context) => ProtectedVideo(
+    onCaptured: () => unawaited(widget.cubit.engine.pause()),
+    child: _picture,
+  );
 }
 
 /// A word that starts with the letter: its picture, and the word with its

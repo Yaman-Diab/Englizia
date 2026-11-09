@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/security/protected_video.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/presentation/grammar/widgets/option_sheet.dart';
 import 'package:englizia/features/lessons/presentation/video/player_contract.dart';
@@ -190,7 +191,10 @@ class _LessonPlayerState extends State<LessonPlayer> {
           child: switch (state.stage) {
             VideoStage.cover => _Cover(state: state, actions: _actions),
             VideoStage.failed => _Failed(onRetry: _actions.retry),
-            VideoStage.playing => _frame(state),
+            VideoStage.playing => ProtectedVideo(
+              onCaptured: () => unawaited(_actions.engine.pause()),
+              child: _frame(state),
+            ),
           },
         ),
       ),
