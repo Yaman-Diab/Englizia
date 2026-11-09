@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/app/shell/tab_shell.dart';
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/practice/domain/entities/word_bank.dart';
@@ -187,6 +188,23 @@ void main() {
       addTearDown(subject.close);
       return subject;
     }
+
+    test('a card turns with its sound, once', () {
+      final sounds = FakeSoundPlayer();
+      final subject = ReviewCubit(
+        practice,
+        player,
+        now: () => _today,
+        sounds: sounds,
+      )..start();
+      addTearDown(subject.close);
+
+      subject
+        ..flip()
+        ..flip();
+
+      expect(sounds.played, [AppSound.cardFlip]);
+    });
 
     test(
       'it takes the words due, and turning comes before answering',

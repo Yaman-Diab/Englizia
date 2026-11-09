@@ -174,11 +174,23 @@ class FakeClipPlayer implements ClipPlayer {
 class FakeSoundPlayer implements SoundPlayer {
   final played = <AppSound>[];
 
+  /// How many [holdQuiet]s are still held.
+  var holds = 0;
+
+  @override
+  bool kidsMode = false;
+
   @override
   Future<void> preload() async {}
 
   @override
   Future<void> play(AppSound sound) async => played.add(sound);
+
+  @override
+  VoidCallback holdQuiet() {
+    holds++;
+    return () => holds--;
+  }
 }
 
 /// Hears what it is told to, when it is told to.

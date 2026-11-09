@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/features/lessons/domain/entities/concept.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/repositories/concept_repository.dart';
@@ -94,14 +96,19 @@ final class ConceptSessionState extends Equatable {
 /// new question in the lessons' own templates and feedback, then the station it
 /// reached. It runs offline, as today's questions came with the concepts.
 class ConceptSessionCubit extends Cubit<ConceptSessionState> {
-  ConceptSessionCubit(this._concepts, ClipPlayer player)
-    : _clip = ClipPlayback(player),
-      super(const ConceptSessionState());
+  ConceptSessionCubit(
+    this._concepts,
+    ClipPlayer player, {
+    SoundPlayer sounds = const SilentSoundPlayer(),
+  }) : _clip = ClipPlayback(player),
+       _sounds = sounds,
+       super(const ConceptSessionState());
 
   static const slowSpeed = .75;
 
   final ConceptRepository _concepts;
   final ClipPlayback _clip;
+  final SoundPlayer _sounds;
 
   void start() => emit(
     ConceptSessionState(
@@ -129,7 +136,12 @@ class ConceptSessionCubit extends Cubit<ConceptSessionState> {
     final draft = state.draft;
     if (question == null || draft == null || !state.canCheck) return;
     await stopAudio();
-    emit(state.copyWith(evaluation: () => evaluate(question, draft)));
+    final evaluation = evaluate(question, draft);
+    // A right answer is the station passed (S §11.2).
+    unawaited(
+      _sounds.play(evaluation.correct ? AppSound.correct : AppSound.incorrect),
+    );
+    emit(state.copyWith(evaluation: () => evaluation));
   }
 
   /// The feedback's «التالي»: the answer moves the concept.
@@ -143,6 +155,9 @@ class ConceptSessionCubit extends Cubit<ConceptSessionState> {
       correct: evaluation.correct,
     );
     if (isClosed) return;
+    if (outcome.kind == OutcomeKind.mastered) {
+      unawaited(_sounds.play(AppSound.achievement));
+    }
     emit(
       state.copyWith(
         stage: ConceptStage.result,

@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/app.dart';
 import 'package:englizia/app/di.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
@@ -35,6 +38,8 @@ Future<void> main() async {
   await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await EasyLocalization.ensureInitialized();
   await configureDependencies();
+  // Ready before the first touch that makes a sound; never waited on.
+  unawaited(sl<SoundPlayer>().preload());
 
   runApp(
     EasyLocalization(

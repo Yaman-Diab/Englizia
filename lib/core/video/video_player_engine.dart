@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/video/video_engine.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +9,15 @@ import 'package:video_player/video_player.dart';
 
 /// [VideoEngine] on Flutter's own `video_player`. While it plays the screen stays
 /// on (S §8.1), through a small native channel: no keep-awake package fits the
-/// Flutter pin (ADR 15).
+/// Flutter pin (ADR 15). While it plays, the app's sounds keep quiet (ADR 9).
 final class VideoPlayerEngine implements VideoEngine {
+  VideoPlayerEngine({SoundPlayer sounds = const SilentSoundPlayer()})
+    : _sounds = sounds;
+
   static const _screen = MethodChannel('englizia/screen_awake');
+
+  final SoundPlayer _sounds;
+  VoidCallback? _quiet;
 
   final _changes = StreamController<VideoSnapshot>.broadcast();
   final _open = ValueNotifier<VideoPlayerController?>(null);
@@ -75,6 +82,12 @@ final class VideoPlayerEngine implements VideoEngine {
   void _keepScreenOn(bool on) {
     if (on == _awake) return;
     _awake = on;
+    if (on) {
+      _quiet ??= _sounds.holdQuiet();
+    } else {
+      _quiet?.call();
+      _quiet = null;
+    }
     unawaited(
       _screen.invokeMethod<void>('set', on).catchError((Object error) {
         AppLogger.error(error, StackTrace.current, 'Keeping the screen on');

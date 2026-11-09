@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/play_sound.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -558,6 +560,7 @@ class _HomePageState extends State<HomePage>
   void _openLesson(HomeLesson lesson, {bool grow = false}) {
     final home = _cubit.state.home;
     if (home == null) return;
+    playSound(AppSound.tap);
     _closeCard();
     void push() => widget.actions.openLesson(lesson.base, kids: home.kids);
     final rect = grow ? _globalRect(_bubbleKey) : null;

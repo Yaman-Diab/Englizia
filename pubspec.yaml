@@ -29,6 +29,8 @@ dependencies:
   speech_to_text: ^7.4.0
   volume_controller: ^3.5.0
   video_player: ^2.11.1
+  just_audio: ^0.10.6
+  audio_session: ^0.2.4
 
 dev_dependencies:
   flutter_test:
@@ -43,6 +45,10 @@ flutter:
 
   assets:
     - assets/translations/
+    # The app's sound effects (lib/core/audio/sound_catalog.dart); where each
+    # came from is in assets/sounds/LICENSES.md.
+    - assets/sounds/
+    - assets/sounds/kids/
     # Mock mode data (env/mock.json); each file goes when its endpoint is
     # confirmed, see docs/STATUS.md.
     - assets/mock/tracks/

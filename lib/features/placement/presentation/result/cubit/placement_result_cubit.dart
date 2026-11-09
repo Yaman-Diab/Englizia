@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/placement/domain/entities/placement_result.dart';
@@ -102,12 +106,17 @@ final class PlacementResultState extends Equatable {
 /// one level lower, after confirming, and the server hears only of the final
 /// choice.
 class PlacementResultCubit extends Cubit<PlacementResultState> {
-  PlacementResultCubit(this._placement, {required String attemptId})
-    : _attemptId = attemptId,
-      super(const PlacementResultState());
+  PlacementResultCubit(
+    this._placement, {
+    required String attemptId,
+    SoundPlayer sounds = const SilentSoundPlayer(),
+  }) : _attemptId = attemptId,
+       _sounds = sounds,
+       super(const PlacementResultState());
 
   final PlacementRepository _placement;
   final String _attemptId;
+  final SoundPlayer _sounds;
 
   Future<void> load() async {
     emit(
@@ -123,6 +132,7 @@ class PlacementResultCubit extends Cubit<PlacementResultState> {
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
+        unawaited(_sounds.play(AppSound.achievement));
         emit(
           state.copyWith(
             view: PlacementResultView.ready,

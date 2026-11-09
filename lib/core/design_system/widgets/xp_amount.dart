@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
+import 'package:englizia/core/audio/app_sound.dart';
+import 'package:englizia/core/audio/play_sound.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -18,6 +20,7 @@ class XpAmount extends StatefulWidget {
     this.starSize = AppSizes.iconSm + AppSpacing.xs,
     this.delay = Duration.zero,
     this.duration = AppMotion.countUp,
+    this.ticks = false,
     super.key,
   });
 
@@ -28,6 +31,10 @@ class XpAmount extends StatefulWidget {
   final double starSize;
   final Duration delay;
   final Duration duration;
+
+  /// Each step of the count ticks, on a lesson's end; the catalog keeps the
+  /// ticks to a few a second.
+  final bool ticks;
 
   @override
   State<XpAmount> createState() => _XpAmountState();
@@ -49,7 +56,16 @@ class _XpAmountState extends State<XpAmount>
     super.dispose();
   }
 
+  int? _ticked;
+
   String _label(int xp) => 'xp_gain'.tr(namedArgs: {'xp': '$xp'});
+
+  /// A tick for each new number shown, none for the first.
+  void _tick(int shown) {
+    if (!widget.ticks || shown == _ticked) return;
+    if (_ticked != null) playSound(AppSound.xpTick);
+    _ticked = shown;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +112,10 @@ class _XpAmountState extends State<XpAmount>
                   delay: widget.delay,
                   duration: widget.duration,
                   onDone: () => _landing.forward(from: 0),
-                  builder: (_, shown) => Text(_label(shown), style: style),
+                  builder: (_, shown) {
+                    _tick(shown);
+                    return Text(_label(shown), style: style);
+                  },
                 ),
               ],
             ),

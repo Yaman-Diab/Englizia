@@ -21,8 +21,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 export 'package:englizia/features/home/presentation/home/cubit/home_state.dart';
 
-/// What home cheers with a sound (silent for now, D-037).
-enum HomeCheer { goal, unit, level }
+/// What home cheers with a sound: the goal, a unit, the level, and the next
+/// island coming out of its fog.
+enum HomeCheer { goal, unit, level, island }
 
 /// The «تعلّم» tab (S §6.1, design "Home Archipelago"): what was kept shows at
 /// once, then the server's; the phone's own completions and resume points win
@@ -333,10 +334,18 @@ class HomeCubit extends Cubit<HomeState> {
   /// The kept profile follows a switch made here, so «أنا» opens on it.
   void _keepProfile() => unawaited(_profiles.getProfile());
 
+  /// The kids' sounds follow the audience, which home is the one to know.
+  @override
+  void onChange(Change<HomeState> change) {
+    super.onChange(change);
+    _sounds.kidsMode = change.nextState.kids;
+  }
+
   void cheer(HomeCheer cheer) => unawaited(
     _sounds.play(switch (cheer) {
       HomeCheer.goal => AppSound.goalReached,
       HomeCheer.unit || HomeCheer.level => AppSound.achievement,
+      HomeCheer.island => AppSound.islandUnlock,
     }),
   );
 

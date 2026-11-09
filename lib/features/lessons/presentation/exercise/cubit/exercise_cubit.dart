@@ -422,6 +422,8 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   };
 
   void _sayVerdict(Evaluation evaluation) {
+    // A matching has said each pair as it was made.
+    if (evaluation is PairsEvaluation) return;
     unawaited(
       _sounds.play(evaluation.correct ? AppSound.correct : AppSound.incorrect),
     );

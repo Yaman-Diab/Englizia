@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
+import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/features/practice/domain/entities/word_bank.dart';
 import 'package:englizia/features/practice/domain/repositories/practice_repository.dart';
 import 'package:englizia/features/practice/domain/services/review_schedule.dart';
@@ -64,14 +66,20 @@ final class ReviewState extends Equatable {
 /// known or not, with no right or wrong colours. It runs without a connection;
 /// each answer is kept at once.
 class ReviewCubit extends Cubit<ReviewState> {
-  ReviewCubit(this._practice, ClipPlayer player, {DateTime Function()? now})
-    : _clip = ClipPlayback(player),
-      _now = now ?? DateTime.now,
-      super(const ReviewState());
+  ReviewCubit(
+    this._practice,
+    ClipPlayer player, {
+    DateTime Function()? now,
+    SoundPlayer sounds = const SilentSoundPlayer(),
+  }) : _clip = ClipPlayback(player),
+       _now = now ?? DateTime.now,
+       _sounds = sounds,
+       super(const ReviewState());
 
   final PracticeRepository _practice;
   final ClipPlayback _clip;
   final DateTime Function() _now;
+  final SoundPlayer _sounds;
 
   void start() {
     final bank = _practice.keptBank;
@@ -82,6 +90,7 @@ class ReviewCubit extends Cubit<ReviewState> {
   /// The card turns once; pressing it again does nothing.
   void flip() {
     if (state.flipped || state.flash != null || state.word == null) return;
+    unawaited(_sounds.play(AppSound.cardFlip));
     emit(state.copyWith(flipped: true));
   }
 

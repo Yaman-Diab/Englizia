@@ -53,6 +53,9 @@ enum MotionCue {
   /// The camera moves to the next island.
   camera,
 
+  /// The next island's fog clears and its lock opens: its sound.
+  unlock,
+
   /// The next unit is the current one: the header folds, the map jumps to it.
   finish,
 

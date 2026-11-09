@@ -257,7 +257,7 @@ extension KidMediaSteps on KidLessonCubit {
       case final KidDialogueStep step
           when state.dialogue.phase == KidTalkPhase.recording ||
               state.dialogue.phase == KidTalkPhase.echo:
-        unawaited(_sounds.play(AppSound.achievement));
+        unawaited(_sounds.play(AppSound.kidsStar));
         _setDialogue(state.dialogue.copyWith(phase: KidTalkPhase.echoed));
         _set(state.copyWith(mood: KidMood.happy));
         _later(

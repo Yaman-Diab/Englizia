@@ -66,7 +66,7 @@ void registerLessonDependencies(GetIt sl) {
     ..registerLazySingleton<TeacherQuestionRepository>(
       () => TeacherQuestionRepositoryImpl(sl()),
     )
-    ..registerFactory<VideoEngine>(VideoPlayerEngine.new)
+    ..registerFactory<VideoEngine>(() => VideoPlayerEngine(sounds: sl()))
     ..registerFactoryParam<GrammarLessonCubit, String, void>(
       (lessonId, _) => GrammarLessonCubit(sl(), sl(), sl(), lessonId: lessonId),
     )
@@ -125,7 +125,7 @@ void registerLessonDependencies(GetIt sl) {
       (request, _) => ExplainCubit(sl(), sl(), request: request),
     )
     ..registerFactory(() => ConceptsCubit(sl()))
-    ..registerFactory(() => ConceptSessionCubit(sl(), sl()))
+    ..registerFactory(() => ConceptSessionCubit(sl(), sl(), sounds: sl()))
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(
       (lessonId, _) =>

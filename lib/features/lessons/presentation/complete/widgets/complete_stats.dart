@@ -43,6 +43,7 @@ class CompleteStats extends StatelessWidget {
               )
             : _Stat(
                 value: XpAmount(
+                  ticks: true,
                   xp: state.result?.xp ?? 0,
                   style: texts.title,
                   delay: xpDelay,

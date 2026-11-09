@@ -509,7 +509,7 @@ class KidLessonCubit extends Cubit<KidLessonState> {
   /// The star reached the bar: one more screen done.
   void landed() {
     emit(state.copyWith(progress: (state.step + 1).clamp(0, state.stepCount)));
-    unawaited(_sounds.play(AppSound.achievement));
+    unawaited(_sounds.play(AppSound.kidsStar));
   }
 
   void _go(int step) {
@@ -722,10 +722,12 @@ class KidLessonCubit extends Cubit<KidLessonState> {
         ),
       ),
     );
+    // One celebration for the five stars: one each would pile up, 420 ms
+    // apart under a sound twice as long.
+    unawaited(_sounds.play(AppSound.lessonComplete));
     for (var star = 1; star <= starCount; star++) {
       _later(firstStar + starGap * (star - 1), () {
         emit(state.copyWith(stars: star));
-        unawaited(_sounds.play(AppSound.achievement));
       });
     }
     _later(
