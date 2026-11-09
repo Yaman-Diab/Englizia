@@ -62,6 +62,8 @@ flutter:
     - assets/mock/me/
     - assets/mock/settings/
     - assets/mock/home/
+    # The mock's clips, spoken by tool/sounds/mock_clips.py (STATUS D-050).
+    - assets/mock/audio/
     # Read by google_fonts instead of fetching at runtime; licenses are
     # registered in main.dart.
     - assets/fonts/ReadexPro-Regular.ttf

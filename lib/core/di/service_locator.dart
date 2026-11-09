@@ -3,8 +3,10 @@ import 'package:englizia/core/audio/asset_sound_player.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/device_volume.dart';
 import 'package:englizia/core/audio/just_audio_backend.dart';
+import 'package:englizia/core/audio/just_audio_clip_player.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/audio/mic_permission.dart';
+import 'package:englizia/core/audio/mock_clips.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:englizia/core/config/app_config.dart';
@@ -82,12 +84,12 @@ Future<void> setupCoreDependencies(GetIt sl) async {
         enabled: () => sl<SettingsStorageService>().soundEffects,
       ),
     )
+    // Clips from the server; in mock mode, the mock's own spoken files.
     ..registerLazySingleton<ClipPlayer>(
-      () => SilentClipPlayer(
+      () => JustAudioClipPlayer(
+        sounds: sl(),
+        bundled: AppConfig.isMock ? MockClips.assetFor : null,
         failsFirstLoad: AppConfig.isMock,
-        latency: AppConfig.isMock
-            ? const Duration(milliseconds: 500)
-            : Duration.zero,
       ),
     )
     ..registerLazySingleton<SpeechListener>(DeviceSpeechListener.new)

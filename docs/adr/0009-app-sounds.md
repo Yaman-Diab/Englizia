@@ -10,7 +10,7 @@ The requirements ask for short sounds on answer feedback that follow the phone's
 - `SoundPlayer` is the only way to play one: `preload`, `play`, `kidsMode`, `holdQuiet`. Cubits take it in their constructor; a widget calls `playSound(sound)`, one line that does nothing where no player is registered, or wraps a card in `SoundOnShow`.
 - `AssetSoundPlayer` holds the rules, with the package behind `SoundBackend` so they are tested without a phone:
   - nothing plays when the «المؤثرات الصوتية» setting is off;
-  - nothing plays while a `holdQuiet` holds: the microphone while it records (its start sound ends before it records), and a video while it plays. A clip player, when one is built, holds it the same way (STATUS D-050). Ducking under them was the alternative; silence is simpler, and nothing a learner must hear is lost;
+  - nothing plays while a `holdQuiet` holds: the microphone while it records (its start sound ends before it records), and a video while it plays. `JustAudioClipPlayer` holds it the same way while a clip plays (STATUS D-050). Ducking under them was the alternative; silence is simpler, and nothing a learner must hear is lost;
   - the same sound again within its gap is dropped (40 ms; a points tick 70 ms), and one still sounding starts over instead of doubling;
   - in kids mode the kids' file plays where there is one; home sets the mode, as it knows the audience;
   - a failure is never seen: a sound that can't play is not heard.
