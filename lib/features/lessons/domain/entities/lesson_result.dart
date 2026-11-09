@@ -71,6 +71,7 @@ final class NextStep extends Equatable {
     this.title = '',
     this.lessonId,
     this.lessonKind = LessonKind.other,
+    this.scenarioId,
     this.unitNumber,
   });
 
@@ -78,10 +79,21 @@ final class NextStep extends Equatable {
   final String title;
   final String? lessonId;
   final LessonKind lessonKind;
+
+  /// A conversation's «تحدّث» scenario, which it opens, as a unit's lesson
+  /// says it.
+  final String? scenarioId;
   final int? unitNumber;
 
   @override
-  List<Object?> get props => [kind, title, lessonId, lessonKind, unitNumber];
+  List<Object?> get props => [
+    kind,
+    title,
+    lessonId,
+    lessonKind,
+    scenarioId,
+    unitNumber,
+  ];
 }
 
 /// What the lesson's package says of its place, so its end can show it offline.

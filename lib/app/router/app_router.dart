@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
+import 'package:englizia/app/router/lesson_paths.dart';
 import 'package:englizia/app/router/route_policies.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/kid_tab_shell.dart';
@@ -754,18 +755,12 @@ GoRouter createAppRouter(AppSessionController session) {
                 ..start(),
           child: LessonCompletePage(
             onNext: (next) => switch (next.lessonId) {
-              final lessonId? when next.lessonKind == LessonKind.grammarVideo =>
-                context.pushReplacement(AppRoutes.grammarOf(lessonId)),
-              final lessonId?
-                  when next.lessonKind == LessonKind.interactiveText =>
-                context.pushReplacement(AppRoutes.textOf(lessonId)),
-              final lessonId?
-                  when next.lessonKind == LessonKind.interactiveVideo =>
-                context.pushReplacement(AppRoutes.videoOf(lessonId)),
-              final lessonId? when next.lessonKind == LessonKind.vocabulary =>
-                context.pushReplacement(AppRoutes.vocabularyOf(lessonId)),
               final lessonId? => context.pushReplacement(
-                AppRoutes.exercisesOf(lessonId),
+                lessonPath(
+                  id: lessonId,
+                  kind: next.lessonKind,
+                  scenarioId: next.scenarioId,
+                ),
               ),
               null => context.push(AppRoutes.unitStart),
             },
@@ -1131,18 +1126,13 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
 void _back(BuildContext context) =>
     context.canPop() ? context.pop() : context.go(AppRoutes.home);
 
-/// Where a unit's lesson opens, by its kind.
-String _unitLessonPath(UnitLesson lesson, {required bool kids}) =>
-    switch (lesson.kind) {
-      _ when kids => AppRoutes.kidsOf(lesson.id),
-      LessonKind.vocabulary => AppRoutes.vocabularyOf(lesson.id),
-      LessonKind.interactiveVideo => AppRoutes.videoOf(lesson.id),
-      LessonKind.grammarVideo => AppRoutes.grammarOf(lesson.id),
-      LessonKind.interactiveText => AppRoutes.textOf(lesson.id),
-      LessonKind.conversation when lesson.scenarioId != null =>
-        AppRoutes.talkScenarioOf(lesson.scenarioId!),
-      _ => AppRoutes.exercisesOf(lesson.id),
-    };
+/// Where a unit's lesson opens ([lessonPath]).
+String _unitLessonPath(UnitLesson lesson, {required bool kids}) => lessonPath(
+  id: lesson.id,
+  kind: lesson.kind,
+  scenarioId: lesson.scenarioId,
+  kids: kids,
+);
 
 /// The «تعلّم» tab (S §6.1): home, under the tabs' bar or a child's one.
 /// Its cubit, the email's and «أنا»'s (for the tracks sheet, started only

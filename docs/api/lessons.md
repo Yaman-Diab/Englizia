@@ -97,7 +97,7 @@ The top of a lesson also says where it sits, so its end can show that offline (d
 | `title` | string | The lesson's name |
 | `alreadyCompleted` | bool | The learner had finished it before |
 | `unit` | `{number, title, lessons: [{id, kind, done}]}` | The unit's chain. `kind`: `vocabulary`, `interactiveVideo`, `grammarVideo`, `interactiveText`, `conversation`, `unitReview` |
-| `next` | `{kind, lessonId?, lessonKind?, title?, unitNumber?}` | What comes after. `kind`: `lesson`, `unitReview`, `unit`. None at the end of a track |
+| `next` | `{kind, lessonId?, lessonKind?, scenarioId?, title?, unitNumber?}` | What comes after. `kind`: `lesson`, `unitReview`, `unit`. A conversation's `scenarioId` opens its «تحدّث» scenario, as a unit's lesson has it. None at the end of a track |
 
 A grammar lesson also has `content`, and `bookRef` for one tied to a book (design `Grammar Video`, S §8.1). All proposed.
 
