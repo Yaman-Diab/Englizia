@@ -46,6 +46,19 @@ void main() {
       expect(MascotFrame.at(rest, waving: true).waveAngle, 0);
       expect(MascotFrame.at(rest, waving: true).waveMarks, 0);
     });
+
+    test('a single wave, then the arm rests with its marks hidden', () {
+      final peak = at(AppMotion.characterWave, .11);
+      expect(
+        MascotFrame.at(peak, waving: true, waveOnce: true).waveAngle,
+        closeTo(-22, 1e-6),
+      );
+      final again = AppMotion.characterWave + peak;
+      expect(MascotFrame.at(again, waving: true).waveAngle, closeTo(-22, 1e-6));
+      final once = MascotFrame.at(again, waving: true, waveOnce: true);
+      expect(once.waveAngle, 0);
+      expect(once.waveMarks, 0);
+    });
   });
 
   group('idle motion has a personality per expression', () {

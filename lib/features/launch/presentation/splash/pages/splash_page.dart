@@ -238,6 +238,7 @@ class _Hero extends StatelessWidget {
                     sparkles: false,
                     shadow: false,
                     waving: state.mode == SplashMode.loading,
+                    waveOnce: true,
                   ),
                 ),
               ),

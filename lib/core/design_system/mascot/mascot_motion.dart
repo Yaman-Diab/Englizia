@@ -112,13 +112,17 @@ final class MascotFrame {
   static MascotFrame at(
     Duration elapsed, {
     required bool waving,
+    bool waveOnce = false,
     MascotIdle idle = MascotIdle.standard,
     double? floatPhase,
   }) {
     final cycle = floatPhase ?? _phase(elapsed, idle.period);
     final float = _ease(cycle % 1);
     final blink = _phase(elapsed, AppMotion.characterBlink);
-    final wave = _phase(elapsed, AppMotion.characterWave);
+    // After its one wave the arm rests where the cycle ends, marks hidden.
+    final wave = waveOnce && elapsed >= AppMotion.characterWave
+        ? 0.0
+        : _phase(elapsed, AppMotion.characterWave);
     return MascotFrame(
       lift: idle.lift * float,
       shadowRadius: 42 - 1.4 * idle.lift * float,

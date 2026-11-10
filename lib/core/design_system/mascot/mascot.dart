@@ -29,6 +29,7 @@ class Mascot extends StatefulWidget {
     this.size = 160,
     this.animate = true,
     this.waving = false,
+    this.waveOnce = false,
     this.silhouette = false,
     this.sparkles = true,
     this.shadow = true,
@@ -44,6 +45,9 @@ class Mascot extends StatefulWidget {
   final double size;
   final bool animate;
   final bool waving;
+
+  /// With [waving]: one wave as it appears, then the arm rests (the splash).
+  final bool waveOnce;
 
   /// One flat color, no face or effects (the design's "الخيال").
   final bool silhouette;
@@ -146,6 +150,7 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
     _frame.value = MascotFrame.at(
       elapsed,
       waving: widget.waving,
+      waveOnce: widget.waveOnce,
       idle: idle,
       floatPhase: _floatPhase,
     );
