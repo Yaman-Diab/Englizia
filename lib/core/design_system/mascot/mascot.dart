@@ -31,6 +31,7 @@ class Mascot extends StatefulWidget {
     this.waving = false,
     this.silhouette = false,
     this.sparkles = true,
+    this.shadow = true,
     this.semanticLabel,
     super.key,
   });
@@ -49,6 +50,9 @@ class Mascot extends StatefulWidget {
 
   /// False leaves out the expression's sparkles: glad, without a celebration.
   final bool sparkles;
+
+  /// False leaves out the ground shadow, for a guide standing in a circle.
+  final bool shadow;
 
   /// Defaults to the guide's name.
   final String? semanticLabel;
@@ -178,6 +182,7 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
             palette: palette,
             prop: widget.prop,
             framing: widget.framing,
+            shadow: widget.shadow,
             frame: _frame,
             blink: _changing ? MascotPose.changeBlink(_poseChange.value) : 0,
             stretch: _changing
