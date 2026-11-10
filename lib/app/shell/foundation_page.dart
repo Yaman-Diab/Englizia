@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
+import 'package:englizia/app/shell/launch_preview.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/design_system/app_semantic_colors.dart';
 import 'package:englizia/core/design_system/app_spacing.dart';
@@ -207,7 +208,34 @@ class FoundationPage extends StatelessWidget {
                   },
                   child: Text('foundation_home_opening'.tr()),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                // The mock recommends a newer version: home offers it again.
+                OutlinedButton(
+                  onPressed: () async {
+                    await sl<SettingsStorageService>().setUpdateReminderDay('');
+                    if (context.mounted) _home(context);
+                  },
+                  child: Text('foundation_update_reminder'.tr()),
+                ),
                 const SizedBox(height: AppSpacing.lg),
+                Text('foundation_splash_title'.tr(), style: texts.bodyStrong),
+                const SizedBox(height: AppSpacing.sm),
+                for (final (preview, label) in [
+                  (LaunchPreview.slow, 'foundation_splash_slow'.tr()),
+                  (LaunchPreview.offline, 'foundation_splash_offline'.tr()),
+                  (LaunchPreview.update, 'foundation_splash_update'.tr()),
+                  (
+                    LaunchPreview.storeFails,
+                    'foundation_splash_store_fails'.tr(),
+                  ),
+                ]) ...[
+                  OutlinedButton(
+                    onPressed: () => previewLaunch(context, preview),
+                    child: Text(label),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                const SizedBox(height: AppSpacing.sm),
                 OutlinedButton(
                   onPressed: () =>
                       context.push(AppRoutes.exercisesOf('les_mock')),

@@ -152,6 +152,13 @@ enum AppIcon {
     '<circle cx="12" cy="12" r="9.5"/>'
     '<path d="M12 11v5.5M12 7.6v.2"/>',
   ),
+
+  /// A newer version to download (the update reminder).
+  download(
+    '<path d="M12 4v11"/>'
+    '<path d="M7.5 10.5 12 15l4.5-4.5"/>'
+    '<path d="M5 19h14"/>',
+  ),
   bookmark('<path d="M6 3.5h12v17l-6-4-6 4z"/>'),
   bookmarkAdd(
     '<path d="M6 3h12v18l-6-4-6 4z"/>'

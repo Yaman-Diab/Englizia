@@ -228,6 +228,7 @@ void main() {
         model.versionsFor('android'),
         VersionPolicy(
           minimum: const AppVersion(0, 0, 1),
+          recommended: const AppVersion(0, 0, 2),
           updateUrl: Uri.parse(
             'https://play.google.com/store/apps/details?id=com.example.englizia',
           ),
@@ -235,7 +236,10 @@ void main() {
       );
       expect(
         model.versionsFor('ios'),
-        const VersionPolicy(minimum: AppVersion(0, 0, 1)),
+        const VersionPolicy(
+          minimum: AppVersion(0, 0, 1),
+          recommended: AppVersion(0, 0, 2),
+        ),
       );
       expect(model.versionsFor(null), VersionPolicy.none);
     });

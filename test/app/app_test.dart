@@ -6,7 +6,7 @@ import 'package:englizia/app/app.dart';
 import 'package:englizia/app/di.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
-import 'package:englizia/app/shell/splash_page.dart';
+import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/error/failure.dart';
@@ -24,6 +24,7 @@ import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_pag
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
 import 'package:englizia/features/home/domain/repositories/home_repository.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
+import 'package:englizia/features/launch/presentation/splash/pages/splash_page.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/lessons/presentation/explain/widgets/explain_sheet.dart';
@@ -77,7 +78,10 @@ void main() {
       ..unregister<HomeRepository>()
       ..registerLazySingleton<HomeRepository>(
         () => FakeHomeRepository(mockHome()),
-      );
+      )
+      // The splash asks for the server's versions.
+      ..unregister<SettingsRepository>()
+      ..registerLazySingleton<SettingsRepository>(FakeSettingsRepository.new);
   });
   tearDown(() => sl.reset());
 
@@ -105,7 +109,7 @@ void main() {
           await tester.pumpUntilLocalized();
           expect(find.byType(SplashPage), findsOneWidget);
 
-          await sl<AppSessionController>().bootstrap();
+          await tester.openApp();
           await tester.pumpUntilLocalized();
           // Let the page transition finish so the splash leaves the tree.
           await tester.pump(const Duration(seconds: 1));
@@ -153,7 +157,7 @@ void main() {
       expect(find.byType(SplashPage), findsNothing);
       expect(find.byType(NewPasswordPage), findsOneWidget);
 
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -168,7 +172,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -199,7 +203,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -225,7 +229,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -251,7 +255,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -285,7 +289,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -317,7 +321,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await sl<AppSessionController>().signIn(tokens);
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
@@ -344,7 +348,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -368,7 +372,7 @@ void main() {
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
     );
     await tester.pumpUntilLocalized();
-    await sl<AppSessionController>().bootstrap();
+    await tester.openApp();
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(WelcomePage), findsOneWidget);
@@ -386,7 +390,7 @@ void main() {
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
     );
     await tester.pumpUntilLocalized();
-    await sl<AppSessionController>().bootstrap();
+    await tester.openApp();
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(WelcomePage), findsOneWidget);
@@ -418,7 +422,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
 
@@ -463,7 +467,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
     }
@@ -587,7 +591,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 1));
     }
@@ -729,7 +733,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 2));
       await tester.pump(const Duration(seconds: 1));
@@ -791,7 +795,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await sl<AppSessionController>().signIn(tokens);
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 2));
@@ -813,7 +817,7 @@ void main() {
         localizedTestRoot(locale: AppLocales.arabic, child: const App()),
       );
       await tester.pumpUntilLocalized();
-      await sl<AppSessionController>().bootstrap();
+      await tester.openApp();
       await sl<AppSessionController>().signIn(guestTokens);
       await tester.pumpUntilLocalized();
       await tester.pump(const Duration(seconds: 2));
@@ -835,7 +839,7 @@ void main() {
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
     );
     await tester.pumpUntilLocalized();
-    await sl<AppSessionController>().bootstrap();
+    await tester.openApp();
     await sl<AppSessionController>().signIn(guestTokens);
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
@@ -876,7 +880,7 @@ void main() {
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
     );
     await tester.pumpUntilLocalized();
-    await sl<AppSessionController>().bootstrap();
+    await tester.openApp();
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
 
@@ -903,7 +907,7 @@ void main() {
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
     );
     await tester.pumpUntilLocalized();
-    await sl<AppSessionController>().bootstrap();
+    await tester.openApp();
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
 
@@ -931,7 +935,7 @@ void main() {
       localizedTestRoot(locale: AppLocales.arabic, child: const App()),
     );
     await tester.pumpUntilLocalized();
-    await sl<AppSessionController>().bootstrap();
+    await tester.openApp();
     await sl<AppSessionController>().signIn(tokens);
     await tester.pumpUntilLocalized();
     await tester.pump(const Duration(seconds: 1));
@@ -956,4 +960,16 @@ void main() {
     await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
     handle.dispose();
   });
+}
+
+extension on WidgetTester {
+  /// Restores the session; the splash plays its intro and lets the app on.
+  Future<void> openApp() async {
+    await sl<AppSessionController>().bootstrap();
+    await pump();
+    await pump(SplashIntro.settled);
+    // The way on from the splash, and its page transition.
+    await pump();
+    await pump(const Duration(seconds: 1));
+  }
 }

@@ -1903,7 +1903,7 @@ class _AccountNumberLineState extends State<AccountNumberLine> {
       'me_copied_semantics'.tr(),
       Directionality.of(context),
     );
-    await Future<void>.delayed(AppMotion.meCopiedHold);
+    await Future<void>.delayed(AppMotion.copiedHold);
     if (mounted) setState(() => _copied = false);
   }
 

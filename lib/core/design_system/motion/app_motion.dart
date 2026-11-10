@@ -182,7 +182,9 @@ abstract final class AppMotion {
   static const meBarGrow = slow;
   static const meIslandPulse = Duration(milliseconds: 1800);
   static const meSwitchHold = Duration(milliseconds: 2600);
-  static const meCopiedHold = Duration(seconds: 2);
+
+  /// How long a «نُسخ» stays before it is a copy button again.
+  static const copiedHold = Duration(seconds: 2);
 
   /// One nod of the guide while it listens.
   static const characterNod = Duration(milliseconds: 900);

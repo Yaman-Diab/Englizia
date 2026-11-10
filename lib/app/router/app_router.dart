@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/router/lesson_paths.dart';
@@ -5,7 +7,6 @@ import 'package:englizia/app/router/route_policies.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/kid_tab_shell.dart';
 import 'package:englizia/app/shell/pending_page.dart';
-import 'package:englizia/app/shell/splash_page.dart';
 import 'package:englizia/app/shell/tab_shell.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/config/app_config.dart';
@@ -38,6 +39,9 @@ import 'package:englizia/features/account/presentation/verify_email/widgets/veri
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
+import 'package:englizia/features/launch/presentation/splash/cubit/splash_cubit.dart';
+import 'package:englizia/features/launch/presentation/splash/pages/splash_page.dart';
+import 'package:englizia/features/launch/presentation/update_reminder/update_reminder.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
@@ -125,9 +129,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-GoRouter createAppRouter(AppSessionController session) {
+GoRouter createAppRouter(
+  AppSessionController session, {
+  required SplashCubit launch,
+}) {
   final redirect = AppRedirect(
     status: () => session.status,
+    launch: () => launch.state.launch,
     policyFor: policyFor,
     splashLocation: AppRoutes.splash,
     homeLocation: AppRoutes.home,
@@ -162,7 +170,7 @@ GoRouter createAppRouter(AppSessionController session) {
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
-    refreshListenable: session,
+    refreshListenable: Listenable.merge([session, _LaunchRefresh(launch)]),
     debugLogDiagnostics: kDebugMode,
     redirect: redirect.call,
     observers: [pages],
@@ -1180,31 +1188,49 @@ Widget _homeTab(
                   : null,
             ),
           );
-          return BlocSelector<HomeCubit, HomeState, ({bool kids, int badge})>(
-            selector: (state) =>
-                (kids: HomePage.isKids(state), badge: state.badge),
-            builder: (context, tab) => tab.kids
-                ? KidTabShell(
-                    current: KidTab.learn,
-                    onSelect: (tab) => switch (tab) {
-                      KidTab.learn => null,
-                      KidTab.words => context.go(AppRoutes.kidsWords),
-                      KidTab.me => context.go(AppRoutes.me),
-                    },
-                    child: page,
-                  )
-                : TabShell(
-                    current: AppTab.learn,
-                    badges: {AppTab.practice: tab.badge},
-                    onSelect: (tab) => _openTab(context, tab),
-                    child: page,
-                  ),
+          final shell =
+              BlocSelector<HomeCubit, HomeState, ({bool kids, int badge})>(
+                selector: (state) =>
+                    (kids: HomePage.isKids(state), badge: state.badge),
+                builder: (context, tab) => tab.kids
+                    ? KidTabShell(
+                        current: KidTab.learn,
+                        onSelect: (tab) => switch (tab) {
+                          KidTab.learn => null,
+                          KidTab.words => context.go(AppRoutes.kidsWords),
+                          KidTab.me => context.go(AppRoutes.me),
+                        },
+                        child: page,
+                      )
+                    : TabShell(
+                        current: AppTab.learn,
+                        badges: {AppTab.practice: tab.badge},
+                        onSelect: (tab) => _openTab(context, tab),
+                        child: page,
+                      ),
+              );
+          // A newer version is offered once home has settled, never to a
+          // child (design App Update 03).
+          return BlocListener<HomeCubit, HomeState>(
+            listenWhen: (previous, current) =>
+                !_homeSettled(previous) && _homeSettled(current),
+            listener: (context, _) =>
+                remindToUpdate(context, sl<UpdateReminder>()),
+            child: shell,
           );
         },
       ),
     ),
   ),
 );
+
+/// Home has its data and its opening and celebrations have played.
+bool _homeSettled(HomeState state) =>
+    state.home != null &&
+    !HomePage.isKids(state) &&
+    !state.openingDue &&
+    state.moment == null &&
+    !state.switching;
 
 /// The tabs' bar.
 void _openTab(BuildContext context, AppTab tab) => switch (tab) {
@@ -1213,3 +1239,21 @@ void _openTab(BuildContext context, AppTab tab) => switch (tab) {
   AppTab.talk => context.go(AppRoutes.talk),
   AppTab.me => context.go(AppRoutes.me),
 };
+
+/// Runs the route guard again when the opening moves on (ADR 19).
+final class _LaunchRefresh extends ChangeNotifier {
+  _LaunchRefresh(SplashCubit launch) {
+    _changes = launch.stream
+        .map((state) => state.launch)
+        .distinct()
+        .listen((_) => notifyListeners());
+  }
+
+  late final StreamSubscription<LaunchStatus> _changes;
+
+  @override
+  void dispose() {
+    unawaited(_changes.cancel());
+    super.dispose();
+  }
+}

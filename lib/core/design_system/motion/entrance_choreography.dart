@@ -16,6 +16,28 @@ abstract final class HeroEntrance {
   static Duration get settled => actions + AppMotion.entrance;
 }
 
+/// The splash (Splash Form): the stage settles, the guide hops in, a ring
+/// ripples out and the name rises; then a state's content arrives.
+abstract final class SplashIntro {
+  static const stage = Duration(milliseconds: 250);
+  static const guide = Duration(milliseconds: 350);
+  static const rippleDelay = Duration(milliseconds: 330);
+  static const ripple = Duration(milliseconds: 440);
+  static const nameDelay = Duration(milliseconds: 350);
+  static const name = Duration(milliseconds: 200);
+
+  /// A state's text and actions (update, offline), after the intro.
+  static const content = Duration(milliseconds: 250);
+  static const actionsDelay = Duration(milliseconds: 100);
+
+  /// «جاري التحميل…»: each dot hops in turn.
+  static const dotsRound = Duration(milliseconds: 900);
+  static const dotsStagger = Duration(milliseconds: 150);
+
+  /// When the intro has played.
+  static Duration get settled => rippleDelay + ripple;
+}
+
 /// Onboarding questions: guide and bubble pop, answers rise one by one, then
 /// the helper and the continue button.
 abstract final class QuestionEntrance {
