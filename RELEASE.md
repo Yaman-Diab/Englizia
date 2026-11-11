@@ -15,6 +15,7 @@ In the app's Google Cloud project (one project for every client):
 2. Clients:
    - **Web application** (no redirect URIs): its ID is `GOOGLE_SERVER_CLIENT_ID` in `env/<env>.json`, and the
      backend checks tokens against the same ID. Its secret is not needed anywhere.
+   The project is `engleazia`; the Web, iOS and one debug-key Android client exist (STATUS D-110).
    - **Android**, package `com.engleazia.app`, one client per signing key's SHA-1: each developer's debug key
      (`cd android && ./gradlew signingReport`), the upload key, and Play App Signing's key (Play Console → App
      integrity, after the first upload). A missing one makes Google's sheet close as if it were canceled.

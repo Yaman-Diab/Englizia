@@ -165,6 +165,6 @@ Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. T
 2. Agree the upgrade above: the path, that it keeps the same account and progress, the same for Google and Apple sign-up, and what happens when the email already has an account (the app now says so and offers sign-in, which would leave the guest behind; merge instead?).
 3. Time zone: the app sends the offset now. For reminders at the learner's time across daylight-saving changes, an IANA name (`Asia/Damascus`) is better; the app can send it once a package is chosen (STATUS D-043).
 4. Should onboarding answers go with every account creation (email, Google) in this same `onboarding` shape? Google's request has no place for them today, so a Google account starts with no plan on the server.
-5. Google: which OAuth client does the server check the `idToken`'s audience against? It must be the "Web application" client of the app's own Google Cloud project, the one the app asks tokens for.
+5. Google: the server must check the `idToken`'s audience against the app's "Web application" client, `959713011641-tsd0sntqf723o1rsmrmkcce05p88di17.apps.googleusercontent.com` (Cloud project `engleazia`). Please confirm it is set on the dev server.
 6. Google for a guest: the request carries no guest token, so signing in with Google can't upgrade the guest account (item 2).
 7. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.
