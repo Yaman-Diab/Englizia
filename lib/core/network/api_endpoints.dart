@@ -8,6 +8,8 @@ abstract final class ApiEndpoints {
   static const login = '/api/v1/auth/login';
   // Confirmed in docs/api/openapi.json.
   static const logout = '/api/v1/auth/logout';
+  // Confirmed in docs/api/openapi.json.
+  static const googleSignIn = '/api/v1/auth/google';
   // ASSUMPTION(api): docs/api/auth.md.
   static const guestAccount = '/api/v1/auth/guest';
   // ASSUMPTION(api): docs/api/auth.md.

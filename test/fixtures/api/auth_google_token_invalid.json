@@ -1,0 +1,10 @@
+{
+  "statusCode": 401,
+  "message": "Google sign-in failed. Please try again.",
+  "data": null,
+  "error": {
+    "code": "auth.google_token_invalid",
+    "details": null
+  },
+  "traceId": "8e20f76978b605453881d33159817fd2"
+}

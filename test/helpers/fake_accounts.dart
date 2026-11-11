@@ -4,6 +4,7 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
@@ -15,6 +16,13 @@ const guestTokens = AuthTokens(
 
 const memberTokens = AuthTokens(accessToken: 'm', refreshToken: 'r');
 
+/// Google signing in to an account that existed, and making a new one.
+const googleSession = SocialSession(tokens: memberTokens, isNewAccount: false);
+const newGoogleSession = SocialSession(
+  tokens: memberTokens,
+  isNewAccount: true,
+);
+
 /// Records what was sent and answers from a script: the nth call gets the
 /// nth result, the last one repeating. While [gate] is set, calls wait for
 /// it, so a test can look at the sending state.
@@ -23,6 +31,7 @@ class FakeAccountRepository implements AccountRepository {
     this.guestResults = const [Ok(guestTokens)],
     this.accountResults = const [Ok(memberTokens)],
     this.signInResults = const [Ok(memberTokens)],
+    this.googleResults = const [Ok(googleSession)],
     this.resetResults = const [Ok(null)],
     this.linkResults = const [Ok(null)],
     this.newPasswordResults = const [Ok(memberTokens)],
@@ -37,6 +46,10 @@ class FakeAccountRepository implements AccountRepository {
   final List<Result<AuthTokens>> accountResults;
   final List<Result<AuthTokens>> signInResults;
   final signIns = <(String, String)>[];
+
+  /// What Google's sign-in answers; `Ok(null)` is its sheet closed.
+  final List<Result<SocialSession?>> googleResults;
+  var googleSignIns = 0;
   final List<Result<void>> resetResults;
   final resetRequests = <String>[];
   final List<Result<void>> linkResults;
@@ -84,6 +97,16 @@ class FakeAccountRepository implements AccountRepository {
     signIns.add((email, password));
     await gate?.future;
     return _nth(signInResults, signIns.length);
+  }
+
+  @override
+  Future<Result<SocialSession?>> signInWithGoogle() async {
+    googleSignIns++;
+    await gate?.future;
+    return googleResults[(googleSignIns - 1).clamp(
+      0,
+      googleResults.length - 1,
+    )];
   }
 
   @override

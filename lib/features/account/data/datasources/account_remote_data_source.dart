@@ -8,11 +8,13 @@ import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/features/account/data/models/google_sign_in_model.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
 import 'package:englizia/features/account/data/models/reset_password_model.dart';
 import 'package:englizia/features/account/data/models/sign_in_model.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class AccountRemoteDataSource {
@@ -24,6 +26,10 @@ abstract interface class AccountRemoteDataSource {
 
   /// [request] is [SignInModel.request].
   Future<AuthTokens> signIn(Map<String, Object?> request);
+
+  /// [request] is [GoogleSignInModel.request]. Signs in, or makes the
+  /// account on its first time.
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request);
 
   Future<void> requestPasswordReset(String email);
 
@@ -74,6 +80,17 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       SignInModel.tokens(
         await _client.post(
           ApiEndpoints.login,
+          data: request,
+          options: ApiClient.publicOptions,
+        ),
+        now: DateTime.now(),
+      );
+
+  @override
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request) async =>
+      GoogleSignInModel.session(
+        await _client.post(
+          ApiEndpoints.googleSignIn,
           data: request,
           options: ApiClient.publicOptions,
         ),
@@ -222,6 +239,14 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
     }
     final body = jsonDecode(await _bundle.loadString(registerAsset));
     return SignInModel.tokens(body, now: DateTime.now());
+  }
+
+  /// Any Google account is a new learner's.
+  @override
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request) async {
+    await Future<void>.delayed(latency);
+    final body = jsonDecode(await _bundle.loadString(registerAsset));
+    return GoogleSignInModel.session(body, now: DateTime.now());
   }
 
   /// Always sent, as the server answers for any email.

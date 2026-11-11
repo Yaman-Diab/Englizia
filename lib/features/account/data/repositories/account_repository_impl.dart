@@ -1,15 +1,19 @@
+import 'package:englizia/core/error/provider_exception.dart';
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
+import 'package:englizia/features/account/data/datasources/google_identity_source.dart';
+import 'package:englizia/features/account/data/models/google_sign_in_model.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
 import 'package:englizia/features/account/data/models/reset_password_model.dart';
 import 'package:englizia/features/account/data/models/sign_in_model.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
@@ -21,10 +25,15 @@ final class AccountRepositoryImpl implements AccountRepository {
     required this.savedDeviceId,
     required this.saveDeviceId,
     required this.devicePlatform,
-  }) : _tokens = tokens;
+    GoogleIdentitySource? google,
+  }) : _tokens = tokens,
+       _google = google;
 
   final AccountRemoteDataSource _remote;
   final TokenStorage _tokens;
+
+  /// Null where Google's sign-in is not offered.
+  final GoogleIdentitySource? _google;
 
   /// This install's id, which the guest account is tied to.
   final Future<String> Function() installationId;
@@ -85,6 +94,25 @@ final class AccountRepositoryImpl implements AccountRepository {
   );
 
   @override
+  Future<Result<SocialSession?>> signInWithGoogle() => guard(() async {
+    final google = _google;
+    if (google == null) {
+      throw const ProviderException('Google sign-in is not part of this build');
+    }
+    final idToken = await google.idToken();
+    if (idToken == null) return null;
+    final session = await _remote.signInWithGoogle(
+      GoogleSignInModel.request(
+        idToken: idToken,
+        deviceId: savedDeviceId(),
+        platform: devicePlatform,
+      ),
+    );
+    await _remembered(session.tokens);
+    return session;
+  });
+
+  @override
   Future<Result<void>> requestPasswordReset(String email) =>
       guard(() => _remote.requestPasswordReset(email.trim()));
 
@@ -138,9 +166,20 @@ final class AccountRepositoryImpl implements AccountRepository {
 
   @override
   Future<Result<void>> logOut() => guard(() async {
+    await _forgetGoogleAccount();
     final tokens = await _tokens.read();
     if (tokens != null) await _remote.logOut(tokens.refreshToken);
   });
+
+  /// So the next Google sign-in asks which account. Signing out never
+  /// depends on it.
+  Future<void> _forgetGoogleAccount() async {
+    try {
+      await _google?.signOut();
+    } catch (error) {
+      AppLogger.warning('Google sign-out failed', error);
+    }
+  }
 
   /// Keeps the id the server gave this phone. The account exists by now: an
   /// id that was not saved costs a new device, never the account.

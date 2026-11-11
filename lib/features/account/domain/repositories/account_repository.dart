@@ -2,6 +2,7 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
 abstract interface class AccountRepository {
@@ -26,6 +27,13 @@ abstract interface class AccountRepository {
     required String email,
     required String password,
   });
+
+  /// Signs in with the Google account the learner picks, making the account
+  /// on its first time (`SocialSession.isNewAccount`). Null when they closed
+  /// Google's sheet. Fails with `ProviderFailure` when Google's sign-in is
+  /// missing or its token is refused, and with `ConflictFailure` when the
+  /// email's account can't be joined to this Google account.
+  Future<Result<SocialSession?>> signInWithGoogle();
 
   /// Asks for a link to set a new password, sent to [email] if it has an
   /// account. The answer is the same either way, so no screen can tell

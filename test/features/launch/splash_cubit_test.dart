@@ -190,9 +190,7 @@ void main() {
 
       await splash.openStore();
 
-      expect(links.tried, [
-        Uri.parse('market://details?id=com.engleazia.app'),
-      ]);
+      expect(links.tried, [Uri.parse('market://details?id=com.engleazia.app')]);
       expect(splash.state.storeFailed, isFalse);
     });
 

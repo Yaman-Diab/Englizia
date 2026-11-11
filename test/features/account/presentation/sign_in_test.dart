@@ -9,6 +9,7 @@ import 'package:englizia/core/design_system/widgets/account_button.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
@@ -114,6 +115,57 @@ void main() {
       expect(cubit.state.waitLeft, SignInCubit.defaultWait);
     });
 
+    test('Google is not stopped by the password\'s lock', () async {
+      final accounts = FakeAccountRepository(
+        signInResults: const [
+          Err(RateLimitFailure(retryAfter: Duration(minutes: 5))),
+        ],
+      );
+      final cubit = cubitWith(accounts);
+      fill(cubit);
+      await cubit.submit();
+      expect(cubit.state.locked, isTrue);
+
+      await cubit.signInWithGoogle();
+      expect(cubit.state.session, memberTokens);
+      expect(cubit.state.signedInWith, SocialProvider.google);
+    });
+
+    test('while Google signs in, nothing else starts or changes', () async {
+      final accounts = FakeAccountRepository()..gate = Completer<void>();
+      final cubit = cubitWith(accounts);
+      fill(cubit);
+
+      unawaited(cubit.signInWithGoogle());
+      await pumpEventQueue();
+      expect(cubit.state.signingInWith, SocialProvider.google);
+      cubit.emailChanged('other@example.com');
+      await cubit.submit();
+      await cubit.signInWithGoogle();
+
+      expect(cubit.state.email, 'user@example.com');
+      expect(accounts.signIns, isEmpty);
+      expect(accounts.googleSignIns, 1);
+      accounts.gate!.complete();
+    });
+
+    test('the retry repeats the last way tried', () async {
+      final accounts = FakeAccountRepository(
+        signInResults: const [Err(NetworkFailure()), Ok(memberTokens)],
+        googleResults: const [Err(NetworkFailure())],
+      );
+      final cubit = cubitWith(accounts);
+      fill(cubit);
+
+      await cubit.signInWithGoogle();
+      await cubit.submit();
+      await cubit.retry();
+
+      expect(accounts.googleSignIns, 1);
+      expect(accounts.signIns, hasLength(2));
+      expect(cubit.state.signedInWith, isNull);
+    });
+
     test('a failed connection keeps both fields for a retry', () async {
       final cubit = cubitWith(
         FakeAccountRepository(
@@ -132,13 +184,15 @@ void main() {
 
   group('SignInPage', () {
     late List<AuthTokens> signedIn;
-    late List<SocialProvider> providers;
+    late List<SocialProvider?> signedInWith;
+    late int apples;
     late List<String> forgot;
     late int creates;
 
     setUp(() {
       signedIn = [];
-      providers = [];
+      signedInWith = [];
+      apples = 0;
       forgot = [];
       creates = 0;
     });
@@ -155,8 +209,11 @@ void main() {
         value: cubit,
         child: SignInPage(
           lastProvider: lastProvider,
-          onSignedIn: signedIn.add,
-          onProvider: providers.add,
+          onSignedIn: (session, provider) {
+            signedIn.add(session);
+            signedInWith.add(provider);
+          },
+          onApple: () => apples++,
           onForgotPassword: forgot.add,
           onCreateAccount: () => creates++,
           onBack: () {},
@@ -197,6 +254,24 @@ void main() {
     MascotExpression expression(WidgetTester tester) =>
         tester.widget<Mascot>(find.byType(Mascot)).expression;
 
+    testLayouts('fits while Google signs in', (tester, layout) async {
+      final accounts = FakeAccountRepository()..gate = Completer<void>();
+      await pumpPage(
+        tester,
+        accounts: accounts,
+        layout: layout,
+        platform: TargetPlatform.iOS,
+        lastProvider: SocialProvider.google,
+      );
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await tester.pump();
+      await tester.pump(AppMotion.slow);
+
+      expect(find.text('sign_in_signing_in'.tr()), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      accounts.gate!.complete();
+    });
+
     testLayouts('lays out without overflow', (tester, layout) async {
       final cubit = await pumpPage(
         tester,
@@ -227,7 +302,129 @@ void main() {
         lessThan(tester.getTopLeft(find.text('sign_in_google'.tr())).dy),
       );
       await tester.tap(find.text('sign_in_apple'.tr()));
-      expect(providers, [SocialProvider.apple]);
+      expect(apples, 1);
+    });
+
+    testWidgets('Google signs in, and says it was Google', (tester) async {
+      final accounts = FakeAccountRepository();
+      await pumpPage(tester, accounts: accounts);
+
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await settle(tester);
+
+      expect(accounts.googleSignIns, 1);
+      expect(signedIn, [memberTokens]);
+      expect(signedInWith, [SocialProvider.google]);
+    });
+
+    testWidgets('while Google signs in: its button waits, the rest too', (
+      tester,
+    ) async {
+      final accounts = FakeAccountRepository()..gate = Completer<void>();
+      final cubit = await pumpPage(
+        tester,
+        accounts: accounts,
+        platform: TargetPlatform.iOS,
+      );
+
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await tester.pump();
+
+      final google = tester.widget<AccountButton>(
+        find.widgetWithText(AccountButton, 'sign_in_signing_in'.tr()),
+      );
+      expect(google.isLoading, isTrue);
+      expect(find.text('sign_in_google'.tr()), findsNothing);
+      final apple = tester.widget<AccountButton>(
+        find.widgetWithText(AccountButton, 'sign_in_apple'.tr()),
+      );
+      expect(apple.onPressed, isNull);
+      expect(apple.isLoading, isFalse);
+      expect(cubit.state.canSubmit, isFalse);
+      // The fields can't take the focus, which would fold the button away.
+      await tester.tap(field('account_field_email'), warnIfMissed: false);
+      await tester.pump();
+      expect(
+        find.text('sign_in_signing_in'.tr()).hitTestable(),
+        findsOneWidget,
+      );
+      // A second press opens no second sheet.
+      await tester.tap(find.text('sign_in_signing_in'.tr()));
+      expect(accounts.googleSignIns, 1);
+
+      accounts.gate!.complete();
+      await settle(tester);
+      expect(signedIn, [memberTokens]);
+    });
+
+    testWidgets('Google\'s sheet closed: back as it was, nothing said', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        accounts: FakeAccountRepository(googleResults: const [Ok(null)]),
+      );
+
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await settle(tester);
+
+      expect(signedIn, isEmpty);
+      expect(find.text('sign_in_google'.tr()), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('Google failed for the connection: the retry is Google\'s', (
+      tester,
+    ) async {
+      final accounts = FakeAccountRepository(
+        googleResults: const [Err(NetworkFailure()), Ok(googleSession)],
+      );
+      await pumpPage(tester, accounts: accounts);
+
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await settle(tester);
+      expect(find.text('error_network'.tr()), findsOneWidget);
+
+      await tester.tap(find.text('common_retry'.tr()));
+      await settle(tester);
+      expect(accounts.googleSignIns, 2);
+      expect(accounts.signIns, isEmpty);
+      expect(signedInWith, [SocialProvider.google]);
+    });
+
+    testWidgets('an account Google can\'t join says why, with no retry', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        accounts: FakeAccountRepository(
+          googleResults: const [
+            Err(ConflictFailure(code: ApiErrorCodes.emailTaken)),
+          ],
+        ),
+      );
+
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await settle(tester);
+
+      expect(find.text('error_email_taken'.tr()), findsOneWidget);
+      expect(find.text('common_retry'.tr()), findsNothing);
+    });
+
+    testWidgets('Google missing on the phone says to use another way', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        accounts: FakeAccountRepository(
+          googleResults: const [Err(ProviderFailure())],
+        ),
+      );
+
+      await tester.tap(find.text('sign_in_google'.tr()));
+      await settle(tester);
+
+      expect(find.text('error_provider'.tr()), findsOneWidget);
     });
 
     testWidgets('the last way used is badged', (tester) async {

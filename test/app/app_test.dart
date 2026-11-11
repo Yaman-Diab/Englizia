@@ -15,6 +15,7 @@ import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/forgot_password/pages/forgot_password_page.dart';
 import 'package:englizia/features/account/presentation/new_password/pages/new_password_page.dart';
@@ -899,7 +900,91 @@ void main() {
 
     expect(accounts.signIns.single, ('user@example.com', 'password1'));
     expect(sl<AppSessionController>().status, SessionStatus.member);
+    expect(sl<SettingsStorageService>().lastSignInMethod, 'email');
     expect(find.byType(HomePage), findsOneWidget);
+  });
+
+  testWidgets('Google from sign-in goes home, and is the last way used', (
+    tester,
+  ) async {
+    final accounts = FakeAccountRepository();
+    sl
+      ..unregister<AccountRepository>()
+      ..registerLazySingleton<AccountRepository>(() => accounts);
+    await tester.pumpWidget(
+      localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+    );
+    await tester.pumpUntilLocalized();
+    await tester.openApp();
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+
+    await tester.tap(find.text('welcome_have_account'.tr()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    await tester.tap(find.text('sign_in_google'.tr()));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(accounts.googleSignIns, 1);
+    expect(sl<AppSessionController>().status, SessionStatus.member);
+    expect(sl<SettingsStorageService>().lastSignInMethod, 'google');
+    expect(find.byType(HomePage), findsOneWidget);
+  });
+
+  group('Google from "save progress"', () {
+    Future<void> saveWithGoogle(
+      WidgetTester tester,
+      FakeAccountRepository accounts,
+    ) async {
+      sl
+        ..unregister<AccountRepository>()
+        ..registerLazySingleton<AccountRepository>(() => accounts)
+        ..unregister<TrackRepository>()
+        ..registerLazySingleton<TrackRepository>(FakeTrackRepository.new);
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await tester.openApp();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+      unawaited(
+        GoRouter.of(tester.element(find.byType(WelcomePage))).push<void>(
+          AppRoutes.onboardingSaveProgress,
+          extra: const OnboardingPath(audience: TrackAudience.self),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+
+      await tester.tap(find.text('onboarding_save_google'.tr()));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(sl<SettingsStorageService>().lastSignInMethod, 'google');
+    }
+
+    testWidgets('a new account goes on to preparing', (tester) async {
+      await saveWithGoogle(
+        tester,
+        FakeAccountRepository(googleResults: const [Ok(newGoogleSession)]),
+      );
+
+      expect(find.byType(PreparingPage), findsOneWidget);
+      expect(sl<AppSessionController>().status, SessionStatus.member);
+      // Preparing's steps, each at least half a second.
+      await tester.pump(const Duration(seconds: 3));
+    });
+
+    testWidgets('an account that existed signs in and goes home', (
+      tester,
+    ) async {
+      await saveWithGoogle(tester, FakeAccountRepository());
+
+      expect(find.byType(PreparingPage), findsNothing);
+      expect(sl<AppSessionController>().status, SessionStatus.member);
+      expect(find.byType(HomePage), findsOneWidget);
+    });
   });
 
   testWidgets('preparing without its arguments goes elsewhere', (tester) async {

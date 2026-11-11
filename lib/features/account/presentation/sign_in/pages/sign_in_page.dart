@@ -11,6 +11,7 @@ import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/core/design_system/widgets/notice_card.dart';
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
@@ -27,11 +28,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 /// title fold away and the guide shrinks; it covers its eyes over the
 /// password and peeks when it is shown. A refused try keeps the email,
 /// clears the password and shakes it; too many tries count the server's
-/// wait down on the button.
+/// wait down on the button. While Google signs in its button waits and the
+/// rest dims.
 class SignInPage extends StatefulWidget {
   const SignInPage({
     required this.onSignedIn,
-    required this.onProvider,
+    required this.onApple,
     required this.onForgotPassword,
     required this.onCreateAccount,
     required this.onBack,
@@ -39,9 +41,12 @@ class SignInPage extends StatefulWidget {
     super.key,
   });
 
-  /// Signed in: the session, not started yet.
-  final ValueChanged<AuthTokens> onSignedIn;
-  final ValueChanged<SocialProvider> onProvider;
+  /// Signed in: the session, not started yet, and the provider it came
+  /// from (null for the email's).
+  final void Function(AuthTokens session, SocialProvider? provider) onSignedIn;
+
+  /// Apple's sign-in isn't built yet (STATUS D-031).
+  final VoidCallback onApple;
 
   /// Opens password recovery with the email typed so far.
   final ValueChanged<String> onForgotPassword;
@@ -65,6 +70,9 @@ class _SignInPageState extends State<SignInPage> {
   bool _passwordHidden = true;
 
   static const _mascotSize = 80.0;
+
+  /// The rest of the screen while a provider signs in (design).
+  static const _dimmed = .38;
 
   @override
   void initState() {
@@ -97,7 +105,7 @@ class _SignInPageState extends State<SignInPage> {
               now.session != null && before.session == null,
           listener: (_, state) {
             TextInput.finishAutofillContext();
-            widget.onSignedIn(state.session!);
+            widget.onSignedIn(state.session!, state.signedInWith);
           },
         ),
         // A refused try: the password is cleared and typed again.
@@ -119,7 +127,11 @@ class _SignInPageState extends State<SignInPage> {
           listener: (context, state) => showFailureSnackBar(
             context,
             state.failure!,
-            onRetry: context.read<SignInCubit>().submit,
+            // An account that can't be joined or is disabled stays so.
+            onRetry: switch (state.failure!) {
+              ConflictFailure() || ForbiddenFailure() => null,
+              _ => context.read<SignInCubit>().retry,
+            },
           ),
         ),
       ],
@@ -143,11 +155,12 @@ class _SignInPageState extends State<SignInPage> {
       _ => MascotExpression.welcome,
     };
     final duration = AppMotion.resolve(context, AppMotion.fast);
+    final withProvider = state.signingInWith != null;
 
     return PopScope(
-      canPop: !state.sending,
+      canPop: !state.busy,
       child: AuthScaffold(
-        onBack: state.sending ? null : widget.onBack,
+        onBack: state.busy ? null : widget.onBack,
         footer: AuthFooter(
           keyboardOpen: MediaQuery.viewInsetsOf(context).bottom > 0,
           submit: AppButton(
@@ -162,7 +175,7 @@ class _SignInPageState extends State<SignInPage> {
           ),
           switchLead: 'sign_in_no_account'.tr(),
           switchAction: 'account_guest_create'.tr(),
-          onSwitch: state.sending ? null : widget.onCreateAccount,
+          onSwitch: state.busy ? null : widget.onCreateAccount,
         ),
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -202,9 +215,14 @@ class _SignInPageState extends State<SignInPage> {
                       child: SocialSignIn(
                         apple: apple,
                         lastProvider: widget.lastProvider,
-                        onProvider: state.sending || compact
+                        signingInWith: state.signingInWith,
+                        onProvider: state.busy || compact
                             ? null
-                            : widget.onProvider,
+                            : (provider) => switch (provider) {
+                                SocialProvider.google =>
+                                  cubit.signInWithGoogle(),
+                                SocialProvider.apple => widget.onApple(),
+                              },
                       ),
                     ),
                   ),
@@ -241,53 +259,62 @@ class _SignInPageState extends State<SignInPage> {
               },
             ),
             const SizedBox(height: AppSpacing.xl),
-            AutofillGroup(
-              onDisposeAction: AutofillContextAction.cancel,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Entrance(
-                    motion: EntranceMotion.up,
-                    delay: FormEntrance.field(1),
-                    child: AppTextField(
-                      label: 'account_field_email'.tr(),
-                      icon: AppIcon.mail,
-                      controller: _email,
-                      focusNode: _emailFocus,
-                      readOnly: state.sending,
-                      keyboardType: TextInputType.emailAddress,
-                      textInputAction: TextInputAction.next,
-                      textDirection: TextDirection.ltr,
-                      autofillHints: const [AutofillHints.email],
-                      onChanged: cubit.emailChanged,
-                      onSubmitted: (_) => _passwordFocus.requestFocus(),
-                    ),
+            AnimatedOpacity(
+              opacity: withProvider ? _dimmed : 1,
+              duration: duration,
+              curve: AppMotion.out,
+              // A field taking the focus would fold the waiting button away.
+              child: IgnorePointer(
+                ignoring: withProvider,
+                child: AutofillGroup(
+                  onDisposeAction: AutofillContextAction.cancel,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Entrance(
+                        motion: EntranceMotion.up,
+                        delay: FormEntrance.field(1),
+                        child: AppTextField(
+                          label: 'account_field_email'.tr(),
+                          icon: AppIcon.mail,
+                          controller: _email,
+                          focusNode: _emailFocus,
+                          readOnly: state.busy,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          textDirection: TextDirection.ltr,
+                          autofillHints: const [AutofillHints.email],
+                          onChanged: cubit.emailChanged,
+                          onSubmitted: (_) => _passwordFocus.requestFocus(),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg + AppSpacing.xxs),
+                      Entrance(
+                        motion: EntranceMotion.up,
+                        delay: FormEntrance.field(2),
+                        child: AppTextField(
+                          label: 'account_field_password'.tr(),
+                          icon: AppIcon.lock,
+                          controller: _password,
+                          focusNode: _passwordFocus,
+                          readOnly: state.busy,
+                          obscurable: true,
+                          keyboardType: TextInputType.visiblePassword,
+                          textInputAction: TextInputAction.done,
+                          textDirection: TextDirection.ltr,
+                          autofillHints: const [AutofillHints.password],
+                          shakeTrigger: state.wrongTries,
+                          onChanged: cubit.passwordChanged,
+                          onObscuredChanged: (hidden) =>
+                              setState(() => _passwordHidden = hidden),
+                          onSubmitted: (_) => state.canSubmit
+                              ? _submit()
+                              : FocusScope.of(context).unfocus(),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: AppSpacing.lg + AppSpacing.xxs),
-                  Entrance(
-                    motion: EntranceMotion.up,
-                    delay: FormEntrance.field(2),
-                    child: AppTextField(
-                      label: 'account_field_password'.tr(),
-                      icon: AppIcon.lock,
-                      controller: _password,
-                      focusNode: _passwordFocus,
-                      readOnly: state.sending,
-                      obscurable: true,
-                      keyboardType: TextInputType.visiblePassword,
-                      textInputAction: TextInputAction.done,
-                      textDirection: TextDirection.ltr,
-                      autofillHints: const [AutofillHints.password],
-                      shakeTrigger: state.wrongTries,
-                      onChanged: cubit.passwordChanged,
-                      onObscuredChanged: (hidden) =>
-                          setState(() => _passwordHidden = hidden),
-                      onSubmitted: (_) => state.canSubmit
-                          ? _submit()
-                          : FocusScope.of(context).unfocus(),
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
             Entrance(
@@ -296,7 +323,7 @@ class _SignInPageState extends State<SignInPage> {
               child: Align(
                 alignment: AlignmentDirectional.centerEnd,
                 child: TextButton(
-                  onPressed: state.sending
+                  onPressed: state.busy
                       ? null
                       : () => widget.onForgotPassword(state.email.trim()),
                   // The only way forward while locked: drawn stronger.

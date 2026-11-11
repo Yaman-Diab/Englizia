@@ -3,6 +3,7 @@ import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/device_platform.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
+import 'package:englizia/features/account/data/datasources/google_identity_source.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/entities/password_link.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
@@ -14,8 +15,10 @@ import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cub
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/verify_email_cubit.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 void registerAccountDependencies(GetIt sl) {
   sl
@@ -23,6 +26,19 @@ void registerAccountDependencies(GetIt sl) {
       () => AppConfig.isMock
           ? AccountFakeDataSource(rootBundle)
           : AccountRemoteDataSourceImpl(sl()),
+    )
+    ..registerLazySingleton<GoogleIdentitySource>(
+      () => AppConfig.isMock
+          ? const GoogleIdentityFake()
+          : GoogleIdentitySourceImpl(
+              GoogleSignIn.instance,
+              serverClientId: AppConfig.googleServerClientId,
+              clientId:
+                  defaultTargetPlatform == TargetPlatform.iOS &&
+                      AppConfig.googleIosClientId.isNotEmpty
+                  ? AppConfig.googleIosClientId
+                  : null,
+            ),
     )
     ..registerFactoryParam<SignUpCubit, bool, void>(
       (upgradesGuest, _) => SignUpCubit(sl(), upgradesGuest: upgradesGuest),
@@ -60,6 +76,7 @@ void registerAccountDependencies(GetIt sl) {
         savedDeviceId: () => sl<SettingsStorageService>().deviceId,
         saveDeviceId: sl<SettingsStorageService>().setDeviceId,
         devicePlatform: devicePlatform(),
+        google: sl(),
       ),
     );
 }

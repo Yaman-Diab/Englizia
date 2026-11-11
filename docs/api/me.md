@@ -117,7 +117,7 @@ The document lists `401`, `403` and `409` without codes. The app reads a wrong c
 
 ## `DELETE /api/v1/app/me`
 
-«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
+«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 7), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
 
 ## Questions for the backend team
 

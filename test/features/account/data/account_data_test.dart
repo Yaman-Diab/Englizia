@@ -12,6 +12,7 @@ import 'package:englizia/features/account/data/datasources/account_remote_data_s
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
@@ -66,6 +67,10 @@ class _RecordingDataSource implements AccountRemoteDataSource {
   @override
   Future<AuthTokens> signIn(Map<String, Object?> request) =>
       createAccount(request);
+
+  @override
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request) async =>
+      SocialSession(tokens: await createAccount(request), isNewAccount: true);
 
   @override
   Future<void> requestPasswordReset(String email) async {}

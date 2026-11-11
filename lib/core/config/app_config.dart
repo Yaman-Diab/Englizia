@@ -7,6 +7,18 @@ abstract final class AppConfig {
   /// (`env/mock_kids.json`).
   static const mockAudience = String.fromEnvironment('MOCK_AUDIENCE');
 
+  /// Google's OAuth client of the server (a "Web application" one): sign-in
+  /// asks for a token made for it. Empty leaves Google sign-in failing.
+  static const googleServerClientId = String.fromEnvironment(
+    'GOOGLE_SERVER_CLIENT_ID',
+  );
+
+  /// Google's OAuth client of the iOS app. Android needs none here: Google
+  /// finds its client by the application ID and the signing key.
+  static const googleIosClientId = String.fromEnvironment(
+    'GOOGLE_IOS_CLIENT_ID',
+  );
+
   static const jsonTimeout = Duration(seconds: 20);
 
   static bool get isProd => appEnv == 'prod';

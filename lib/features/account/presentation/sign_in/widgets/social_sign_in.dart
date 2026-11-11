@@ -7,12 +7,14 @@ import 'package:englizia/features/account/domain/entities/social_provider.dart';
 import 'package:flutter/material.dart';
 
 /// Apple (iOS only) and Google as equal ways in, the last one used badged,
-/// then "or" before the email form.
+/// then "or" before the email form. The one signing in waits with a spinner
+/// for its mark.
 class SocialSignIn extends StatelessWidget {
   const SocialSignIn({
     required this.apple,
     required this.lastProvider,
     required this.onProvider,
+    this.signingInWith,
     super.key,
   });
 
@@ -20,14 +22,19 @@ class SocialSignIn extends StatelessWidget {
   final bool apple;
   final SocialProvider? lastProvider;
 
-  /// Null while signing in another way.
+  /// Null while signing in, by any way.
   final ValueChanged<SocialProvider>? onProvider;
+
+  /// The provider signing in now.
+  final SocialProvider? signingInWith;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     Widget button(SocialProvider provider) => AccountButton(
+      isLoading: provider == signingInWith,
       label: switch (provider) {
+        _ when provider == signingInWith => 'sign_in_signing_in'.tr(),
         SocialProvider.google => 'sign_in_google'.tr(),
         SocialProvider.apple => 'sign_in_apple'.tr(),
       },

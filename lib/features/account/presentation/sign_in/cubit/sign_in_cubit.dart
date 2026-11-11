@@ -2,6 +2,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/core/state/wait_countdown.dart';
+import 'package:englizia/features/account/domain/entities/social_provider.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,16 +13,24 @@ final class SignInState extends Equatable {
     this.email = '',
     this.password = '',
     this.sending = false,
+    this.signingInWith,
     this.wrongTries = 0,
     this.wrongCredentials = false,
     this.lockedUntil,
     this.failure,
     this.session,
+    this.signedInWith,
   });
 
   final String email;
   final String password;
+
+  /// Signing in with the email and password.
   final bool sending;
+
+  /// The provider signing in, whose button waits; null otherwise. It stays
+  /// once signed in, until the screen is left.
+  final SocialProvider? signingInWith;
 
   /// Counts refused sign-ins; a change shakes the password field.
   final int wrongTries;
@@ -42,7 +51,13 @@ final class SignInState extends Equatable {
   /// The signed-in session, handed to the router. Null until then.
   final AuthTokens? session;
 
+  /// The provider [session] came from; null for the email's.
+  final SocialProvider? signedInWith;
+
   bool get filled => email.trim().isNotEmpty && password.isNotEmpty;
+
+  /// A sign-in is on its way, by any way.
+  bool get busy => sending || signingInWith != null;
 
   /// What is left of the wait; zero when not locked.
   Duration get waitLeft => switch (lockedUntil) {
@@ -52,28 +67,32 @@ final class SignInState extends Equatable {
 
   bool get locked => waitLeft > Duration.zero;
 
-  bool get canSubmit => filled && !sending && !locked;
+  bool get canSubmit => filled && !busy && !locked;
 
   SignInState copyWith({
     String? email,
     String? password,
     bool? sending,
+    SocialProvider? Function()? signingInWith,
     int? wrongTries,
     bool? wrongCredentials,
     DateTime? Function()? lockedUntil,
     DateTime? now,
     Failure? Function()? failure,
     AuthTokens? session,
+    SocialProvider? signedInWith,
   }) => SignInState(
     email: email ?? this.email,
     password: password ?? this.password,
     sending: sending ?? this.sending,
+    signingInWith: signingInWith != null ? signingInWith() : this.signingInWith,
     wrongTries: wrongTries ?? this.wrongTries,
     wrongCredentials: wrongCredentials ?? this.wrongCredentials,
     lockedUntil: lockedUntil != null ? lockedUntil() : this.lockedUntil,
     now: now ?? this.now,
     failure: failure != null ? failure() : this.failure,
     session: session ?? this.session,
+    signedInWith: signedInWith ?? this.signedInWith,
   );
 
   @override
@@ -81,19 +100,23 @@ final class SignInState extends Equatable {
     email,
     password,
     sending,
+    signingInWith,
     wrongTries,
     wrongCredentials,
     lockedUntil,
     now,
     failure,
     session,
+    signedInWith,
   ];
 }
 
-/// Sign-in with email (requirements v3.0 §5.1, design "Login v2"). Wrong
-/// credentials keep the email and clear the password; too many tries wait
-/// the server's time, counted down here; a failed connection keeps both
-/// for a retry. The session is handed on (`SignInState.session`).
+/// Sign-in with email or Google (requirements v3.0 §5.1, design "Login v2").
+/// Wrong credentials keep the email and clear the password; too many tries
+/// wait the server's time, counted down here; a failed connection keeps both
+/// for a retry, which repeats the way that failed. Google signs in, or makes
+/// the account on its first time. The session is handed on
+/// (`SignInState.session`).
 class SignInCubit extends Cubit<SignInState> {
   SignInCubit(this._accounts, {String email = '', DateTime Function()? now})
     : _countdown = WaitCountdown(now: now),
@@ -102,21 +125,60 @@ class SignInCubit extends Cubit<SignInState> {
   final AccountRepository _accounts;
   final WaitCountdown _countdown;
 
+  /// The provider of the last try; null for the email's.
+  SocialProvider? _lastTried;
+
   /// When the server asks to wait but does not say how long.
   // ASSUMPTION(api): `Retry-After` on 429 is requested (docs/api/README.md,
   // request 7); the design's five minutes until then.
   static const defaultWait = Duration(minutes: 5);
 
   void emailChanged(String value) {
-    if (!state.sending) emit(state.copyWith(email: value));
+    if (!state.busy) emit(state.copyWith(email: value));
   }
 
   void passwordChanged(String value) {
-    if (!state.sending) emit(state.copyWith(password: value));
+    if (!state.busy) emit(state.copyWith(password: value));
+  }
+
+  /// Repeats the try that failed, by the same way.
+  Future<void> retry() => switch (_lastTried) {
+    SocialProvider.google => signInWithGoogle(),
+    _ => submit(),
+  };
+
+  /// Opens Google's sheet; closing it changes nothing. The server's lock
+  /// on the password doesn't stop it.
+  Future<void> signInWithGoogle() async {
+    if (state.busy) return;
+    _lastTried = SocialProvider.google;
+    emit(
+      state.copyWith(
+        signingInWith: () => SocialProvider.google,
+        wrongCredentials: false,
+        failure: () => null,
+      ),
+    );
+    final result = await _accounts.signInWithGoogle();
+    if (isClosed) return;
+    switch (result) {
+      case Ok(:final value?):
+        emit(
+          state.copyWith(
+            session: value.tokens,
+            signedInWith: SocialProvider.google,
+          ),
+        );
+      case Ok():
+        emit(state.copyWith(signingInWith: () => null));
+      case Err(:final failure):
+        emit(state.copyWith(signingInWith: () => null, failure: () => failure));
+    }
   }
 
   Future<void> submit() async {
     if (!state.canSubmit) return;
+    _lastTried = null;
     emit(
       state.copyWith(
         sending: true,

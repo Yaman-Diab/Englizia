@@ -1,0 +1,16 @@
+{
+  "statusCode": 400,
+  "message": "One or more fields are invalid.",
+  "data": null,
+  "error": {
+    "code": "validation.failed",
+    "details": [
+      {
+        "field": "idToken",
+        "code": "not_empty",
+        "message": "'Id Token' must not be empty."
+      }
+    ]
+  },
+  "traceId": "3a188b5000a3aa33cca5de5d2bb5b89b"
+}
