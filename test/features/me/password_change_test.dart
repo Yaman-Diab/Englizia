@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/me/data/datasources/profile_remote_data_source.dart';
@@ -102,6 +104,26 @@ void main() {
     await repository.changePassword(current: 'old-pass-1', next: 'new-pass-1');
 
     expect(settings.deviceId, 'device-2');
+  });
+
+  test('a wrong current password keeps the server\'s code', () async {
+    await answer(400, {
+      'statusCode': 400,
+      'message': 'The current password is incorrect.',
+      'data': null,
+      'error': {'code': 'auth.current_password_invalid', 'details': null},
+      'traceId': 't',
+    });
+
+    final result = await repository.changePassword(
+      current: 'wrong-pass',
+      next: 'new-pass-1',
+    );
+
+    final failure = (result as Err<void>).failure;
+    expect(failure, isA<ValidationFailure>());
+    expect(failure.code, ApiErrorCodes.currentPasswordInvalid);
+    expect(tokens.writeCount, 0);
   });
 
   test('an answer with no session changes nothing on the phone', () async {

@@ -355,6 +355,19 @@ GoRouter createAppRouter(
               onPrivacy: () => context.push(AppRoutes.legalPrivacy),
               onGuestCreated: (session) =>
                   _accountCreated(context, path, session),
+              onGoogleSession: (google) async {
+                await sl<SettingsStorageService>().setLastSignInMethod(
+                  SocialProvider.google.name,
+                );
+                if (!context.mounted) return;
+                if (google.isNewAccount) {
+                  return _accountCreated(context, path, google.tokens);
+                }
+                // The Google account had an account already: it carries on
+                // with its own plan, not these answers.
+                await session.signIn(google.tokens);
+                if (context.mounted) context.go(AppRoutes.home);
+              },
               onBack: () => context.pop(),
             ),
           );
@@ -421,7 +434,7 @@ GoRouter createAppRouter(
           );
         },
       ),
-      // Google and Apple sign-up are not built yet.
+      // Apple sign-up is not built yet.
       GoRoute(
         path: AppRoutes.signUpWithProvider,
         builder: (_, _) => PendingPage(title: 'account_create_title'.tr()),
@@ -515,12 +528,14 @@ GoRouter createAppRouter(
             child: SignInPage(
               lastProvider: SocialProvider.values
                   .asNameMap()[settings.lastSignInMethod],
-              onSignedIn: (account) async {
+              onSignedIn: (account, provider) async {
+                // The badge marks Google or Apple; an email sign-in clears it.
+                await settings.setLastSignInMethod(provider?.name ?? _byEmail);
                 await session.signIn(account);
                 // Pushed over home for a guest, which the guard leaves.
                 if (context.mounted) context.go(AppRoutes.home);
               },
-              onProvider: (_) => context.push(AppRoutes.signInWithProvider),
+              onApple: () => context.push(AppRoutes.signInWithProvider),
               onForgotPassword: (email) =>
                   context.push(AppRoutes.forgotPassword, extra: email),
               // Back to sign-up when it led here; else from the start of
@@ -533,7 +548,7 @@ GoRouter createAppRouter(
           );
         },
       ),
-      // Google and Apple sign-in are not built yet.
+      // Apple sign-in is not built yet.
       GoRoute(
         path: AppRoutes.signInWithProvider,
         builder: (_, _) => PendingPage(title: 'sign_in_title'.tr()),
@@ -1084,6 +1099,9 @@ GoRouter createAppRouter(
     ],
   );
 }
+
+/// The last sign-in method kept for an email sign-in, which no badge marks.
+const _byEmail = 'email';
 
 /// A new account goes on to "preparing", or on the child path to the kids'
 /// welcome that replaces it (S §4.5); either starts its session. `go`

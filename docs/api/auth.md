@@ -1,6 +1,6 @@
 # Accounts and sessions
 
-Status: mixed. **Live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, password recovery, the password change and the email's confirmation; the app uses all but Google and Apple (STATUS D-001). **Proposed**, mock only (`assets/mock/account/`): the guest account and its upgrade. The real answers the app was checked against are in `test/fixtures/api/auth_*.json`.
+Status: mixed. **Live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, password recovery, the password change and the email's confirmation; the app uses all but Apple. **Proposed**, mock only (`assets/mock/account/`): the guest account and its upgrade. The real answers the app was checked against are in `test/fixtures/api/auth_*.json`.
 Decision: guest mode is back by the owner's decision (2026-10-27, ADR 10), as a **server-side guest account**. This reverses student doc §4.3 ("no guest mode") and server doc §26's table row ("no guest accounts"); both documents need updating, and the backend needs a guest account type.
 
 ## `POST /api/v1/auth/guest`
@@ -129,7 +129,7 @@ The first link goes out by itself when an account is made with an email (S §5.3
 
 The link is `https://engleazia.com/verify-email?token=<token>`, valid and opening the app like the recovery link (STATUS D-024). All three below are **live**, used:
 
-- `POST /api/v1/auth/email/verify`: `VerifyEmailRequest { "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `400 auth.reset_token_invalid` for a link expired, used or unknown: the recovery's code, read the same way (`test/fixtures/api/auth_email_verify_link_invalid.json`).
+- `POST /api/v1/auth/email/verify`: `VerifyEmailRequest { "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `400 auth.email_link_invalid` for a link expired, used, replaced or unknown, read as the recovery's `auth.reset_token_invalid` is (`test/fixtures/api/auth_email_verify_link_invalid.json`).
 - `POST /api/v1/auth/email/resend`: with the session, no body. Sends the link again (`202`). The app waits 1, 2, then 5 minutes between tries, so the server's limit should allow that; `429` counts as sent. `409` is likely an email confirmed already, which the next read of `/app/me` shows.
 - `PUT /api/v1/auth/email`: `ChangeEmailRequest { "newEmail": "..." }`, with the session. Corrects the address and sends a link there (`202`). `409` when it has an account, `400` (`validation.failed`) when refused.
 
@@ -137,7 +137,23 @@ Questions for the backend team: whether correcting the email will ask for the pa
 
 ## `POST /api/v1/auth/google` and `POST /api/v1/auth/apple`
 
-Live, not used yet: the app's side needs the final application ID, which Google's and Apple's sign-in are bound to (STATUS D-001). Google takes `GoogleSignInRequest { idToken, deviceId, platform }`; Apple takes `AppleSignInRequest { identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform }`, with `POST /api/v1/auth/apple/callback` for the web flow Android needs. Both answer with a `TokenResponse` whose `isNewUser` says the sign-in made the account, when the onboarding answers belong with it. A refused Google token is `401 auth.google_token_invalid`.
+Both are live; the app uses Google's (ADR 20), Apple's isn't built. Both answer with a `TokenResponse` whose `isNewUser` says the sign-in made the account.
+
+**Google.** `GoogleSignInRequest { idToken, deviceId, platform }`, sent without the session's token. The `idToken` comes from Google's sheet on the phone and is made for the server's own OAuth client (a "Web application" client, `GOOGLE_SERVER_CLIENT_ID` in the env files): the token's `aud` is that client, so **the server must check tokens against the same client ID**, from the same Google Cloud project as the Android and iOS clients. `deviceId` and `platform` are as for sign-in.
+
+| Answer | Meaning | The app |
+|---|---|---|
+| `200 TokenResponse` | Signed in; `isNewUser: true` when this made the account | From "save progress": a new account goes on to "preparing", one that existed goes home. From sign-in: home |
+| `400 validation.failed` | No `idToken` (`details`: `idToken`, `not_empty`). Real answer: `test/fixtures/api/auth_google_validation_failed.json` | A general message; the app never sends an empty one |
+| `401 auth.google_token_invalid` | The token failed Google's checks, or was made for another client. Real answer: `test/fixtures/api/auth_google_token_invalid.json` | «تعذّر الدخول بهذه الطريقة», with a retry |
+| `403 auth.account_disabled` | The account was disabled from the dashboard | «هذا الحساب موقوف», no retry |
+| `409 auth.email_taken` | The email has an account and Google did not verify the email, so the two are not joined | «لهذا البريد حساب», no retry |
+| `409 auth.external_login_conflict` | The email's account is linked to another Google account | Says so, no retry |
+| `429 rate_limit.exceeded` | Too many requests | The general wait message, with a retry |
+
+The `403` and `409` answers are from the document, not yet seen on the dev server. No real Google token has reached the dev server from the app yet (STATUS D-110).
+
+**Apple.** `AppleSignInRequest { identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform }`, with `POST /api/v1/auth/apple/callback` for the web flow Android needs. A refused token is `401 auth.apple_token_invalid`.
 
 ## `POST /api/v1/auth/logout`
 
@@ -148,4 +164,7 @@ Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. T
 1. Agree the guest account type: what it may do (everything a learner does?) and how long an unused guest is kept.
 2. Agree the upgrade above: the path, that it keeps the same account and progress, the same for Google and Apple sign-up, and what happens when the email already has an account (the app now says so and offers sign-in, which would leave the guest behind; merge instead?).
 3. Time zone: the app sends the offset now. For reminders at the learner's time across daylight-saving changes, an IANA name (`Asia/Damascus`) is better; the app can send it once a package is chosen (STATUS D-043).
-4. Should onboarding answers go with every account creation (email, Google) in this same `onboarding` shape?
+4. Should onboarding answers go with every account creation (email, Google) in this same `onboarding` shape? Google's request has no place for them today, so a Google account starts with no plan on the server.
+5. Google: the server must check the `idToken`'s audience against the app's "Web application" client, `959713011641-tsd0sntqf723o1rsmrmkcce05p88di17.apps.googleusercontent.com` (Cloud project `engleazia`). Please confirm it is set on the dev server.
+6. Google for a guest: the request carries no guest token, so signing in with Google can't upgrade the guest account (item 2).
+7. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.

@@ -1,4 +1,6 @@
 {
   "APP_ENV": "dev",
+  "GOOGLE_SERVER_CLIENT_ID": "959713011641-tsd0sntqf723o1rsmrmkcce05p88di17.apps.googleusercontent.com",
+  "GOOGLE_IOS_CLIENT_ID": "959713011641-v96b50q8cvgtg475e0e91t1q9n8uhnqu.apps.googleusercontent.com",
   "BASE_URL": "https://api-dev.engleazia.com"
 }

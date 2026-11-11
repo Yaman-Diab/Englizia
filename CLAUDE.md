@@ -112,7 +112,7 @@ Dependency direction: `presentation → domain ← data`.
 - Never rewrite history or change git config without an explicit request.
 - New packages must be reputable: pub points near the max, many likes and downloads, a recent release, a verified publisher where possible, Android + iOS, and compatible with the Flutter pin. Show those numbers and the alternatives when proposing one; prefer a little code over a weak package. Never remove or replace an existing dependency (owner's decision, 2026-10-26).
 - Pending decisions and postponed work live in `docs/STATUS.md` → Deferred; don't change them silently
-  (e.g. application ID, kept platform folders, provisional palette, the Flutter 3.41.6 pin).
+  (e.g. kept platform folders, provisional palette, the Flutter 3.41.6 pin).
 - Never leave something undone without a Deferred row. Fake/mock data is a Deferred row until its endpoint is connected, then the mock data is deleted.
 - `ui-ux-pro-max` (design skill) is **reference only**: never override the identity tokens (`docs/product/visual-identity-*`) or the approved designs, and never take palettes, fonts or styles from it. Dart/Flutter skills from the `dart-flutter` plugin may be used for Dart and Flutter tasks.
 - If a problem is wider than reported, say so with evidence (file:line, command output).

@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
+import 'package:englizia/core/design_system/widgets/account_button.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/cubit/save_progress_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/save_progress/pages/save_progress_page.dart';
@@ -48,9 +52,13 @@ void main() {
   /// Guest sessions the page handed on.
   late List<AuthTokens> handedOn;
 
+  /// Google's sessions the page handed on.
+  late List<SocialSession> fromGoogle;
+
   setUp(() {
     connectivity = FakeConnectivityService();
     handedOn = [];
+    fromGoogle = [];
   });
   tearDown(() => connectivity.dispose());
 
@@ -100,6 +108,52 @@ void main() {
       expect(cubit.state.guestSession, guestTokens);
     });
 
+    test('Google\'s session is handed on, new account or not', () async {
+      final accounts = FakeAccountRepository(
+        googleResults: const [Ok(newGoogleSession)],
+      );
+      final cubit = SaveProgressCubit(accounts, connectivity);
+      addTearDown(cubit.close);
+
+      await cubit.continueWithGoogle();
+
+      expect(cubit.state.googleSession, newGoogleSession);
+      expect(cubit.state.busy, isTrue);
+      // Nothing else starts once the session is there.
+      await cubit.continueWithGoogle();
+      expect(accounts.googleSignIns, 1);
+    });
+
+    test('Google\'s sheet closed leaves every way open', () async {
+      final cubit = SaveProgressCubit(
+        FakeAccountRepository(googleResults: const [Ok(null)]),
+        connectivity,
+      );
+      addTearDown(cubit.close);
+
+      await cubit.continueWithGoogle();
+
+      expect(cubit.state.busy, isFalse);
+      expect(cubit.state.failure, isNull);
+    });
+
+    test('the retry repeats the way that failed', () async {
+      final accounts = FakeAccountRepository(
+        googleResults: const [Err(ProviderFailure()), Ok(googleSession)],
+      );
+      final cubit = SaveProgressCubit(accounts, connectivity);
+      addTearDown(cubit.close);
+
+      await cubit.continueWithGoogle();
+      expect(cubit.state.failure, isA<ProviderFailure>());
+      expect(cubit.state.signingInWithGoogle, isFalse);
+
+      await cubit.retry();
+      expect(cubit.state.failure, isNull);
+      expect(cubit.state.googleSession, googleSession);
+      expect(accounts.guestAnswers, isEmpty);
+    });
+
     test('follows the connection', () async {
       final cubit = SaveProgressCubit(FakeAccountRepository(), connectivity);
       addTearDown(cubit.close);
@@ -135,6 +189,7 @@ void main() {
           onTerms: () {},
           onPrivacy: () {},
           onGuestCreated: handedOn.add,
+          onGoogleSession: fromGoogle.add,
           onBack: () {},
         ),
       );
@@ -200,14 +255,70 @@ void main() {
       expect(find.text('onboarding_save_parent_note'.tr()), findsOneWidget);
     });
 
-    testWidgets('each way to create the account is passed on', (tester) async {
+    testWidgets('the email opens its own screen', (tester) async {
       final chosen = <AccountProvider>[];
       await pumpPage(tester, onCreateAccount: chosen.add);
 
-      await tester.tap(find.text('onboarding_save_google'.tr()));
       await tester.tap(find.text('onboarding_save_email'.tr()));
-      expect(chosen, [AccountProvider.google, AccountProvider.email]);
+      expect(chosen, [AccountProvider.email]);
       expect(find.text('onboarding_save_apple'.tr()), findsNothing);
+    });
+
+    testWidgets('Google makes the account from here, its button waiting', (
+      tester,
+    ) async {
+      final accounts = FakeAccountRepository(
+        googleResults: const [Ok(newGoogleSession)],
+      )..gate = Completer<void>();
+      await pumpPage(tester, accounts: accounts);
+
+      await tester.tap(find.text('onboarding_save_google'.tr()));
+      await tester.pump();
+      final google = tester.widget<AccountButton>(
+        find.widgetWithText(AccountButton, 'sign_in_signing_in'.tr()),
+      );
+      expect(google.isLoading, isTrue);
+      final email = tester.widget<AccountButton>(
+        find.widgetWithText(AccountButton, 'onboarding_save_email'.tr()),
+      );
+      expect(email.onPressed, isNull);
+
+      accounts.gate!.complete();
+      await settle(tester);
+      expect(fromGoogle, [newGoogleSession]);
+    });
+
+    testWidgets('Google\'s sheet closed: the ways are back', (tester) async {
+      await pumpPage(
+        tester,
+        accounts: FakeAccountRepository(googleResults: const [Ok(null)]),
+      );
+
+      await tester.tap(find.text('onboarding_save_google'.tr()));
+      await settle(tester);
+
+      expect(fromGoogle, isEmpty);
+      expect(find.text('onboarding_save_google'.tr()), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
+    });
+
+    testWidgets('Google failed: it says so, and the retry is Google\'s', (
+      tester,
+    ) async {
+      final accounts = FakeAccountRepository(
+        googleResults: const [Err(NetworkFailure()), Ok(googleSession)],
+      );
+      await pumpPage(tester, accounts: accounts);
+
+      await tester.tap(find.text('onboarding_save_google'.tr()));
+      await settle(tester);
+      expect(find.text('error_network'.tr()), findsOneWidget);
+
+      await tester.tap(find.text('common_retry'.tr()));
+      await settle(tester);
+      expect(accounts.googleSignIns, 2);
+      expect(accounts.guestAnswers, isEmpty);
+      expect(fromGoogle, [googleSession]);
     });
 
     testWidgets('Apple comes first on iOS', (tester) async {
@@ -282,22 +393,25 @@ void main() {
 
     testWidgets('offline, every way waits for the connection', (tester) async {
       final chosen = <AccountProvider>[];
-      await pumpPage(tester, onCreateAccount: chosen.add);
+      final accounts = FakeAccountRepository();
+      await pumpPage(tester, accounts: accounts, onCreateAccount: chosen.add);
       connectivity.online = false;
       await settle(tester);
 
       expect(find.text('onboarding_save_offline'.tr()), findsOneWidget);
       await tester.tap(find.text('onboarding_save_google'.tr()));
+      await tester.tap(find.text('onboarding_save_email'.tr()));
       await tester.tap(find.text('onboarding_save_later'.tr()));
       await settle(tester);
       expect(chosen, isEmpty);
+      expect(accounts.googleSignIns, 0);
       expect(find.text('onboarding_save_guest_title'.tr()), findsNothing);
 
       connectivity.online = true;
       await settle(tester);
       expect(find.text('onboarding_save_offline'.tr()), findsNothing);
-      await tester.tap(find.text('onboarding_save_google'.tr()));
-      expect(chosen, [AccountProvider.google]);
+      await tester.tap(find.text('onboarding_save_email'.tr()));
+      expect(chosen, [AccountProvider.email]);
     });
 
     testWidgets('buttons and links meet the tap target guidelines', (

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/error/provider_exception.dart';
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_error_codes.dart';
@@ -20,6 +21,9 @@ abstract final class FailureMapper {
       case NetworkException():
         AppLogger.info('Network unavailable: ${error.reason}');
         return const NetworkFailure();
+      case ProviderException():
+        AppLogger.warning('Sign-in provider failed: ${error.reason}');
+        return const ProviderFailure();
       case DioException():
         final converted = ApiClient.convertDioException(error);
         if (converted is DioException) {
@@ -37,8 +41,14 @@ abstract final class FailureMapper {
     final code = e.code;
     final message = e.detail ?? e.title;
     // A link's token is refused with a 400, which would read as a form error.
-    if (code == ApiErrorCodes.linkInvalid) {
+    if (code == ApiErrorCodes.linkInvalid ||
+        code == ApiErrorCodes.emailLinkInvalid) {
       return LinkExpiredFailure(code: code, serverMessage: message);
+    }
+    // The provider's token is refused with a 401, which would read as a
+    // session that ended.
+    if (code == ApiErrorCodes.googleTokenInvalid) {
+      return ProviderFailure(code: code, serverMessage: message);
     }
     return switch (e.statusCode) {
       ApiStatusCodes.badRequest ||

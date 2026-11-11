@@ -254,7 +254,12 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
     String? platform,
   }) async {
     await Future<void>.delayed(latency);
-    if (current != mockPassword) throw _wrong('currentPassword');
+    if (current != mockPassword) {
+      throw const ApiException(
+        statusCode: 400,
+        code: ApiErrorCodes.currentPasswordInvalid,
+      );
+    }
     // The mock's session carries on; the server's is replaced.
     return null;
   }
@@ -269,7 +274,8 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
 
   static const mockPassword = 'password';
 
-  /// ASSUMPTION(api): a wrong password is a validation error on its field.
+  /// ASSUMPTION(api): the deletion's wrong password is a validation error
+  /// on its field (docs/api/me.md).
   static ApiException _wrong(String field) => ApiException(
     statusCode: 400,
     code: ApiErrorCodes.validationFailed,

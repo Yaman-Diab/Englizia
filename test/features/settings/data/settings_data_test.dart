@@ -230,7 +230,7 @@ void main() {
           minimum: const AppVersion(0, 0, 1),
           recommended: const AppVersion(0, 0, 2),
           updateUrl: Uri.parse(
-            'https://play.google.com/store/apps/details?id=com.example.englizia',
+            'https://play.google.com/store/apps/details?id=com.engleazia.app',
           ),
         ),
       );

@@ -68,6 +68,18 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<!-- Google sign-in's answer: the iOS OAuth client's reversed ID (ADR 20). -->
+				<string>com.googleusercontent.apps.959713011641-v96b50q8cvgtg475e0e91t1q9n8uhnqu</string>
+			</array>
+		</dict>
+	</array>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>نحتاج الميكروفون لنسمع نطقك. التسجيل يُحذف بعد تحويله إلى نص.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>

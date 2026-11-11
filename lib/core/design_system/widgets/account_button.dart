@@ -1,18 +1,22 @@
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:flutter/material.dart';
 
 /// One way into an account (Google, Apple, email): a full-width outlined
 /// button with the provider's mark at its start and the label in the
 /// middle, as the designs draw them. No option looks primary: they are
 /// equal choices. [badge] marks the way used last time («آخر دخول لك»), on
-/// the button's edge.
+/// the button's edge. While [isLoading], the spinner takes the mark's place:
+/// the button keeps its look but can't be pressed, and [label] says what is
+/// happening («جاري الدخول…»).
 class AccountButton extends StatelessWidget {
   const AccountButton({
     required this.label,
     required this.mark,
     required this.onPressed,
     this.badge,
+    this.isLoading = false,
     super.key,
   });
 
@@ -22,6 +26,7 @@ class AccountButton extends StatelessWidget {
   /// Null disables the button (offline, or another way is in progress).
   final VoidCallback? onPressed;
   final String? badge;
+  final bool isLoading;
 
   static const _height = 56.0;
   static const _markInset = 18.0;
@@ -34,12 +39,15 @@ class AccountButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final button = OutlinedButton(
-      onPressed: onPressed,
+      onPressed: isLoading ? null : onPressed,
       style: OutlinedButton.styleFrom(
         minimumSize: const Size.fromHeight(_height),
         padding: EdgeInsets.zero,
         foregroundColor: colors.textPrimary,
         backgroundColor: colors.surface,
+        // Waiting is not disabled: the button keeps its colors.
+        disabledForegroundColor: isLoading ? colors.textPrimary : null,
+        disabledBackgroundColor: isLoading ? colors.surface : null,
         side: BorderSide(color: colors.border),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -53,10 +61,19 @@ class AccountButton extends StatelessWidget {
             start: _markInset,
             child: SizedBox.square(
               dimension: _markSize,
-              child: Opacity(
-                opacity: onPressed == null ? .4 : 1,
-                child: Center(child: mark),
-              ),
+              // ASSUMPTION(design): 20 as "Login v2" draws it; "Save Progress"
+              // draws 22 (STATUS D-112).
+              child: isLoading
+                  ? Center(
+                      child: AppSpinner(
+                        size: AppSpinner.compactSize,
+                        color: colors.primaryStrong,
+                      ),
+                    )
+                  : Opacity(
+                      opacity: onPressed == null ? .4 : 1,
+                      child: Center(child: mark),
+                    ),
             ),
           ),
           Padding(

@@ -106,7 +106,7 @@ ADR 19. The opening is `features/launch`: one app-scoped `SplashCubit`, created 
 
 ## Environments
 
-`env/{dev,staging,prod,mock}.json` + gitignored `env/local.json`. `AppConfig.validate()` fails fast without `APP_ENV`/`BASE_URL`. Non-prod builds show an environment banner. `mock` is reserved for fixture-backed datasources registered in `configureDependencies()` when `AppConfig.isMock`.
+`env/{dev,staging,prod,mock}.json` + gitignored `env/local.json`. `AppConfig.validate()` fails fast without `APP_ENV`/`BASE_URL`. Google's OAuth client IDs travel the same way (`GOOGLE_SERVER_CLIENT_ID`, `GOOGLE_IOS_CLIENT_ID`; public values, ADR 20). Non-prod builds show an environment banner. `mock` is reserved for fixture-backed datasources registered in `configureDependencies()` when `AppConfig.isMock`.
 
 ## Testing
 

@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Signing in and creating an account with Google, from sign-in and from "save progress": one press, Google's own sheet, and the button waits meanwhile. The way used last is marked on the sign-in screen.
 - Clips play for real: listening questions, words, sentences and the guide's lines, from the server; in mock mode each says its word or sentence in an English voice. The app's sounds keep quiet while one plays.
 - A lesson's video is protected: on Android it can't be screenshot or recorded, and on iOS it hides behind a notice and pauses while the screen is recorded or shared, coming back when that stops.
 - Sound effects: a right and a wrong answer, a piece picked, a lesson finished, a unit and a placement test done, a concept mastered, the next island out of its fog, the daily goal, the microphone, a word saved, a freeze kept, the points counting and a card turned; the kids hear their own toy sounds and stars. One family of warm marimba and soft bells, quiet under the phone's silent switch and the learner's own music, off with «المؤثرات الصوتية», and never over the microphone or a video. The sounds are placeholders for now.
@@ -66,6 +67,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Fixed
+- An old link from the email that confirms your address shows "this link has expired" again, and a wrong current password is said under its field, after the server gave each its own code.
 - The line of a unit's chain on the lesson's end was never drawn: it had no height.
 
 ### Changed

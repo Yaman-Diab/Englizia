@@ -5,6 +5,6 @@ final class AppInfo {
   /// "1.0.0", from the build.
   final String version;
 
-  /// The application ID ("com.example.englizia"), for the store's page.
+  /// The application ID ("com.engleazia.app"), for the store's page.
   final String packageName;
 }

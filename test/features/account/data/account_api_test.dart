@@ -103,7 +103,10 @@ void main() {
 
       final result = await repository.verifyEmail('old');
 
-      expect((result as Err<void>).failure, isA<LinkExpiredFailure>());
+      final failure = (result as Err<void>).failure;
+      expect(failure, isA<LinkExpiredFailure>());
+      // Its own code since the server parted it from the recovery's.
+      expect(failure.code, 'auth.email_link_invalid');
     });
 
     test('is corrected with newEmail', () async {

@@ -57,8 +57,9 @@ final class SettingsStorageService {
     await _prefs.setBool(_hasLaunchedKey, true);
   }
 
-  /// The provider used for the last sign-in (`google`, `apple`), for the
-  /// «آخر دخول لك» badge. Kept on the phone only (S §5.1).
+  /// The way used for the last sign-in (`google`, `apple`, `email`), for the
+  /// «آخر دخول لك» badge on Google's or Apple's button. Kept on the phone only
+  /// (S §5.1), and through a sign-out.
   String? get lastSignInMethod => _prefs.getString(_lastSignInKey);
 
   Future<void> setLastSignInMethod(String method) async {

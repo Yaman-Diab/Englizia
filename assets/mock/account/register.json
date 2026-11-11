@@ -8,6 +8,7 @@
     "refreshToken": "mock-member-refresh-token",
     "refreshTokenExpiresAt": "2026-12-31T00:00:00Z",
     "deviceId": "00000000-0000-4000-8000-000000000000",
+    "isNewUser": true,
     "user": {
       "id": "00000000-0000-0000-0000-000000000000",
       "userName": "user@example.com",

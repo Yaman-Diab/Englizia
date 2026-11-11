@@ -10,7 +10,7 @@ final class AppStore {
 
   final ExternalLink _links;
 
-  /// The Android application ID ("com.example.englizia").
+  /// The Android application ID ("com.engleazia.app").
   final String packageName;
 
   /// "android", "ios" or null (`devicePlatform()`).

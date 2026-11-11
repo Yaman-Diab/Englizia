@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/settings/app_haptics.dart';
@@ -307,6 +308,24 @@ void main() {
       await tester.tap(save);
       await settle(tester);
       expect(saved, 1);
+    });
+
+    testWidgets('the server\'s own code for a wrong current password is said '
+        'under the field too', (tester) async {
+      await host(tester, PasswordPage(onBack: () {}, onSaved: () {}));
+      final fields = find.byType(TextField);
+
+      profiles.passwordFailure = const ValidationFailure(
+        code: ApiErrorCodes.currentPasswordInvalid,
+      );
+      await tester.enterText(fields.first, 'old');
+      await tester.enterText(fields.last, 'long enough');
+      await tester.pump();
+      await tester.tap(find.widgetWithText(FilledButton, 'common_save'.tr()));
+      await settle(tester);
+
+      expect(find.text('settings_password_wrong'.tr()), findsOneWidget);
+      expect(find.byType(SnackBar), findsNothing);
     });
 
     testWidgets('deleting: what goes, the password, then gone', (tester) async {

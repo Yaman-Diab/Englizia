@@ -71,7 +71,7 @@ void main() {
     app: const AppInfo(version: _installed),
     store: AppStore(
       links,
-      packageName: 'com.example.englizia',
+      packageName: 'com.engleazia.app',
       platform: platform,
     ),
   );
@@ -190,9 +190,7 @@ void main() {
 
       await splash.openStore();
 
-      expect(links.tried, [
-        Uri.parse('market://details?id=com.example.englizia'),
-      ]);
+      expect(links.tried, [Uri.parse('market://details?id=com.engleazia.app')]);
       expect(splash.state.storeFailed, isFalse);
     });
 
@@ -222,7 +220,7 @@ void main() {
       expect(
         splash.state.storePage,
         Uri.parse(
-          'https://play.google.com/store/apps/details?id=com.example.englizia',
+          'https://play.google.com/store/apps/details?id=com.engleazia.app',
         ),
       );
       expect(splash.state.mode, SplashMode.update);

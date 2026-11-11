@@ -16,7 +16,7 @@ import '../../helpers/pump_app.dart';
 class _Splash extends MockCubit<SplashState> implements SplashCubit {}
 
 final _page = Uri.parse(
-  'https://play.google.com/store/apps/details?id=com.example.englizia',
+  'https://play.google.com/store/apps/details?id=com.engleazia.app',
 );
 
 void main() {

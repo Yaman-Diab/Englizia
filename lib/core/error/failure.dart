@@ -90,6 +90,12 @@ final class ServerFailure extends Failure {
   List<Object?> get props => [...super.props, statusCode];
 }
 
+/// Google's or Apple's sign-in did not give an account the server accepts:
+/// missing on this phone, not set up, or its token refused.
+final class ProviderFailure extends Failure {
+  const ProviderFailure({super.code, super.serverMessage});
+}
+
 /// Anything unexpected (parsing, programming errors). Always logged with stack.
 final class UnknownFailure extends Failure {
   const UnknownFailure();

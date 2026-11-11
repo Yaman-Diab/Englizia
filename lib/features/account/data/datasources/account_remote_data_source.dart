@@ -8,11 +8,13 @@ import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/features/account/data/models/google_sign_in_model.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/models/register_model.dart';
 import 'package:englizia/features/account/data/models/reset_password_model.dart';
 import 'package:englizia/features/account/data/models/sign_in_model.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class AccountRemoteDataSource {
@@ -24,6 +26,10 @@ abstract interface class AccountRemoteDataSource {
 
   /// [request] is [SignInModel.request].
   Future<AuthTokens> signIn(Map<String, Object?> request);
+
+  /// [request] is [GoogleSignInModel.request]. Signs in, or makes the
+  /// account on its first time.
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request);
 
   Future<void> requestPasswordReset(String email);
 
@@ -74,6 +80,17 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       SignInModel.tokens(
         await _client.post(
           ApiEndpoints.login,
+          data: request,
+          options: ApiClient.publicOptions,
+        ),
+        now: DateTime.now(),
+      );
+
+  @override
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request) async =>
+      GoogleSignInModel.session(
+        await _client.post(
+          ApiEndpoints.googleSignIn,
           data: request,
           options: ApiClient.publicOptions,
         ),
@@ -144,11 +161,18 @@ AccountEmail _email(Map<String, Object?> user) => AccountEmail(
   verified: user.readBool('emailVerified') ?? false,
 );
 
-/// The dev server's answer to a link expired, used or unknown: 400 with
-/// `auth.reset_token_invalid` (`test/fixtures/api/auth_link_invalid.json`).
+/// The dev server's answer to a recovery link expired, used or unknown: 400
+/// with `auth.reset_token_invalid` (`test/fixtures/api/auth_link_invalid.json`).
 const _linkInvalid = ApiException(
   statusCode: ApiStatusCodes.badRequest,
   code: ApiErrorCodes.linkInvalid,
+);
+
+/// The same for the link that confirms an email
+/// (`test/fixtures/api/auth_email_verify_link_invalid.json`).
+const _emailLinkInvalid = ApiException(
+  statusCode: ApiStatusCodes.badRequest,
+  code: ApiErrorCodes.emailLinkInvalid,
 );
 
 /// Mock mode (`env/mock.json`): the contract's examples from bundled assets
@@ -224,6 +248,14 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
     return SignInModel.tokens(body, now: DateTime.now());
   }
 
+  /// Any Google account is a new learner's.
+  @override
+  Future<SocialSession> signInWithGoogle(Map<String, Object?> request) async {
+    await Future<void>.delayed(latency);
+    final body = jsonDecode(await _bundle.loadString(registerAsset));
+    return GoogleSignInModel.session(body, now: DateTime.now());
+  }
+
   /// Always sent, as the server answers for any email.
   @override
   Future<void> requestPasswordReset(String email) =>
@@ -278,7 +310,7 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   Future<void> verifyEmail(String token) async {
     await Future<void>.delayed(latency);
     if (token == expiredResetToken) {
-      throw _linkInvalid;
+      throw _emailLinkInvalid;
     }
     _verified = true;
   }
