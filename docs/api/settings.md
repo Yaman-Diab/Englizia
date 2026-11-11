@@ -49,7 +49,7 @@ The global settings after inheritance, as the app needs them before any track is
       "android": {
         "minVersion": "0.1.0",
         "recommendedVersion": "1.0.0",
-        "updateUrl": "https://play.google.com/store/apps/details?id=com.example.englizia"
+        "updateUrl": "https://play.google.com/store/apps/details?id=com.engleazia.app"
       },
       "ios": {
         "minVersion": "0.1.0",

@@ -1,9 +1,8 @@
 # Release
 
 ## Before the first build that leaves your machine
-- [ ] Final application ID / bundle ID (currently the provisional `com.example.englizia`). Change in
-      `android/app/build.gradle.kts` (`namespace`, `applicationId`), move `MainActivity.kt` to the new package,
-      and set `PRODUCT_BUNDLE_IDENTIFIER` in Xcode. It cannot change after the first store upload.
+- [x] Application ID / bundle ID: `com.engleazia.app` (Android `namespace` and `applicationId`, iOS
+      `PRODUCT_BUNDLE_IDENTIFIER`). It cannot change after the first store upload.
 - [ ] App icon and splash generated from one source (`flutter_launcher_icons`, `flutter_native_splash`).
 - [ ] Crash reporter chosen and wired into `AppLogger.reporter` (provider must work for users in Syria).
 - [ ] `env/prod.json` has the real `BASE_URL`.

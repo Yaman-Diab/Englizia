@@ -1,4 +1,4 @@
-package com.example.englizia
+package com.engleazia.app
 
 import android.content.ActivityNotFoundException
 import android.content.Intent

@@ -103,7 +103,7 @@
       "android": {
         "minVersion": "0.0.1",
         "recommendedVersion": "0.0.2",
-        "updateUrl": "https://play.google.com/store/apps/details?id=com.example.englizia"
+        "updateUrl": "https://play.google.com/store/apps/details?id=com.engleazia.app"
       },
       "ios": {
         "minVersion": "0.0.1",

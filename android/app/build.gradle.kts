@@ -18,7 +18,7 @@ val hasReleaseKeystore = keystoreProperties.containsKey("storeFile")
 
 android {
     // The application ID is provisional and must be final before the first store upload.
-    namespace = "com.example.englizia"
+    namespace = "com.engleazia.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -32,7 +32,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.englizia"
+        applicationId = "com.engleazia.app"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

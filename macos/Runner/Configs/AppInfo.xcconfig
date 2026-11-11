@@ -8,7 +8,7 @@
 PRODUCT_NAME = englizia
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.englizia
+PRODUCT_BUNDLE_IDENTIFIER = com.engleazia.app
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.

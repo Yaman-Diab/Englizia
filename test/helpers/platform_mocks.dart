@@ -8,7 +8,7 @@ void mockPlatformPlugins() {
   FlutterSecureStorage.setMockInitialValues({});
   PackageInfo.setMockInitialValues(
     appName: 'Engleazia',
-    packageName: 'com.example.englizia',
+    packageName: 'com.engleazia.app',
     version: '0.0.1',
     buildNumber: '1',
     buildSignature: '',

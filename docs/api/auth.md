@@ -1,6 +1,6 @@
 # Accounts and sessions
 
-Status: mixed. **Live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, password recovery, the password change and the email's confirmation; the app uses all but Google and Apple (STATUS D-001). **Proposed**, mock only (`assets/mock/account/`): the guest account and its upgrade. The real answers the app was checked against are in `test/fixtures/api/auth_*.json`.
+Status: mixed. **Live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, password recovery, the password change and the email's confirmation; the app uses all but Google and Apple. **Proposed**, mock only (`assets/mock/account/`): the guest account and its upgrade. The real answers the app was checked against are in `test/fixtures/api/auth_*.json`.
 Decision: guest mode is back by the owner's decision (2026-10-27, ADR 10), as a **server-side guest account**. This reverses student doc §4.3 ("no guest mode") and server doc §26's table row ("no guest accounts"); both documents need updating, and the backend needs a guest account type.
 
 ## `POST /api/v1/auth/guest`
@@ -137,7 +137,7 @@ Questions for the backend team: whether correcting the email will ask for the pa
 
 ## `POST /api/v1/auth/google` and `POST /api/v1/auth/apple`
 
-Live, not used yet: the app's side needs the final application ID, which Google's and Apple's sign-in are bound to (STATUS D-001). Google takes `GoogleSignInRequest { idToken, deviceId, platform }`; Apple takes `AppleSignInRequest { identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform }`, with `POST /api/v1/auth/apple/callback` for the web flow Android needs. Both answer with a `TokenResponse` whose `isNewUser` says the sign-in made the account, when the onboarding answers belong with it. A refused Google token is `401 auth.google_token_invalid`.
+Live, not used yet. Google takes `GoogleSignInRequest { idToken, deviceId, platform }`; Apple takes `AppleSignInRequest { identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform }`, with `POST /api/v1/auth/apple/callback` for the web flow Android needs. Both answer with a `TokenResponse` whose `isNewUser` says the sign-in made the account, when the onboarding answers belong with it. A refused Google token is `401 auth.google_token_invalid`.
 
 ## `POST /api/v1/auth/logout`
 

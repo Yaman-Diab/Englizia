@@ -134,8 +134,8 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/email/verify` | POST | `VerifyEmailRequest {token}` | none; `400 auth.reset_token_invalid` for a link expired, used or unknown ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/email/resend` | POST | — | `202`; `409`, `429` ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/email` | PUT | `ChangeEmailRequest {newEmail}` | `202`; `409` when it has an account ([auth.md](auth.md)) | live, used |
-| `/api/v1/auth/google` | POST | `GoogleSignInRequest {idToken, deviceId, platform}` | `TokenResponse` | live, not used (STATUS D-001) |
-| `/api/v1/auth/apple` | POST | `AppleSignInRequest {identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform}` | `TokenResponse` | live, not used (STATUS D-001) |
+| `/api/v1/auth/google` | POST | `GoogleSignInRequest {idToken, deviceId, platform}` | `TokenResponse` | live, not used |
+| `/api/v1/auth/apple` | POST | `AppleSignInRequest {identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform}` | `TokenResponse` | live, not used |
 | `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team
