@@ -29,8 +29,10 @@ class Mascot extends StatefulWidget {
     this.size = 160,
     this.animate = true,
     this.waving = false,
+    this.waveOnce = false,
     this.silhouette = false,
     this.sparkles = true,
+    this.shadow = true,
     this.semanticLabel,
     super.key,
   });
@@ -44,11 +46,17 @@ class Mascot extends StatefulWidget {
   final bool animate;
   final bool waving;
 
+  /// With [waving]: one wave as it appears, then the arm rests (the splash).
+  final bool waveOnce;
+
   /// One flat color, no face or effects (the design's "الخيال").
   final bool silhouette;
 
   /// False leaves out the expression's sparkles: glad, without a celebration.
   final bool sparkles;
+
+  /// False leaves out the ground shadow, for a guide standing in a circle.
+  final bool shadow;
 
   /// Defaults to the guide's name.
   final String? semanticLabel;
@@ -142,6 +150,7 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
     _frame.value = MascotFrame.at(
       elapsed,
       waving: widget.waving,
+      waveOnce: widget.waveOnce,
       idle: idle,
       floatPhase: _floatPhase,
     );
@@ -178,6 +187,7 @@ class _MascotState extends State<Mascot> with TickerProviderStateMixin {
             palette: palette,
             prop: widget.prop,
             framing: widget.framing,
+            shadow: widget.shadow,
             frame: _frame,
             blink: _changing ? MascotPose.changeBlink(_poseChange.value) : 0,
             stretch: _changing

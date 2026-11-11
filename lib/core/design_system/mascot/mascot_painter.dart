@@ -19,6 +19,7 @@ class MascotPainter extends CustomPainter {
     required this.prop,
     required this.frame,
     this.framing = MascotFraming.full,
+    this.shadow = true,
     this.blink = 0,
     this.stretch = 0,
   }) : pose = _effectivePose(pose, prop, framing),
@@ -28,6 +29,9 @@ class MascotPainter extends CustomPainter {
   final MascotPalette palette;
   final MascotProp prop;
   final MascotFraming framing;
+
+  /// The ground shadow under a full figure.
+  final bool shadow;
   final ValueListenable<MascotFrame> frame;
 
   /// How shut the eyes are for the face swap, 0-1.
@@ -83,7 +87,7 @@ class MascotPainter extends CustomPainter {
         ..translate(-_headLeft, 0);
     } else {
       canvas.scale(size.width / viewBox, size.height / viewBox);
-      if (!palette.isSilhouette) {
+      if (shadow && !palette.isSilhouette) {
         canvas.drawOval(
           Rect.fromCenter(
             center: const Offset(90, 171),
@@ -842,6 +846,7 @@ class MascotPainter extends CustomPainter {
       oldDelegate.palette != palette ||
       oldDelegate.prop != prop ||
       oldDelegate.framing != framing ||
+      oldDelegate.shadow != shadow ||
       oldDelegate.frame != frame ||
       oldDelegate.blink != blink ||
       oldDelegate.stretch != stretch;

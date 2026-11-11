@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- The splash page's BACKGROUND and PRIMARY_SURFACE (light), so the
+         system splash hands over to it without a flash. -->
+    <color name="splash_background">#F7F9FC</color>
+    <color name="splash_circle">#E6EEFD</color>
+</resources>

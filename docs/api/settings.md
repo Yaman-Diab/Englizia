@@ -1,7 +1,7 @@
 # Effective settings
 
 Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/settings/`); nothing is confirmed by the backend team yet.
-Requirements: server doc §17.1 (inheritance and reading), §17.7 (motivation), §17.8 (notifications), §19.2 ("the app reads the effective settings on open and caches them"); student doc §4.2 (reminder step) and §20.
+Requirements: server doc §17.1 (inheritance and reading), §17.7 (motivation), §17.8 (notifications), §19.2 ("the app reads the effective settings on open and caches them"; the app versions); student doc §4.2 (reminder step) and §20.
 
 ## `GET /api/v1/app/settings`
 
@@ -44,6 +44,18 @@ The global settings after inheritance, as the app needs them before any track is
         "title": { "ar": "حان وقت درسك اليومي", "en": "Time for your daily lesson" },
         "body": { "ar": "{minutes} دقائق فقط وتحافظ على أيامك المتتالية", "en": "Just {minutes} minutes keeps your streak going" }
       }
+    },
+    "appVersion": {
+      "android": {
+        "minVersion": "0.1.0",
+        "recommendedVersion": "1.0.0",
+        "updateUrl": "https://play.google.com/store/apps/details?id=com.example.englizia"
+      },
+      "ios": {
+        "minVersion": "0.1.0",
+        "recommendedVersion": "1.0.0",
+        "updateUrl": "https://apps.apple.com/app/id0000000000"
+      }
     }
   },
   "error": null,
@@ -64,6 +76,12 @@ The global settings after inheritance, as the app needs them before any track is
 | `notifications.defaultReminderSlot` | slot | The preselected time (§17.8: evening) | yes |
 | `notifications.dailyReminder.enabled` | bool | Whether the daily reminder is on | not yet |
 | `notifications.dailyReminder.title` / `.body` | bilingual text | The reminder's text as edited in the panel; `{minutes}` is the learner's daily goal | yes (the preview) |
+| `appVersion.<platform>` | object per platform (`android`, `ios`) | The app versions of server doc §19.2; the app reads its own platform's | yes |
+| `appVersion.<platform>.minVersion` | `"major.minor.patch"`, optional | An older installed version stops at the update screen, with no way past it (student doc §4.1) | yes |
+| `appVersion.<platform>.recommendedVersion` | `"major.minor.patch"`, optional | An older one gets a reminder on home, once a day | yes |
+| `appVersion.<platform>.updateUrl` | `https` URL, optional | The app's store page. Android opens Google Play's app first and this page after it; iOS opens this page only, since only the server knows the App Store ID | yes |
+
+A version that isn't a release number (a build `+12` or a tag `-beta` is ignored) or a link that isn't `https` is left out alone, so it decides nothing; the rest of `appVersion` still counts, and `appVersion` is read even when another group is incomplete. The phone keeps its platform's entry, so an open without a connection still stops a version too old to run (ADR 19).
 
 An unknown slot, a malformed time, or a goal or challenge option without its number or label is skipped. A response without any usable time, the reminder text, any goal or challenge option, their defaults or the challenge question is rejected.
 
@@ -77,3 +95,4 @@ The common errors (`docs/api/README.md`).
 2. Confirm the placeholder name in the reminder body (`{minutes}`; the panel shows it as `{الدقائق}`).
 3. Is `averageLessonMinutes` acceptable as a setting (or should the app count lessons another way)? The weekly total is minutes × 7.
 4. Times are phone-local "HH:mm" (the learner's time zone), not UTC instants. Confirm, and how the chosen time is sent back with the account (§4.3).
+5. `appVersion`: confirm the group, the field names and the version format (`major.minor.patch`, compared part by part as numbers). The app compares its own store version (`1.2.3`), not the build number.

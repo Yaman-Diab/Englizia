@@ -12,6 +12,7 @@ import 'package:englizia/core/audio/speech_listener.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/links/app_store.dart';
 import 'package:englizia/core/links/external_link.dart';
 import 'package:englizia/core/mail/mail_app.dart';
 import 'package:englizia/core/network/api_client.dart';
@@ -22,6 +23,7 @@ import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
 import 'package:englizia/core/security/screen_protection.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
+import 'package:englizia/core/session/device_platform.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/core/storage/secure_token_storage.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
@@ -42,7 +44,12 @@ Future<void> setupCoreDependencies(GetIt sl) async {
   final packageInfo = await PackageInfo.fromPlatform();
 
   sl
-    ..registerSingleton(AppInfo(version: packageInfo.version))
+    ..registerSingleton(
+      AppInfo(
+        version: packageInfo.version,
+        packageName: packageInfo.packageName,
+      ),
+    )
     ..registerLazySingleton(() => SettingsStorageService(prefs))
     ..registerLazySingleton<TokenStorage>(SecureTokenStorage.new)
     ..registerLazySingleton(CurrentLanguage.new)
@@ -101,6 +108,13 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     // A lesson's video out of screenshots and recordings (ADR 18).
     ..registerLazySingleton<ScreenProtection>(PlatformScreenProtection.new)
     ..registerLazySingleton<ExternalLink>(() => const PlatformExternalLink())
+    ..registerLazySingleton(
+      () => AppStore(
+        sl(),
+        packageName: packageInfo.packageName,
+        platform: devicePlatform(),
+      ),
+    )
     ..registerFactory(() => SettingsCubit(sl()));
 }
 

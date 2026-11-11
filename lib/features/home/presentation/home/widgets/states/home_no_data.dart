@@ -53,13 +53,12 @@ class HomeNoData extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // ASSUMPTION(design): the design drops the guide's ground
-                  // shadow too, which `Mascot` always draws (D-102).
                   const ExcludeSemantics(
                     child: Mascot(
                       expression: MascotExpression.understand,
                       size: _guide,
                       sparkles: false,
+                      shadow: false,
                     ),
                   ),
                   // The design's gap 12, plus the heading's margin 8.

@@ -69,7 +69,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the preferences, the password and deleting the account | mock (`PUT /api/v1/app/me` confirmed) |
 | [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
-| [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), later every screen that reads a setting | mock |
+| [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), the splash's version gate, later every screen that reads a setting | mock |
 
 ## Headers sent on every request
 
@@ -153,7 +153,7 @@ Paste-ready; each item names what the app needs and why.
 9. **The links in the emails open the app.** Recovery and confirmation are live; their links (`https://engleazia.com/reset-password?token=…&email=…`, `/verify-email?token=…`) need `assetlinks.json` and apple-app-site-association on that host, and the Apple relay domain registered so they reach hidden Apple emails (S §5.1).
 10. **The password change's refusals.** `POST /api/v1/auth/password/change` lists 401, 403 and 409 without codes: which one is a wrong current password (the app expects `400 validation.failed` naming `currentPassword`, or a code to key on), and whether a 401 there means the session or the password (a 401 makes the app refresh the session once first).
 11. **The confirmation link's code.** A bad `/auth/email/verify` token answers `auth.reset_token_invalid`, the recovery's code; the app reads both as an expired link, so either a code of its own or this one kept is fine, as long as it stays.
-12. **App gate.** An endpoint for the minimum and recommended app version per platform (§19.2), e.g. `GET /api/v1/app/config`.
+12. **App gate.** The minimum and recommended app version per platform (§19.2), proposed as the `appVersion` group of `GET /api/v1/app/settings` ([settings.md](settings.md)), so the app needs one call on open.
 13. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
 14. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
 15. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.

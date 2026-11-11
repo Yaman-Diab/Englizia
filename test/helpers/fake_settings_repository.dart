@@ -1,6 +1,8 @@
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 
 /// The contract's example (`assets/mock/settings/effective.json`) as entities.
@@ -76,10 +78,26 @@ const testSettings = EffectiveSettings(
 class FakeSettingsRepository implements SettingsRepository {
   FakeSettingsRepository([
     this.results = const [Ok<EffectiveSettings>(testSettings)],
+    this.versions = const Ok(VersionPolicy.none),
   ]);
 
   final List<Result<EffectiveSettings>> results;
+  Result<VersionPolicy> versions;
+
+  /// What the phone kept from an earlier open.
+  VersionPolicy? kept;
   var calls = 0;
+
+  @override
+  Future<Result<VersionPolicy>> getVersionPolicy({
+    bool keptOnly = false,
+  }) async => switch (keptOnly ? null : versions) {
+    final Ok<VersionPolicy> fetched => fetched,
+    final failed => switch (kept) {
+      final kept? => Ok(kept),
+      null => failed ?? const Err(UnknownFailure()),
+    },
+  };
 
   @override
   Future<Result<EffectiveSettings>> getSettings() async =>

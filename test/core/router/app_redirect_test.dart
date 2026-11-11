@@ -13,8 +13,13 @@ void main() {
     '/': RoutePolicy.requiresSession,
   };
 
-  String? resolve(SessionStatus status, String location) => AppRedirect(
+  String? resolve(
+    SessionStatus status,
+    String location, {
+    LaunchStatus launch = LaunchStatus.ready,
+  }) => AppRedirect(
     status: () => status,
+    launch: () => launch,
     policyFor: (pattern) => policies[pattern] ?? RoutePolicy.requiresSession,
     splashLocation: '/splash',
     homeLocation: '/',
@@ -68,5 +73,25 @@ void main() {
   test('unlisted routes need a session', () {
     expect(resolve(SessionStatus.signedOut, '/unknown'), '/welcome');
     expect(resolve(SessionStatus.guest, '/unknown'), isNull);
+  });
+
+  test('the opening holds the app on the splash, as an unknown session', () {
+    const starting = LaunchStatus.starting;
+    expect(resolve(SessionStatus.member, '/splash', launch: starting), isNull);
+    expect(resolve(SessionStatus.member, '/', launch: starting), '/splash');
+    expect(
+      resolve(SessionStatus.signedOut, '/about', launch: starting),
+      isNull,
+    );
+  });
+
+  test('an app too old to run stays on the splash, public routes too', () {
+    const update = LaunchStatus.updateRequired;
+    for (final status in SessionStatus.values) {
+      expect(resolve(status, '/splash', launch: update), isNull);
+      expect(resolve(status, '/', launch: update), '/splash');
+      expect(resolve(status, '/about', launch: update), '/splash');
+      expect(resolve(status, '/welcome', launch: update), '/splash');
+    }
   });
 }

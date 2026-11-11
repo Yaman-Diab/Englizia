@@ -1,24 +1,25 @@
 import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/features/settings/data/models/version_policy_model.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 
 /// The effective settings the app reads; contract in docs/api/settings.md.
 // ASSUMPTION(api): field names proposed, not confirmed (docs/api/settings.md).
 final class EffectiveSettingsModel {
-  const EffectiveSettingsModel(this.entity);
+  EffectiveSettingsModel.fromJson(this._json);
 
-  factory EffectiveSettingsModel.fromJson(Map<String, Object?> json) {
-    final notifications = json.readMap('notifications');
-    final motivation = json.readMap('motivation');
-    return EffectiveSettingsModel(
-      EffectiveSettings(
-        reminder: _reminder(notifications),
-        dailyGoal: _dailyGoal(motivation),
-        challenge: _challenge(motivation),
-      ),
-    );
-  }
+  final Map<String, Object?> _json;
 
-  final EffectiveSettings entity;
+  /// Throws a [FormatException] while a group the app needs is incomplete.
+  late final EffectiveSettings entity = EffectiveSettings(
+    reminder: _reminder(_json.readMap('notifications')),
+    dailyGoal: _dailyGoal(_json.readMap('motivation')),
+    challenge: _challenge(_json.readMap('motivation')),
+  );
+
+  /// Read on its own, so an incomplete group elsewhere can't hide it.
+  VersionPolicy versionsFor(String? platform) =>
+      VersionPolicyModel.fromSettings(_json, platform: platform).entity;
 
   static ReminderSettings _reminder(Map<String, Object?>? notifications) {
     final reminder = notifications?.readMap('dailyReminder');

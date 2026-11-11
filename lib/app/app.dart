@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_router.dart';
 import 'package:englizia/core/config/app_config.dart';
@@ -7,6 +9,7 @@ import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/core/settings/settings_state.dart';
+import 'package:englizia/features/launch/presentation/splash/cubit/splash_cubit.dart';
 import 'package:englizia/features/lessons/data/answers_sync.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,12 +25,18 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  late final GoRouter _router = createAppRouter(sl<AppSessionController>());
+  /// The opening: the splash shows it, the router waits for it.
+  final _launch = sl<SplashCubit>();
+  late final GoRouter _router = createAppRouter(
+    sl<AppSessionController>(),
+    launch: _launch,
+  );
   late final AnswersSync _answers;
 
   @override
   void initState() {
     super.initState();
+    unawaited(_launch.start());
     _answers = sl<AnswersSync>()..start();
   }
 
@@ -41,6 +50,7 @@ class _AppState extends State<App> {
   void dispose() {
     _answers.stop();
     _router.dispose();
+    unawaited(_launch.close());
     super.dispose();
   }
 
@@ -48,8 +58,11 @@ class _AppState extends State<App> {
   Widget build(BuildContext context) {
     final isArabic =
         context.locale.languageCode == AppLocales.arabic.languageCode;
-    return BlocProvider(
-      create: (_) => sl<SettingsCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => sl<SettingsCubit>()),
+        BlocProvider.value(value: _launch),
+      ],
       child: ScreenUtilInit(
         designSize: AppTheme.designSize,
         minTextAdapt: true,

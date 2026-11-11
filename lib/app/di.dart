@@ -1,6 +1,7 @@
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/features/account/account_injection.dart';
 import 'package:englizia/features/home/home_injection.dart';
+import 'package:englizia/features/launch/launch_injection.dart';
 import 'package:englizia/features/lessons/lessons_injection.dart';
 import 'package:englizia/features/me/me_injection.dart';
 import 'package:englizia/features/onboarding/onboarding_injection.dart';
@@ -25,4 +26,5 @@ Future<void> configureDependencies() async {
   registerTalkDependencies(sl);
   registerMeDependencies(sl);
   registerHomeDependencies(sl);
+  registerLaunchDependencies(sl);
 }
