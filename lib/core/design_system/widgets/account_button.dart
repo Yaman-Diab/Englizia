@@ -61,6 +61,8 @@ class AccountButton extends StatelessWidget {
             start: _markInset,
             child: SizedBox.square(
               dimension: _markSize,
+              // ASSUMPTION(design): 20 as "Login v2" draws it; "Save Progress"
+              // draws 22 (STATUS D-112).
               child: isLoading
                   ? Center(
                       child: AppSpinner(

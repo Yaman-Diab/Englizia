@@ -67,6 +67,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Fixed
+- An old link from the email that confirms your address shows "this link has expired" again, and a wrong current password is said under its field, after the server gave each its own code.
 - The line of a unit's chain on the lesson's end was never drawn: it had no height.
 
 ### Changed

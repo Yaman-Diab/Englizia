@@ -36,26 +36,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "201": {
             "description": "Created",
             "content": {
@@ -66,8 +46,18 @@
               }
             }
           },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "409": {
-            "description": "Conflict",
+            "description": "`auth.email_taken`: an account already uses this email, in any letter case.",
             "content": {
               "application/json": {
                 "schema": {
@@ -77,7 +67,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -115,26 +115,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -145,8 +125,18 @@
               }
             }
           },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.invalid_credentials`: wrong email or password, or a deleted account (one answer for all).",
             "content": {
               "application/json": {
                 "schema": {
@@ -156,7 +146,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -166,7 +156,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`auth.locked_out`: 5 wrong passwords lock the account for 5 minutes (Retry-After). `rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -204,26 +204,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -234,8 +214,18 @@
               }
             }
           },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.google_token_invalid`: the idToken failed Google's checks.",
             "content": {
               "application/json": {
                 "schema": {
@@ -245,7 +235,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -255,7 +245,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "`auth.email_taken`: an account has this email and Google did not verify it. `auth.external_login_conflict`: that account is linked to another Google account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -265,7 +255,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -303,26 +303,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -333,8 +313,18 @@
               }
             }
           },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.apple_token_invalid`: the identityToken failed Apple's checks, or the nonce does not match.",
             "content": {
               "application/json": {
                 "schema": {
@@ -344,7 +334,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -354,7 +344,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "`auth.email_taken`: an account has this email and Apple did not verify it. `auth.external_login_conflict`: that account is linked to another Apple account.",
             "content": {
               "application/json": {
                 "schema": {
@@ -364,7 +354,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -409,8 +409,24 @@
           "required": true
         },
         "responses": {
+          "303": {
+            "description": "See Other",
+            "content": {
+              "application/json": { }
+            }
+          },
           "400": {
-            "description": "Bad Request",
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
             "content": {
               "application/json": {
                 "schema": {
@@ -420,23 +436,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "303": {
-            "description": "See Other",
-            "content": {
-              "application/json": { }
-            }
-          },
-          "429": {
-            "description": "Too Many Requests",
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -446,7 +446,7 @@
             }
           },
           "503": {
-            "description": "Service Unavailable",
+            "description": "`auth.apple_not_configured`: the server has no Android package name. A setup error on our side.",
             "content": {
               "application/json": {
                 "schema": {
@@ -467,43 +467,43 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/RefreshRequest"
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/RefreshRequest"
+                  }
+                ]
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -514,8 +514,18 @@
               }
             }
           },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.refresh_token_invalid`: the token is unknown, expired or signed out, or there is no token and no cookie. `auth.refresh_token_reused`: a replaced token came back after 60 seconds, so every session of this device was closed. Both: sign in again.",
             "content": {
               "application/json": {
                 "schema": {
@@ -525,7 +535,27 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard. `auth.origin_not_allowed`: the cookie came from a page that is not the dashboard. A setup error, not a sign-out.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -546,25 +576,75 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogoutRequest"
+                  }
+                ]
               }
             },
             "text/json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogoutRequest"
+                  }
+                ]
               }
             },
             "application/*+json": {
               "schema": {
-                "$ref": "#/components/schemas/LogoutRequest"
+                "oneOf": [
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "$ref": "#/components/schemas/LogoutRequest"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
               }
             }
           },
-          "required": true
-        },
-        "responses": {
           "400": {
-            "description": "Bad Request",
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`auth.origin_not_allowed`: the cookie came from a page that is not the dashboard. A setup error, not a sign-out.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
             "content": {
               "application/json": {
                 "schema": {
@@ -574,17 +654,7 @@
             }
           },
           "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -602,26 +672,6 @@
           "Auth"
         ],
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "202": {
             "description": "Accepted",
             "content": {
@@ -633,7 +683,27 @@
             }
           },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.unauthenticated`: no Bearer token. `auth.token_expired`: refresh the session, then retry. `auth.token_invalid`: sign out.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`user.not_found`: the account was deleted or has no email.",
             "content": {
               "application/json": {
                 "schema": {
@@ -643,7 +713,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "`auth.email_already_confirmed`: the email is confirmed already.",
             "content": {
               "application/json": {
                 "schema": {
@@ -653,7 +723,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`auth.resend_too_soon`: a link was sent less than 60 seconds ago; Retry-After is the countdown of screen 2.06. `rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -696,28 +776,18 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
-            "description": "OK",
+            "description": "The email is confirmed. Also for a used, replaced or expired link whose address is confirmed already (a second tap).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`auth.email_link_invalid`: the link is unknown, used, replaced by a newer one, expired, or was sent to an address the account no longer has; show the «link expired, request a new one» screen. `validation.failed`: a field is missing or invalid; the details list names each field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -727,7 +797,7 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -737,7 +807,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -775,26 +855,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "202": {
             "description": "Accepted",
             "content": {
@@ -805,8 +865,38 @@
               }
             }
           },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.unauthenticated`: no Bearer token. `auth.token_expired`: refresh the session, then retry. `auth.token_invalid`: sign out.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`user.not_found`: the account was deleted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -816,7 +906,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "`auth.email_taken`: another account uses this email. `auth.email_already_confirmed`: a confirmed email cannot be changed here.",
             "content": {
               "application/json": {
                 "schema": {
@@ -826,7 +916,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -869,28 +969,18 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "202": {
-            "description": "Accepted",
+            "description": "Always, whether an account uses this email or not.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`validation.failed`: a field is missing or invalid; the details list names each field.",
             "content": {
               "application/json": {
                 "schema": {
@@ -900,7 +990,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -938,26 +1038,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -968,8 +1048,18 @@
               }
             }
           },
+          "400": {
+            "description": "`auth.reset_token_invalid`: the link is unknown, used, replaced by a newer one or expired. `validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -979,7 +1069,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1017,26 +1117,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -1047,8 +1127,18 @@
               }
             }
           },
+          "400": {
+            "description": "`auth.reset_token_invalid`: the link is unknown, used, replaced by a newer one or expired. `validation.failed`: a field is missing or invalid; the details list names each field. The link stays valid after this one.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1058,7 +1148,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1096,26 +1196,6 @@
           "required": true
         },
         "responses": {
-          "400": {
-            "description": "Bad Request",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "500": {
-            "description": "Internal Server Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
           "200": {
             "description": "OK",
             "content": {
@@ -1126,8 +1206,18 @@
               }
             }
           },
+          "400": {
+            "description": "`auth.current_password_invalid`: the current password is wrong (400, not 401: the session is still valid). `validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
           "401": {
-            "description": "Unauthorized",
+            "description": "`auth.unauthenticated`: no Bearer token. `auth.token_expired`: refresh the session, then retry. `auth.token_invalid`: sign out.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1137,7 +1227,17 @@
             }
           },
           "403": {
-            "description": "Forbidden",
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "`user.not_found`: the account was deleted.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1147,7 +1247,7 @@
             }
           },
           "409": {
-            "description": "Conflict",
+            "description": "`auth.password_not_set`: the account signs in with Google or Apple only.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1157,7 +1257,17 @@
             }
           },
           "429": {
-            "description": "Too Many Requests",
+            "description": "`auth.locked_out`: 5 wrong current passwords (the same counter as sign-in) lock the account for 5 minutes (Retry-After). `rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1180,6 +1290,16 @@
           "Me"
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUserDto"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -1206,16 +1326,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfUserDto"
                 }
               }
             }
@@ -1252,6 +1362,16 @@
           "required": true
         },
         "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUserDto"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -1278,16 +1398,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfUserDto"
                 }
               }
             }
@@ -1306,6 +1416,16 @@
           "System"
         ],
         "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPingResponse"
+                }
+              }
+            }
+          },
           "400": {
             "description": "Bad Request",
             "content": {
@@ -1332,16 +1452,6 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ApiResponseOfObject"
-                }
-              }
-            }
-          },
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ApiResponseOfPingResponse"
                 }
               }
             }
@@ -1810,7 +1920,10 @@
         "type": "object",
         "properties": {
           "refreshToken": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -1836,7 +1949,10 @@
         "type": "object",
         "properties": {
           "refreshToken": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -1949,7 +2065,10 @@
             "type": "string"
           },
           "refreshToken": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "refreshTokenExpiresAt": {
             "format": "date-time"

@@ -5,6 +5,9 @@ import 'package:englizia/core/network/api_error_codes.dart';
 /// User-facing text for a [Failure]. Every failure type has a translated
 /// message, so raw backend text never reaches the screen.
 extension FailureL10n on Failure {
+  // ASSUMPTION(design): the texts for a disabled account, an email or a
+  // Google account that can't be joined, and a provider failing are not in
+  // the designs (STATUS D-112).
   String get localizedMessage => switch (this) {
     NetworkFailure() => 'error_network'.tr(),
     StorageFailure() => 'error_storage'.tr(),

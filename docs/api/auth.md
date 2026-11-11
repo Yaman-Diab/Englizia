@@ -129,7 +129,7 @@ The first link goes out by itself when an account is made with an email (S §5.3
 
 The link is `https://engleazia.com/verify-email?token=<token>`, valid and opening the app like the recovery link (STATUS D-024). All three below are **live**, used:
 
-- `POST /api/v1/auth/email/verify`: `VerifyEmailRequest { "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `400 auth.reset_token_invalid` for a link expired, used or unknown: the recovery's code, read the same way (`test/fixtures/api/auth_email_verify_link_invalid.json`).
+- `POST /api/v1/auth/email/verify`: `VerifyEmailRequest { "token": "..." }`, sent without a session, as the phone may be signed out. `200`, or `400 auth.email_link_invalid` for a link expired, used, replaced or unknown, read as the recovery's `auth.reset_token_invalid` is (`test/fixtures/api/auth_email_verify_link_invalid.json`).
 - `POST /api/v1/auth/email/resend`: with the session, no body. Sends the link again (`202`). The app waits 1, 2, then 5 minutes between tries, so the server's limit should allow that; `429` counts as sent. `409` is likely an email confirmed already, which the next read of `/app/me` shows.
 - `PUT /api/v1/auth/email`: `ChangeEmailRequest { "newEmail": "..." }`, with the session. Corrects the address and sends a link there (`202`). `409` when it has an account, `400` (`validation.failed`) when refused.
 

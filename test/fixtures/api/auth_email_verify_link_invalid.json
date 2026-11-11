@@ -1,1 +1,1 @@
-{"statusCode":400,"message":"This link is invalid or has expired. Please request a new one.","data":null,"error":{"code":"auth.reset_token_invalid","details":null},"traceId":"2195d4a43e0144bba2e99102eb78a2dd"}
+{"statusCode":400,"message":"This confirmation link is invalid or has expired. Please request a new one.","data":null,"error":{"code":"auth.email_link_invalid","details":null},"traceId":"b7761af856d04e8185f389a5d1508f33"}

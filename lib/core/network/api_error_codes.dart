@@ -11,9 +11,16 @@ abstract final class ApiErrorCodes {
   /// or revoked; the session is over.
   static const refreshTokenInvalid = 'auth.refresh_token_invalid';
 
-  /// 400 from a link's token (recovery or the email's confirmation): expired,
-  /// used already or unknown, one answer for all three.
+  /// 400 from a recovery link's token: expired, used already, replaced by a
+  /// newer one or unknown, one answer for all.
   static const linkInvalid = 'auth.reset_token_invalid';
+
+  /// 400 from the link that confirms an email, for the same reasons.
+  static const emailLinkInvalid = 'auth.email_link_invalid';
+
+  /// 400 from the password change: the current password is wrong. Not a
+  /// 401, as the session still stands.
+  static const currentPasswordInvalid = 'auth.current_password_invalid';
 
   /// 401 from Google sign-in: the ID token failed Google's checks, or was
   /// made for another client than the server's.

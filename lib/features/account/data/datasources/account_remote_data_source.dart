@@ -161,11 +161,18 @@ AccountEmail _email(Map<String, Object?> user) => AccountEmail(
   verified: user.readBool('emailVerified') ?? false,
 );
 
-/// The dev server's answer to a link expired, used or unknown: 400 with
-/// `auth.reset_token_invalid` (`test/fixtures/api/auth_link_invalid.json`).
+/// The dev server's answer to a recovery link expired, used or unknown: 400
+/// with `auth.reset_token_invalid` (`test/fixtures/api/auth_link_invalid.json`).
 const _linkInvalid = ApiException(
   statusCode: ApiStatusCodes.badRequest,
   code: ApiErrorCodes.linkInvalid,
+);
+
+/// The same for the link that confirms an email
+/// (`test/fixtures/api/auth_email_verify_link_invalid.json`).
+const _emailLinkInvalid = ApiException(
+  statusCode: ApiStatusCodes.badRequest,
+  code: ApiErrorCodes.emailLinkInvalid,
 );
 
 /// Mock mode (`env/mock.json`): the contract's examples from bundled assets
@@ -303,7 +310,7 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
   Future<void> verifyEmail(String token) async {
     await Future<void>.delayed(latency);
     if (token == expiredResetToken) {
-      throw _linkInvalid;
+      throw _emailLinkInvalid;
     }
     _verified = true;
   }

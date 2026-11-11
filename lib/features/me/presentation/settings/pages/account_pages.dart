@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_text_field.dart';
 import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/me/presentation/settings/cubit/preferences_cubit.dart';
@@ -14,8 +15,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// A wrong password is said under its field; anything else in the band.
+/// The password change answers with its own code; the deletion, still
+/// proposed, with a validation error on [field].
 bool _wrongPassword(Failure failure, String field) =>
-    failure is ValidationFailure && failure.firstCodeFor(field) != null;
+    failure is ValidationFailure &&
+    (failure.code == ApiErrorCodes.currentPasswordInvalid ||
+        failure.firstCodeFor(field) != null);
 
 /// «كلمة المرور»: the current one, the new one with its rule in sight, and
 /// «حفظ» once both are there.

@@ -113,7 +113,7 @@ The appearance, sound effects, vibration and video quality stay on the phone. Th
 
 «تغيير كلمة المرور». Live (docs/api/openapi.json): `ChangePasswordRequest { currentPassword, newPassword, deviceId, platform }`, the new one by the sign-up rule. It answers with a `TokenResponse`, the session this phone carries on with, which the app keeps in place of its own (the old one may be over with the account's others). An answer with no tokens keeps the session as it is.
 
-The document lists `401`, `403` and `409` without codes. The app reads a wrong current password as a `400` validation error on `currentPassword` (`error.details`), as proposed; which of those the server sends is a question for the backend (docs/api/README.md, request 10). A `401` makes the app refresh the session once and try again before it shows the failure.
+A wrong current password is `400 auth.current_password_invalid` (a 400, as the session still stands), said under its field; an account that signs in with Google or Apple only is `409 auth.password_not_set`, and five wrong tries `429 auth.locked_out` with `Retry-After`, both shown in the band. These are from the document, not yet seen on the dev server. A `401` makes the app refresh the session once and try again before it shows the failure.
 
 ## `DELETE /api/v1/app/me`
 

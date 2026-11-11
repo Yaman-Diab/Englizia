@@ -41,7 +41,8 @@ abstract final class FailureMapper {
     final code = e.code;
     final message = e.detail ?? e.title;
     // A link's token is refused with a 400, which would read as a form error.
-    if (code == ApiErrorCodes.linkInvalid) {
+    if (code == ApiErrorCodes.linkInvalid ||
+        code == ApiErrorCodes.emailLinkInvalid) {
       return LinkExpiredFailure(code: code, serverMessage: message);
     }
     // The provider's token is refused with a 401, which would read as a
