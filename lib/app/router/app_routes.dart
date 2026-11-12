@@ -59,6 +59,9 @@ abstract final class AppRoutes {
   static const meJoin = '/me/join';
   static const unitStart = '/units/next';
 
+  /// «نذكّرك بدرسك؟», once after the first lesson (design "Notifications").
+  static const notificationPrompt = '/notifications/prompt';
+
   static String unitOf(String unitId) => '/units/$unitId';
 
   static String grammarOf(String lessonId) => '/lessons/$lessonId/grammar';

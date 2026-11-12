@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- Notifications: a banner over the app when a teacher answers, the daily goal is due or the streak is at risk, held while touched and swiped away; none while you learn, where a reply waits as a dot on «أنا». Tapping one, in the app or on the phone, opens its lesson or your next lesson. After your first lesson, «نذكّرك بدرسك؟» asks once when to remind you and then asks the phone, with a child's own version; «أنا» says when reminders are off and how to turn them on.
 - Signing in and creating an account with Google, from sign-in and from "save progress": one press, Google's own sheet, and the button waits meanwhile. The way used last is marked on the sign-in screen.
 - Clips play for real: listening questions, words, sentences and the guide's lines, from the server; in mock mode each says its word or sentence in an English voice. The app's sounds keep quiet while one plays.
 - A lesson's video is protected: on Android it can't be screenshot or recorded, and on iOS it hides behind a notice and pauses while the screen is recorded or shared, coming back when that stops.

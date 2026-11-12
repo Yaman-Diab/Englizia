@@ -2,5 +2,11 @@
   "APP_ENV": "dev",
   "GOOGLE_SERVER_CLIENT_ID": "959713011641-tsd0sntqf723o1rsmrmkcce05p88di17.apps.googleusercontent.com",
   "GOOGLE_IOS_CLIENT_ID": "959713011641-v96b50q8cvgtg475e0e91t1q9n8uhnqu.apps.googleusercontent.com",
+  "FIREBASE_PROJECT_ID": "engleazia",
+  "FIREBASE_SENDER_ID": "959713011641",
+  "FIREBASE_ANDROID_APP_ID": "1:959713011641:android:d99be4b482a3f5a851f868",
+  "FIREBASE_ANDROID_API_KEY": "AIzaSyCWmaOy8QYFYl-C7qKH8UMvQcUuGW_LuAk",
+  "FIREBASE_IOS_APP_ID": "1:959713011641:ios:67871f34ef1939e051f868",
+  "FIREBASE_IOS_API_KEY": "AIzaSyDOkRKWwui90cQX3V8zkZgRIs61J1afPPY",
   "BASE_URL": "https://api-dev.engleazia.com"
 }

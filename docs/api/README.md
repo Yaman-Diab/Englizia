@@ -69,6 +69,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the preferences, the password and deleting the account | mock (`PUT /api/v1/app/me` confirmed) |
 | [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
+| [`notifications.md`](notifications.md) | Notifications: the push token, what the server sends and what a tap opens (ADR 21) | proposed, mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), the splash's version gate, later every screen that reads a setting | mock |
 
 ## Headers sent on every request
@@ -136,6 +137,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/email` | PUT | `ChangeEmailRequest {newEmail}` | `202`; `409` when it has an account ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/google` | POST | `GoogleSignInRequest {idToken, deviceId, platform}` | `TokenResponse` with `isNewUser`; `401 auth.google_token_invalid`, `403 auth.account_disabled`, `409 auth.email_taken` or `auth.external_login_conflict` ([auth.md](auth.md)) | live, used (no real token sent yet, STATUS D-110) |
 | `/api/v1/auth/apple` | POST | `AppleSignInRequest {identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform}` | `TokenResponse` | live, not used |
+| `/api/v1/app/me/push-token` | PUT | `{token, platform, deviceId}` | `204` ([notifications.md](notifications.md)) | proposed, mock |
 | `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
 
 ## Requests to raise with the backend team

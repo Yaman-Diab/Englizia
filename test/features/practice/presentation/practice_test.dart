@@ -17,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../helpers/fake_practice_repository.dart';
 import '../../../helpers/fakes.dart';
+import '../../../helpers/notifications.dart';
 import '../../../helpers/pump_app.dart';
 
 final _today = DateTime(2026, 11, 2, 10);
@@ -91,9 +92,13 @@ void main() {
       void Function()? onWords,
     }) async {
       final subject = cubit();
+      final notifications = await inAppNotifications();
       await tester.pumpLocalized(
-        BlocProvider.value(
-          value: subject,
+        MultiBlocProvider(
+          providers: [
+            BlocProvider.value(value: subject),
+            BlocProvider.value(value: notifications),
+          ],
           child: BlocSelector<PracticeCubit, PracticeState, int>(
             selector: (state) => state.badge,
             builder: (context, badge) => TabShell(

@@ -36,6 +36,9 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): proposed, docs/api/me.md.
   static const preferences = '/api/v1/app/me/preferences';
 
+  // ASSUMPTION(api): proposed, docs/api/notifications.md.
+  static const pushToken = '/api/v1/app/me/push-token';
+
   // Confirmed in docs/api/openapi.json.
   static const changePassword = '/api/v1/auth/password/change';
   // Confirmed in docs/api/openapi.json.

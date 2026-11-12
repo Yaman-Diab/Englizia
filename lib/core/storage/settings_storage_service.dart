@@ -40,6 +40,11 @@ final class SettingsStorageService {
   static const _updateReminderDayKey = 'app.update_reminder_day';
   static const _homeOpeningDayKey = 'account.home_opening_day';
   static const _homeSeenEventsKey = 'account.home_seen_events';
+  static const _pushTokenSentKey = 'account.push_token_sent';
+  static const _meDotKey = 'account.me_dot';
+  static const _goalBannerOffKey = 'account.goal_banner_off_day';
+  static const _notifPromptShownKey = 'app.notification_prompt_shown';
+  static const _notifPromptSkipsKey = 'app.notification_prompt_skips';
 
   final SharedPreferences _prefs;
 
@@ -240,6 +245,42 @@ final class SettingsStorageService {
     await _prefs.setString(_versionPolicyKey, json);
   }
 
+  /// The notification address last sent to the server for this account.
+  String? get pushTokenSent => _prefs.getString(_pushTokenSentKey);
+
+  Future<void> setPushTokenSent(String token) async {
+    await _prefs.setString(_pushTokenSentKey, token);
+  }
+
+  /// A teacher's reply came during a lesson: «أنا» carries a dot.
+  bool get meDot => _prefs.getBool(_meDotKey) ?? false;
+
+  Future<void> setMeDot({required bool on}) async {
+    await _prefs.setBool(_meDotKey, on);
+  }
+
+  /// The day ("yyyy-MM-dd") «لاحقًا» put the goal's banner off.
+  String? get goalBannerOffDay => _prefs.getString(_goalBannerOffKey);
+
+  Future<void> setGoalBannerOffDay(String day) async {
+    await _prefs.setString(_goalBannerOffKey, day);
+  }
+
+  /// The reminders' prompt showed after the first lesson; it shows once.
+  bool get notificationPromptShown =>
+      _prefs.getBool(_notifPromptShownKey) ?? false;
+
+  Future<void> setNotificationPromptShown() async {
+    await _prefs.setBool(_notifPromptShownKey, true);
+  }
+
+  /// How often «ليس الآن» put the reminders off.
+  int get notificationPromptSkips => _prefs.getInt(_notifPromptSkipsKey) ?? 0;
+
+  Future<void> setNotificationPromptSkips(int count) async {
+    await _prefs.setInt(_notifPromptSkipsKey, count);
+  }
+
   /// The day ("yyyy-MM-dd") the update reminder last showed: once a day.
   String? get updateReminderDay => _prefs.getString(_updateReminderDayKey);
 
@@ -312,6 +353,9 @@ final class SettingsStorageService {
       await _prefs.remove(_homeKey);
       await _prefs.remove(_homeOpeningDayKey);
       await _prefs.remove(_homeSeenEventsKey);
+      await _prefs.remove(_pushTokenSentKey);
+      await _prefs.remove(_meDotKey);
+      await _prefs.remove(_goalBannerOffKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Clearing account data failed');
     }

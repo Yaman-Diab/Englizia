@@ -441,6 +441,24 @@ abstract final class AppMotion {
   static const homeShimmer = Duration(milliseconds: 1300);
   static const homeFailedHold = Duration(seconds: 4);
 
+  /// The in-app notification (design "Notifications"): it drops in, stays,
+  /// then rises away; a newer one takes its place with a short fade.
+  static const bannerIn = fast;
+  static const bannerOut = closeUp;
+  static const bannerSwap = quick;
+  static const bannerHold = Duration(seconds: 4);
+  static const bannerOutCurve = Cubic(.4, 0, 1, 1);
+
+  /// Under reduce motion it fades in and out over this, without moving.
+  static const bannerFade = quick;
+
+  /// A drag up past this closes it; a press that moves less is a tap.
+  static const bannerDismissDrag = 24.0;
+  static const bannerTapSlop = 6.0;
+
+  /// A newer banner starts from this opacity.
+  static const bannerSwapOpacity = .3;
+
   /// Travel distances in logical pixels. Not scaled with the screen.
   static const distanceMicro = 4.0;
   static const distanceSmall = 6.0;

@@ -311,10 +311,20 @@ class VerifiedBadge extends StatelessWidget {
 }
 
 /// The phone has notifications off: the app can't turn them on by itself.
+/// «أنا» shows the same band for reminders put off ([text], [action]).
 class NotificationsBlocked extends StatelessWidget {
-  const NotificationsBlocked({required this.onOpen, super.key});
+  const NotificationsBlocked({
+    required this.onOpen,
+    this.text,
+    this.action,
+    super.key,
+  });
 
   final VoidCallback onOpen;
+
+  /// The settings' words when null.
+  final String? text;
+  final String? action;
 
   @override
   Widget build(BuildContext context) {
@@ -333,7 +343,7 @@ class NotificationsBlocked extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm + 2),
             Expanded(
               child: Text(
-                'settings_notifications_off'.tr(),
+                text ?? 'settings_notifications_off'.tr(),
                 style: context.texts.caption.copyWith(color: colors.info.text),
               ),
             ),
@@ -344,7 +354,7 @@ class NotificationsBlocked extends StatelessWidget {
                 backgroundColor: colors.surface,
                 foregroundColor: colors.primary.text,
               ),
-              child: Text('settings_open_phone'.tr()),
+              child: Text(action ?? 'settings_open_phone'.tr()),
             ),
           ],
         ),

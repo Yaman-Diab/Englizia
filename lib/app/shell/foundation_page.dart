@@ -9,6 +9,8 @@ import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/notifications/push_channel.dart';
+import 'package:englizia/core/notifications/push_message.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
@@ -236,6 +238,39 @@ class FoundationPage extends StatelessWidget {
                   const SizedBox(height: AppSpacing.sm),
                 ],
                 const SizedBox(height: AppSpacing.sm),
+                // The banner over this page; the tap as if from the phone.
+                Text('foundation_notifications'.tr(), style: texts.bodyStrong),
+                const SizedBox(height: AppSpacing.sm),
+                for (final (message, label) in [
+                  (_mockReply, 'foundation_notification_teacher'.tr()),
+                  (_mockGoal, 'foundation_notification_goal'.tr()),
+                  (_mockStreak, 'foundation_notification_streak'.tr()),
+                ]) ...[
+                  OutlinedButton(
+                    onPressed: () => _mockPush?.arrive(message),
+                    child: Text(label),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                OutlinedButton(
+                  onPressed: () => _mockPush?.open(_mockGoal),
+                  child: Text('foundation_notification_tap'.tr()),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                for (final (kids, label) in [
+                  (false, 'foundation_notification_prompt'.tr()),
+                  (true, 'foundation_notification_prompt_kids'.tr()),
+                ]) ...[
+                  OutlinedButton(
+                    onPressed: () => context.push<void>(
+                      AppRoutes.notificationPrompt,
+                      extra: kids,
+                    ),
+                    child: Text(label),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+                const SizedBox(height: AppSpacing.sm),
                 OutlinedButton(
                   onPressed: () =>
                       context.push(AppRoutes.exercisesOf('les_mock')),
@@ -405,3 +440,17 @@ class _ToneChip extends StatelessWidget {
     );
   }
 }
+
+/// Mock mode's notifications (the dev page sends them).
+MockPushChannel? get _mockPush => switch (sl<PushChannel>()) {
+  final MockPushChannel mock => mock,
+  _ => null,
+};
+
+const _mockReply = PushMessage(
+  kind: PushKind.teacherReply,
+  questionId: 'q_mock',
+  lessonId: 'les_gv',
+);
+const _mockGoal = PushMessage(kind: PushKind.dailyGoal);
+const _mockStreak = PushMessage(kind: PushKind.streak);

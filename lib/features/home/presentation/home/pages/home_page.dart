@@ -94,9 +94,19 @@ final class HomeActions {
 /// Reads the [VerifyEmailCubit] for the email reminder and the [MeCubit]
 /// for the tracks sheet when the route provides them.
 class HomePage extends StatefulWidget {
-  const HomePage({required this.actions, required this.pages, super.key});
+  const HomePage({
+    required this.actions,
+    required this.pages,
+    this.openNextLesson,
+    super.key,
+  });
 
   final HomeActions actions;
+
+  /// Set when a reminder was tapped (the daily goal, the streak): once its
+  /// map is drawn, home opens the next lesson as its bubble does. A new
+  /// value asks again; none leaves home as it is.
+  final Object? openNextLesson;
 
   /// The navigator's page routes: a page that covers home and closes again
   /// is a return (a lesson, a unit); a sheet or a dialog isn't one.
@@ -127,6 +137,9 @@ class _HomePageState extends State<HomePage>
 
   bool _reduceMotion = false;
   bool _onTop = true;
+
+  /// The [HomePage.openNextLesson] already answered.
+  Object? _nextOpened;
 
   /// The route [HomePage.pages] reports on.
   PageRoute<dynamic>? _route;
@@ -583,6 +596,19 @@ class _HomePageState extends State<HomePage>
     if (lesson != null) _openLesson(lesson, grow: true);
   }
 
+  /// A tapped reminder's way to the lesson: once per ask. A unit with no
+  /// lesson left to do (locked, done, nothing kept offline) stays on home.
+  void _openNextIfAsked(HomeMapScene scene) {
+    final asked = widget.openNextLesson;
+    if (asked == null || identical(asked, _nextOpened)) return;
+    _nextOpened = asked;
+    final lesson = scene.bubbleLesson;
+    if (lesson == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _openLesson(lesson, grow: true);
+    });
+  }
+
   void _onStone(int k) {
     final scene = _scene;
     final unit = scene?.unit;
@@ -1037,6 +1063,7 @@ class _HomePageState extends State<HomePage>
     final drawn = overrides.snapshot ?? home;
     final scene = _sceneFor(context, state, drawn, overrides, metrics);
     _scene = scene;
+    _openNextIfAsked(scene);
     _choreo
       ..island = scene.island
       ..mapLayout = scene.map;

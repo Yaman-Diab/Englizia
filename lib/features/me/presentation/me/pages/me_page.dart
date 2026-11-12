@@ -49,9 +49,12 @@ final class MeActions {
 
 /// The «أنا» tab (S §19.1, §13.5; design "Me v2"); kids get their own.
 class MePage extends StatelessWidget {
-  const MePage({required this.actions, super.key});
+  const MePage({required this.actions, this.notice, super.key});
 
   final MeActions actions;
+
+  /// A word on top of an adult's «أنا», as the reminders' card.
+  final Widget? notice;
 
   static bool isKids(MeState state) =>
       state.profile?.active?.audience == TrackAudience.child;
@@ -78,7 +81,7 @@ class MePage extends StatelessWidget {
       }
       return isKids(state)
           ? _KidMe(state: state, actions: actions)
-          : _Me(state: state, actions: actions);
+          : _Me(state: state, actions: actions, notice: notice);
     },
   );
 }
@@ -90,10 +93,11 @@ void _failed(BuildContext context, Failure? failure) {
 }
 
 class _Me extends StatelessWidget {
-  const _Me({required this.state, required this.actions});
+  const _Me({required this.state, required this.actions, this.notice});
 
   final MeState state;
   final MeActions actions;
+  final Widget? notice;
 
   Future<void> _rename(BuildContext context, Profile profile) async {
     final cubit = context.read<MeCubit>();
@@ -174,6 +178,7 @@ class _Me extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 spacing: AppSpacing.xl,
                 children: [
+                  ?notice,
                   if (state.guest)
                     GuestCard(onCreateAccount: actions.onCreateAccount),
                   if (track != null)

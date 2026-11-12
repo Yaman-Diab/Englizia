@@ -20,7 +20,7 @@ void registerOnboardingDependencies(GetIt sl) {
     ..registerFactory(() => LevelCubit(sl(), sl(), sl()))
     ..registerFactory(() => GoalCubit(sl()))
     ..registerFactory(() => ChallengeCubit(sl()))
-    ..registerFactory(() => ReminderCubit(sl(), sl()))
+    ..registerFactory(() => ReminderCubit(sl()))
     ..registerFactory(() => SaveProgressCubit(sl(), sl()))
     ..registerFactory(() => PreparingCubit(sl(), sl(), sl(), sl()))
     ..registerFactory(() => KidWelcomeCubit(sl(), sl(), sl()));

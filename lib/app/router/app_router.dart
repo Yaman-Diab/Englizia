@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/router/lesson_paths.dart';
+import 'package:englizia/app/router/notification_routes.dart';
 import 'package:englizia/app/router/route_policies.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/app/shell/kid_tab_shell.dart';
@@ -75,6 +76,10 @@ import 'package:englizia/features/me/presentation/me/pages/me_page.dart';
 import 'package:englizia/features/me/presentation/settings/cubit/preferences_cubit.dart';
 import 'package:englizia/features/me/presentation/settings/pages/account_pages.dart';
 import 'package:englizia/features/me/presentation/settings/pages/settings_page.dart';
+import 'package:englizia/features/notifications/presentation/off_card/cubit/notifications_card_cubit.dart';
+import 'package:englizia/features/notifications/presentation/off_card/widgets/reminders_card.dart';
+import 'package:englizia/features/notifications/presentation/prompt/cubit/notification_prompt_cubit.dart';
+import 'package:englizia/features/notifications/presentation/prompt/pages/notification_prompt_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/audience/cubit/audience_cubit.dart';
 import 'package:englizia/features/onboarding/presentation/audience/pages/audience_page.dart';
@@ -642,6 +647,7 @@ GoRouter createAppRouter(
               ),
             ],
             child: GrammarLessonPage(
+              openQuestions: state.extra is OpenQuestions,
               onStartExercises: () =>
                   context.pushReplacement(AppRoutes.exercisesOf(lessonId)),
               onExit: () =>
@@ -697,8 +703,13 @@ GoRouter createAppRouter(
           ],
           child: KidLessonPage(
             onExit: () => _back(context),
-            // Home, which shows what the lesson changed (D-087).
-            onNext: () => context.go(AppRoutes.home),
+            // Home, which shows what the lesson changed (D-087), after the
+            // reminders' prompt the first time.
+            onNext: () => _afterLessonEnd(
+              context,
+              kids: true,
+              then: () => context.go(AppRoutes.home),
+            ),
           ),
         ),
       ),
@@ -776,19 +787,29 @@ GoRouter createAppRouter(
           create: (_) =>
               sl<LessonCompleteCubit>(param1: state.extra! as LessonSummary)
                 ..start(),
+          // The reminders' prompt comes first, the first time (design
+          // "Notifications" 06).
           child: LessonCompletePage(
-            onNext: (next) => switch (next.lessonId) {
-              final lessonId? => context.pushReplacement(
-                lessonPath(
-                  id: lessonId,
-                  kind: next.lessonKind,
-                  scenarioId: next.scenarioId,
+            onNext: (next) => _afterLessonEnd(
+              context,
+              kids: false,
+              then: () => switch (next.lessonId) {
+                final lessonId? => context.pushReplacement(
+                  lessonPath(
+                    id: lessonId,
+                    kind: next.lessonKind,
+                    scenarioId: next.scenarioId,
+                  ),
                 ),
-              ),
-              null => context.push(AppRoutes.unitStart),
-            },
+                null => context.push(AppRoutes.unitStart),
+              },
+            ),
             // Back to the unit it was opened from.
-            onBack: () => _back(context),
+            onBack: () => _afterLessonEnd(
+              context,
+              kids: false,
+              then: () => _back(context),
+            ),
             onWords: () => context.push(AppRoutes.savedWords),
           ),
         ),
@@ -931,6 +952,13 @@ GoRouter createAppRouter(
           child: Builder(
             builder: (context) {
               final page = MePage(
+                notice: BlocProvider(
+                  create: (_) => sl<NotificationsCardCubit>()..check(),
+                  child: RemindersCard(
+                    onEnable: () =>
+                        context.push<void>(AppRoutes.notificationPrompt),
+                  ),
+                ),
                 actions: MeActions(
                   onSettings: () => context.push<void>(AppRoutes.meSettings),
                   onPrivacy: () => context.push<void>(AppRoutes.legalPrivacy),
@@ -1043,6 +1071,16 @@ GoRouter createAppRouter(
         ),
       ),
       GoRoute(
+        path: AppRoutes.notificationPrompt,
+        builder: (context, state) => BlocProvider(
+          create: (_) => sl<NotificationPromptCubit>()..start(),
+          child: NotificationPromptPage(
+            kids: state.extra == true,
+            onDone: () => _back(context),
+          ),
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.unitStart,
         builder: (_, _) => PendingPage(title: 'lesson_done_next_unit'.tr()),
       ),
@@ -1102,6 +1140,21 @@ GoRouter createAppRouter(
 
 /// The last sign-in method kept for an email sign-in, which no badge marks.
 const _byEmail = 'email';
+
+/// The way on from a lesson's end: the reminders' prompt first, once ever
+/// (design "Notifications" 06), then [then].
+Future<void> _afterLessonEnd(
+  BuildContext context, {
+  required bool kids,
+  required void Function() then,
+}) async {
+  final storage = sl<SettingsStorageService>();
+  if (!storage.notificationPromptShown) {
+    await context.push<void>(AppRoutes.notificationPrompt, extra: kids);
+    if (!context.mounted) return;
+  }
+  then();
+}
 
 /// A new account goes on to "preparing", or on the child path to the kids'
 /// welcome that replaces it (S §4.5); either starts its session. `go`
@@ -1184,6 +1237,7 @@ Widget _homeTab(
           final page = HomePage(
             key: GlobalObjectKey(context.read<HomeCubit>()),
             pages: pages,
+            openNextLesson: state.extra is OpenNextLesson ? state.extra : null,
             actions: HomeActions(
               openLesson: (lesson, {required kids}) =>
                   context.push<void>(_unitLessonPath(lesson, kids: kids)),

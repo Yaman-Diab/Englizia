@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/app_semantic_colors.dart';
-import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/l10n/clock_format.dart';
@@ -11,7 +10,6 @@ import 'package:englizia/features/onboarding/presentation/reminder/cubit/reminde
 import 'package:englizia/features/onboarding/presentation/reminder/widgets/reminder_preview.dart';
 import 'package:englizia/features/onboarding/presentation/reminder/widgets/reminder_time_sheet.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/loaded_answers.dart';
-import 'package:englizia/features/onboarding/presentation/widgets/onboarding_notice.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_option.dart';
 import 'package:englizia/features/onboarding/presentation/widgets/onboarding_question_scaffold.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
@@ -20,9 +18,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Onboarding "when should we remind you?" (requirements v3.0 §4.2, in v1.0
 /// per §27, built ahead of plan). A configured time or the learner's own,
-/// a preview of the reminder, then the system permission. A refusal offers
-/// the phone settings and going on without a reminder; coming back from
-/// the settings picks up an allowance made there.
+/// with a preview of the reminder. The phone isn't asked here: the
+/// reminders' prompt after the first lesson does (design "Notifications").
 class ReminderPage extends StatefulWidget {
   const ReminderPage({
     required this.path,
@@ -43,26 +40,7 @@ class ReminderPage extends StatefulWidget {
 }
 
 class _ReminderPageState extends State<ReminderPage> {
-  late final AppLifecycleListener _lifecycle;
-
-  @override
-  void initState() {
-    super.initState();
-    _lifecycle = AppLifecycleListener(
-      onResume: () => context.read<ReminderCubit>().refresh(),
-    );
-  }
-
-  @override
-  void dispose() {
-    _lifecycle.dispose();
-    super.dispose();
-  }
-
-  Future<void> _enable() async {
-    final cubit = context.read<ReminderCubit>();
-    if (await cubit.enable() && mounted) widget.onContinue(cubit.state.time);
-  }
+  void _enable() => widget.onContinue(context.read<ReminderCubit>().state.time);
 
   Future<void> _pickTime(ReminderState state) async {
     final cubit = context.read<ReminderCubit>();
@@ -85,12 +63,8 @@ class _ReminderPageState extends State<ReminderPage> {
         final settings = state.settings;
         final time = state.time;
         return OnboardingQuestionScaffold(
-          question: state.denied
-              ? 'onboarding_reminder_denied_reply'.tr()
-              : 'onboarding_reminder_question'.tr(),
-          expression: state.denied
-              ? MascotExpression.understand
-              : MascotExpression.welcome,
+          question: 'onboarding_reminder_question'.tr(),
+          expression: MascotExpression.welcome,
           step: position.current,
           totalSteps: position.total,
           lead: settings == null || time == null
@@ -108,16 +82,7 @@ class _ReminderPageState extends State<ReminderPage> {
                             state.defaultGoalMinutes ??
                             0,
                       ),
-                      muted: state.denied,
                     ),
-                    if (state.denied) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      OnboardingNotice(
-                        icon: AppIcon.bellOff,
-                        text: 'onboarding_reminder_denied'.tr(),
-                        tone: NoticeTone.neutral,
-                      ),
-                    ],
                   ],
                 ),
           options: loadedAnswers(
@@ -152,20 +117,13 @@ class _ReminderPageState extends State<ReminderPage> {
               ),
             ],
           ),
-          continueLabel: state.denied
-              ? 'onboarding_reminder_continue_without'.tr()
-              : 'onboarding_reminder_enable'.tr(),
+          continueLabel: 'onboarding_reminder_enable'.tr(),
           onContinue: switch (state) {
-            ReminderState(denied: true) => () => widget.onContinue(null),
             ReminderState(status: LoadStatus.ready, canEnable: true) => _enable,
             _ => null,
           },
-          secondaryLabel: state.denied
-              ? 'onboarding_reminder_open_settings'.tr()
-              : 'onboarding_reminder_skip'.tr(),
-          onSecondary: state.denied
-              ? cubit.openSettings
-              : () => widget.onContinue(null),
+          secondaryLabel: 'onboarding_reminder_skip'.tr(),
+          onSecondary: () => widget.onContinue(null),
           onBack: widget.onBack,
         );
       },

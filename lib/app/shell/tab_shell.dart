@@ -2,13 +2,17 @@ import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/design_system/app_spacing.dart';
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
+import 'package:englizia/features/notifications/presentation/banner/cubit/in_app_notifications_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// The app's four tabs (S §6).
 enum AppTab { learn, practice, talk, me }
 
 /// A tab's page with the tabs' bar under it; each tab's route builds it
-/// around its page (plain routes, D-084).
+/// around its page (plain routes, D-084). «أنا» carries a dot while a
+/// teacher's reply that came during a lesson waits (design "Notifications"
+/// 05); the app's [InAppNotificationsCubit] says so.
 class TabShell extends StatelessWidget {
   const TabShell({
     required this.current,
@@ -52,6 +56,9 @@ class _TabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final meDot = context.select(
+      (InAppNotificationsCubit notifications) => notifications.state.meDot,
+    );
     return DecoratedBox(
       decoration: BoxDecoration(
         color: colors.surface,
@@ -69,6 +76,7 @@ class _TabBar extends StatelessWidget {
                     tab: tab,
                     current: tab == current,
                     badge: badges[tab] ?? 0,
+                    dot: tab == AppTab.me && meDot,
                     onTap: () => onSelect(tab),
                   ),
                 ),
@@ -85,17 +93,23 @@ class _TabItem extends StatelessWidget {
     required this.tab,
     required this.current,
     required this.badge,
+    required this.dot,
     required this.onTap,
   });
 
   final AppTab tab;
   final bool current;
   final int badge;
+
+  /// Something waits here, with no count to it.
+  final bool dot;
   final VoidCallback onTap;
 
   static const _pillWidth = 56.0;
   static const _pillHeight = 30.0;
   static const _badge = 18.0;
+  static const _dot = 10.0;
+  static const _dotRing = 2.0;
 
   @override
   Widget build(BuildContext context) {
@@ -115,9 +129,13 @@ class _TabItem extends StatelessWidget {
     return Semantics(
       button: true,
       selected: current,
-      label: badge > 0
-          ? 'tab_with_badge'.tr(namedArgs: {'tab': label, 'count': '$badge'})
-          : label,
+      label: switch ((badge, dot)) {
+        (> 0, _) => 'tab_with_badge'.tr(
+          namedArgs: {'tab': label, 'count': '$badge'},
+        ),
+        (_, true) => 'tab_with_dot'.tr(namedArgs: {'tab': label}),
+        _ => label,
+      },
       excludeSemantics: true,
       child: InkWell(
         onTap: onTap,
@@ -137,6 +155,23 @@ class _TabItem extends StatelessWidget {
                   ),
                   child: Icon(icon, size: AppSizes.iconMd, color: ink),
                 ),
+                if (dot && badge == 0)
+                  PositionedDirectional(
+                    end: AppSpacing.md,
+                    top: 1,
+                    child: Container(
+                      width: _dot,
+                      height: _dot,
+                      decoration: BoxDecoration(
+                        color: colors.primary.fill,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: colors.surface,
+                          width: _dotRing,
+                        ),
+                      ),
+                    ),
+                  ),
                 if (badge > 0)
                   PositionedDirectional(
                     end: AppSpacing.sm,
