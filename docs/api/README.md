@@ -59,15 +59,15 @@ One file per endpoint group, with request, response and example; the matching mo
 | Contract | Used by | Data in the app |
 |---|---|---|
 | [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register, login, refresh and logout |
-| [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), later track switching | mock |
+| [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), «أنا»'s tracks and grades | live, units mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
-| [`auth.md`](auth.md) | Accounts: sign-up and sign-in, password recovery, the email's confirmation, Google and Apple, and "save progress"'s guest account (ADR 10) | live, guest mock |
+| [`auth.md`](auth.md) | Accounts: sign-up and sign-in, password recovery, the email's confirmation, Google and Apple, "save progress"'s guest account and its upgrades (ADR 10), onboarding's answers | live |
 | [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
 | [`explanations.md`](explanations.md) | «اشرح لي» under a wrong answer, in a lesson or a concept's session | mock |
 | [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
-| [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the preferences, the password and deleting the account | mock (`PUT /api/v1/app/me` confirmed) |
+| [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the goal and the reminder, the password and deleting the account | live, the profile and deletion mock |
 | [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
 | [`notifications.md`](notifications.md) | Notifications: the push token, what the server sends and what a tap opens (ADR 21) | proposed, mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), the splash's version gate, later every screen that reads a setting | mock |
@@ -84,11 +84,13 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse`; 401 for wrong credentials, 429 for too many tries | live, used (sign-in) |
 | `/api/v1/auth/refresh` | POST | `RefreshRequest {refreshToken}` | `TokenResponse` | live, used |
 | `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, used (sign-out, never waited on) |
-| `/api/v1/app/me` | GET | — | `UserDto` | live, not used yet |
-| `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, not used yet |
+| `/api/v1/app/me` | GET | — | `UserDto`; the goal and the reminder ([me.md](me.md)) | live, used |
+| `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, used (the name) |
+| `/api/v1/app/me/learning` | PUT | `UpdateLearningRequest {dailyGoalMinutes, reminderTime}` | `UserDto` ([me.md](me.md)) | live, used |
+| `/api/v1/app/enrollments/{trackId}/active` | PUT | — | the enrollments ([me.md](me.md)) | live, used |
+| `/api/v1/app/enrollments/{trackId}/level` | PUT | `ChangeLevelRequest {levelId}` | `EnrollmentDto` ([me.md](me.md)) | live, used |
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
-| `/api/v1/app/tracks` | GET | — | track list ([tracks.md](tracks.md)) | proposed, mock |
-| `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/app/tracks` | GET | — (a session) | `{items: TrackCatalogItemDto[]}`, each with its levels ([tracks.md](tracks.md)) | live, used |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, version, exercises}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/answers/review` | POST | as an answer | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
@@ -127,7 +129,9 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
 | `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
-| `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions, links and onboarding's tracks used |
+| `/api/v1/auth/guest` | POST | `CreateGuestRequest {deviceId, platform, displayName}`, no session | `TokenResponse`, `accountType: "guest"` ([auth.md](auth.md)) | live, used |
+| `/api/v1/app/me/onboarding` | POST | `OnboardingRequest`, with the new account's token | `OnboardingResultDto` ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/password/forgot` | POST | `ForgotPasswordRequest {email}` | `202`, the same whether or not the email has an account ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/password/reset/check` | POST | `CheckResetTokenRequest {token}` | `ResetTokenInfo {email}`; `400 auth.reset_token_invalid` for a link expired, used or unknown ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/password/reset` | POST | `ResetPasswordRequest {token, newPassword, deviceId, platform}` | `TokenResponse`; `400 auth.reset_token_invalid` as above, `400 validation.failed` for a refused password ([auth.md](auth.md)) | live, used |
@@ -138,17 +142,18 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/google` | POST | `GoogleSignInRequest {idToken, deviceId, platform}` | `TokenResponse` with `isNewUser`; `401 auth.google_token_invalid`, `403 auth.account_disabled`, `409 auth.email_taken` or `auth.external_login_conflict` ([auth.md](auth.md)) | live, used (no real token sent yet, STATUS D-110) |
 | `/api/v1/auth/apple` | POST | `AppleSignInRequest {identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform}` | `TokenResponse` | live, not used |
 | `/api/v1/app/me/push-token` | PUT | `{token, platform, deviceId}` | `204` ([notifications.md](notifications.md)) | proposed, mock |
-| `/api/v1/auth/guest/upgrade` | POST | `RegisterRequest`, with the guest's token | `TokenResponse` of the same account, now a member ([auth.md](auth.md)) | proposed, mock |
+| `/api/v1/auth/guest/upgrade/email` | POST | `{email, password, displayName}`, with the guest's session | `UserDto`; the session carries on ([auth.md](auth.md)) | live, used |
+| `/api/v1/auth/guest/upgrade/google` | POST | `{idToken}`, with the guest's session | `UserDto`; `409 auth.external_login_conflict` signs in to that account instead ([auth.md](auth.md)) | live, used |
 
 ## Requests to raise with the backend team
 
 Paste-ready; each item names what the app needs and why.
 
-1. **Guest account (ADR 10).** `POST /api/v1/auth/guest` as in [auth.md](auth.md): no token, idempotent on `installationId`, returns the same `TokenResponse` with `roles: ["guest"]`. Plus the **upgrade**, `POST /api/v1/auth/guest/upgrade` with the guest's token and register's body: the same account becomes a member and keeps its progress; agree it and what happens when the email already has an account.
-2. **Google and Apple for a guest.** `POST /api/v1/auth/google` and `/apple` exist; a guest signing in with one should upgrade the same account, as the email upgrade does, and `isNewUser: true` should take the `onboarding` answers (item 3). Today the app's Google sign-in leaves the guest account behind.
+1. **Guest account (ADR 10).** Answered: `POST /api/v1/auth/guest` and the upgrades by email, Google and Apple are live ([auth.md](auth.md)).
+2. **Google and Apple for a guest.** Answered: `POST /api/v1/auth/guest/upgrade/google` and `/apple`.
    **Google's client.** The server must check the `idToken`'s audience against the "Web application" client of the app's Google Cloud project ([auth.md](auth.md)); the app's owner sends its ID.
-3. **Onboarding answers with account creation.** `RegisterRequest` (and the guest and social endpoints) should accept the `onboarding` object from [auth.md](auth.md) (audience, track, child profile, grade, reasons, daily goal, challenge, start level, placement choice, reminder time), so the plan is ready on first sign-in (S §4.3).
-4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/tracks`, `GET /app/tracks/{trackId}/levels`, `GET /app/levels/{levelId}/units`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the tracks, levels and settings calls must work **without a token**, because onboarding reads them before an account exists.
+3. **Onboarding answers with account creation.** Answered: `POST /api/v1/app/me/onboarding`, sent with the new account's token right after it is made ([auth.md](auth.md)).
+4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/levels/{levelId}/units`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
 5. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
 6. **The password policy** in the OpenAPI document: any name length limit as `minLength`/`maxLength` (the password's 8 shows only in register's answer), and the `details` codes beyond `not_empty`. The codes per endpoint are there now, in each response's description; as an `enum` or an extension field they could be checked by a test.
 7. **`Retry-After` on 429.** Answered by the document: `auth.locked_out` (5 wrong passwords, 5 minutes) and `rate_limit.exceeded` both carry it, and the app counts it down. Not yet seen on the dev server.
@@ -156,7 +161,7 @@ Paste-ready; each item names what the app needs and why.
 9. **The links in the emails open the app.** Recovery and confirmation are live; their links (`https://engleazia.com/reset-password?token=…&email=…`, `/verify-email?token=…`) need `assetlinks.json` and apple-app-site-association on that host, and the Apple relay domain registered so they reach hidden Apple emails (S §5.1).
 10. **The password change's refusals.** Answered by the document: a wrong current password is `400 auth.current_password_invalid`, an account with no password `409 auth.password_not_set`, five wrong tries `429 auth.locked_out`. The app keys on the first; it has not been seen on the dev server yet.
 11. **The confirmation link's code.** Answered: a bad `/auth/email/verify` token is now `auth.email_link_invalid` (`test/fixtures/api/auth_email_verify_link_invalid.json`), which the app reads as an expired link, like the recovery's. Please announce a code's change before it reaches the dev server: this one made the expired-link screen show a form error until the app followed.
-12. **App gate.** The minimum and recommended app version per platform (§19.2), proposed as the `appVersion` group of `GET /api/v1/app/settings` ([settings.md](settings.md)), so the app needs one call on open.
+12. **App gate.** Answered: `GET /api/v1/app/system/config` carries the versions and the store page, and every `/app/` call refuses a version below the minimum with `426 app.update_required`; the app follows both.
 13. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
 14. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
 15. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.

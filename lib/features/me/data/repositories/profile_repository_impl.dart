@@ -55,17 +55,18 @@ final class ProfileRepositoryImpl implements ProfileRepository {
   Future<Result<void>> rename(String name) => guard(() => _remote.rename(name));
 
   @override
-  Future<Result<void>> switchTrack(String enrollmentId) =>
-      guard(() => _remote.switchTrack(enrollmentId));
+  Future<Result<void>> switchTrack(String trackId) =>
+      guard(() => _remote.switchTrack(trackId));
 
   @override
-  Future<Result<void>> changeLevel(String enrollmentId, String levelId) =>
-      guard(() => _remote.changeLevel(enrollmentId, levelId));
+  Future<Result<void>> changeLevel(String trackId, String levelId) =>
+      guard(() => _remote.changeLevel(trackId, levelId));
 
   @override
   Future<Result<Preferences>> getPreferences() => guard(() async {
     final preferences = ProfileModel.preferences(
       await _remote.getPreferences(),
+      notifications: _settings.notifications,
     );
     if (preferences == null) {
       throw const FormatException('Preferences without a goal');
@@ -73,10 +74,16 @@ final class ProfileRepositoryImpl implements ProfileRepository {
     return preferences;
   });
 
+  /// The notifications' switch is kept on the phone: the server has none
+  /// yet (docs/api/me.md).
   @override
-  Future<Result<void>> savePreferences(Preferences preferences) => guard(
-    () => _remote.savePreferences(ProfileModel.preferencesToJson(preferences)),
-  );
+  Future<Result<void>> savePreferences(Preferences preferences) =>
+      guard(() async {
+        await _settings.setNotifications(on: preferences.notifications);
+        await _remote.savePreferences(
+          ProfileModel.preferencesToJson(preferences),
+        );
+      });
 
   @override
   Future<Result<void>> changePassword({

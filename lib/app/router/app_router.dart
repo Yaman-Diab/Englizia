@@ -14,6 +14,7 @@ import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/links/external_link.dart';
+import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
@@ -123,6 +124,8 @@ import 'package:englizia/features/practice/presentation/review/cubit/review_cubi
 import 'package:englizia/features/practice/presentation/review/pages/review_page.dart';
 import 'package:englizia/features/practice/presentation/words/cubit/my_words_cubit.dart';
 import 'package:englizia/features/practice/presentation/words/pages/my_words_page.dart';
+import 'package:englizia/features/settings/domain/entities/support_links.dart';
+import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 import 'package:englizia/features/talk/presentation/conversation/cubit/conversation_cubit.dart';
 import 'package:englizia/features/talk/presentation/conversation/pages/conversation_page.dart';
 import 'package:englizia/features/talk/presentation/talk/cubit/talk_cubit.dart';
@@ -356,8 +359,8 @@ GoRouter createAppRouter(
                     : AppRoutes.signUpWithProvider,
                 extra: path,
               ),
-              onTerms: () => context.push(AppRoutes.legalTerms),
-              onPrivacy: () => context.push(AppRoutes.legalPrivacy),
+              onTerms: () => _openLegal(context, privacy: false),
+              onPrivacy: () => _openLegal(context, privacy: true),
               onGuestCreated: (session) =>
                   _accountCreated(context, path, session),
               onGoogleSession: (google) async {
@@ -386,7 +389,10 @@ GoRouter createAppRouter(
           // goes straight back: the progress is already there.
           final upgrading = session.status == SessionStatus.guest;
           return BlocProvider(
-            create: (_) => sl<SignUpCubit>(param1: upgrading),
+            create: (_) => sl<SignUpCubit>(
+              param1: upgrading,
+              param2: upgrading ? null : path,
+            ),
             child: SignUpPage(
               onCreated: (account, name) async {
                 if (!upgrading) {
@@ -533,10 +539,13 @@ GoRouter createAppRouter(
             child: SignInPage(
               lastProvider: SocialProvider.values
                   .asNameMap()[settings.lastSignInMethod],
-              onSignedIn: (account, provider) async {
+              onSignedIn: (account, provider, keptGuest) async {
                 // The badge marks Google or Apple; an email sign-in clears it.
                 await settings.setLastSignInMethod(provider?.name ?? _byEmail);
-                await session.signIn(account);
+                // A guest's own account upgraded keeps what the phone holds.
+                await (keptGuest
+                    ? session.upgrade(account)
+                    : session.signIn(account));
                 // Pushed over home for a guest, which the guard leaves.
                 if (context.mounted) context.go(AppRoutes.home);
               },
@@ -961,10 +970,8 @@ GoRouter createAppRouter(
                 ),
                 actions: MeActions(
                   onSettings: () => context.push<void>(AppRoutes.meSettings),
-                  onPrivacy: () => context.push<void>(AppRoutes.legalPrivacy),
-                  onWhatsApp: (number) => sl<ExternalLink>().open(
-                    Uri.https('wa.me', number.replaceAll(RegExp('[^0-9]'), '')),
-                  ),
+                  onPrivacy: () => _openLegal(context, privacy: true),
+                  onWhatsApp: _openWhatsApp,
                   onPractice: () => context.go(AppRoutes.practice),
                   onCreateAccount: () => context.push<void>(AppRoutes.signUp),
                   onSignOut: context.read<AccountCubit>().signOut,
@@ -1014,11 +1021,9 @@ GoRouter createAppRouter(
             builder: (context) => SettingsPage(
               actions: SettingsActions(
                 onBack: () => _back(context),
-                onWhatsApp: (number) => sl<ExternalLink>().open(
-                  Uri.https('wa.me', number.replaceAll(RegExp('[^0-9]'), '')),
-                ),
-                onPrivacy: () => context.push<void>(AppRoutes.legalPrivacy),
-                onTerms: () => context.push<void>(AppRoutes.legalTerms),
+                onWhatsApp: _openWhatsApp,
+                onPrivacy: () => _openLegal(context, privacy: true),
+                onTerms: () => _openLegal(context, privacy: false),
                 onSignOut: context.read<AccountCubit>().signOut,
                 onCreateAccount: () => context.push<void>(AppRoutes.signUp),
                 onVerifyEmail: () => showVerifyEmailSheet(context),
@@ -1201,6 +1206,31 @@ String _onboardingRoute(OnboardingStep step) => switch (step) {
   OnboardingStep.reminder => AppRoutes.onboardingReminder,
   OnboardingStep.saveProgress => AppRoutes.onboardingSaveProgress,
 };
+
+/// A legal page: the panel's own when it has one, else the app's.
+Future<void> _openLegal(BuildContext context, {required bool privacy}) async {
+  final links = switch (await sl<SettingsRepository>().getSupportLinks()) {
+    Ok(:final value) => value,
+    Err() => SupportLinks.none,
+  };
+  final page = privacy ? links.privacy : links.terms;
+  if (page != null && await sl<ExternalLink>().open(page)) return;
+  if (!context.mounted) return;
+  await context.push<void>(
+    privacy ? AppRoutes.legalPrivacy : AppRoutes.legalTerms,
+  );
+}
+
+/// Support on WhatsApp: the panel's number, else the one the screen had.
+Future<void> _openWhatsApp(String number) async {
+  final support = switch (await sl<SettingsRepository>().getSupportLinks()) {
+    Ok(value: SupportLinks(:final whatsapp?)) => whatsapp,
+    _ => number,
+  };
+  await sl<ExternalLink>().open(
+    Uri.https('wa.me', support.replaceAll(RegExp('[^0-9]'), '')),
+  );
+}
 
 void _back(BuildContext context) =>
     context.canPop() ? context.pop() : context.go(AppRoutes.home);

@@ -214,7 +214,7 @@ void main() {
 
       await subject.switchTrack(emar);
 
-      expect(profiles.switches, [emar.enrollmentId]);
+      expect(profiles.switches, [emar.trackId]);
       expect(subject.state.profile?.active?.enrollmentId, emar.enrollmentId);
       expect(subject.state.switched, emar.title);
       expect(subject.state.switches, 1);
@@ -225,7 +225,8 @@ void main() {
       await subject.start();
       await subject.loadLevels();
       expect(subject.state.levels, hasLength(12));
-      expect(subject.state.levels!.first.kidsMode, isTrue);
+      // A level takes its track's kids mode: Emar's is off.
+      expect(subject.state.levels!.first.kidsMode, isFalse);
 
       await subject.changeLevel(subject.state.levels!.first);
       expect(profiles.levels.single.$2, 'lvl_emar_01');

@@ -10,10 +10,14 @@ abstract final class ApiEndpoints {
   static const logout = '/api/v1/auth/logout';
   // Confirmed in docs/api/openapi.json.
   static const googleSignIn = '/api/v1/auth/google';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
   static const guestAccount = '/api/v1/auth/guest';
-  // ASSUMPTION(api): docs/api/auth.md.
-  static const upgradeGuest = '/api/v1/auth/guest/upgrade';
+  // Confirmed in docs/api/openapi.json.
+  static const upgradeGuestWithEmail = '/api/v1/auth/guest/upgrade/email';
+  // Confirmed in docs/api/openapi.json.
+  static const upgradeGuestWithGoogle = '/api/v1/auth/guest/upgrade/google';
+  // Confirmed in docs/api/openapi.json.
+  static const onboarding = '/api/v1/app/me/onboarding';
   // Confirmed in docs/api/openapi.json.
   static const forgotPassword = '/api/v1/auth/password/forgot';
   // Confirmed in docs/api/openapi.json.
@@ -27,14 +31,11 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): proposed, docs/api/me.md.
   static const profile = '/api/v1/app/me/profile';
 
-  // ASSUMPTION(api): proposed, docs/api/me.md.
-  static const activeEnrollment = '/api/v1/app/me/active-enrollment';
+  // Confirmed in docs/api/openapi.json: the goal and the reminder.
+  static const learning = '/api/v1/app/me/learning';
 
   // ASSUMPTION(api): proposed, docs/api/home.md.
   static const home = '/api/v1/app/home';
-
-  // ASSUMPTION(api): proposed, docs/api/me.md.
-  static const preferences = '/api/v1/app/me/preferences';
 
   // ASSUMPTION(api): proposed, docs/api/notifications.md.
   static const pushToken = '/api/v1/app/me/push-token';
@@ -48,7 +49,7 @@ abstract final class ApiEndpoints {
   // Confirmed in docs/api/openapi.json.
   static const emailVerify = '/api/v1/auth/email/verify';
 
-  // ASSUMPTION(api): docs/api/tracks.md.
+  // Confirmed in docs/api/openapi.json; a member's, with a session.
   static const tracks = '/api/v1/app/tracks';
   // ASSUMPTION(api): docs/api/placement.md.
   static const placementSummary = '/api/v1/app/placement/summary';
@@ -58,6 +59,8 @@ abstract final class ApiEndpoints {
   static const placementAttempts = '/api/v1/app/placement/attempts';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
+  // Confirmed in docs/api/openapi.json; answered without a session.
+  static const systemConfig = '/api/v1/app/system/config';
 
   // ASSUMPTION(api): docs/api/placement.md.
   static String placementStage(String attemptId, int stage) =>
@@ -82,6 +85,14 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/placement.md.
   static String enrollment(String enrollmentId) =>
       '/api/v1/app/enrollments/$enrollmentId';
+
+  // Confirmed in docs/api/openapi.json: an enrollment is its track's.
+  static String activeEnrollment(String trackId) =>
+      '/api/v1/app/enrollments/$trackId/active';
+
+  // Confirmed in docs/api/openapi.json.
+  static String enrollmentLevel(String trackId) =>
+      '/api/v1/app/enrollments/$trackId/level';
 
   // ASSUMPTION(api): docs/api/lessons.md.
   static String unit(String unitId) => '/api/v1/app/units/$unitId';
@@ -162,7 +173,4 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/tracks.md.
   static String levelUnits(String levelId) =>
       '/api/v1/app/levels/$levelId/units';
-
-  static String trackLevels(String trackId) =>
-      '/api/v1/app/tracks/$trackId/levels';
 }

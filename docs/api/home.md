@@ -109,7 +109,7 @@ Other frames, as deltas:
 | `level.id`, `label`, `name` | «A2، ما قبل المتوسط»; a grade shows its `name` |
 | `level.cefr` | `preA1` … `c1` or null: the level's sea; unknown reads as null (the general sea) |
 | `level.completed` | The horizon opens and «أكملت مستوى A2» shows on every open until the next level starts |
-| `level.next` | `{id, label, name, cefr}` or null at the track's last level (no horizon flag). «ابدأ B1» sends `PATCH /api/v1/app/enrollments/{id} {levelId}` ([me.md](me.md)) |
+| `level.next` | `{id, label, name, cefr}` or null at the track's last level (no horizon flag). «ابدأ B1» sends `PUT /api/v1/app/enrollments/{trackId}/level {levelId}` ([me.md](me.md)) |
 | `units[]` | Every unit of the level, in order |
 | `units[].title` | `{ar, en}`; `en` shows beside `ar` for kids only. A plain string is read as the Arabic title |
 | `units[].cover` | The island's medal (a circle cut from the cover) |
@@ -144,7 +144,7 @@ The common errors (`README.md`). Offline, the phone shows what it kept with «ل
 
 ## Switching track
 
-`PUT /api/v1/app/me/active-enrollment` ([me.md](me.md)), then `GET /api/v1/app/home` again.
+`PUT /api/v1/app/enrollments/{trackId}/active` ([me.md](me.md)), then `GET /api/v1/app/home` again.
 
 ## Questions for the backend team
 

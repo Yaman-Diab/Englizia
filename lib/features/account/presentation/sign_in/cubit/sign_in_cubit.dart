@@ -20,6 +20,7 @@ final class SignInState extends Equatable {
     this.failure,
     this.session,
     this.signedInWith,
+    this.keptGuest = false,
   });
 
   final String email;
@@ -54,6 +55,9 @@ final class SignInState extends Equatable {
   /// The provider [session] came from; null for the email's.
   final SocialProvider? signedInWith;
 
+  /// [session] is this phone's guest account, upgraded: its progress stays.
+  final bool keptGuest;
+
   bool get filled => email.trim().isNotEmpty && password.isNotEmpty;
 
   /// A sign-in is on its way, by any way.
@@ -81,6 +85,7 @@ final class SignInState extends Equatable {
     Failure? Function()? failure,
     AuthTokens? session,
     SocialProvider? signedInWith,
+    bool? keptGuest,
   }) => SignInState(
     email: email ?? this.email,
     password: password ?? this.password,
@@ -93,6 +98,7 @@ final class SignInState extends Equatable {
     failure: failure != null ? failure() : this.failure,
     session: session ?? this.session,
     signedInWith: signedInWith ?? this.signedInWith,
+    keptGuest: keptGuest ?? this.keptGuest,
   );
 
   @override
@@ -108,6 +114,7 @@ final class SignInState extends Equatable {
     failure,
     session,
     signedInWith,
+    keptGuest,
   ];
 }
 
@@ -167,6 +174,7 @@ class SignInCubit extends Cubit<SignInState> {
           state.copyWith(
             session: value.tokens,
             signedInWith: SocialProvider.google,
+            keptGuest: value.keptGuest,
           ),
         );
       case Ok():

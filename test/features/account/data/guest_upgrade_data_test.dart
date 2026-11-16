@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
 import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/api_client.dart';
@@ -12,12 +9,9 @@ import 'package:englizia/features/account/data/repositories/account_repository_i
 import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/api_fixtures.dart';
 import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fakes.dart';
-
-final _memberBody =
-    jsonDecode(File(AccountFakeDataSource.registerAsset).readAsStringSync())
-        as Map<String, Object?>;
 
 void main() {
   const guest = AuthTokens(
@@ -51,7 +45,6 @@ void main() {
     return AccountRepositoryImpl(
       AccountRemoteDataSourceImpl(ApiClient(dio)),
       tokens: storage,
-      installationId: () async => 'install-1',
       savedDeviceId: () => savedDevice,
       saveDeviceId: (id) async => savedDevice = id,
       devicePlatform: 'android',
@@ -64,36 +57,51 @@ void main() {
   });
 
   group('upgradeGuest', () {
-    test(
-      'POST /api/v1/auth/guest/upgrade with the guest\'s own token',
-      () async {
-        final result = await repository(
-          () => FakeResponse(200, body: _memberBody),
-        ).upgradeGuest(account);
-
-        final request = adapter.requests.single;
-        expect(request.path, '/api/v1/auth/guest/upgrade');
-        expect(request.headers['Authorization'], 'Bearer guest-access');
-        expect((request.data! as Map)['email'], 'user@example.com');
-        expect((result as Ok<AuthTokens>).value.kind, AccountKind.member);
-      },
-    );
-
-    test('sends the saved device id and saves the server\'s', () async {
-      savedDevice = 'device-1';
-      await repository(
-        () => FakeResponse(200, body: _memberBody),
+    test('POST /api/v1/auth/guest/upgrade/email with the guest token; the '
+        'session carries on as a member session', () async {
+      final result = await repository(
+        () => FakeResponse(200, body: apiFixture('app_me_guest')),
       ).upgradeGuest(account);
 
-      expect((adapter.requests.single.data! as Map)['deviceId'], 'device-1');
-      expect(savedDevice, '00000000-0000-4000-8000-000000000000');
+      final request = adapter.requests.single;
+      expect(request.path, '/api/v1/auth/guest/upgrade/email');
+      expect(request.headers['Authorization'], 'Bearer guest-access');
+      expect(request.data, {
+        'email': 'user@example.com',
+        'password': 'password1',
+        'displayName': 'Learner',
+      });
+      final tokens = (result as Ok<AuthTokens>).value;
+      expect(tokens.kind, AccountKind.member);
+      expect(tokens.accessToken, 'guest-access');
     });
 
     test('an email with an account is a conflict', () async {
       final result = await repository(
-        () => const FakeResponse(409),
+        () => const FakeResponse(
+          409,
+          body: {
+            'statusCode': 409,
+            'data': null,
+            'error': {'code': 'auth.email_taken', 'details': null},
+          },
+        ),
       ).upgradeGuest(account);
       expect((result as Err).failure, isA<ConflictFailure>());
+    });
+
+    test('not a guest any more: upgraded already, by a lost answer', () async {
+      final result = await repository(
+        () => const FakeResponse(
+          409,
+          body: {
+            'statusCode': 409,
+            'data': null,
+            'error': {'code': 'auth.not_guest', 'details': null},
+          },
+        ),
+      ).upgradeGuest(account);
+      expect((result as Ok<AuthTokens>).value.kind, AccountKind.member);
     });
   });
 

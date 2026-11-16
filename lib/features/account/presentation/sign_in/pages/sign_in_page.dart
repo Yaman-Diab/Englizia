@@ -41,9 +41,15 @@ class SignInPage extends StatefulWidget {
     super.key,
   });
 
-  /// Signed in: the session, not started yet, and the provider it came
-  /// from (null for the email's).
-  final void Function(AuthTokens session, SocialProvider? provider) onSignedIn;
+  /// Signed in: the session, not started yet, the provider it came from
+  /// (null for the email's), and whether it is this phone's guest account
+  /// upgraded (its progress stays).
+  final void Function(
+    AuthTokens session,
+    SocialProvider? provider,
+    bool keptGuest,
+  )
+  onSignedIn;
 
   /// Apple's sign-in isn't built yet (STATUS D-031).
   final VoidCallback onApple;
@@ -105,7 +111,11 @@ class _SignInPageState extends State<SignInPage> {
               now.session != null && before.session == null,
           listener: (_, state) {
             TextInput.finishAutofillContext();
-            widget.onSignedIn(state.session!, state.signedInWith);
+            widget.onSignedIn(
+              state.session!,
+              state.signedInWith,
+              state.keptGuest,
+            );
           },
         ),
         // A refused try: the password is cleared and typed again.

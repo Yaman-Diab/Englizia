@@ -52,6 +52,16 @@ final class AuthTokens extends Equatable {
     deviceId: deviceId,
   );
 
+  /// The same session, now a member's: a guest's account upgraded keeps its
+  /// tokens.
+  AuthTokens asMember() => AuthTokens(
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    accessExpiresAt: accessExpiresAt,
+    refreshExpiresAt: refreshExpiresAt,
+    deviceId: deviceId,
+  );
+
   @override
   List<Object?> get props => [
     accessToken,

@@ -34,6 +34,14 @@ abstract final class ApiErrorCodes {
   /// Google account.
   static const externalLoginConflict = 'auth.external_login_conflict';
 
+  /// 426 from any `/app/` call: this app's version is below the server's
+  /// minimum (`X-App-Version`).
+  static const updateRequired = 'app.update_required';
+
+  /// 409 from a guest's upgrade: the account has a login already, so it
+  /// was upgraded (a retry after a lost answer).
+  static const notGuest = 'auth.not_guest';
+
   /// 403: the account was disabled from the dashboard.
   static const accountDisabled = 'auth.account_disabled';
 }

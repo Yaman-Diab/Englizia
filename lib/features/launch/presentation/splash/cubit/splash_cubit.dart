@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/links/app_store.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
+import 'package:englizia/core/network/update_required.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/features/launch/presentation/splash/cubit/splash_state.dart';
@@ -24,11 +25,13 @@ class SplashCubit extends Cubit<SplashState> {
     required ConnectivityService connectivity,
     required AppInfo app,
     required AppStore store,
+    UpdateRequiredSignal? serverRefused,
   }) : _session = session,
        _settings = settings,
        _connectivity = connectivity,
        _app = app,
        _store = store,
+       _serverRefused = serverRefused,
        super(const SplashState());
 
   final AppSessionController _session;
@@ -36,6 +39,10 @@ class SplashCubit extends Cubit<SplashState> {
   final ConnectivityService _connectivity;
   final AppInfo _app;
   final AppStore _store;
+
+  /// The server answering `426` to any call, before or after the opening:
+  /// its minimum is above this version, whatever the versions said.
+  final UpdateRequiredSignal? _serverRefused;
 
   static const slowAfter = Duration(seconds: 3);
 
@@ -57,6 +64,7 @@ class SplashCubit extends Cubit<SplashState> {
   Future<void> start() async {
     if (_started) return;
     _started = true;
+    _serverRefused?.addListener(_refused);
     _slow = Timer(slowAfter, () {
       if (!isClosed && state.mode == SplashMode.loading) {
         emit(state.copyWith(slow: true));
@@ -118,6 +126,7 @@ class SplashCubit extends Cubit<SplashState> {
     final firstOpenOffline =
         !online && _session.status == SessionStatus.signedOut;
     final decided = _decided = switch (need) {
+      _ when _serverRefused?.raised ?? false => SplashMode.update,
       UpdateNeed.required => SplashMode.update,
       _ when firstOpenOffline => SplashMode.offline,
       _ => SplashMode.done,
@@ -153,6 +162,13 @@ class SplashCubit extends Cubit<SplashState> {
     };
   }
 
+  void _refused() {
+    if (isClosed || _decided == SplashMode.update) return;
+    _decided = SplashMode.update;
+    emit(state.copyWith(need: UpdateNeed.required));
+    _show();
+  }
+
   void _show() {
     final decided = _decided;
     if (decided == null || _introPlaying || isClosed) return;
@@ -162,6 +178,7 @@ class SplashCubit extends Cubit<SplashState> {
 
   @override
   Future<void> close() async {
+    _serverRefused?.removeListener(_refused);
     _slow?.cancel();
     await _online?.cancel();
     return super.close();

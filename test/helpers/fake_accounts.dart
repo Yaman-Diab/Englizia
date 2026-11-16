@@ -74,17 +74,22 @@ class FakeAccountRepository implements AccountRepository {
   @override
   Future<Result<AuthTokens>> createGuestAccount({
     required OnboardingPath answers,
-    required String languageCode,
-    required int utcOffsetMinutes,
   }) async {
     guestAnswers.add(answers);
     await gate?.future;
     return _nth(guestResults, guestAnswers.length);
   }
 
+  /// The answers each new email account came with.
+  final accountAnswers = <OnboardingPath?>[];
+
   @override
-  Future<Result<AuthTokens>> createAccount(NewAccount account) async {
+  Future<Result<AuthTokens>> createAccount(
+    NewAccount account, {
+    OnboardingPath? answers,
+  }) async {
     accounts.add(account);
+    accountAnswers.add(answers);
     await gate?.future;
     return _nth(accountResults, accounts.length);
   }
@@ -99,9 +104,15 @@ class FakeAccountRepository implements AccountRepository {
     return _nth(signInResults, signIns.length);
   }
 
+  /// The answers each Google sign-in came with.
+  final googleAnswers = <OnboardingPath?>[];
+
   @override
-  Future<Result<SocialSession?>> signInWithGoogle() async {
+  Future<Result<SocialSession?>> signInWithGoogle({
+    OnboardingPath? answers,
+  }) async {
     googleSignIns++;
+    googleAnswers.add(answers);
     await gate?.future;
     return googleResults[(googleSignIns - 1).clamp(
       0,

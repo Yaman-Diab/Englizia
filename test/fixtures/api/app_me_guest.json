@@ -1,0 +1,28 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "00000000-0000-0000-0000-000000000000",
+    "userName": "u_guest",
+    "email": null,
+    "displayName": "متعلّم",
+    "emailVerified": false,
+    "roles": [
+      "student"
+    ],
+    "timeZone": "Asia/Damascus",
+    "uiLanguage": "ar",
+    "authMethods": [],
+    "accountType": "guest",
+    "accountNumber": "EZ-0000",
+    "createdAt": "2026-11-16T12:20:59.645Z",
+    "learnerKind": null,
+    "learningReasons": [],
+    "dailyGoalMinutes": 10,
+    "streakGoalDays": null,
+    "reminderTime": null,
+    "onboardedAt": null
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

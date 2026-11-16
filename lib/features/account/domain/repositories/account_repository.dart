@@ -6,19 +6,23 @@ import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
 abstract interface class AccountRepository {
-  /// Creates the anonymous guest account of this phone with the onboarding
-  /// [answers] (ADR 10). Safe to retry: the same phone gets the same guest.
+  /// Creates this phone's anonymous guest account, then gives it the
+  /// onboarding [answers] (ADR 10). A retry after the answers failed sends
+  /// only them.
   Future<Result<AuthTokens>> createGuestAccount({
     required OnboardingPath answers,
-    required String languageCode,
-    required int utcOffsetMinutes,
   });
 
   /// Creates a member account with email and password and returns its
   /// session. An email that already has an account fails with
   /// `ConflictFailure`; a value the server refuses, with `ValidationFailure`
   /// naming the field (`displayName`, `email`, `password`).
-  Future<Result<AuthTokens>> createAccount(NewAccount account);
+  /// With [answers] (a new learner's onboarding), they follow as for a
+  /// guest's.
+  Future<Result<AuthTokens>> createAccount(
+    NewAccount account, {
+    OnboardingPath? answers,
+  });
 
   /// Signs in with email and password. Wrong credentials, whether or not
   /// the email has an account, fail with `UnauthorizedFailure`; too many
@@ -29,11 +33,13 @@ abstract interface class AccountRepository {
   });
 
   /// Signs in with the Google account the learner picks, making the account
-  /// on its first time (`SocialSession.isNewAccount`). Null when they closed
-  /// Google's sheet. Fails with `ProviderFailure` when Google's sign-in is
-  /// missing or its token is refused, and with `ConflictFailure` when the
-  /// email's account can't be joined to this Google account.
-  Future<Result<SocialSession?>> signInWithGoogle();
+  /// on its first time (`SocialSession.isNewAccount`), which then takes
+  /// [answers]. A guest's own account takes it instead and stays
+  /// (`SocialSession.keptGuest`), unless the Google account has one already.
+  /// Null when they closed Google's sheet. Fails with `ProviderFailure` when
+  /// Google's sign-in is missing or its token is refused, and with
+  /// `ConflictFailure` when the email's account can't be joined to it.
+  Future<Result<SocialSession?>> signInWithGoogle({OnboardingPath? answers});
 
   /// Asks for a link to set a new password, sent to [email] if it has an
   /// account. The answer is the same either way, so no screen can tell
@@ -70,8 +76,8 @@ abstract interface class AccountRepository {
   Future<Result<void>> verifyEmail(String token);
 
   /// Turns this phone's guest account into a member account with [account]'s
-  /// email and password, keeping its progress (ADR 10). Fails like
-  /// [createAccount].
+  /// email and password, keeping its progress and its session (ADR 10).
+  /// Fails like [createAccount].
   Future<Result<AuthTokens>> upgradeGuest(NewAccount account);
 
   /// Ends this phone's session on the server. Signing out never waits on

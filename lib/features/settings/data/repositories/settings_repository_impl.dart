@@ -8,22 +8,24 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
 import 'package:englizia/features/settings/data/models/effective_settings_model.dart';
+import 'package:englizia/features/settings/data/models/support_links_model.dart';
 import 'package:englizia/features/settings/data/models/version_policy_model.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/support_links.dart';
 import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 
 final class SettingsRepositoryImpl implements SettingsRepository {
-  SettingsRepositoryImpl(
-    this._remote,
-    this._storage, {
-    required String? platform,
-  }) : _platform = platform;
+  SettingsRepositoryImpl(this._remote, this._storage);
 
   final SettingsRemoteDataSource _remote;
   final SettingsStorageService _storage;
-  final String? _platform;
   EffectiveSettingsModel? _loaded;
+  Map<String, Object?>? _config;
+
+  /// `system/config`, kept for the session once it came.
+  Future<Map<String, Object?>> _systemConfig() async =>
+      _config ??= await _remote.getSystemConfig();
 
   /// A response is kept for the session, so each screen that reads a setting
   /// does not fetch it again; a failure is retried by the next call.
@@ -54,9 +56,10 @@ final class SettingsRepositoryImpl implements SettingsRepository {
         null => const Err(UnknownFailure()),
       };
     }
-    switch (await _settings()) {
+    _config = null;
+    switch (await guard(_systemConfig)) {
       case Ok(:final value):
-        final policy = value.versionsFor(_platform);
+        final policy = VersionPolicyModel.fromJson(value).entity;
         await _keep(policy);
         return Ok(policy);
       case Err(:final failure):
@@ -64,6 +67,10 @@ final class SettingsRepositoryImpl implements SettingsRepository {
         return kept == null ? Err(failure) : Ok(kept);
     }
   }
+
+  @override
+  Future<Result<SupportLinks>> getSupportLinks() =>
+      guard(() async => SupportLinksModel.fromJson(await _systemConfig()));
 
   Future<void> _keep(VersionPolicy policy) async {
     try {

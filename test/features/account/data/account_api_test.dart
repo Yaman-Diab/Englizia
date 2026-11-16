@@ -35,7 +35,6 @@ void main() {
     repository = AccountRepositoryImpl(
       AccountRemoteDataSourceImpl(client),
       tokens: FakeTokenStorage(),
-      installationId: () async => 'install-1',
       savedDeviceId: () => 'device-1',
       saveDeviceId: (_) async {},
       devicePlatform: 'android',

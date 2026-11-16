@@ -2,7 +2,7 @@ name: englizia
 description: "Engleazia — English learning app for Arabic speakers (student app)."
 publish_to: 'none'
 
-version: 0.0.1+1
+version: 0.1.0+1
 
 environment:
   sdk: ^3.11.4

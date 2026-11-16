@@ -1,0 +1,10 @@
+{
+  "statusCode": 426,
+  "message": "This version of the app is no longer supported. Please update it from the store.",
+  "data": null,
+  "error": {
+    "code": "app.update_required",
+    "details": null
+  },
+  "traceId": "9bac50940dac326a4f466b32920f54d2"
+}

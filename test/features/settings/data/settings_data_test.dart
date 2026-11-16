@@ -10,14 +10,18 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
 import 'package:englizia/features/settings/data/models/effective_settings_model.dart';
+import 'package:englizia/features/settings/data/models/support_links_model.dart';
+import 'package:englizia/features/settings/data/models/version_policy_model.dart';
 import 'package:englizia/features/settings/data/repositories/settings_repository_impl.dart';
 import 'package:englizia/features/settings/domain/entities/app_version.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/support_links.dart';
 import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../helpers/api_fixtures.dart';
 import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fake_settings_repository.dart';
 
@@ -44,6 +48,14 @@ class _FlakyDataSource implements SettingsRemoteDataSource {
     calls++;
     if (failures-- > 0) throw const NetworkException('connectionError');
     return EffectiveSettingsModel.fromJson(example());
+  }
+
+  /// The dev server's real answer (`test/fixtures/api`).
+  @override
+  Future<Map<String, Object?>> getSystemConfig() async {
+    calls++;
+    if (failures-- > 0) throw const NetworkException('connectionError');
+    return asJsonMap(ApiClient.unwrap(apiFixture('app_system_config')));
   }
 }
 
@@ -196,7 +208,6 @@ void main() {
       final repository = SettingsRepositoryImpl(
         source,
         SettingsStorageService(prefs),
-        platform: 'android',
       );
 
       final first = await repository.getSettings();
@@ -211,7 +222,6 @@ void main() {
       final repository = SettingsRepositoryImpl(
         source,
         SettingsStorageService(prefs),
-        platform: 'android',
       );
 
       await repository.getSettings();
@@ -222,48 +232,59 @@ void main() {
   });
 
   group('versions', () {
-    test("the example has each platform's minimum and store page", () {
-      final model = EffectiveSettingsModel.fromJson(example());
+    test("the server's system config: its minimum and its latest", () {
+      final config = asJsonMap(
+        ApiClient.unwrap(apiFixture('app_system_config')),
+      );
       expect(
-        model.versionsFor('android'),
+        VersionPolicyModel.fromJson(config).entity,
+        const VersionPolicy(
+          minimum: AppVersion(0, 1),
+          recommended: AppVersion(0, 1),
+        ),
+      );
+    });
+
+    test('the mock\'s, with a store page and a newer version', () {
+      final config = asJsonMap(
+        ApiClient.unwrap(
+          jsonDecode(
+            File(SettingsFakeDataSource.configAsset).readAsStringSync(),
+          ),
+        ),
+      );
+      expect(
+        VersionPolicyModel.fromJson(config).entity,
         VersionPolicy(
-          minimum: const AppVersion(0, 0, 1),
-          recommended: const AppVersion(0, 0, 2),
+          minimum: const AppVersion(0, 1),
+          recommended: const AppVersion(0, 1, 1),
           updateUrl: Uri.parse(
             'https://play.google.com/store/apps/details?id=com.engleazia.app',
           ),
         ),
       );
-      expect(
-        model.versionsFor('ios'),
-        const VersionPolicy(
-          minimum: AppVersion(0, 0, 1),
-          recommended: AppVersion(0, 0, 2),
-        ),
-      );
-      expect(model.versionsFor(null), VersionPolicy.none);
     });
 
     test("a value that isn't valid is left out alone", () {
-      final json = example()
-        ..['appVersion'] = {
-          'android': {
-            'minVersion': '1.x',
-            'recommendedVersion': '2.1',
-            'updateUrl': 'market://details?id=x',
-          },
-        };
       expect(
-        EffectiveSettingsModel.fromJson(json).versionsFor('android'),
+        VersionPolicyModel.fromJson({
+          'minSupportedVersion': '1.x',
+          'latestVersion': '2.1',
+          'storeUrl': 'market://details?id=x',
+        }).entity,
         const VersionPolicy(recommended: AppVersion(2, 1)),
       );
     });
 
-    test('read even when another group is incomplete', () {
-      final json = example()..remove('motivation');
+    test('kept in the shape it came in', () {
+      final policy = VersionPolicy(
+        minimum: const AppVersion(1, 2),
+        recommended: const AppVersion(1, 3),
+        updateUrl: Uri.parse('https://example.com/app'),
+      );
       expect(
-        EffectiveSettingsModel.fromJson(json).versionsFor('ios').minimum,
-        const AppVersion(0, 0, 1),
+        VersionPolicyModel.fromJson(VersionPolicyModel(policy).toJson()).entity,
+        policy,
       );
     });
   });
@@ -277,11 +298,7 @@ void main() {
     });
 
     SettingsRepositoryImpl repository(SettingsRemoteDataSource source) =>
-        SettingsRepositoryImpl(
-          source,
-          SettingsStorageService(prefs),
-          platform: 'android',
-        );
+        SettingsRepositoryImpl(source, SettingsStorageService(prefs));
 
     test(
       'kept on the phone, and served from there without a connection',
@@ -291,7 +308,7 @@ void main() {
                   as Ok<VersionPolicy>)
               .value
               .minimum,
-          const AppVersion(0, 0, 1),
+          const AppVersion(0, 1),
         );
 
         final offline = await repository(
@@ -299,7 +316,7 @@ void main() {
         ).getVersionPolicy();
         expect(
           (offline as Ok<VersionPolicy>).value.minimum,
-          const AppVersion(0, 0, 1),
+          const AppVersion(0, 1),
         );
       },
     );
@@ -309,6 +326,49 @@ void main() {
         _FlakyDataSource(failures: 1),
       ).getVersionPolicy();
       expect((result as Err).failure, isA<NetworkFailure>());
+    });
+  });
+
+  group('support links', () {
+    late SharedPreferences prefs;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
+    });
+
+    test('the dev server has none yet', () async {
+      final result = await SettingsRepositoryImpl(
+        _FlakyDataSource(),
+        SettingsStorageService(prefs),
+      ).getSupportLinks();
+      expect((result as Ok<SupportLinks>).value, SupportLinks.none);
+    });
+
+    test('the number and https pages; anything else is left out', () {
+      expect(
+        SupportLinksModel.fromJson(const {
+          'supportWhatsapp': '+963 900 000 000',
+          'privacyUrl': 'https://example.com/privacy',
+          'termsUrl': 'http://example.com/terms',
+        }),
+        SupportLinks(
+          whatsapp: '+963 900 000 000',
+          privacy: Uri.parse('https://example.com/privacy'),
+        ),
+      );
+    });
+
+    test('one system config a session, the versions included', () async {
+      final source = _FlakyDataSource();
+      final repository = SettingsRepositoryImpl(
+        source,
+        SettingsStorageService(prefs),
+      );
+      await repository.getVersionPolicy();
+      await repository.getSupportLinks();
+      await repository.getSupportLinks();
+      expect(source.calls, 1);
     });
   });
 }

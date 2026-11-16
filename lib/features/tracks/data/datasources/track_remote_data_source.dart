@@ -3,15 +3,17 @@ import 'dart:convert';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
 import 'package:englizia/core/network/json_reader.dart';
-import 'package:englizia/features/tracks/data/models/track_level_model.dart';
 import 'package:englizia/features/tracks/data/models/track_model.dart';
 import 'package:englizia/features/tracks/data/models/track_unit_model.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class TrackRemoteDataSource {
-  Future<List<TrackModel>> getPublishedTracks();
+  /// The tracks each onboarding audience leads to, from `system/config`,
+  /// which needs no session: onboarding runs before the account exists.
+  Future<List<TrackModel>> getOnboardingTracks();
 
-  Future<List<TrackLevelModel>> getLevels(String trackId);
+  /// Every published track, for a learner with a session.
+  Future<List<TrackModel>> getCatalog();
 
   Future<List<TrackUnitModel>> getUnits(String levelId);
 }
@@ -22,32 +24,34 @@ final class TrackRemoteDataSourceImpl implements TrackRemoteDataSource {
   final ApiClient _client;
 
   @override
-  Future<List<TrackModel>> getPublishedTracks() async =>
-      parseTracks(await _client.get(ApiEndpoints.tracks));
+  Future<List<TrackModel>> getOnboardingTracks() async => parseOnboarding(
+    await _client.get(
+      ApiEndpoints.systemConfig,
+      options: ApiClient.publicOptions,
+    ),
+  );
 
   @override
-  Future<List<TrackLevelModel>> getLevels(String trackId) async =>
-      parseLevels(await _client.get(ApiEndpoints.trackLevels(trackId)));
+  Future<List<TrackModel>> getCatalog() async =>
+      parseCatalog(await _client.get(ApiEndpoints.tracks));
 
   @override
   Future<List<TrackUnitModel>> getUnits(String levelId) async =>
       parseUnits(await _client.get(ApiEndpoints.levelUnits(levelId)));
 }
 
-/// Mock mode (`env/mock.json`): the contract's example response, read from
-/// the bundled asset the tests also use. Deleted once the endpoint is
-/// confirmed (docs/STATUS.md).
+/// Mock mode (`env/mock.json`): example responses in the server's shape,
+/// read from the bundled assets the tests also use. Units are deleted once
+/// their endpoint exists (docs/STATUS.md).
 final class TrackFakeDataSource implements TrackRemoteDataSource {
   const TrackFakeDataSource(
     this._bundle, {
     this.latency = const Duration(milliseconds: 400),
   });
 
-  static const asset = 'assets/mock/tracks/published_tracks.json';
-
-  /// Levels per track: `levels_<trackId>.json` next to [asset].
-  static String levelsAsset(String trackId) =>
-      'assets/mock/tracks/levels_$trackId.json';
+  /// `system/config`, shared with the settings' mock.
+  static const configAsset = 'assets/mock/settings/system_config.json';
+  static const catalogAsset = 'assets/mock/tracks/catalog.json';
 
   /// Units of the levels that have their own example; any other level
   /// gets [defaultUnitsAsset].
@@ -62,45 +66,61 @@ final class TrackFakeDataSource implements TrackRemoteDataSource {
   /// Lets loading states show in demos as they would on a real network.
   final Duration latency;
 
-  @override
-  Future<List<TrackModel>> getPublishedTracks() async {
+  Future<Object?> _read(String asset) async {
     await Future<void>.delayed(latency);
-    final body = jsonDecode(await _bundle.loadString(asset));
-    return parseTracks(ApiClient.unwrap(body));
+    return ApiClient.unwrap(jsonDecode(await _bundle.loadString(asset)));
   }
 
   @override
-  Future<List<TrackLevelModel>> getLevels(String trackId) async {
-    await Future<void>.delayed(latency);
-    final body = jsonDecode(await _bundle.loadString(levelsAsset(trackId)));
-    return parseLevels(ApiClient.unwrap(body));
-  }
+  Future<List<TrackModel>> getOnboardingTracks() async =>
+      parseOnboarding(await _read(configAsset));
 
   @override
-  Future<List<TrackUnitModel>> getUnits(String levelId) async {
-    await Future<void>.delayed(latency);
-    final body = jsonDecode(await _bundle.loadString(unitsAsset(levelId)));
-    return parseUnits(ApiClient.unwrap(body));
-  }
+  Future<List<TrackModel>> getCatalog() async =>
+      parseCatalog(await _read(catalogAsset));
+
+  @override
+  Future<List<TrackUnitModel>> getUnits(String levelId) async =>
+      parseUnits(await _read(unitsAsset(levelId)));
 }
 
-List<TrackModel> parseTracks(Object? data) => switch (data) {
-  final List<Object?> items => [
-    for (final item in items) TrackModel.fromJson(asJsonMap(item)),
-  ],
-  _ => throw FormatException('Expected a list of tracks, got $data'),
-};
+/// `SystemConfigDto.onboarding`: the tracks by audience, in that order.
+/// An audience the app doesn't know leaves its tracks unsuggested.
+List<TrackModel> parseOnboarding(Object? data) {
+  final groups = asJsonMap(data).readList('onboarding');
+  if (groups == null) {
+    throw FormatException('Expected the onboarding tracks, got $data');
+  }
+  final tracks = <TrackModel>[];
+  for (final item in groups) {
+    final group = asJsonMap(item);
+    final audience = TrackModel.audienceOf(group.readString('audience'));
+    for (final track in group.readList('tracks') ?? const []) {
+      tracks.add(
+        TrackModel.fromJson(
+          asJsonMap(track),
+          order: tracks.length,
+          audience: audience,
+        ),
+      );
+    }
+  }
+  return tracks;
+}
+
+/// `ListDataOfTrackCatalogItemDto`: the tracks under `items`.
+List<TrackModel> parseCatalog(Object? data) =>
+    switch (asJsonMap(data).readList('items')) {
+      final items? => [
+        for (final (index, item) in items.indexed)
+          TrackModel.fromJson(asJsonMap(item), order: index),
+      ],
+      null => throw FormatException('Expected a list of tracks, got $data'),
+    };
 
 List<TrackUnitModel> parseUnits(Object? data) => switch (data) {
   final List<Object?> items => [
     for (final item in items) TrackUnitModel.fromJson(asJsonMap(item)),
   ],
   _ => throw FormatException('Expected a list of units, got $data'),
-};
-
-List<TrackLevelModel> parseLevels(Object? data) => switch (data) {
-  final List<Object?> items => [
-    for (final item in items) TrackLevelModel.fromJson(asJsonMap(item)),
-  ],
-  _ => throw FormatException('Expected a list of levels, got $data'),
 };

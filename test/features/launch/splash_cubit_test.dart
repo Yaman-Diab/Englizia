@@ -4,6 +4,7 @@ import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/links/app_store.dart';
 import 'package:englizia/core/links/external_link.dart';
+import 'package:englizia/core/network/update_required.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -157,6 +158,36 @@ void main() {
 
       expect(splash.state.mode, SplashMode.done);
     });
+
+    test(
+      'the server refusing this version stops the app, opened or not',
+      () async {
+        final refused = UpdateRequiredSignal();
+        SplashCubit withSignal(AppSessionController session) => SplashCubit(
+          session: session,
+          settings: settings,
+          connectivity: connectivity,
+          app: const AppInfo(version: _installed),
+          store: AppStore(links, packageName: 'x', platform: 'android'),
+          serverRefused: refused,
+        );
+
+        final opened = withSignal(await session(tokens: member));
+        await opened.start();
+        expect(opened.state.mode, SplashMode.done);
+
+        refused.raise();
+        expect(opened.state.mode, SplashMode.update);
+        expect(opened.state.launch, LaunchStatus.updateRequired);
+
+        // Raised before the opening decides: it decides the same.
+        final later = withSignal(await session(tokens: member));
+        await later.start();
+        expect(later.state.mode, SplashMode.update);
+        await opened.close();
+        await later.close();
+      },
+    );
 
     testWidgets('a server too slow: the kept versions decide', (tester) async {
       final late = Completer<Result<VersionPolicy>>();

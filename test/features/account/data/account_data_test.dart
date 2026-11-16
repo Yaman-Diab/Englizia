@@ -5,13 +5,17 @@ import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/network_exception.dart';
+import 'package:englizia/core/network/token_response.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/entities/account_email.dart';
+import 'package:englizia/features/account/domain/entities/new_account.dart';
 import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/onboarding/domain/entities/learning_reason.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
@@ -21,6 +25,7 @@ import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/api_fixtures.dart';
 import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fakes.dart';
 
@@ -36,10 +41,37 @@ class _DiskBundle extends CachingAssetBundle {
 }
 
 class _RecordingDataSource implements AccountRemoteDataSource {
-  _RecordingDataSource({this.fail = false});
+  _RecordingDataSource({
+    this.fail = false,
+    this.answersFail = 0,
+    this.answersConflict = false,
+  });
 
   final bool fail;
+  int answersFail;
+  final bool answersConflict;
   final requests = <Map<String, Object?>>[];
+  final onboardings = <(Map<String, Object?>, String)>[];
+
+  @override
+  Future<void> submitOnboarding(
+    Map<String, Object?> request, {
+    required String accessToken,
+  }) async {
+    if (answersFail-- > 0) throw const NetworkException('connectionError');
+    if (answersConflict) {
+      throw const ApiException(statusCode: ApiStatusCodes.conflict);
+    }
+    onboardings.add((request, accessToken));
+  }
+
+  @override
+  Future<void> upgradeGuestWithEmail(Map<String, Object?> request) async =>
+      requests.add(request);
+
+  @override
+  Future<void> upgradeGuestWithGoogle(String idToken) async =>
+      requests.add({'idToken': idToken});
 
   @override
   Future<AuthTokens> createGuestAccount(Map<String, Object?> request) async {
@@ -59,10 +91,6 @@ class _RecordingDataSource implements AccountRemoteDataSource {
     if (fail) throw const NetworkException('connectionError');
     return const AuthTokens(accessToken: 'a', refreshToken: 'r');
   }
-
-  @override
-  Future<AuthTokens> upgradeGuest(Map<String, Object?> request) =>
-      createAccount(request);
 
   @override
   Future<AuthTokens> signIn(Map<String, Object?> request) =>
@@ -117,54 +145,100 @@ void main() {
     reminder: ReminderTime(8, 5),
   );
 
-  test('the answers are sent as the contract says', () {
+  test('the answers go as OnboardingRequest', () {
     expect(
-      GuestAccountModel.request(
-        installationId: 'install-1',
-        answers: adult,
-        languageCode: 'ar',
-        utcOffsetMinutes: 180,
-      ),
+      OnboardingModel.request(adult, language: 'ar', timeZone: 'Etc/GMT-3'),
       {
-        'installationId': 'install-1',
-        'language': 'ar',
-        'utcOffsetMinutes': 180,
-        'onboarding': {
-          'audience': 'self',
-          'trackId': 'trk_general',
-          'child': null,
-          'gradeLevelId': null,
-          'reasons': ['travel', 'career'],
-          'dailyGoalMinutes': 15,
-          'challengeDays': 14,
-          'startLevelId': 'lvl_gen_prea1',
-          'placementTest': false,
-          'reminderTime': '08:05',
-        },
+        'uiLanguage': 'ar',
+        'timeZone': 'Etc/GMT-3',
+        'learnerKind': 'adult',
+        'trackId': 'trk_general',
+        'start': 'beginner',
+        'levelId': 'lvl_gen_prea1',
+        'child': null,
+        'learningReasons': ['travel', 'career'],
+        'dailyGoalMinutes': 15,
+        'streakGoalDays': 14,
+        'reminderTime': '08:05:00',
       },
     );
   });
 
   test('a parent sends the child; no reminder is null', () {
-    final onboarding = GuestAccountModel.onboarding(
+    final request = OnboardingModel.request(
       const OnboardingPath(
         audience: TrackAudience.child,
         trackId: 'trk_kids',
         childName: 'سارة',
         childAge: 7,
       ),
+      language: 'ar',
+      timeZone: 'UTC',
     );
-    expect(onboarding['audience'], 'child');
-    expect(onboarding['child'], {'name': 'سارة', 'age': 7});
-    expect(onboarding['reminderTime'], isNull);
+    expect(request['learnerKind'], 'child');
+    expect(request['child'], {'name': 'سارة', 'age': 7});
+    expect(request['reminderTime'], isNull);
   });
 
-  test('the example response is a guest session', () {
-    final now = DateTime.utc(2026, 10, 28);
-    final tokens = GuestAccountModel.tokens(exampleBody, now: now);
+  test('the test or the grade decide where the learner starts', () {
+    final test = OnboardingModel.request(
+      adult.copyWith(placementTest: true),
+      language: 'en',
+      timeZone: 'UTC',
+    );
+    expect((test['start'], test['levelId']), ('placement', null));
+
+    final grade = OnboardingModel.request(
+      const OnboardingPath(
+        audience: TrackAudience.schoolStudent,
+        grade: TrackLevel(
+          id: 'grade_7',
+          order: 7,
+          name: LocalizedText(ar: '7'),
+        ),
+      ),
+      language: 'ar',
+      timeZone: 'UTC',
+    );
+    expect(grade['learnerKind'], 'school_student');
+    expect((grade['start'], grade['levelId']), (null, 'grade_7'));
+  });
+
+  test('the phone\'s offset as an IANA zone', () {
+    expect(OnboardingModel.timeZoneOf(const Duration(hours: 3)), 'Etc/GMT-3');
+    expect(OnboardingModel.timeZoneOf(const Duration(hours: -5)), 'Etc/GMT+5');
+    expect(OnboardingModel.timeZoneOf(Duration.zero), 'UTC');
+    expect(
+      OnboardingModel.timeZoneOf(const Duration(hours: 5, minutes: 30)),
+      'UTC',
+    );
+  });
+
+  test('a guest is made bare: CreateGuestRequest', () {
+    expect(
+      GuestAccountModel.request(deviceId: 'device-1', platform: 'android'),
+      {'deviceId': 'device-1', 'platform': 'android', 'displayName': null},
+    );
+  });
+
+  test('the dev server\'s answer is a guest session', () {
+    final now = DateTime.utc(2026, 11, 16);
+    final tokens = GuestAccountModel.tokens(
+      apiFixture('auth_guest_created'),
+      now: now,
+    );
     expect(tokens.kind, AccountKind.guest);
-    expect(tokens.accessToken, 'mock-guest-access-token');
+    expect(tokens.accessToken, 'guest-access-token');
+    expect(tokens.deviceId, '00000000-0000-4000-8000-000000000000');
     expect(tokens.accessExpiresAt, now.add(const Duration(seconds: 900)));
+  });
+
+  test('any session says whose it is: the account type', () {
+    final tokens = TokenResponse.parse(
+      apiFixture('auth_guest_created'),
+      now: DateTime.utc(2026),
+    );
+    expect(tokens.kind, AccountKind.guest);
   });
 
   test('a response without tokens is rejected', () {
@@ -176,25 +250,45 @@ void main() {
     );
   });
 
-  test('POST /api/v1/auth/guest', () async {
+  test('POST /api/v1/auth/guest, without a session', () async {
     final adapter = FakeHttpAdapter(
-      (_) => FakeResponse(200, body: exampleBody),
+      (_) => FakeResponse(201, body: apiFixture('auth_guest_created')),
     );
     final client = ApiClient(
       Dio(BaseOptions(baseUrl: 'https://api.test'))
         ..httpClientAdapter = adapter,
     );
 
-    final tokens = await AccountRemoteDataSourceImpl(
-      client,
-    ).createGuestAccount(const {'installationId': 'install-1'});
+    final tokens = await AccountRemoteDataSourceImpl(client).createGuestAccount(
+      GuestAccountModel.request(deviceId: null, platform: 'android'),
+    );
 
     final request = adapter.requests.single;
     expect(request.method, 'POST');
     expect(request.path, '/api/v1/auth/guest');
-    expect(request.data, {'installationId': 'install-1'});
+    expect(request.headers.containsKey('Authorization'), isFalse);
     expect(tokens.kind, AccountKind.guest);
   });
+
+  test(
+    'POST /api/v1/app/me/onboarding with the new account\'s token',
+    () async {
+      final adapter = FakeHttpAdapter((_) => const FakeResponse(200));
+      final client = ApiClient(
+        Dio(BaseOptions(baseUrl: 'https://api.test'))
+          ..httpClientAdapter = adapter,
+      );
+
+      await AccountRemoteDataSourceImpl(
+        client,
+      ).submitOnboarding(const {'uiLanguage': 'ar'}, accessToken: 'new-token');
+
+      final request = adapter.requests.single;
+      expect(request.path, '/api/v1/app/me/onboarding');
+      expect(request.headers['Authorization'], 'Bearer new-token');
+      expect(request.data, {'uiLanguage': 'ar'});
+    },
+  );
 
   test('mock mode serves the bundled example', () async {
     final tokens = await AccountFakeDataSource(
@@ -205,60 +299,95 @@ void main() {
   });
 
   group('AccountRepositoryImpl', () {
+    AccountRepositoryImpl repository(_RecordingDataSource source) =>
+        AccountRepositoryImpl(
+          source,
+          tokens: FakeTokenStorage(),
+          savedDeviceId: () => null,
+          saveDeviceId: (_) async {},
+          devicePlatform: 'android',
+          language: () => 'en',
+          timeZone: () => 'Etc/GMT-3',
+        );
+
     test('keeps the device id a new guest gets', () async {
       String? saved;
       await AccountRepositoryImpl(
         _RecordingDataSource(),
         tokens: FakeTokenStorage(),
-        installationId: () async => 'install-1',
         savedDeviceId: () => saved,
         saveDeviceId: (id) async => saved = id,
         devicePlatform: 'android',
-      ).createGuestAccount(
-        answers: adult,
-        languageCode: 'en',
-        utcOffsetMinutes: -300,
-      );
+      ).createGuestAccount(answers: adult);
       expect(saved, 'device-1');
     });
 
-    test('ties the guest to this install', () async {
+    test('a guest, then its answers with its own token', () async {
       final source = _RecordingDataSource();
-      final result =
-          await AccountRepositoryImpl(
-            source,
-            tokens: FakeTokenStorage(),
-            installationId: () async => 'install-1',
-            savedDeviceId: () => null,
-            saveDeviceId: (_) async {},
-            devicePlatform: 'android',
-          ).createGuestAccount(
-            answers: adult,
-            languageCode: 'en',
-            utcOffsetMinutes: -300,
-          );
+      final result = await repository(
+        source,
+      ).createGuestAccount(answers: adult);
 
       expect(result, isA<Ok<AuthTokens>>());
-      final sent = source.requests.single;
-      expect(sent['installationId'], 'install-1');
-      expect(sent['language'], 'en');
-      expect(sent['utcOffsetMinutes'], -300);
+      expect(source.requests.first, {
+        'deviceId': null,
+        'platform': 'android',
+        'displayName': null,
+      });
+      final (answers, token) = source.onboardings.single;
+      expect(answers['uiLanguage'], 'en');
+      expect(answers['timeZone'], 'Etc/GMT-3');
+      expect(answers['trackId'], 'trk_general');
+      expect(token, 'a');
+    });
+
+    test('answers that failed are sent again, with no second guest', () async {
+      final source = _RecordingDataSource(answersFail: 1);
+      final repo = repository(source);
+
+      final first = await repo.createGuestAccount(answers: adult);
+      expect((first as Err).failure, isA<NetworkFailure>());
+      final second = await repo.createGuestAccount(answers: adult);
+
+      expect(second, isA<Ok<AuthTokens>>());
+      expect(source.requests, hasLength(1));
+      expect(source.onboardings, hasLength(1));
+    });
+
+    test('answered already is answered', () async {
+      final source = _RecordingDataSource(answersConflict: true);
+      final result = await repository(
+        source,
+      ).createGuestAccount(answers: adult);
+      expect(result, isA<Ok<AuthTokens>>());
+    });
+
+    test('an email account takes the answers too, when it has them', () async {
+      final source = _RecordingDataSource();
+      await repository(source).createAccount(
+        const NewAccount(
+          name: 'Learner',
+          email: 'user@example.com',
+          password: 'password1',
+        ),
+        answers: adult,
+      );
+      expect(source.onboardings, hasLength(1));
+
+      await repository(source).createAccount(
+        const NewAccount(
+          name: 'Learner',
+          email: 'user@example.com',
+          password: 'password1',
+        ),
+      );
+      expect(source.onboardings, hasLength(1));
     });
 
     test('maps errors through the error funnel', () async {
-      final result =
-          await AccountRepositoryImpl(
-            _RecordingDataSource(fail: true),
-            tokens: FakeTokenStorage(),
-            installationId: () async => 'install-1',
-            savedDeviceId: () => null,
-            saveDeviceId: (_) async {},
-            devicePlatform: 'android',
-          ).createGuestAccount(
-            answers: adult,
-            languageCode: 'ar',
-            utcOffsetMinutes: 0,
-          );
+      final result = await repository(
+        _RecordingDataSource(fail: true),
+      ).createGuestAccount(answers: adult);
       expect((result as Err).failure, isA<NetworkFailure>());
     });
   });

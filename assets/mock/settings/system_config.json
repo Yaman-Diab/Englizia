@@ -1,0 +1,203 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "platform": "android",
+    "minSupportedVersion": "0.1.0",
+    "latestVersion": "0.1.1",
+    "storeUrl": "https://play.google.com/store/apps/details?id=com.engleazia.app",
+    "supportWhatsapp": null,
+    "privacyUrl": null,
+    "termsUrl": null,
+    "dailyGoalOptions": [
+      {
+        "minutes": 5,
+        "xp": 20
+      },
+      {
+        "minutes": 10,
+        "xp": 40
+      },
+      {
+        "minutes": 15,
+        "xp": 60
+      },
+      {
+        "minutes": 20,
+        "xp": 80
+      }
+    ],
+    "aiEnabled": {
+      "explain": false,
+      "grading": false,
+      "examples": false,
+      "conversation": false
+    },
+    "onboarding": [
+      {
+        "audience": "adult",
+        "tracks": [
+          {
+            "id": "trk_general",
+            "nameAr": "الإنجليزية العامة",
+            "nameEn": "General English",
+            "entryMode": "placement",
+            "kidsMode": false,
+            "levelLabel": "level",
+            "coverUrl": "https://cdn.example.com/tracks/general/cover.webp",
+            "levels": [
+              {
+                "id": "lvl_gen_prea1",
+                "nameAr": "Pre-A1 · البداية",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              },
+              {
+                "id": "lvl_gen_a1",
+                "nameAr": "A1 · مبتدئ",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              },
+              {
+                "id": "lvl_gen_a2",
+                "nameAr": "A2 · ما قبل المتوسط",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              },
+              {
+                "id": "lvl_gen_b1",
+                "nameAr": "B1 · متوسط",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              },
+              {
+                "id": "lvl_gen_b2",
+                "nameAr": "B2 · فوق المتوسط",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "audience": "child",
+        "tracks": [
+          {
+            "id": "trk_kids",
+            "nameAr": "الأطفال",
+            "nameEn": "Kids",
+            "entryMode": "direct",
+            "kidsMode": true,
+            "levelLabel": "level",
+            "coverUrl": "https://cdn.example.com/tracks/kids/cover.webp",
+            "levels": [
+              {
+                "id": "lvl_kids_s1",
+                "nameAr": "Starter 1",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              },
+              {
+                "id": "lvl_kids_s2",
+                "nameAr": "Starter 2",
+                "gradeNumber": null,
+                "stageLabelAr": null
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "audience": "school_student",
+        "tracks": [
+          {
+            "id": "trk_emar",
+            "nameAr": "منهاج إيمار",
+            "nameEn": "Emar curriculum",
+            "entryMode": "grade_choice",
+            "kidsMode": false,
+            "levelLabel": "grade",
+            "coverUrl": "https://cdn.example.com/tracks/emar/cover.webp",
+            "levels": [
+              {
+                "id": "lvl_emar_01",
+                "nameAr": "الأول",
+                "gradeNumber": 1,
+                "stageLabelAr": "الحلقة الأولى"
+              },
+              {
+                "id": "lvl_emar_02",
+                "nameAr": "الثاني",
+                "gradeNumber": 2,
+                "stageLabelAr": "الحلقة الأولى"
+              },
+              {
+                "id": "lvl_emar_03",
+                "nameAr": "الثالث",
+                "gradeNumber": 3,
+                "stageLabelAr": "الحلقة الأولى"
+              },
+              {
+                "id": "lvl_emar_04",
+                "nameAr": "الرابع",
+                "gradeNumber": 4,
+                "stageLabelAr": "الحلقة الأولى"
+              },
+              {
+                "id": "lvl_emar_05",
+                "nameAr": "الخامس",
+                "gradeNumber": 5,
+                "stageLabelAr": "الحلقة الأولى"
+              },
+              {
+                "id": "lvl_emar_06",
+                "nameAr": "السادس",
+                "gradeNumber": 6,
+                "stageLabelAr": "الحلقة الأولى"
+              },
+              {
+                "id": "lvl_emar_07",
+                "nameAr": "السابع",
+                "gradeNumber": 7,
+                "stageLabelAr": "الحلقة الثانية"
+              },
+              {
+                "id": "lvl_emar_08",
+                "nameAr": "الثامن",
+                "gradeNumber": 8,
+                "stageLabelAr": "الحلقة الثانية"
+              },
+              {
+                "id": "lvl_emar_09",
+                "nameAr": "التاسع",
+                "gradeNumber": 9,
+                "stageLabelAr": "الحلقة الثانية"
+              },
+              {
+                "id": "lvl_emar_10",
+                "nameAr": "العاشر",
+                "gradeNumber": 10,
+                "stageLabelAr": "الثانوية"
+              },
+              {
+                "id": "lvl_emar_11",
+                "nameAr": "الحادي عشر",
+                "gradeNumber": 11,
+                "stageLabelAr": "الثانوية"
+              },
+              {
+                "id": "lvl_emar_12",
+                "nameAr": "البكالوريا",
+                "gradeNumber": 12,
+                "stageLabelAr": "الثانوية"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

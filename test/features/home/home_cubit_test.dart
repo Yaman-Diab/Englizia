@@ -659,7 +659,7 @@ void main() {
 
       expect(await subject.switchTrack(emar), isNull);
 
-      expect(profiles.switches, [emar.enrollmentId]);
+      expect(profiles.switches, [emar.trackId]);
       expect(subject.state.home?.enrollment.id, 'enr_emar');
       expect(subject.state.switches, 1);
       expect(subject.state.switchedTo, emar.title);
@@ -708,7 +708,7 @@ void main() {
       final subject = cubit();
       await subject.start();
       expect(await subject.startNextLevel(), isNull);
-      expect(profiles.levels, [('enr_general', 'lvl_gen_b1')]);
+      expect(profiles.levels, [('trk_general', 'lvl_gen_b1')]);
       expect(homes.fetches, 2);
     });
 
@@ -721,7 +721,7 @@ void main() {
 
       expect(await subject.switchTrack(emar), const NetworkFailure());
 
-      expect(profiles.switches, [emar.enrollmentId]);
+      expect(profiles.switches, [emar.trackId]);
       expect(subject.state.switching, isFalse);
       expect(subject.state.switches, 0);
       expect(subject.state.home?.enrollment.id, 'enr_general');

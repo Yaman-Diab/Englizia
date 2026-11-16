@@ -3,7 +3,11 @@ import 'package:equatable/equatable.dart';
 
 /// A session from Google or Apple, which sign in and sign up in one step.
 final class SocialSession extends Equatable {
-  const SocialSession({required this.tokens, required this.isNewAccount});
+  const SocialSession({
+    required this.tokens,
+    required this.isNewAccount,
+    this.keptGuest = false,
+  });
 
   final AuthTokens tokens;
 
@@ -11,6 +15,10 @@ final class SocialSession extends Equatable {
   /// answers belong with it.
   final bool isNewAccount;
 
+  /// This phone's guest account took the sign-in and became a member's: the
+  /// same account, its progress and what the phone keeps for it stay.
+  final bool keptGuest;
+
   @override
-  List<Object?> get props => [tokens, isNewAccount];
+  List<Object?> get props => [tokens, isNewAccount, keptGuest];
 }

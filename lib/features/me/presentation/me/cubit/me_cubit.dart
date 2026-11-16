@@ -205,7 +205,7 @@ class MeCubit extends Cubit<MeState> {
         ),
       ),
     );
-    final result = await _profiles.switchTrack(track.enrollmentId);
+    final result = await _profiles.switchTrack(track.trackId);
     if (isClosed) return null;
     return _afterChange(result, before: profile, told: () => track.title);
   }
@@ -216,7 +216,7 @@ class MeCubit extends Cubit<MeState> {
     if (profile == null || active == null || state.switching) return null;
     if (level.id == active.levelId) return null;
     emit(state.copyWith(switching: true));
-    final result = await _profiles.changeLevel(active.enrollmentId, level.id);
+    final result = await _profiles.changeLevel(active.trackId, level.id);
     if (isClosed) return null;
     return _afterChange(
       result,

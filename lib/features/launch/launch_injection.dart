@@ -12,6 +12,7 @@ void registerLaunchDependencies(GetIt sl) {
         connectivity: sl(),
         app: sl(),
         store: sl(),
+        serverRefused: sl(),
       ),
     );
 }

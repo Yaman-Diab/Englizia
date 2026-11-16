@@ -2,6 +2,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/account/domain/repositories/account_repository.dart';
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_state.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 export 'sign_up_state.dart';
@@ -10,7 +11,7 @@ export 'sign_up_state.dart';
 /// each field when it is left or sent and creates the account. Its session
 /// is handed on (`SignUpState.session`), not started here.
 class SignUpCubit extends Cubit<SignUpState> {
-  SignUpCubit(this._accounts, {this.upgradesGuest = false})
+  SignUpCubit(this._accounts, {this.upgradesGuest = false, this.answers})
     : super(const SignUpState());
 
   final AccountRepository _accounts;
@@ -18,6 +19,9 @@ class SignUpCubit extends Cubit<SignUpState> {
   /// A guest is signing up: the guest account itself becomes the member
   /// account, so its progress stays (ADR 10).
   final bool upgradesGuest;
+
+  /// A new learner's onboarding answers, for the new account.
+  final OnboardingPath? answers;
 
   /// Server field names (`RegisterRequest`) to the form's.
   static const _serverFields = {
@@ -60,7 +64,7 @@ class SignUpCubit extends Cubit<SignUpState> {
     emit(checkedAll.copyWith(sending: true, emailTaken: false));
     final result = upgradesGuest
         ? await _accounts.upgradeGuest(state.account)
-        : await _accounts.createAccount(state.account);
+        : await _accounts.createAccount(state.account, answers: answers);
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):

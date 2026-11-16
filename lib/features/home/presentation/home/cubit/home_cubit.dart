@@ -289,7 +289,7 @@ class HomeCubit extends Cubit<HomeState> {
   /// play again for it.
   Future<Failure?> switchTrack(ProfileTrack track) async {
     emit(state.copyWith(switching: true));
-    final switched = await _profiles.switchTrack(track.enrollmentId);
+    final switched = await _profiles.switchTrack(track.trackId);
     if (isClosed) return null;
     if (switched case Err(:final failure)) {
       emit(state.copyWith(switching: false));
@@ -322,7 +322,10 @@ class HomeCubit extends Cubit<HomeState> {
     final home = state.home;
     final next = home?.level.next;
     if (home == null || next == null) return null;
-    final result = await _profiles.changeLevel(home.enrollment.id, next.id);
+    final result = await _profiles.changeLevel(
+      home.enrollment.trackId,
+      next.id,
+    );
     if (isClosed) return null;
     if (result case Err(:final failure)) return failure;
     _keepProfile();

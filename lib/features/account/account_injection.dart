@@ -1,4 +1,5 @@
 import 'package:englizia/core/config/app_config.dart';
+import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/device_platform.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
@@ -15,6 +16,7 @@ import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cub
 import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/email_link_cubit.dart';
 import 'package:englizia/features/account/presentation/verify_email/cubit/verify_email_cubit.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -40,8 +42,9 @@ void registerAccountDependencies(GetIt sl) {
                   : null,
             ),
     )
-    ..registerFactoryParam<SignUpCubit, bool, void>(
-      (upgradesGuest, _) => SignUpCubit(sl(), upgradesGuest: upgradesGuest),
+    ..registerFactoryParam<SignUpCubit, bool, OnboardingPath?>(
+      (upgradesGuest, answers) =>
+          SignUpCubit(sl(), upgradesGuest: upgradesGuest, answers: answers),
     )
     ..registerFactory(() => AccountCubit(sl(), sl()))
     ..registerFactoryParam<ForgotPasswordCubit, String, void>(
@@ -72,7 +75,8 @@ void registerAccountDependencies(GetIt sl) {
       () => AccountRepositoryImpl(
         sl(),
         tokens: sl(),
-        installationId: sl<SettingsStorageService>().installationId,
+        // The app's language for a new account's onboarding answers.
+        language: () => sl<CurrentLanguage>().code,
         savedDeviceId: () => sl<SettingsStorageService>().deviceId,
         saveDeviceId: sl<SettingsStorageService>().setDeviceId,
         devicePlatform: devicePlatform(),
