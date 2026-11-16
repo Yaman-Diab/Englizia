@@ -44,7 +44,6 @@ void main() {
           ),
         ),
         tokens: FakeTokenStorage(),
-        installationId: () async => 'i',
         savedDeviceId: () => null,
         saveDeviceId: (_) async {},
         devicePlatform: null,

@@ -386,7 +386,10 @@ GoRouter createAppRouter(
           // goes straight back: the progress is already there.
           final upgrading = session.status == SessionStatus.guest;
           return BlocProvider(
-            create: (_) => sl<SignUpCubit>(param1: upgrading),
+            create: (_) => sl<SignUpCubit>(
+              param1: upgrading,
+              param2: upgrading ? null : path,
+            ),
             child: SignUpPage(
               onCreated: (account, name) async {
                 if (!upgrading) {
@@ -533,10 +536,13 @@ GoRouter createAppRouter(
             child: SignInPage(
               lastProvider: SocialProvider.values
                   .asNameMap()[settings.lastSignInMethod],
-              onSignedIn: (account, provider) async {
+              onSignedIn: (account, provider, keptGuest) async {
                 // The badge marks Google or Apple; an email sign-in clears it.
                 await settings.setLastSignInMethod(provider?.name ?? _byEmail);
-                await session.signIn(account);
+                // A guest's own account upgraded keeps what the phone holds.
+                await (keptGuest
+                    ? session.upgrade(account)
+                    : session.signIn(account));
                 // Pushed over home for a guest, which the guard leaves.
                 if (context.mounted) context.go(AppRoutes.home);
               },

@@ -57,14 +57,9 @@ class SaveProgressPage extends StatelessWidget {
 
   Future<void> _later(BuildContext context) async {
     final cubit = context.read<SaveProgressCubit>();
-    final languageCode = context.locale.languageCode;
     final asGuest = await showGuestSheet(context);
     if (asGuest != true) return;
-    await cubit.continueAsGuest(
-      answers: path,
-      languageCode: languageCode,
-      utcOffsetMinutes: DateTime.now().timeZoneOffset.inMinutes,
-    );
+    await cubit.continueAsGuest(answers: path);
   }
 
   @override
@@ -141,7 +136,9 @@ class SaveProgressPage extends StatelessWidget {
                 mark: const BrandMarkView(BrandMark.google),
                 isLoading: google,
                 onPressed: enabled
-                    ? context.read<SaveProgressCubit>().continueWithGoogle
+                    ? () => context
+                          .read<SaveProgressCubit>()
+                          .continueWithGoogle(answers: path)
                     : null,
               ),
               const SizedBox(height: AppSpacing.md),

@@ -69,7 +69,6 @@ void main() {
           ),
         ),
         tokens: FakeTokenStorage(),
-        installationId: () async => 'i',
         savedDeviceId: () => savedDevice,
         saveDeviceId: (id) async => savedDevice = id,
         devicePlatform: 'android',

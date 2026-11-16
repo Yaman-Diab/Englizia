@@ -5,12 +5,13 @@ import 'package:englizia/core/session/auth_tokens.dart';
 /// The server's `TokenResponse` (register, login, refresh;
 /// docs/api/openapi.json) as [AuthTokens]. [body] may still be wrapped in
 /// the envelope. `expiresIn` (seconds) is counted from [now], the moment
-/// the response arrived.
+/// the response arrived. The account's kind is [kind] when given, else its
+/// `user.accountType` (`guest`, `standard`).
 abstract final class TokenResponse {
   static AuthTokens parse(
     Object? body, {
     required DateTime now,
-    AccountKind kind = AccountKind.member,
+    AccountKind? kind,
     AuthTokens? current,
   }) {
     final json = asJsonMap(ApiClient.unwrap(body));
@@ -46,7 +47,11 @@ abstract final class TokenResponse {
     return AuthTokens(
       accessToken: access,
       refreshToken: refresh,
-      kind: kind,
+      kind:
+          kind ??
+          (json.readMap('user')?.readString('accountType') == 'guest'
+              ? AccountKind.guest
+              : AccountKind.member),
       accessExpiresAt: accessExpiresAt,
       refreshExpiresAt: refreshExpiresAt,
       deviceId: json.readString('deviceId'),

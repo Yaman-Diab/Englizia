@@ -1,103 +1,40 @@
 # Accounts and sessions
 
-Status: mixed. **Live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, password recovery, the password change and the email's confirmation; the app uses all but Apple. **Proposed**, mock only (`assets/mock/account/`): the guest account and its upgrade. The real answers the app was checked against are in `test/fixtures/api/auth_*.json`.
-Decision: guest mode is back by the owner's decision (2026-10-27, ADR 10), as a **server-side guest account**. This reverses student doc §4.3 ("no guest mode") and server doc §26's table row ("no guest accounts"); both documents need updating, and the backend needs a guest account type.
+Status: **live** on the dev server (docs/api/openapi.json): register, login, refresh, logout, Google and Apple sign-in, the guest account and its upgrades, onboarding's answers, password recovery, the password change and the email's confirmation; the app uses all but Apple's. The real answers the app was checked against are in `test/fixtures/api/auth_*.json` and `app_*.json`.
+Decision: guest mode is back by the owner's decision (2026-10-27, ADR 10), as a **server-side guest account** (`accountType: "guest"`). This reverses student doc §4.3 ("no guest mode") and server doc §26's table row ("no guest accounts"); both documents need updating.
+
+Every session's `user.accountType` (`standard`, `guest`) says whose it is; the app keeps it with the tokens.
 
 ## `POST /api/v1/auth/guest`
 
-Creates the anonymous guest account of this phone when the learner chooses «متابعة كضيف» on "save progress". Sent without a token. The guest can learn like any learner (grading, points and streaks stay on the server), but has no credentials: the account is reachable from this install only, until the learner creates a full account, which must **upgrade the same account** so nothing is lost.
+Creates the anonymous guest account of this phone when the learner chooses «متابعة كضيف» on "save progress". Sent without a token. `CreateGuestRequest { deviceId, platform, displayName }`: the app sends the id the server gave this phone (null the first time), its `DevicePlatform`, and no name (the server names it «متعلّم»). Answer `201` with a `TokenResponse` whose user is `accountType: "guest"` (`test/fixtures/api/auth_guest_created.json`). The onboarding answers follow at once (below). The guest can learn like any learner, but has no credentials until it is upgraded.
 
-### Request
+## `POST /api/v1/app/me/onboarding`
 
-```json
-{
-  "installationId": "3f0b8f5e-6a1c-4c2e-9d0b-6f1e2a7c9b11",
-  "language": "ar",
-  "utcOffsetMinutes": 180,
-  "onboarding": {
-    "audience": "self",
-    "trackId": "trk_general",
-    "child": null,
-    "gradeLevelId": null,
-    "reasons": ["travel", "career"],
-    "dailyGoalMinutes": 15,
-    "challengeDays": 14,
-    "startLevelId": "lvl_gen_prea1",
-    "placementTest": false,
-    "reminderTime": "08:05"
-  }
-}
-```
+Onboarding's answers for a new account, sent right after it is made, whichever way: a guest, an email account from "save progress", or a Google account the sign-in made (`isNewUser: true`) from "save progress". Sent with the **new account's own token**, as its session hasn't started on the phone yet. `OnboardingRequest`:
 
-| Field | Type | Meaning |
-|---|---|---|
-| `installationId` | UUID v4 string | Random id made on the phone at first use and kept. **Idempotency key**: a retried request with the same id returns the same guest, never a second one |
-| `language` | `ar` \| `en` | The interface language chosen in onboarding |
-| `utcOffsetMinutes` | int | The phone's offset from UTC now; see question 3 |
-| `onboarding.audience` | `self` \| `child` \| `schoolStudent` | "Who will learn" |
-| `onboarding.trackId` | string | The track the audience leads to |
-| `onboarding.child` | `{name, age}` or null | The child path's profile; the name is shown to the child only (S §4.5) |
-| `onboarding.gradeLevelId` | string or null | The school student's grade (a level of the curriculum track) |
-| `onboarding.reasons` | string[] | `communication`, `fun`, `education`, `travel`, `career`, `exams` |
-| `onboarding.dailyGoalMinutes` / `challengeDays` | int or null | The goal and streak challenge chosen |
-| `onboarding.startLevelId` | string or null | The first level, when the learner starts there (now, or with the test left for later) |
-| `onboarding.placementTest` | bool | The learner went on to the placement test |
-| `onboarding.reminderTime` | `"HH:mm"` or null | The daily reminder, phone time; null for none |
+| Field | From the app |
+|---|---|
+| `uiLanguage` | The app's language, `ar` or `en` |
+| `timeZone` | The phone's offset as an IANA `Etc/GMT` zone (`Etc/GMT-3` for UTC+3; `UTC` when the offset has minutes; STATUS D-043) |
+| `learnerKind` | `adult`, `child` or `school_student`, from "who will learn" |
+| `trackId` | The track the audience leads to |
+| `start`, `levelId` | `placement` and no level for the placement test; no start and the grade's level for a school student; else `beginner` and the starting level |
+| `child` | `{name, age}` on the child path, else null |
+| `learningReasons` | The reasons chosen, as the server names them |
+| `dailyGoalMinutes`, `streakGoalDays` | The goal and the streak challenge |
+| `reminderTime` | `"HH:mm:ss"`, phone time, or null for none |
 
-### Response `200`
+Answers `200 OnboardingResultDto { user, enrollment }`; the app doesn't read it yet. If the answers fail, a retry of the same way sends only them and makes no second account; a `409` is taken as answered already. Not seen on the dev server yet: it has no tracks to answer with.
 
-The server's `TokenResponse`, exactly as login and register return it (`docs/api/openapi.json`), so the guest's session is handled by the same code:
+## Upgrading a guest
 
-```json
-{
-  "statusCode": 201,
-  "message": "Created",
-  "data": {
-    "accessToken": "…",
-    "expiresIn": 900,
-    "tokenType": "Bearer",
-    "refreshToken": "…",
-    "refreshTokenExpiresAt": "2026-12-31T00:00:00Z",
-    "deviceId": "00000000-0000-4000-8000-000000000000",
-    "user": {
-      "id": "00000000-0000-0000-0000-000000000000",
-      "userName": "guest-00000000000",
-      "email": null,
-      "displayName": "",
-      "emailVerified": false,
-      "roles": ["guest"],
-      "timeZone": "Asia/Damascus",
-      "uiLanguage": "ar"
-    }
-  },
-  "error": null,
-  "traceId": "0HN7…"
-}
-```
+The guest account becomes a member's **in place**: same account, progress, points and streak. Both are sent with the guest's own session, which carries on as the member's (the answer is the account, `UserDto`, not new tokens).
 
-The tokens work like a member's (same refresh endpoint, same headers); the app stores them as a guest's. `roles` should hold `guest` so the server can refuse member-only actions.
-
-### Errors
-
-The common errors (`docs/api/README.md`). Creating a guest needs a connection; the app says so and offers to retry.
-
-## `POST /api/v1/auth/guest/upgrade`
-
-Turns the guest account of this phone into a member account **in place**: same account id, same progress, points and streak. Sent with the guest's own access token (the normal `Authorization` header), from "create an account" on «أنا»'s guest card (or the dev page's account card). The body is register's `RegisterRequest`:
-
-```json
-{
-  "email": "user@example.com",
-  "password": "…",
-  "displayName": "Learner",
-  "deviceId": null,
-  "platform": "android"
-}
-```
-
-The response is register's: `TokenResponse` (201) for the member account, whose tokens replace the guest's. Errors as register: `409` when the email already has an account (the app shows "this email already has an account" with "sign in instead"), `400 validation.failed` with field `details`, and `401` when the token is not a guest's.
-
-Status: **proposed**, mock (the mock answers like register). The app never upgrades by calling register: a new account would leave the guest's progress behind.
+- `POST /api/v1/auth/guest/upgrade/email` `{ email, password, displayName }`, from "create an account" on «أنا»'s guest card. `409 auth.email_taken` says the email has an account (the app says so and offers sign-in).
+- `POST /api/v1/auth/guest/upgrade/google` `{ idToken }`, when a guest signs in with Google. `409 auth.external_login_conflict` means that Google account has an account already: the app then signs in to it with the same token (`POST /api/v1/auth/google`), leaving the guest behind.
+- `409 auth.not_guest` (a login is there already) is taken as upgraded: a retry after a lost answer.
+- `POST /api/v1/auth/guest/upgrade/apple` exists too; Apple's sign-in isn't built.
 
 ## `POST /api/v1/auth/password/forgot`
 
@@ -161,10 +98,10 @@ Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. T
 
 ## Questions for the backend team
 
-1. Agree the guest account type: what it may do (everything a learner does?) and how long an unused guest is kept.
-2. Agree the upgrade above: the path, that it keeps the same account and progress, the same for Google and Apple sign-up, and what happens when the email already has an account (the app now says so and offers sign-in, which would leave the guest behind; merge instead?).
-3. Time zone: the app sends the offset now. For reminders at the learner's time across daylight-saving changes, an IANA name (`Asia/Damascus`) is better; the app can send it once a package is chosen (STATUS D-043).
-4. Should onboarding answers go with every account creation (email, Google) in this same `onboarding` shape? Google's request has no place for them today, so a Google account starts with no plan on the server.
+1. How long an unused guest is kept.
+2. A guest who signs in to an email account that exists leaves the guest behind (the app says the email has an account and offers sign-in): merge instead?
+3. Time zone: the app sends an `Etc/GMT` zone from the phone's offset. A city (`Asia/Damascus`) follows daylight-saving changes; the app can send one once a package is chosen (STATUS D-043). Confirm `Etc/GMT-3` is accepted.
+4. Onboarding's answers: confirm `start: "beginner"` with a level is right for a learner who chose where to start, and what `409` on `me/onboarding` means.
 5. Google: the server must check the `idToken`'s audience against the app's "Web application" client, `959713011641-tsd0sntqf723o1rsmrmkcce05p88di17.apps.googleusercontent.com` (Cloud project `engleazia`). Please confirm it is set on the dev server.
-6. Google for a guest: the request carries no guest token, so signing in with Google can't upgrade the guest account (item 2).
+6. Google for a guest: answered by `POST /api/v1/auth/guest/upgrade/google`.
 7. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.

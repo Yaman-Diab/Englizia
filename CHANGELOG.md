@@ -73,6 +73,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
+- Your onboarding answers reach the server with your new account, whether a guest's, by email or by Google, and a guest who signs in with Google keeps their progress in the same account.
 - "I know some English" no longer starts the placement test at once: onboarding goes on, and the test starts after your account is ready. Offline it can't be chosen, and the screen says why.
 - Every button and screen waits the same way: one spinner, and a busy button keeps its size and color instead of fading.
 - If the phone can't save your sign-in after creating an account, "preparing" says so and tries again, instead of signing you out the next time you open the app.

@@ -94,7 +94,6 @@ void main() {
           ),
         ),
         tokens: FakeTokenStorage(),
-        installationId: () async => 'install-1',
         savedDeviceId: () => saved,
         saveDeviceId: (id) async => saved = id,
         devicePlatform: 'android',
@@ -153,7 +152,6 @@ void main() {
       final result = await AccountRepositoryImpl(
         AccountRemoteDataSourceImpl(client),
         tokens: FakeTokenStorage(),
-        installationId: () async => 'install-1',
         savedDeviceId: () => null,
         saveDeviceId: (_) async {},
         devicePlatform: null,
@@ -178,7 +176,6 @@ void main() {
           await AccountRepositoryImpl(
             source(),
             tokens: FakeTokenStorage(),
-            installationId: () async => 'install-1',
             savedDeviceId: () => null,
             saveDeviceId: (_) async {},
             devicePlatform: 'android',

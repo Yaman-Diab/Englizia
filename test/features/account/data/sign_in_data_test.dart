@@ -57,7 +57,6 @@ void main() {
     return AccountRepositoryImpl(
       AccountRemoteDataSourceImpl(ApiClient(dio)),
       tokens: FakeTokenStorage(),
-      installationId: () async => 'install-1',
       savedDeviceId: () => savedDevice,
       saveDeviceId: saveDevice ?? (id) async => savedDevice = id,
       devicePlatform: 'android',
@@ -164,7 +163,6 @@ void main() {
       final repo = AccountRepositoryImpl(
         source(),
         tokens: FakeTokenStorage(),
-        installationId: () async => 'i',
         savedDeviceId: () => null,
         saveDeviceId: (_) async {},
         devicePlatform: null,

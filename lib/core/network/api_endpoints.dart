@@ -10,10 +10,14 @@ abstract final class ApiEndpoints {
   static const logout = '/api/v1/auth/logout';
   // Confirmed in docs/api/openapi.json.
   static const googleSignIn = '/api/v1/auth/google';
-  // ASSUMPTION(api): docs/api/auth.md.
+  // Confirmed in docs/api/openapi.json.
   static const guestAccount = '/api/v1/auth/guest';
-  // ASSUMPTION(api): docs/api/auth.md.
-  static const upgradeGuest = '/api/v1/auth/guest/upgrade';
+  // Confirmed in docs/api/openapi.json.
+  static const upgradeGuestWithEmail = '/api/v1/auth/guest/upgrade/email';
+  // Confirmed in docs/api/openapi.json.
+  static const upgradeGuestWithGoogle = '/api/v1/auth/guest/upgrade/google';
+  // Confirmed in docs/api/openapi.json.
+  static const onboarding = '/api/v1/app/me/onboarding';
   // Confirmed in docs/api/openapi.json.
   static const forgotPassword = '/api/v1/auth/password/forgot';
   // Confirmed in docs/api/openapi.json.

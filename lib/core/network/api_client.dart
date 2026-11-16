@@ -20,6 +20,13 @@ final class ApiClient {
     extra: {AuthInterceptor.skipAuthKey: true},
   );
 
+  /// For an account whose session hasn't started yet (a new one): its own
+  /// token, not the stored one, and no refresh on its behalf.
+  static Options asAccount(String accessToken) => Options(
+    extra: {AuthInterceptor.skipAuthKey: true},
+    headers: {'Authorization': 'Bearer $accessToken'},
+  );
+
   Future<Object?> get(
     String path, {
     Map<String, Object?>? query,

@@ -70,11 +70,7 @@ void main() {
         final cubit = SaveProgressCubit(accounts, connectivity);
         addTearDown(cubit.close);
 
-        await cubit.continueAsGuest(
-          answers: _adult,
-          languageCode: 'ar',
-          utcOffsetMinutes: 180,
-        );
+        await cubit.continueAsGuest(answers: _adult);
 
         expect(accounts.guestAnswers.single, _adult);
         expect(cubit.state.guestSession, guestTokens);
@@ -91,20 +87,12 @@ void main() {
       );
       addTearDown(cubit.close);
 
-      await cubit.continueAsGuest(
-        answers: _adult,
-        languageCode: 'ar',
-        utcOffsetMinutes: 0,
-      );
+      await cubit.continueAsGuest(answers: _adult);
       expect(cubit.state.failure, isA<NetworkFailure>());
       expect(cubit.state.creatingGuest, isFalse);
       expect(cubit.state.guestSession, isNull);
 
-      await cubit.continueAsGuest(
-        answers: _adult,
-        languageCode: 'ar',
-        utcOffsetMinutes: 0,
-      );
+      await cubit.continueAsGuest(answers: _adult);
       expect(cubit.state.guestSession, guestTokens);
     });
 
@@ -115,12 +103,14 @@ void main() {
       final cubit = SaveProgressCubit(accounts, connectivity);
       addTearDown(cubit.close);
 
-      await cubit.continueWithGoogle();
+      await cubit.continueWithGoogle(answers: _adult);
 
       expect(cubit.state.googleSession, newGoogleSession);
+      // A new account takes the answers; the repository decides.
+      expect(accounts.googleAnswers, [_adult]);
       expect(cubit.state.busy, isTrue);
       // Nothing else starts once the session is there.
-      await cubit.continueWithGoogle();
+      await cubit.continueWithGoogle(answers: _adult);
       expect(accounts.googleSignIns, 1);
     });
 
@@ -131,7 +121,7 @@ void main() {
       );
       addTearDown(cubit.close);
 
-      await cubit.continueWithGoogle();
+      await cubit.continueWithGoogle(answers: _adult);
 
       expect(cubit.state.busy, isFalse);
       expect(cubit.state.failure, isNull);
@@ -144,7 +134,7 @@ void main() {
       final cubit = SaveProgressCubit(accounts, connectivity);
       addTearDown(cubit.close);
 
-      await cubit.continueWithGoogle();
+      await cubit.continueWithGoogle(answers: _adult);
       expect(cubit.state.failure, isA<ProviderFailure>());
       expect(cubit.state.signingInWithGoogle, isFalse);
 

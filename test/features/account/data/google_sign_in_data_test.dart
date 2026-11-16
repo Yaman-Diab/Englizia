@@ -13,6 +13,8 @@ import 'package:englizia/features/account/data/datasources/google_identity_sourc
 import 'package:englizia/features/account/data/models/google_sign_in_model.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
 import 'package:englizia/features/account/domain/entities/social_session.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
+import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -71,14 +73,14 @@ void main() {
     FakeResponse Function() answer, {
     GoogleIdentitySource? google,
     FakeTokenStorage? tokens,
+    FakeResponse Function(RequestOptions request)? answers,
   }) {
-    adapter = FakeHttpAdapter((_) => answer());
+    adapter = FakeHttpAdapter(answers ?? (_) => answer());
     final dio = Dio(BaseOptions(baseUrl: 'https://api.test'))
       ..httpClientAdapter = adapter;
     return AccountRepositoryImpl(
       AccountRemoteDataSourceImpl(ApiClient(dio)),
       tokens: tokens ?? FakeTokenStorage(),
-      installationId: () async => 'install-1',
       savedDeviceId: () => savedDevice,
       saveDeviceId: (id) async => savedDevice = id,
       devicePlatform: 'android',
@@ -233,6 +235,124 @@ void main() {
     });
   });
 
+  group('a new account, a guest', () {
+    const answers = OnboardingPath(
+      audience: TrackAudience.self,
+      trackId: 'trk_general',
+      dailyGoalMinutes: 10,
+    );
+    const guest = AuthTokens(
+      accessToken: 'guest-access',
+      refreshToken: 'guest-refresh',
+      kind: AccountKind.guest,
+    );
+    const conflict = FakeResponse(
+      409,
+      body: {
+        'statusCode': 409,
+        'data': null,
+        'error': {'code': 'auth.external_login_conflict', 'details': null},
+      },
+    );
+
+    test('a new Google account takes the answers with its own token', () async {
+      final repo = repository(
+        () => const FakeResponse(200),
+        google: _Google(),
+        answers: (request) => request.path == '/api/v1/auth/google'
+            ? FakeResponse(200, body: _newAccountBody)
+            : const FakeResponse(200),
+      );
+      final result = await repo.signInWithGoogle(answers: answers);
+
+      expect((result as Ok<SocialSession?>).value!.isNewAccount, isTrue);
+      final onboarding = adapter.requests.last;
+      expect(onboarding.path, '/api/v1/app/me/onboarding');
+      expect(
+        onboarding.headers['Authorization'],
+        'Bearer mock-member-access-token',
+      );
+      expect((onboarding.data! as Map)['trackId'], 'trk_general');
+    });
+
+    test('an account that existed keeps its own plan', () async {
+      final data = Map.of(_newAccountBody['data']! as Map<String, Object?>)
+        ..['isNewUser'] = false;
+      await repository(
+        () => FakeResponse(200, body: {..._newAccountBody, 'data': data}),
+        google: _Google(),
+      ).signInWithGoogle(answers: answers);
+      expect(adapter.requests.single.path, '/api/v1/auth/google');
+    });
+
+    test(
+      'answers that failed are sent again: one sheet, one account',
+      () async {
+        var onboardings = 0;
+        final google = _Google();
+        final repo = repository(
+          () => const FakeResponse(200),
+          google: google,
+          answers: (request) {
+            if (request.path == '/api/v1/auth/google') {
+              return FakeResponse(200, body: _newAccountBody);
+            }
+            return ++onboardings == 1
+                ? const FakeResponse(500)
+                : const FakeResponse(200);
+          },
+        );
+
+        expect(
+          await repo.signInWithGoogle(answers: answers),
+          isA<Err<SocialSession?>>(),
+        );
+        expect(
+          await repo.signInWithGoogle(answers: answers),
+          isA<Ok<SocialSession?>>(),
+        );
+        expect(google.asked, 1);
+        expect(
+          adapter.requests.where((r) => r.path == '/api/v1/auth/google'),
+          hasLength(1),
+        );
+      },
+    );
+
+    test('the guest account takes Google and stays', () async {
+      final result = await repository(
+        () => FakeResponse(200, body: apiFixture('app_me_guest')),
+        google: _Google(),
+        tokens: FakeTokenStorage(guest),
+      ).signInWithGoogle();
+
+      final request = adapter.requests.single;
+      expect(request.path, '/api/v1/auth/guest/upgrade/google');
+      expect(request.data, {'idToken': 'google-id-token'});
+      final session = (result as Ok<SocialSession?>).value!;
+      expect(session.keptGuest, isTrue);
+      expect(session.tokens.kind, AccountKind.member);
+      expect(session.tokens.accessToken, 'guest-access');
+    });
+
+    test('a Google account that has one already is signed in to', () async {
+      final result = await repository(
+        () => const FakeResponse(200),
+        google: _Google(),
+        tokens: FakeTokenStorage(guest),
+        answers: (request) => request.path == '/api/v1/auth/google'
+            ? FakeResponse(200, body: _newAccountBody)
+            : conflict,
+      ).signInWithGoogle();
+
+      expect(adapter.requests.map((r) => r.path), [
+        '/api/v1/auth/guest/upgrade/google',
+        '/api/v1/auth/google',
+      ]);
+      expect((result as Ok<SocialSession?>).value!.keptGuest, isFalse);
+    });
+  });
+
   group('signing out', () {
     const session = AuthTokens(accessToken: 'a', refreshToken: 'r');
 
@@ -264,7 +384,6 @@ void main() {
     final repo = AccountRepositoryImpl(
       AccountFakeDataSource(_DiskBundle(), latency: Duration.zero),
       tokens: FakeTokenStorage(),
-      installationId: () async => 'i',
       savedDeviceId: () => null,
       saveDeviceId: (_) async {},
       devicePlatform: null,

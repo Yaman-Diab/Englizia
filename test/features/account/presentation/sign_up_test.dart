@@ -13,6 +13,8 @@ import 'package:englizia/features/account/presentation/sign_up/cubit/sign_up_cub
 import 'package:englizia/features/account/presentation/sign_up/pages/sign_up_page.dart';
 import 'package:englizia/features/account/presentation/sign_up/widgets/email_suggestions.dart';
 import 'package:englizia/features/account/presentation/sign_up/widgets/email_taken_card.dart';
+import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
+import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -62,6 +64,19 @@ void main() {
   });
 
   group('SignUpCubit', () {
+    test('a new learner account takes the onboarding answers', () async {
+      const answers = OnboardingPath(
+        audience: TrackAudience.self,
+        trackId: 'trk_general',
+      );
+      final accounts = FakeAccountRepository();
+      final cubit = SignUpCubit(accounts, answers: answers);
+      addTearDown(cubit.close);
+      fill(cubit);
+      await cubit.submit();
+      expect(accounts.accountAnswers, [answers]);
+    });
+
     test('sends only when every field is filled', () async {
       final accounts = FakeAccountRepository();
       final cubit = cubitWith(accounts)

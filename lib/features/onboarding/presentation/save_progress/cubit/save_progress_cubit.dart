@@ -98,23 +98,12 @@ class SaveProgressCubit extends Cubit<SaveProgressState> {
     if (!isClosed) emit(state.copyWith(online: online));
   }
 
-  Future<void> continueAsGuest({
-    required OnboardingPath answers,
-    required String languageCode,
-    required int utcOffsetMinutes,
-  }) async {
+  /// The guest account, then the [answers] for it.
+  Future<void> continueAsGuest({required OnboardingPath answers}) async {
     if (state.busy) return;
-    _lastTry = () => continueAsGuest(
-      answers: answers,
-      languageCode: languageCode,
-      utcOffsetMinutes: utcOffsetMinutes,
-    );
+    _lastTry = () => continueAsGuest(answers: answers);
     emit(state.copyWith(creatingGuest: true, failure: () => null));
-    final result = await _accounts.createGuestAccount(
-      answers: answers,
-      languageCode: languageCode,
-      utcOffsetMinutes: utcOffsetMinutes,
-    );
+    final result = await _accounts.createGuestAccount(answers: answers);
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):
@@ -124,12 +113,13 @@ class SaveProgressCubit extends Cubit<SaveProgressState> {
     }
   }
 
-  /// Opens Google's sheet; closing it changes nothing.
-  Future<void> continueWithGoogle() async {
+  /// Opens Google's sheet; closing it changes nothing. A new account takes
+  /// the [answers]; one that existed keeps its own plan.
+  Future<void> continueWithGoogle({required OnboardingPath answers}) async {
     if (state.busy) return;
-    _lastTry = continueWithGoogle;
+    _lastTry = () => continueWithGoogle(answers: answers);
     emit(state.copyWith(signingInWithGoogle: true, failure: () => null));
-    final result = await _accounts.signInWithGoogle();
+    final result = await _accounts.signInWithGoogle(answers: answers);
     if (isClosed) return;
     switch (result) {
       case Ok(:final value?):

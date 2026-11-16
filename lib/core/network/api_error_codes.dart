@@ -38,6 +38,10 @@ abstract final class ApiErrorCodes {
   /// minimum (`X-App-Version`).
   static const updateRequired = 'app.update_required';
 
+  /// 409 from a guest's upgrade: the account has a login already, so it
+  /// was upgraded (a retry after a lost answer).
+  static const notGuest = 'auth.not_guest';
+
   /// 403: the account was disabled from the dashboard.
   static const accountDisabled = 'auth.account_disabled';
 }

@@ -13,6 +13,7 @@ import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
 import 'package:englizia/features/account/domain/entities/social_provider.dart';
+import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:englizia/features/account/presentation/sign_in/cubit/sign_in_cubit.dart';
 import 'package:englizia/features/account/presentation/sign_in/pages/sign_in_page.dart';
 import 'package:flutter/foundation.dart' show Unicode;
@@ -115,6 +116,25 @@ void main() {
       expect(cubit.state.waitLeft, SignInCubit.defaultWait);
     });
 
+    test('the guest account kept by Google is said to be so', () async {
+      final cubit = cubitWith(
+        FakeAccountRepository(
+          googleResults: const [
+            Ok(
+              SocialSession(
+                tokens: memberTokens,
+                isNewAccount: false,
+                keptGuest: true,
+              ),
+            ),
+          ],
+        ),
+      );
+      await cubit.signInWithGoogle();
+      expect(cubit.state.keptGuest, isTrue);
+      expect(cubit.state.session, memberTokens);
+    });
+
     test('Google is not stopped by the password\'s lock', () async {
       final accounts = FakeAccountRepository(
         signInResults: const [
@@ -209,7 +229,7 @@ void main() {
         value: cubit,
         child: SignInPage(
           lastProvider: lastProvider,
-          onSignedIn: (session, provider) {
+          onSignedIn: (session, provider, _) {
             signedIn.add(session);
             signedInWith.add(provider);
           },

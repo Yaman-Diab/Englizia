@@ -1,5 +1,8 @@
 import 'package:englizia/core/error/provider_exception.dart';
 import 'package:englizia/core/logging/app_logger.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
+import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
@@ -18,16 +21,21 @@ import 'package:englizia/features/account/domain/repositories/account_repository
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 
 final class AccountRepositoryImpl implements AccountRepository {
-  const AccountRepositoryImpl(
+  AccountRepositoryImpl(
     this._remote, {
     required TokenStorage tokens,
-    required this.installationId,
     required this.savedDeviceId,
     required this.saveDeviceId,
     required this.devicePlatform,
     GoogleIdentitySource? google,
+    String Function()? language,
+    String Function()? timeZone,
   }) : _tokens = tokens,
-       _google = google;
+       _google = google,
+       _language = language ?? (() => 'ar'),
+       _timeZone =
+           timeZone ??
+           (() => OnboardingModel.timeZoneOf(DateTime.now().timeZoneOffset));
 
   final AccountRemoteDataSource _remote;
   final TokenStorage _tokens;
@@ -35,8 +43,13 @@ final class AccountRepositoryImpl implements AccountRepository {
   /// Null where Google's sign-in is not offered.
   final GoogleIdentitySource? _google;
 
-  /// This install's id, which the guest account is tied to.
-  final Future<String> Function() installationId;
+  /// The app's language, and the phone's time zone, for a new account.
+  final String Function() _language;
+  final String Function() _timeZone;
+
+  /// A new account the server made whose onboarding answers didn't reach it:
+  /// a retry of the same way gives them, and makes no second account.
+  ({_NewAccountWay way, AuthTokens account})? _withoutAnswers;
 
   /// The id the server gave this phone, or null before the first time.
   final String? Function() savedDeviceId;
@@ -48,33 +61,77 @@ final class AccountRepositoryImpl implements AccountRepository {
   @override
   Future<Result<AuthTokens>> createGuestAccount({
     required OnboardingPath answers,
-    required String languageCode,
-    required int utcOffsetMinutes,
   }) => guard(
-    () async => _remembered(
-      await _remote.createGuestAccount(
-        GuestAccountModel.request(
-          installationId: await installationId(),
-          answers: answers,
-          languageCode: languageCode,
-          utcOffsetMinutes: utcOffsetMinutes,
+    () => _newAccount(
+      _NewAccountWay.guest,
+      answers,
+      () async => _remembered(
+        await _remote.createGuestAccount(
+          GuestAccountModel.request(
+            deviceId: savedDeviceId(),
+            platform: devicePlatform,
+          ),
         ),
       ),
     ),
   );
 
   @override
-  Future<Result<AuthTokens>> createAccount(NewAccount account) => guard(
-    () async => _remembered(
-      await _remote.createAccount(
-        RegisterModel.request(
-          account,
-          deviceId: savedDeviceId(),
-          platform: devicePlatform,
+  Future<Result<AuthTokens>> createAccount(
+    NewAccount account, {
+    OnboardingPath? answers,
+  }) => guard(
+    () => _newAccount(
+      _NewAccountWay.email,
+      answers,
+      () async => _remembered(
+        await _remote.createAccount(
+          RegisterModel.request(
+            account,
+            deviceId: savedDeviceId(),
+            platform: devicePlatform,
+          ),
         ),
       ),
     ),
   );
+
+  /// Makes the account (or takes the one a failed try made), then gives it
+  /// [answers], with its own token as its session hasn't started yet.
+  Future<AuthTokens> _newAccount(
+    _NewAccountWay way,
+    OnboardingPath? answers,
+    Future<AuthTokens> Function() create,
+  ) async {
+    final made = _withoutAnswers;
+    final account = made != null && made.way == way
+        ? made.account
+        : await create();
+    if (answers != null) await _giveAnswers(way, account, answers);
+    return account;
+  }
+
+  Future<void> _giveAnswers(
+    _NewAccountWay way,
+    AuthTokens account,
+    OnboardingPath answers,
+  ) async {
+    _withoutAnswers = (way: way, account: account);
+    try {
+      await _remote.submitOnboarding(
+        OnboardingModel.request(
+          answers,
+          language: _language(),
+          timeZone: _timeZone(),
+        ),
+        accessToken: account.accessToken,
+      );
+    } on ApiException catch (error) {
+      // A conflict: answered already, a retry after an answer that was lost.
+      if (error.statusCode != ApiStatusCodes.conflict) rethrow;
+    }
+    _withoutAnswers = null;
+  }
 
   @override
   Future<Result<AuthTokens>> signIn({
@@ -94,13 +151,41 @@ final class AccountRepositoryImpl implements AccountRepository {
   );
 
   @override
-  Future<Result<SocialSession?>> signInWithGoogle() => guard(() async {
+  Future<Result<SocialSession?>> signInWithGoogle({
+    OnboardingPath? answers,
+  }) => guard(() async {
+    // A new account whose answers didn't reach it: only they are sent again.
+    if (_withoutAnswers case (
+      way: _NewAccountWay.google,
+      :final account,
+    ) when answers != null) {
+      await _giveAnswers(_NewAccountWay.google, account, answers);
+      return SocialSession(tokens: account, isNewAccount: true);
+    }
     final google = _google;
     if (google == null) {
       throw const ProviderException('Google sign-in is not part of this build');
     }
     final idToken = await google.idToken();
     if (idToken == null) return null;
+    // A guest's own account takes Google and keeps its progress, unless
+    // this Google account has one already: then that one is signed in to.
+    final current = await _tokens.read();
+    if (current != null && current.kind == AccountKind.guest) {
+      try {
+        final upgraded = await _upgraded(
+          () => _remote.upgradeGuestWithGoogle(idToken),
+        );
+        return SocialSession(
+          tokens: upgraded,
+          isNewAccount: false,
+          keptGuest: true,
+        );
+      } on ApiException catch (error) {
+        // That account is signed in to below, leaving the guest behind.
+        if (error.code != ApiErrorCodes.externalLoginConflict) rethrow;
+      }
+    }
     final session = await _remote.signInWithGoogle(
       GoogleSignInModel.request(
         idToken: idToken,
@@ -109,6 +194,9 @@ final class AccountRepositoryImpl implements AccountRepository {
       ),
     );
     await _remembered(session.tokens);
+    if (session.isNewAccount && answers != null) {
+      await _giveAnswers(_NewAccountWay.google, session.tokens, answers);
+    }
     return session;
   });
 
@@ -150,19 +238,33 @@ final class AccountRepositoryImpl implements AccountRepository {
   Future<Result<void>> verifyEmail(String token) =>
       guard(() => _remote.verifyEmail(token));
 
-  // ASSUMPTION(api): the upgrade takes register's fields (docs/api/auth.md).
   @override
   Future<Result<AuthTokens>> upgradeGuest(NewAccount account) => guard(
-    () async => _remembered(
-      await _remote.upgradeGuest(
-        RegisterModel.request(
-          account,
-          deviceId: savedDeviceId(),
-          platform: devicePlatform,
-        ),
-      ),
+    () => _upgraded(
+      () => _remote.upgradeGuestWithEmail({
+        'email': account.email.trim(),
+        'password': account.password,
+        'displayName': account.name.trim(),
+      }),
     ),
   );
+
+  /// The guest's session carries on as the member's: the server answers
+  /// with the account, not new tokens. `auth.not_guest` means a retry of an
+  /// upgrade already done.
+  Future<AuthTokens> _upgraded(Future<void> Function() upgrade) async {
+    final guest = await _tokens.read();
+    if (guest == null) {
+      throw const ApiException(statusCode: ApiStatusCodes.unauthorized);
+    }
+    try {
+      await upgrade();
+    } on ApiException catch (error) {
+      // Not a guest any more: upgraded already.
+      if (error.code != ApiErrorCodes.notGuest) rethrow;
+    }
+    return guest.asMember();
+  }
 
   @override
   Future<Result<void>> logOut() => guard(() async {
@@ -194,3 +296,6 @@ final class AccountRepositoryImpl implements AccountRepository {
     return tokens;
   }
 }
+
+/// The ways a new account is made, for a retry to take the same one.
+enum _NewAccountWay { guest, email, google }

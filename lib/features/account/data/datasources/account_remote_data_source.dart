@@ -18,8 +18,15 @@ import 'package:englizia/features/account/domain/entities/social_session.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class AccountRemoteDataSource {
-  /// [request] is [GuestAccountModel.request].
+  /// [request] is [GuestAccountModel.request]. Sent without a session.
   Future<AuthTokens> createGuestAccount(Map<String, Object?> request);
+
+  /// [request] is [OnboardingModel.request], for the new account whose
+  /// [accessToken] it is.
+  Future<void> submitOnboarding(
+    Map<String, Object?> request, {
+    required String accessToken,
+  });
 
   /// [request] is [RegisterModel.request].
   Future<AuthTokens> createAccount(Map<String, Object?> request);
@@ -38,8 +45,12 @@ abstract interface class AccountRemoteDataSource {
   /// [request] is [ResetPasswordModel.request].
   Future<AuthTokens?> resetPassword(Map<String, Object?> request);
 
-  /// Sent with the guest's own token; [request] is [RegisterModel.request].
-  Future<AuthTokens> upgradeGuest(Map<String, Object?> request);
+  /// Sent with the guest's own session, which carries on as the member's:
+  /// `{email, password, displayName}`.
+  Future<void> upgradeGuestWithEmail(Map<String, Object?> request);
+
+  /// As [upgradeGuestWithEmail], with Google's ID token.
+  Future<void> upgradeGuestWithGoogle(String idToken);
 
   Future<void> logOut(String refreshToken);
 
@@ -60,9 +71,23 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
   @override
   Future<AuthTokens> createGuestAccount(Map<String, Object?> request) async =>
       GuestAccountModel.tokens(
-        await _client.post(ApiEndpoints.guestAccount, data: request),
+        await _client.post(
+          ApiEndpoints.guestAccount,
+          data: request,
+          options: ApiClient.publicOptions,
+        ),
         now: DateTime.now(),
       );
+
+  @override
+  Future<void> submitOnboarding(
+    Map<String, Object?> request, {
+    required String accessToken,
+  }) => _client.post(
+    ApiEndpoints.onboarding,
+    data: request,
+    options: ApiClient.asAccount(accessToken),
+  );
 
   @override
   Future<AuthTokens> createAccount(Map<String, Object?> request) async =>
@@ -123,11 +148,14 @@ final class AccountRemoteDataSourceImpl implements AccountRemoteDataSource {
       );
 
   @override
-  Future<AuthTokens> upgradeGuest(Map<String, Object?> request) async =>
-      RegisterModel.tokens(
-        await _client.post(ApiEndpoints.upgradeGuest, data: request),
-        now: DateTime.now(),
-      );
+  Future<void> upgradeGuestWithEmail(Map<String, Object?> request) =>
+      _client.post(ApiEndpoints.upgradeGuestWithEmail, data: request);
+
+  @override
+  Future<void> upgradeGuestWithGoogle(String idToken) => _client.post(
+    ApiEndpoints.upgradeGuestWithGoogle,
+    data: {'idToken': idToken},
+  );
 
   @override
   Future<void> logOut(String refreshToken) => _client.post(
@@ -315,10 +343,33 @@ final class AccountFakeDataSource implements AccountRemoteDataSource {
     _verified = true;
   }
 
-  /// Answers like [createAccount]: the upgraded account is a member.
+  /// The answers are kept, as the server would.
+  final onboardings = <Map<String, Object?>>[];
+
   @override
-  Future<AuthTokens> upgradeGuest(Map<String, Object?> request) =>
-      createAccount(request);
+  Future<void> submitOnboarding(
+    Map<String, Object?> request, {
+    required String accessToken,
+  }) async {
+    await Future<void>.delayed(latency);
+    onboardings.add(request);
+  }
+
+  /// The taken email answers as the server does.
+  @override
+  Future<void> upgradeGuestWithEmail(Map<String, Object?> request) async {
+    await Future<void>.delayed(latency);
+    if (request['email'] == takenEmail) {
+      throw const ApiException(
+        statusCode: ApiStatusCodes.conflict,
+        code: ApiErrorCodes.emailTaken,
+      );
+    }
+  }
+
+  @override
+  Future<void> upgradeGuestWithGoogle(String idToken) =>
+      Future<void>.delayed(latency);
 
   @override
   Future<void> logOut(String refreshToken) => Future<void>.delayed(latency);
