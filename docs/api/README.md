@@ -3,7 +3,7 @@
 Backend: **.NET** (ASP.NET Core) REST API, separate team. Per `docs/product/dashboard-server-requirements.md` §19.1 the backend delivers an **OpenAPI document with every release** (app and control panel share it), plus a JSON Schema for the lesson package with v0.1.
 
 - **Dev server:** `https://api-dev.engleazia.com` (`env/dev.json`). Interactive docs at `/scalar/#app-api`, the document itself at `/openapi/app.json`.
-- **[`openapi.json`](openapi.json)** is the committed copy of the app's OpenAPI document; replace it with every release and reconcile this folder, the fake data sources and the fixtures against it.
+- **[`openapi.json`](openapi.json)** is the committed copy of the dev server's App API document (`https://api-dev.engleazia.com/openapi/app.json`), never the Admin API's (`/openapi/admin.json`, the control panel's `/api/v1/admin/*`); replace it with every release and reconcile this folder, the fake data sources and the fixtures against it.
 - Everything the document does not cover is an assumption, tagged in code as `// ASSUMPTION(api): ...` (`grep -rn "ASSUMPTION(api)" lib` lists them).
 - Real responses are saved, sanitized, under `test/fixtures/api/<endpoint>_<case>.json` and parsed in tests (`test/helpers/api_fixtures.dart`).
 
@@ -58,7 +58,7 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Contract | Used by | Data in the app |
 |---|---|---|
-| [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register, login, refresh and logout |
+| [`openapi.json`](openapi.json) | The App API: auth, the guest and its upgrades, `/app/me`, onboarding, `system/config`, tracks, enrollments, ping | live, the endpoints below marked used |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), «أنا»'s tracks and grades | live, units mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
