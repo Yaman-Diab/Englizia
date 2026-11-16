@@ -47,7 +47,8 @@ final class SoundSpec {
 /// `tool/sounds/synth.py` prints it), so each sits where it should against
 /// [AppSound.correct]: a wrong answer 1.5 dB under it, a tap 7, the
 /// microphone 5, a tick 10; a lesson's end and an achievement above it. The guide's recorded voice
-/// ([AppSound.guideWelcome], [AppSound.hello], [AppSound.placementTrial]) is
+/// ([AppSound.guideWelcome], [AppSound.hello], [AppSound.placementTrial],
+/// [AppSound.guideRemind]) is
 /// not an effect and has no line: it stays silent until its recordings come.
 const soundCatalog = <AppSound, SoundSpec>{
   AppSound.correct: SoundSpec(

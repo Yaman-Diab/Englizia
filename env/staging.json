@@ -2,5 +2,11 @@
   "APP_ENV": "staging",
   "GOOGLE_SERVER_CLIENT_ID": "",
   "GOOGLE_IOS_CLIENT_ID": "",
+  "FIREBASE_PROJECT_ID": "",
+  "FIREBASE_SENDER_ID": "",
+  "FIREBASE_ANDROID_APP_ID": "",
+  "FIREBASE_ANDROID_API_KEY": "",
+  "FIREBASE_IOS_APP_ID": "",
+  "FIREBASE_IOS_API_KEY": "",
   "BASE_URL": "https://api-staging.example.com"
 }

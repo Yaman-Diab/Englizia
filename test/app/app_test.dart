@@ -12,6 +12,8 @@ import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
+import 'package:englizia/core/notifications/push_channel.dart';
+import 'package:englizia/core/notifications/push_message.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
@@ -29,6 +31,7 @@ import 'package:englizia/features/launch/presentation/splash/pages/splash_page.d
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/presentation/exercise/pages/exercise_page.dart';
 import 'package:englizia/features/lessons/presentation/explain/widgets/explain_sheet.dart';
+import 'package:englizia/features/lessons/presentation/grammar/pages/grammar_lesson_page.dart';
 import 'package:englizia/features/onboarding/domain/entities/onboarding_steps.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/pages/preparing_page.dart';
 import 'package:englizia/features/onboarding/presentation/preparing/preparing_args.dart';
@@ -1033,6 +1036,124 @@ void main() {
     expect(find.text('Engleazia'), findsOneWidget);
     expect(sl<CurrentLanguage>().code, 'en');
     expect(await sentLanguage(), 'en');
+  });
+
+  group('notifications while the app is open', () {
+    late MockPushChannel push;
+
+    setUp(() {
+      push = MockPushChannel();
+      sl
+        ..unregister<PushChannel>()
+        ..registerLazySingleton<PushChannel>(() => push);
+    });
+
+    Future<void> openHome(WidgetTester tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await tester.openApp();
+      await sl<AppSessionController>().signIn(tokens);
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 3));
+      expect(find.byType(HomePage), findsOneWidget);
+    }
+
+    testWidgets('a reply shows over home; its tap opens its lesson', (
+      tester,
+    ) async {
+      await openHome(tester);
+      push.arrive(
+        const PushMessage(
+          kind: PushKind.teacherReply,
+          questionId: 'q1',
+          lessonId: 'les_gv',
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('notification_teacher_title'.tr()), findsOneWidget);
+
+      await tester.tap(find.text('notification_teacher_body'.tr()));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(GrammarLessonPage), findsOneWidget);
+      await tester.pump(const Duration(seconds: 5));
+    });
+
+    testWidgets('in a lesson there is no banner: the reply waits on «أنا»', (
+      tester,
+    ) async {
+      await openHome(tester);
+      unawaited(
+        GoRouter.of(
+          tester.element(find.byType(HomePage)),
+        ).push<void>(AppRoutes.grammarOf('les_gv')),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      push.arrive(
+        const PushMessage(kind: PushKind.teacherReply, lessonId: 'les_gv'),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('notification_teacher_title'.tr()), findsNothing);
+      expect(sl<SettingsStorageService>().meDot, isTrue);
+      await tester.pump(const Duration(seconds: 5));
+    });
+
+    testWidgets('a reminder tapped on the phone opens the next lesson', (
+      tester,
+    ) async {
+      await openHome(tester);
+      push.open(const PushMessage(kind: PushKind.dailyGoal));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.byType(HomePage, skipOffstage: false), findsOneWidget);
+      final location = GoRouter.of(
+        tester.element(find.byType(HomePage, skipOffstage: false)),
+      ).state.uri.path;
+      expect(location, startsWith('/lessons/'));
+      await tester.pump(const Duration(seconds: 5));
+    });
+
+    testWidgets('a tap with no account waits for a sign-in', (tester) async {
+      await tester.pumpWidget(
+        localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+      );
+      await tester.pumpUntilLocalized();
+      await tester.openApp();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 1));
+
+      push.open(const PushMessage(kind: PushKind.dailyGoal));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(SignInPage), findsOneWidget);
+
+      // As the sign-in screen does: the session, then home.
+      await sl<AppSessionController>().signIn(tokens);
+      GoRouter.of(tester.element(find.byType(SignInPage))).go(AppRoutes.home);
+      await tester.pump();
+      await tester.pump();
+      await tester.pumpUntilLocalized();
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.byType(SignInPage), findsNothing);
+      // The reminder still opens the next lesson, after home.
+      expect(
+        GoRouter.of(
+          tester.element(find.byType(HomePage, skipOffstage: false)),
+        ).state.uri.path,
+        startsWith('/lessons/'),
+      );
+      await tester.pump(const Duration(seconds: 5));
+    });
   });
 
   testWidgets('home has no undersized or unlabeled tap targets', (

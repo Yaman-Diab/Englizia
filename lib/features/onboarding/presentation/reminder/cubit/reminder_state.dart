@@ -12,8 +12,6 @@ final class ReminderState extends Equatable {
     this.slot,
     this.custom,
     this.useCustom = false,
-    this.denied = false,
-    this.asking = false,
   });
 
   final LoadStatus status;
@@ -31,13 +29,6 @@ final class ReminderState extends Equatable {
   final ReminderTime? custom;
   final bool useCustom;
 
-  /// The learner refused notifications: the step offers the phone settings
-  /// and going on without a reminder.
-  final bool denied;
-
-  /// The system prompt is up.
-  final bool asking;
-
   /// The reminder time as chosen, or null before the settings arrive.
   ReminderTime? get time {
     if (useCustom) return custom;
@@ -47,7 +38,7 @@ final class ReminderState extends Equatable {
     return null;
   }
 
-  bool get canEnable => time != null && !asking;
+  bool get canEnable => time != null;
 
   /// Nullable fields take a function so they can be cleared: `failure: () => null`.
   ReminderState copyWith({
@@ -58,8 +49,6 @@ final class ReminderState extends Equatable {
     ReminderSlot? Function()? slot,
     ReminderTime? Function()? custom,
     bool? useCustom,
-    bool? denied,
-    bool? asking,
   }) => ReminderState(
     status: status ?? this.status,
     settings: settings != null ? settings() : this.settings,
@@ -70,8 +59,6 @@ final class ReminderState extends Equatable {
     slot: slot != null ? slot() : this.slot,
     custom: custom != null ? custom() : this.custom,
     useCustom: useCustom ?? this.useCustom,
-    denied: denied ?? this.denied,
-    asking: asking ?? this.asking,
   );
 
   @override
@@ -83,7 +70,5 @@ final class ReminderState extends Equatable {
     slot,
     custom,
     useCustom,
-    denied,
-    asking,
   ];
 }

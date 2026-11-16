@@ -19,6 +19,27 @@ abstract final class AppConfig {
     'GOOGLE_IOS_CLIENT_ID',
   );
 
+  /// Firebase, for notifications (ADR 21): the project and each platform's
+  /// app. Public values, like the OAuth client IDs; empty leaves the app
+  /// without notifications.
+  static const firebaseProjectId = String.fromEnvironment(
+    'FIREBASE_PROJECT_ID',
+  );
+  static const firebaseSenderId = String.fromEnvironment('FIREBASE_SENDER_ID');
+  static const firebaseAndroidAppId = String.fromEnvironment(
+    'FIREBASE_ANDROID_APP_ID',
+  );
+  static const firebaseAndroidApiKey = String.fromEnvironment(
+    'FIREBASE_ANDROID_API_KEY',
+  );
+  static const firebaseIosAppId = String.fromEnvironment('FIREBASE_IOS_APP_ID');
+  static const firebaseIosApiKey = String.fromEnvironment(
+    'FIREBASE_IOS_API_KEY',
+  );
+
+  /// The iOS bundle ID, as Xcode has it.
+  static const iosBundleId = 'com.engleazia.app';
+
   static const jsonTimeout = Duration(seconds: 20);
 
   static bool get isProd => appEnv == 'prod';

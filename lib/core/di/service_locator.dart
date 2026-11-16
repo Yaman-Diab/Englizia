@@ -21,6 +21,7 @@ import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/dio_factory.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
+import 'package:englizia/core/notifications/push_channel.dart';
 import 'package:englizia/core/security/screen_protection.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/device_platform.dart';
@@ -84,6 +85,10 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     ..registerLazySingleton<ConnectivityService>(PlusConnectivityService.new)
     ..registerLazySingleton<NotificationPermission>(
       () => const PlatformNotificationPermission(),
+    )
+    // The server's notifications (ADR 21); the dev page's in mock mode.
+    ..registerLazySingleton<PushChannel>(
+      () => AppConfig.isMock ? MockPushChannel() : FirebasePushChannel(),
     )
     // The app's sounds (ADR 9), off with the «المؤثرات الصوتية» setting.
     ..registerLazySingleton<SoundPlayer>(

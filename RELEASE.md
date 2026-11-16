@@ -23,6 +23,12 @@ In the app's Google Cloud project (one project for every client):
      (`com.googleusercontent.apps.…`) goes in `ios/Runner/Info.plist` as a `CFBundleURLTypes` URL scheme.
 3. Sign in on a phone against each environment's server before a build leaves your machine.
 
+## Notifications (once per environment)
+The Firebase project is `engleazia` (ADR 21). Each environment's `env/<env>.json` needs `FIREBASE_PROJECT_ID`,
+`FIREBASE_SENDER_ID` and each platform's `FIREBASE_*_APP_ID` and `FIREBASE_*_API_KEY` (Project settings → Your apps;
+the keys under Google Cloud → Credentials, "auto created by Firebase"). For iOS: an APNs key in Project settings →
+Cloud Messaging, and the Push Notifications capability with Background Modes → Remote notifications in Xcode.
+
 ## Android signing (once)
 1. Create an upload keystore **outside the repo** and back it up off-machine:
    ```

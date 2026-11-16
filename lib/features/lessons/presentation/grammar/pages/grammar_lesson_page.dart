@@ -29,11 +29,16 @@ class GrammarLessonPage extends StatefulWidget {
   const GrammarLessonPage({
     required this.onStartExercises,
     required this.onExit,
+    this.openQuestions = false,
     super.key,
   });
 
   final VoidCallback onStartExercises;
   final VoidCallback onExit;
+
+  /// Opened from a teacher's reply: the questions open once the lesson is
+  /// there, with the replies in them.
+  final bool openQuestions;
 
   @override
   State<GrammarLessonPage> createState() => _GrammarLessonPageState();
@@ -45,6 +50,7 @@ class _GrammarLessonPageState extends State<GrammarLessonPage>
 
   final _scroll = ScrollController();
   bool _fullscreen = false;
+  bool _questionsOpened = false;
   bool _overflows = false;
 
   @override
@@ -82,6 +88,18 @@ class _GrammarLessonPageState extends State<GrammarLessonPage>
     return false;
   }
 
+  void _openAskedQuestions(GrammarLessonState state) {
+    if (!widget.openQuestions || _questionsOpened) return;
+    if (!(state.content?.questionsEnabled ?? false)) return;
+    _questionsOpened = true;
+    unawaited(
+      showTeacherQuestions(
+        context,
+        videoPosition: () => context.read<GrammarLessonCubit>().state.position,
+      ),
+    );
+  }
+
   /// «شاهد الفيديو»: starts it, and brings it into view.
   void _watch() {
     final cubit = context.read<GrammarLessonCubit>();
@@ -98,8 +116,13 @@ class _GrammarLessonPageState extends State<GrammarLessonPage>
   @override
   Widget build(BuildContext context) =>
       BlocConsumer<GrammarLessonCubit, GrammarLessonState>(
-        listenWhen: (before, now) => !before.unlocked && now.celebrating,
-        listener: (_, _) => unawaited(AppHaptics.lightImpact()),
+        listenWhen: (before, now) =>
+            !before.unlocked && now.celebrating ||
+            before.load != now.load && now.load == LoadStatus.ready,
+        listener: (context, state) {
+          if (state.load == LoadStatus.ready) return _openAskedQuestions(state);
+          unawaited(AppHaptics.lightImpact());
+        },
         buildWhen: (before, now) =>
             before.load != now.load ||
             before.content != now.content ||

@@ -59,6 +59,10 @@ enum AppSound {
   /// voice, not an effect: no file yet.
   guideWelcome,
 
+  /// The guide reads the kids' reminders prompt: «نذكّرك نلعب ونتعلّم؟
+  /// تذكير واحد كل يوم.». A voice: no file yet.
+  guideRemind,
+
   /// The word "Hello!", spoken alone. A voice: no file yet.
   hello,
 

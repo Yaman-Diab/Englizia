@@ -51,6 +51,7 @@ void main() {
     AppSound.guideWelcome,
     AppSound.hello,
     AppSound.placementTrial,
+    AppSound.guideRemind,
   };
 
   test('every effect has its line in the catalog; the voices have none', () {
