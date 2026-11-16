@@ -85,27 +85,30 @@ The common errors (`README.md`).
 
 «تعديل الاسم». Confirmed by the OpenAPI: it takes `{displayName, timeZone, uiLanguage}`, all required, so the app reads `GET /api/v1/app/me` first and sends the other two back unchanged.
 
-## `PUT /api/v1/app/me/active-enrollment`
+## `PUT /api/v1/app/enrollments/{trackId}/active`
 
-«مساراتك»: `{ "enrollmentId": "enr_emar" }` makes another joined track the active one. Each keeps its own progress. `204`. Proposed.
+«مساراتك»: makes another joined track the active one, with no body; an enrollment is its track's. Each keeps its own progress. Answers the enrollments (`ListDataOfEnrollmentDto`), which the app doesn't read: it fetches the profile again. Live.
 
-## `PATCH /api/v1/app/enrollments/{id}`
+## `PUT /api/v1/app/enrollments/{trackId}/level`
 
-«تغيير الصف»: `{ "levelId": "lvl_emar_08" }` moves an Emar learner to another grade, which keeps its own progress. The grades are the track's levels in `GET /api/v1/app/tracks` ([tracks.md](tracks.md)); a grade is marked «وضع الأطفال» by its track's kids mode until the server gives one per level. Proposed, on the endpoint [placement.md](placement.md) already uses.
+«تغيير الصف» and home's «ابدأ B1»: `ChangeLevelRequest { "levelId": "…" }` moves the learner to another level of the track, which keeps its own progress. Answers the enrollment (`EnrollmentDto`), not read. The grades are the track's levels in `GET /api/v1/app/tracks` ([tracks.md](tracks.md)); a grade is marked «وضع الأطفال» by its track's kids mode until the server gives one per level. Live.
 
-## `GET /api/v1/app/me/preferences`, `PUT /api/v1/app/me/preferences`
+## The goal and the reminder: `GET /api/v1/app/me`, `PUT /api/v1/app/me/learning`
 
-The settings that follow the account (S §19.2, design `Settings`). Each is saved as it changes: the app sends the whole object with the change. Proposed.
+The settings that follow the account (S §19.2, design `Settings`). Read from the account (`UserDto.dailyGoalMinutes`, `UserDto.reminderTime` as `"HH:mm:ss"` or null); each change sends `UpdateLearningRequest`:
 
 ```json
-{ "dailyGoalMinutes": 10, "reminderTime": "20:00", "notifications": true }
+{ "dailyGoalMinutes": 10, "reminderTime": "20:00:00" }
 ```
 
 | Field | Meaning |
 |---|---|
 | `dailyGoalMinutes` | One of the panel's daily goals (`dailyGoal.options` in the effective settings) |
-| `reminderTime` | `HH:mm` in the learner's time zone, or `null` for none |
-| `notifications` | Every kind of notification, or none (ADR 16): the goal's reminder, the warning before the streak breaks, a teacher's reply |
+| `reminderTime` | `HH:mm:ss` in the learner's time zone, or `null` for none |
+
+Live; seen on the dev server: `test/fixtures/api/app_me_guest.json`.
+
+«الإشعارات» (every kind or none, ADR 16: the goal's reminder, the warning before the streak breaks, a teacher's reply) has no field on the server, so the phone keeps it (STATUS D-117).
 
 The appearance, sound effects, vibration and video quality stay on the phone. The profile also says how the learner signs in, `signIn`: `email` (a password to change), `google` or `apple`.
 
@@ -124,6 +127,6 @@ A wrong current password is `400 auth.current_password_invalid` (a 400, as the s
 1. Is one profile endpoint acceptable, or should «أنا» read the account, the tracks and the stats separately?
 2. Confirm the streak's freezes: how many, how often one is added, and that one is used automatically.
 3. Confirm that the week starts on Saturday (the owner's decision, 2026-11-08) and that `days` are that week, seven days in the order to show.
-4. Confirm switching the active track and changing the grade, and that progress is kept per enrollment and per level.
-5. Confirm the preferences, the password change and the deletion above, and the error codes for a wrong password.
-6. Joining another track from «أنا» (`«انضم»`) needs its own flow per entry method: an endpoint to enrol, and whether the placement test or the grade step runs inside the app.
+4. Switching the track and changing the grade: answered by the enrollments endpoints above. Confirm progress is kept per level.
+5. The notifications' switch: where does the server keep it, so it follows the account to another phone? Confirm the deletion above and its error code for a wrong password.
+6. Joining another track from «أنا» (`«انضم»`): `POST /api/v1/app/enrollments` (`JoinTrackRequest {trackId, start, levelId, child}`) enrols; the flow per entry method (the placement test, the grade step) still has no design.

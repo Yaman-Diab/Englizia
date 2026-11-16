@@ -10,10 +10,10 @@ abstract interface class ProfileRepository {
   Future<Result<void>> rename(String name);
 
   /// Makes another joined track the active one; each keeps its progress.
-  Future<Result<void>> switchTrack(String enrollmentId);
+  Future<Result<void>> switchTrack(String trackId);
 
   /// Another level of the same track: an Emar learner's grade.
-  Future<Result<void>> changeLevel(String enrollmentId, String levelId);
+  Future<Result<void>> changeLevel(String trackId, String levelId);
 
   Future<Result<Preferences>> getPreferences();
 

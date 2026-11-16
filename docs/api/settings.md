@@ -83,7 +83,9 @@ Live (docs/api/openapi.json `SystemConfigDto`), answered **without a session** a
 | `storeUrl` | The app's store page. Android opens Google Play's app first and this page after it; iOS opens this page only | yes |
 | `onboarding` | The tracks each audience of "who will learn" leads to, with their levels ([tracks.md](tracks.md)) | yes |
 | `dailyGoalOptions` | The goals' minutes, each with its points (`{minutes, xp}`) | not yet: the goal step needs each choice's name ("مريح"), the default and a lesson's length, which only `GET /api/v1/app/settings` has (question 6) |
-| `supportWhatsapp`, `privacyUrl`, `termsUrl`, `aiEnabled` | The support number, the legal pages, the AI switches | not yet |
+| `supportWhatsapp` | Support's WhatsApp number; «أنا» and the settings open it, before the profile's own | yes |
+| `privacyUrl`, `termsUrl` | The legal pages, opened outside the app; an `https` one only, else the app's placeholder page | yes |
+| `aiEnabled` | The AI features' switches | not yet |
 
 A version that isn't a release number (a build `+12` or a tag `-beta` is ignored) or a link that isn't `https` is left out alone, so it decides nothing. The phone keeps the three, so an open without a connection still stops a version too old to run (ADR 19).
 

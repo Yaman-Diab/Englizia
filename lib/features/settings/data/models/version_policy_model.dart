@@ -14,7 +14,7 @@ final class VersionPolicyModel {
         VersionPolicy(
           minimum: AppVersion.tryParse(json?.readString('minSupportedVersion')),
           recommended: AppVersion.tryParse(json?.readString('latestVersion')),
-          updateUrl: _link(json?.readString('storeUrl')),
+          updateUrl: webPage(json?.readString('storeUrl')),
         ),
       );
 
@@ -26,8 +26,8 @@ final class VersionPolicyModel {
     'storeUrl': ?entity.updateUrl?.toString(),
   };
 
-  /// A web page only: it is shown to be copied when no store opens.
-  static Uri? _link(String? text) {
+  /// A web page only, `https`: anything else is left out.
+  static Uri? webPage(String? text) {
     final link = Uri.tryParse(text?.trim() ?? '');
     return link != null && link.isScheme('https') && link.host.isNotEmpty
         ? link

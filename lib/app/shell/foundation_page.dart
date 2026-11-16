@@ -382,7 +382,7 @@ class FoundationPage extends StatelessWidget {
   }
 
   /// The mock's enrollment of the Emar curriculum.
-  static const _emar = 'enr_emar';
+  static const _emar = 'trk_emar';
 
   static void _home(BuildContext context) =>
       context.go(AppRoutes.home, extra: HomeRestart());

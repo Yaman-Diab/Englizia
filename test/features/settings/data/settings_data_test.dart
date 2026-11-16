@@ -10,10 +10,12 @@ import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/settings/data/datasources/settings_remote_data_source.dart';
 import 'package:englizia/features/settings/data/models/effective_settings_model.dart';
+import 'package:englizia/features/settings/data/models/support_links_model.dart';
 import 'package:englizia/features/settings/data/models/version_policy_model.dart';
 import 'package:englizia/features/settings/data/repositories/settings_repository_impl.dart';
 import 'package:englizia/features/settings/domain/entities/app_version.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/support_links.dart';
 import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -324,6 +326,49 @@ void main() {
         _FlakyDataSource(failures: 1),
       ).getVersionPolicy();
       expect((result as Err).failure, isA<NetworkFailure>());
+    });
+  });
+
+  group('support links', () {
+    late SharedPreferences prefs;
+
+    setUp(() async {
+      SharedPreferences.setMockInitialValues({});
+      prefs = await SharedPreferences.getInstance();
+    });
+
+    test('the dev server has none yet', () async {
+      final result = await SettingsRepositoryImpl(
+        _FlakyDataSource(),
+        SettingsStorageService(prefs),
+      ).getSupportLinks();
+      expect((result as Ok<SupportLinks>).value, SupportLinks.none);
+    });
+
+    test('the number and https pages; anything else is left out', () {
+      expect(
+        SupportLinksModel.fromJson(const {
+          'supportWhatsapp': '+963 900 000 000',
+          'privacyUrl': 'https://example.com/privacy',
+          'termsUrl': 'http://example.com/terms',
+        }),
+        SupportLinks(
+          whatsapp: '+963 900 000 000',
+          privacy: Uri.parse('https://example.com/privacy'),
+        ),
+      );
+    });
+
+    test('one system config a session, the versions included', () async {
+      final source = _FlakyDataSource();
+      final repository = SettingsRepositoryImpl(
+        source,
+        SettingsStorageService(prefs),
+      );
+      await repository.getVersionPolicy();
+      await repository.getSupportLinks();
+      await repository.getSupportLinks();
+      expect(source.calls, 1);
     });
   });
 }

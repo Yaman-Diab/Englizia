@@ -2,6 +2,7 @@ import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/support_links.dart';
 import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 
@@ -102,4 +103,9 @@ class FakeSettingsRepository implements SettingsRepository {
   @override
   Future<Result<EffectiveSettings>> getSettings() async =>
       results[(calls++).clamp(0, results.length - 1)];
+
+  Result<SupportLinks> links = const Ok(SupportLinks.none);
+
+  @override
+  Future<Result<SupportLinks>> getSupportLinks() async => links;
 }

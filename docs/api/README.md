@@ -67,7 +67,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`explanations.md`](explanations.md) | «اشرح لي» under a wrong answer, in a lesson or a concept's session | mock |
 | [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
-| [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the preferences, the password and deleting the account | mock (`PUT /api/v1/app/me` confirmed) |
+| [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the goal and the reminder, the password and deleting the account | live, the profile and deletion mock |
 | [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
 | [`notifications.md`](notifications.md) | Notifications: the push token, what the server sends and what a tap opens (ADR 21) | proposed, mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), the splash's version gate, later every screen that reads a setting | mock |
@@ -84,8 +84,11 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/login` | POST | `LoginRequest {email, password, deviceId, platform}` | `TokenResponse`; 401 for wrong credentials, 429 for too many tries | live, used (sign-in) |
 | `/api/v1/auth/refresh` | POST | `RefreshRequest {refreshToken}` | `TokenResponse` | live, used |
 | `/api/v1/auth/logout` | POST | `LogoutRequest {refreshToken}` | — | live, used (sign-out, never waited on) |
-| `/api/v1/app/me` | GET | — | `UserDto` | live, not used yet |
-| `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, not used yet |
+| `/api/v1/app/me` | GET | — | `UserDto`; the goal and the reminder ([me.md](me.md)) | live, used |
+| `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, used (the name) |
+| `/api/v1/app/me/learning` | PUT | `UpdateLearningRequest {dailyGoalMinutes, reminderTime}` | `UserDto` ([me.md](me.md)) | live, used |
+| `/api/v1/app/enrollments/{trackId}/active` | PUT | — | the enrollments ([me.md](me.md)) | live, used |
+| `/api/v1/app/enrollments/{trackId}/level` | PUT | `ChangeLevelRequest {levelId}` | `EnrollmentDto` ([me.md](me.md)) | live, used |
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
 | `/api/v1/app/tracks` | GET | — (a session) | `{items: TrackCatalogItemDto[]}`, each with its levels ([tracks.md](tracks.md)) | live, used |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
@@ -126,7 +129,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
 | `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
-| `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions and onboarding's tracks used |
+| `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions, links and onboarding's tracks used |
 | `/api/v1/auth/guest` | POST | `CreateGuestRequest {deviceId, platform, displayName}`, no session | `TokenResponse`, `accountType: "guest"` ([auth.md](auth.md)) | live, used |
 | `/api/v1/app/me/onboarding` | POST | `OnboardingRequest`, with the new account's token | `OnboardingResultDto` ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/password/forgot` | POST | `ForgotPasswordRequest {email}` | `202`, the same whether or not the email has an account ([auth.md](auth.md)) | live, used |

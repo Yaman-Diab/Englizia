@@ -25,6 +25,7 @@ final class SettingsStorageService {
   static const _readerTipKey = 'settings.reader_tip_seen';
   static const _soundEffectsKey = 'settings.sound_effects';
   static const _vibrationKey = 'settings.vibration';
+  static const _notificationsKey = 'settings.notifications';
   static const _savedWordsKey = 'account.saved_words';
   static const _wordBankKey = 'account.word_bank';
   static const _wordBankOutboxKey = 'account.word_bank_outbox';
@@ -158,6 +159,13 @@ final class SettingsStorageService {
 
   Future<void> setVibration({required bool on}) async {
     await _prefs.setBool(_vibrationKey, on);
+  }
+
+  /// «الإشعارات», every kind or none (ADR 16), until the server keeps it.
+  bool get notifications => _prefs.getBool(_notificationsKey) ?? true;
+
+  Future<void> setNotifications({required bool on}) async {
+    await _prefs.setBool(_notificationsKey, on);
   }
 
   bool get readerTipSeen => _prefs.getBool(_readerTipKey) ?? false;

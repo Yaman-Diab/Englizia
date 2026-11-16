@@ -76,22 +76,22 @@ class FakeProfileRepository implements ProfileRepository {
   }
 
   @override
-  Future<Result<void>> switchTrack(String enrollmentId) async {
+  Future<Result<void>> switchTrack(String trackId) async {
     if (writeFailure case final failure?) return Err(failure);
-    switches.add(enrollmentId);
+    switches.add(trackId);
     profile = profile.copyWith(
       tracks: [
         for (final track in profile.tracks)
-          track.withActive(active: track.enrollmentId == enrollmentId),
+          track.withActive(active: track.trackId == trackId),
       ],
     );
     return const Ok(null);
   }
 
   @override
-  Future<Result<void>> changeLevel(String enrollmentId, String levelId) async {
+  Future<Result<void>> changeLevel(String trackId, String levelId) async {
     if (writeFailure case final failure?) return Err(failure);
-    levels.add((enrollmentId, levelId));
+    levels.add((trackId, levelId));
     return const Ok(null);
   }
 

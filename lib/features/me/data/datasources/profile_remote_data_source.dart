@@ -18,12 +18,14 @@ abstract interface class ProfileRemoteDataSource {
 
   Future<void> rename(String name);
 
-  Future<void> switchTrack(String enrollmentId);
+  Future<void> switchTrack(String trackId);
 
-  Future<void> changeLevel(String enrollmentId, String levelId);
+  Future<void> changeLevel(String trackId, String levelId);
 
+  /// The goal and the reminder, as the account has them.
   Future<Map<String, Object?>> getPreferences();
 
+  /// The goal and the reminder; the notifications' switch stays on the phone.
   Future<void> savePreferences(Map<String, Object?> request);
 
   /// The server ends the account's sessions and answers with one for this
@@ -63,23 +65,32 @@ final class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> switchTrack(String enrollmentId) => _client.put(
-    ApiEndpoints.activeEnrollment,
-    data: {'enrollmentId': enrollmentId},
+  Future<void> switchTrack(String trackId) =>
+      _client.put(ApiEndpoints.activeEnrollment(trackId));
+
+  @override
+  Future<void> changeLevel(String trackId, String levelId) => _client.put(
+    ApiEndpoints.enrollmentLevel(trackId),
+    data: {'levelId': levelId},
   );
 
-  // ASSUMPTION(api): `levelId` on the enrollment, docs/api/me.md.
-  @override
-  Future<void> changeLevel(String enrollmentId, String levelId) => _client
-      .patch(ApiEndpoints.enrollment(enrollmentId), data: {'levelId': levelId});
-
+  /// `UserDto`'s `dailyGoalMinutes` and `reminderTime` ("HH:mm:ss").
   @override
   Future<Map<String, Object?>> getPreferences() async =>
-      asJsonMap(await _client.get(ApiEndpoints.preferences));
+      asJsonMap(await _client.get(ApiEndpoints.me));
 
+  /// `UpdateLearningRequest`: the reminder as "HH:mm:ss".
   @override
-  Future<void> savePreferences(Map<String, Object?> request) =>
-      _client.put(ApiEndpoints.preferences, data: request);
+  Future<void> savePreferences(Map<String, Object?> request) => _client.put(
+    ApiEndpoints.learning,
+    data: {
+      'dailyGoalMinutes': request['dailyGoalMinutes'],
+      'reminderTime': switch (request['reminderTime']) {
+        final String time => '$time:00',
+        _ => null,
+      },
+    },
+  );
 
   @override
   Future<AuthTokens?> changePassword({
@@ -193,7 +204,7 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
   }
 
   @override
-  Future<void> switchTrack(String enrollmentId) async {
+  Future<void> switchTrack(String trackId) async {
     await Future<void>.delayed(latency);
     final profile = await _load();
     _profile = {
@@ -202,8 +213,7 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
         for (final item in profile.readList('tracks') ?? const <Object?>[])
           {
             ...asJsonMap(item),
-            'active':
-                asJsonMap(item).readString('enrollmentId') == enrollmentId,
+            'active': asJsonMap(item).readString('trackId') == trackId,
           },
       ],
     };
@@ -211,7 +221,7 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
 
   /// The grade's names come from the mock's own `mockLevels`.
   @override
-  Future<void> changeLevel(String enrollmentId, String levelId) async {
+  Future<void> changeLevel(String trackId, String levelId) async {
     await Future<void>.delayed(latency);
     final profile = await _load();
     final level = profile.readMap('mockLevels')?.readMap(levelId) ?? const {};
@@ -219,7 +229,7 @@ final class ProfileFakeDataSource implements ProfileRemoteDataSource {
       ...profile,
       'tracks': [
         for (final item in profile.readList('tracks') ?? const <Object?>[])
-          if (asJsonMap(item).readString('enrollmentId') == enrollmentId)
+          if (asJsonMap(item).readString('trackId') == trackId)
             {...asJsonMap(item), ...level, 'levelId': levelId, 'unit': 1}
           else
             item,

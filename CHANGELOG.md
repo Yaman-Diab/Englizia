@@ -73,6 +73,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
+- Switching tracks, changing the grade, the daily goal and the reminder are saved on the server; the privacy and terms pages and support's WhatsApp come from the panel.
 - The tracks of "who will learn" and the school grades come from the server; a track's levels arrive with it.
 - Your onboarding answers reach the server with your new account, whether a guest's, by email or by Google, and a guest who signs in with Google keeps their progress in the same account.
 - "I know some English" no longer starts the placement test at once: onboarding goes on, and the test starts after your account is ready. Offline it can't be chosen, and the screen says why.

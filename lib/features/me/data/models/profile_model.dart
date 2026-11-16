@@ -43,13 +43,17 @@ final class ProfileModel {
     );
   }
 
-  static Preferences? preferences(Map<String, Object?> json) {
+  /// [notifications] is the phone's switch, for an answer without one.
+  static Preferences? preferences(
+    Map<String, Object?> json, {
+    bool notifications = true,
+  }) {
     final goal = json.readInt('dailyGoalMinutes');
     if (goal == null) return null;
     final reminder = json.readString('reminderTime')?.split(':');
     return Preferences(
       dailyGoalMinutes: goal,
-      notifications: json.readBool('notifications') ?? true,
+      notifications: json.readBool('notifications') ?? notifications,
       reminderHour: reminder == null ? null : int.tryParse(reminder.first),
       reminderMinute: reminder == null || reminder.length < 2
           ? 0

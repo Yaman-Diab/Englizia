@@ -214,7 +214,7 @@ void main() {
 
       await subject.switchTrack(emar);
 
-      expect(profiles.switches, [emar.enrollmentId]);
+      expect(profiles.switches, [emar.trackId]);
       expect(subject.state.profile?.active?.enrollmentId, emar.enrollmentId);
       expect(subject.state.switched, emar.title);
       expect(subject.state.switches, 1);

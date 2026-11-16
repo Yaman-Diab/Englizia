@@ -12,6 +12,7 @@ import 'package:englizia/features/launch/presentation/splash/cubit/splash_state.
 import 'package:englizia/features/launch/presentation/splash/pages/splash_page.dart';
 import 'package:englizia/features/settings/domain/entities/app_version.dart';
 import 'package:englizia/features/settings/domain/entities/effective_settings.dart';
+import 'package:englizia/features/settings/domain/entities/support_links.dart';
 import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 import 'package:flutter/material.dart';
@@ -86,6 +87,10 @@ final class _Versions implements SettingsRepository {
   @override
   Future<Result<EffectiveSettings>> getSettings() =>
       sl<SettingsRepository>().getSettings();
+
+  @override
+  Future<Result<SupportLinks>> getSupportLinks() =>
+      sl<SettingsRepository>().getSupportLinks();
 }
 
 /// Offline until the phone itself says otherwise.
