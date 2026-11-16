@@ -8,6 +8,9 @@ import 'package:flutter/services.dart';
 
 abstract interface class SettingsRemoteDataSource {
   Future<EffectiveSettingsModel> getSettings();
+
+  /// `SystemConfigDto` for this phone's platform (the `X-Platform` header).
+  Future<Map<String, Object?>> getSystemConfig();
 }
 
 final class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
@@ -20,6 +23,14 @@ final class SettingsRemoteDataSourceImpl implements SettingsRemoteDataSource {
       EffectiveSettingsModel.fromJson(
         asJsonMap(await _client.get(ApiEndpoints.settings)),
       );
+
+  @override
+  Future<Map<String, Object?>> getSystemConfig() async => asJsonMap(
+    await _client.get(
+      ApiEndpoints.systemConfig,
+      options: ApiClient.publicOptions,
+    ),
+  );
 }
 
 /// Mock mode (`env/mock.json`): the contract's example from the bundled
@@ -31,6 +42,7 @@ final class SettingsFakeDataSource implements SettingsRemoteDataSource {
   });
 
   static const asset = 'assets/mock/settings/effective.json';
+  static const configAsset = 'assets/mock/settings/system_config.json';
 
   final AssetBundle _bundle;
   final Duration latency;
@@ -40,5 +52,12 @@ final class SettingsFakeDataSource implements SettingsRemoteDataSource {
     await Future<void>.delayed(latency);
     final body = jsonDecode(await _bundle.loadString(asset));
     return EffectiveSettingsModel.fromJson(asJsonMap(ApiClient.unwrap(body)));
+  }
+
+  @override
+  Future<Map<String, Object?>> getSystemConfig() async {
+    await Future<void>.delayed(latency);
+    final body = jsonDecode(await _bundle.loadString(configAsset));
+    return asJsonMap(ApiClient.unwrap(body));
   }
 }

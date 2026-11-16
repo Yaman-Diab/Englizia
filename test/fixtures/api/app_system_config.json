@@ -1,0 +1,53 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "platform": "android",
+    "minSupportedVersion": "0.1.0",
+    "latestVersion": "0.1.0",
+    "storeUrl": null,
+    "supportWhatsapp": null,
+    "privacyUrl": null,
+    "termsUrl": null,
+    "dailyGoalOptions": [
+      {
+        "minutes": 5,
+        "xp": 20
+      },
+      {
+        "minutes": 10,
+        "xp": 40
+      },
+      {
+        "minutes": 15,
+        "xp": 60
+      },
+      {
+        "minutes": 20,
+        "xp": 80
+      }
+    ],
+    "aiEnabled": {
+      "explain": false,
+      "grading": false,
+      "examples": false,
+      "conversation": false
+    },
+    "onboarding": [
+      {
+        "audience": "adult",
+        "tracks": []
+      },
+      {
+        "audience": "child",
+        "tracks": []
+      },
+      {
+        "audience": "school_student",
+        "tracks": []
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "a69a08ae7c4b6694ae86067f2bc1ec03"
+}

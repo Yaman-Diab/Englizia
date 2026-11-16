@@ -58,6 +58,8 @@ abstract final class ApiEndpoints {
   static const placementAttempts = '/api/v1/app/placement/attempts';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
+  // Confirmed in docs/api/openapi.json; answered without a session.
+  static const systemConfig = '/api/v1/app/system/config';
 
   // ASSUMPTION(api): docs/api/placement.md.
   static String placementStage(String attemptId, int stage) =>

@@ -127,6 +127,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
 | `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
+| `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions used |
 | `/api/v1/auth/guest` | POST | `{installationId, language, utcOffsetMinutes, onboarding}` | `TokenResponse` ([auth.md](auth.md)) | proposed, mock |
 | `/api/v1/auth/password/forgot` | POST | `ForgotPasswordRequest {email}` | `202`, the same whether or not the email has an account ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/password/reset/check` | POST | `CheckResetTokenRequest {token}` | `ResetTokenInfo {email}`; `400 auth.reset_token_invalid` for a link expired, used or unknown ([auth.md](auth.md)) | live, used |
@@ -156,7 +157,7 @@ Paste-ready; each item names what the app needs and why.
 9. **The links in the emails open the app.** Recovery and confirmation are live; their links (`https://engleazia.com/reset-password?token=…&email=…`, `/verify-email?token=…`) need `assetlinks.json` and apple-app-site-association on that host, and the Apple relay domain registered so they reach hidden Apple emails (S §5.1).
 10. **The password change's refusals.** Answered by the document: a wrong current password is `400 auth.current_password_invalid`, an account with no password `409 auth.password_not_set`, five wrong tries `429 auth.locked_out`. The app keys on the first; it has not been seen on the dev server yet.
 11. **The confirmation link's code.** Answered: a bad `/auth/email/verify` token is now `auth.email_link_invalid` (`test/fixtures/api/auth_email_verify_link_invalid.json`), which the app reads as an expired link, like the recovery's. Please announce a code's change before it reaches the dev server: this one made the expired-link screen show a form error until the app followed.
-12. **App gate.** The minimum and recommended app version per platform (§19.2), proposed as the `appVersion` group of `GET /api/v1/app/settings` ([settings.md](settings.md)), so the app needs one call on open.
+12. **App gate.** Answered: `GET /api/v1/app/system/config` carries the versions and the store page, and every `/app/` call refuses a version below the minimum with `426 app.update_required`; the app follows both.
 13. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
 14. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
 15. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.

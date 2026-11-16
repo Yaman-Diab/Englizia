@@ -2,37 +2,28 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/settings/domain/entities/app_version.dart';
 import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 
-/// One platform's entry of the settings' `appVersion` group; the phone keeps
-/// it in the same shape for an open without a connection.
-// ASSUMPTION(api): field names proposed, not confirmed (docs/api/settings.md).
+/// The versions of `GET /api/v1/app/system/config` (`SystemConfigDto`,
+/// docs/api/openapi.json), for this phone's platform as `X-Platform` names
+/// it; the phone keeps them in the same shape for an open without a
+/// connection.
 final class VersionPolicyModel {
   const VersionPolicyModel(this.entity);
 
   factory VersionPolicyModel.fromJson(Map<String, Object?>? json) =>
       VersionPolicyModel(
         VersionPolicy(
-          minimum: AppVersion.tryParse(json?.readString('minVersion')),
-          recommended: AppVersion.tryParse(
-            json?.readString('recommendedVersion'),
-          ),
-          updateUrl: _link(json?.readString('updateUrl')),
+          minimum: AppVersion.tryParse(json?.readString('minSupportedVersion')),
+          recommended: AppVersion.tryParse(json?.readString('latestVersion')),
+          updateUrl: _link(json?.readString('storeUrl')),
         ),
       );
-
-  /// This phone's entry in the whole settings; none for another platform.
-  factory VersionPolicyModel.fromSettings(
-    Map<String, Object?> settings, {
-    required String? platform,
-  }) => VersionPolicyModel.fromJson(
-    platform == null ? null : settings.readMap('appVersion')?.readMap(platform),
-  );
 
   final VersionPolicy entity;
 
   Map<String, Object?> toJson() => {
-    'minVersion': ?entity.minimum?.toString(),
-    'recommendedVersion': ?entity.recommended?.toString(),
-    'updateUrl': ?entity.updateUrl?.toString(),
+    'minSupportedVersion': ?entity.minimum?.toString(),
+    'latestVersion': ?entity.recommended?.toString(),
+    'storeUrl': ?entity.updateUrl?.toString(),
   };
 
   /// A web page only: it is shown to be copied when no store opens.

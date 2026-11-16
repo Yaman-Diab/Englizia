@@ -1,0 +1,9 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "items": []
+  },
+  "error": null,
+  "traceId": "b5a4aa57b3432139d672c7df6952e613"
+}

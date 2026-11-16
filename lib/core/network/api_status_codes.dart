@@ -9,6 +9,9 @@ abstract final class ApiStatusCodes {
   static const conflict = 409;
   static const gone = 410;
   static const unprocessableEntity = 422;
+
+  /// This app's version is older than the server's minimum.
+  static const upgradeRequired = 426;
   static const tooManyRequests = 429;
   static const internalServerError = 500;
 }

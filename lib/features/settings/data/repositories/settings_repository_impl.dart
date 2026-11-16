@@ -14,15 +14,10 @@ import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:englizia/features/settings/domain/repositories/settings_repository.dart';
 
 final class SettingsRepositoryImpl implements SettingsRepository {
-  SettingsRepositoryImpl(
-    this._remote,
-    this._storage, {
-    required String? platform,
-  }) : _platform = platform;
+  SettingsRepositoryImpl(this._remote, this._storage);
 
   final SettingsRemoteDataSource _remote;
   final SettingsStorageService _storage;
-  final String? _platform;
   EffectiveSettingsModel? _loaded;
 
   /// A response is kept for the session, so each screen that reads a setting
@@ -54,9 +49,9 @@ final class SettingsRepositoryImpl implements SettingsRepository {
         null => const Err(UnknownFailure()),
       };
     }
-    switch (await _settings()) {
+    switch (await guard(_remote.getSystemConfig)) {
       case Ok(:final value):
-        final policy = value.versionsFor(_platform);
+        final policy = VersionPolicyModel.fromJson(value).entity;
         await _keep(policy);
         return Ok(policy);
       case Err(:final failure):
