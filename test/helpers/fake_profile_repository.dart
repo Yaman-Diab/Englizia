@@ -9,7 +9,7 @@ import 'package:englizia/features/me/data/datasources/profile_remote_data_source
 import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/me/domain/repositories/profile_repository.dart';
-import 'package:englizia/features/tracks/data/models/track_level_model.dart';
+import 'package:englizia/features/tracks/data/datasources/track_remote_data_source.dart';
 import 'package:englizia/features/tracks/data/models/track_model.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:englizia/features/tracks/domain/entities/track_level.dart';
@@ -31,16 +31,15 @@ Map<String, Object?> mockProfileJson({bool kids = false, DateTime? now}) =>
 Profile mockProfile({bool kids = false, DateTime? now}) =>
     ProfileModel(mockProfileJson(kids: kids, now: now)).toEntity();
 
+List<TrackModel> _catalog() =>
+    parseCatalog(_asset(TrackFakeDataSource.catalogAsset));
+
 List<LearningTrack> mockPublishedTracks() => [
-  for (final item
-      in _asset('assets/mock/tracks/published_tracks.json')! as List)
-    TrackModel.fromJson(asJsonMap(item)).entity,
+  for (final model in _catalog()) model.entity,
 ];
 
-List<TrackLevel> mockEmarLevels() => [
-  for (final item in _asset('assets/mock/tracks/levels_trk_emar.json')! as List)
-    TrackLevelModel.fromJson(asJsonMap(item)).entity,
-];
+List<TrackLevel> mockEmarLevels() =>
+    _catalog().firstWhere((model) => model.entity.id == 'trk_emar').levels;
 
 class FakeProfileRepository implements ProfileRepository {
   FakeProfileRepository(this.profile, {this.firstView = false});

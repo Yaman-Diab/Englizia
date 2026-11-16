@@ -52,7 +52,7 @@ abstract final class ApiEndpoints {
   // Confirmed in docs/api/openapi.json.
   static const emailVerify = '/api/v1/auth/email/verify';
 
-  // ASSUMPTION(api): docs/api/tracks.md.
+  // Confirmed in docs/api/openapi.json; a member's, with a session.
   static const tracks = '/api/v1/app/tracks';
   // ASSUMPTION(api): docs/api/placement.md.
   static const placementSummary = '/api/v1/app/placement/summary';
@@ -168,7 +168,4 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/tracks.md.
   static String levelUnits(String levelId) =>
       '/api/v1/app/levels/$levelId/units';
-
-  static String trackLevels(String trackId) =>
-      '/api/v1/app/tracks/$trackId/levels';
 }

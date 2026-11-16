@@ -45,6 +45,11 @@ class FakeTrackRepository implements TrackRepository {
   Future<Result<List<LearningTrack>>> getPublishedTracks() async =>
       tracks[(trackCalls++).clamp(0, tracks.length - 1)];
 
+  /// The same queue as [getPublishedTracks]: a test gives one list.
+  @override
+  Future<Result<List<LearningTrack>>> getOnboardingTracks() =>
+      getPublishedTracks();
+
   @override
   Future<Result<List<TrackLevel>>> getLevels(String trackId) async {
     levelRequests.add(trackId);

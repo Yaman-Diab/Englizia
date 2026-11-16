@@ -14,7 +14,7 @@ class AudienceCubit extends Cubit<AudienceState> {
 
   Future<void> load() async {
     emit(state.copyWith(status: LoadStatus.loading, failure: () => null));
-    final result = await _tracks.getPublishedTracks();
+    final result = await _tracks.getOnboardingTracks();
     if (isClosed) return;
     switch (result) {
       case Ok(:final value):

@@ -19,11 +19,13 @@ class RecordedRequest {
     : method = options.method,
       path = options.path,
       headers = Map.of(options.headers),
+      extra = Map.of(options.extra),
       data = options.data;
 
   final String method;
   final String path;
   final Map<String, Object?> headers;
+  final Map<String, Object?> extra;
   final Object? data;
 }
 

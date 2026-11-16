@@ -5,23 +5,27 @@ import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/auth_interceptor.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/features/tracks/data/datasources/track_remote_data_source.dart';
-import 'package:englizia/features/tracks/data/models/track_level_model.dart';
 import 'package:englizia/features/tracks/data/models/track_model.dart';
 import 'package:englizia/features/tracks/data/models/track_unit_model.dart';
 import 'package:englizia/features/tracks/data/repositories/track_repository_impl.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
+import 'package:englizia/features/tracks/domain/entities/track_level.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/api_fixtures.dart';
 import '../../../helpers/fake_http_adapter.dart';
 
-/// The contract's example response: the same file mock mode serves.
-final exampleBody =
-    jsonDecode(File(TrackFakeDataSource.asset).readAsStringSync())
-        as Map<String, Object?>;
+/// Mock mode's examples, in the server's shape.
+Map<String, Object?> _read(String path) =>
+    jsonDecode(File(path).readAsStringSync()) as Map<String, Object?>;
+
+final configBody = _read(TrackFakeDataSource.configAsset);
+final catalogBody = _read(TrackFakeDataSource.catalogAsset);
 
 class _DiskBundle extends CachingAssetBundle {
   @override
@@ -31,11 +35,11 @@ class _DiskBundle extends CachingAssetBundle {
 
 class _FailingDataSource implements TrackRemoteDataSource {
   @override
-  Future<List<TrackModel>> getPublishedTracks() async =>
+  Future<List<TrackModel>> getOnboardingTracks() async =>
       throw const NetworkException('connectionError');
 
   @override
-  Future<List<TrackLevelModel>> getLevels(String trackId) async =>
+  Future<List<TrackModel>> getCatalog() async =>
       throw const NetworkException('connectionError');
 
   @override
@@ -44,99 +48,181 @@ class _FailingDataSource implements TrackRemoteDataSource {
 }
 
 class _FixedDataSource implements TrackRemoteDataSource {
-  _FixedDataSource(
-    this.models, [
-    this.levels = const [],
+  _FixedDataSource({
+    this.onboarding = const [],
+    this.catalog = const [],
     this.units = const [],
-  ]);
+  });
 
-  final List<TrackModel> models;
-  final List<TrackLevelModel> levels;
+  final List<TrackModel> onboarding;
+  final List<TrackModel> catalog;
   final List<TrackUnitModel> units;
+  var onboardingCalls = 0;
+  var catalogCalls = 0;
 
   @override
-  Future<List<TrackModel>> getPublishedTracks() async => models;
+  Future<List<TrackModel>> getOnboardingTracks() async {
+    onboardingCalls++;
+    return onboarding;
+  }
 
   @override
-  Future<List<TrackLevelModel>> getLevels(String trackId) async => levels;
+  Future<List<TrackModel>> getCatalog() async {
+    catalogCalls++;
+    return catalog;
+  }
 
   @override
   Future<List<TrackUnitModel>> getUnits(String levelId) async => units;
 }
 
-void main() {
-  test('the example response parses into tracks', () {
-    final tracks = parseTracks(ApiClient.unwrap(exampleBody));
+ApiClient _client(FakeHttpAdapter adapter) => ApiClient(
+  Dio(BaseOptions(baseUrl: 'https://api.test'))..httpClientAdapter = adapter,
+);
 
-    expect(tracks.map((t) => t.entity.id), [
-      'trk_general',
-      'trk_kids',
-      'trk_emar',
-    ]);
-    final general = tracks.first.entity;
-    expect(
-      general.title,
-      const LocalizedText(ar: 'الإنجليزية العامة', en: 'General English'),
-    );
-    expect(general.audience, TrackAudience.self);
-    expect(general.entryMethod, TrackEntryMethod.placementTest);
-    expect(tracks[1].entity.audience, TrackAudience.child);
-    expect(tracks.last.entity.audience, TrackAudience.schoolStudent);
-    expect(tracks.last.entity.entryMethod, TrackEntryMethod.gradeSelection);
+void main() {
+  group('onboarding: system/config', () {
+    test('the tracks come by audience, each with its levels', () {
+      final tracks = parseOnboarding(ApiClient.unwrap(configBody));
+
+      expect(tracks.map((t) => t.entity.id), [
+        'trk_general',
+        'trk_kids',
+        'trk_emar',
+      ]);
+      final general = tracks.first.entity;
+      expect(
+        general.title,
+        const LocalizedText(ar: 'الإنجليزية العامة', en: 'General English'),
+      );
+      expect(general.audience, TrackAudience.self);
+      expect(general.entryMethod, TrackEntryMethod.placementTest);
+      expect(tracks[1].entity.audience, TrackAudience.child);
+      expect(tracks[1].levels.every((l) => l.kidsMode), isTrue);
+      final emar = tracks.last;
+      expect(emar.entity.audience, TrackAudience.schoolStudent);
+      expect(emar.entity.entryMethod, TrackEntryMethod.gradeSelection);
+      expect(emar.levels, hasLength(12));
+      final seventh = emar.levels[6];
+      expect((seventh.order, seventh.schoolGrade), (7, 7));
+      expect(seventh.name.of('ar'), 'السابع');
+      expect(seventh.group?.of('ar'), 'الحلقة الثانية');
+    });
+
+    test('the dev server answer: every audience, no track yet', () {
+      expect(
+        parseOnboarding(ApiClient.unwrap(apiFixture('app_system_config'))),
+        isEmpty,
+      );
+    });
+
+    test('an audience the app does not know suggests nothing', () {
+      final tracks = parseOnboarding({
+        'onboarding': [
+          {
+            'audience': 'teachers',
+            'tracks': [
+              {'id': 't'},
+            ],
+          },
+        ],
+      });
+      expect(tracks.single.entity.audience, isNull);
+    });
+
+    test('without the onboarding list it is rejected', () {
+      expect(() => parseOnboarding(const {}), throwsFormatException);
+    });
+
+    test('GET /api/v1/app/system/config, without a session', () async {
+      final adapter = FakeHttpAdapter(
+        (_) => FakeResponse(200, body: configBody),
+      );
+      final tracks = await TrackRemoteDataSourceImpl(
+        _client(adapter),
+      ).getOnboardingTracks();
+
+      final request = adapter.requests.single;
+      expect(request.path, '/api/v1/app/system/config');
+      expect(request.extra[AuthInterceptor.skipAuthKey], isTrue);
+      expect(tracks, hasLength(3));
+    });
+  });
+
+  group('the catalog: /app/tracks', () {
+    test('the tracks under items, with descriptions', () {
+      final tracks = parseCatalog(ApiClient.unwrap(catalogBody));
+      expect(tracks, hasLength(3));
+      expect(
+        tracks.first.entity.description.of('en'),
+        'From zero to B2, with a placement test',
+      );
+      expect(tracks.last.entity.audience, TrackAudience.schoolStudent);
+    });
+
+    test('the dev server answer: no track yet', () {
+      expect(
+        parseCatalog(ApiClient.unwrap(apiFixture('app_tracks_empty'))),
+        isEmpty,
+      );
+    });
+
+    test('GET /api/v1/app/tracks', () async {
+      final adapter = FakeHttpAdapter(
+        (_) => FakeResponse(200, body: catalogBody),
+      );
+      await TrackRemoteDataSourceImpl(_client(adapter)).getCatalog();
+      expect(adapter.requests.single.path, '/api/v1/app/tracks');
+    });
   });
 
   group('TrackModel', () {
-    test('an unknown audience means not suggested', () {
+    test('English falls back to Arabic; a broken level is skipped', () {
       final model = TrackModel.fromJson(const {
         'id': 't',
-        'onboardingAudience': 'teachers',
-      });
-      expect(model.entity.audience, isNull);
+        'nameAr': 'مسار',
+        'levels': [
+          {'id': 'l1', 'nameAr': 'الأول'},
+          'not a level',
+          {'nameAr': 'no id'},
+        ],
+      }, order: 0);
+      expect(model.entity.title.of('en'), 'مسار');
+      final level = model.levels.single;
+      expect(level.name.of('en'), 'الأول');
+      expect((level.group, level.schoolGrade), (null, null));
+    });
+
+    test('an unknown entry mode is a direct start', () {
+      final model = TrackModel.fromJson(const {
+        'id': 't',
+        'entryMode': 'lottery',
+      }, order: 0);
+      expect(model.entity.entryMethod, TrackEntryMethod.directStart);
     });
 
     test('a track without an id is rejected', () {
       expect(
-        () => TrackModel.fromJson(const {'title': {}}),
+        () => TrackModel.fromJson(const {'nameAr': 'x'}, order: 0),
         throwsFormatException,
       );
     });
   });
 
-  test('the remote data source calls GET /api/v1/app/tracks', () async {
-    final adapter = FakeHttpAdapter(
-      (_) => FakeResponse(200, body: exampleBody),
-    );
-    final client = ApiClient(
-      Dio(BaseOptions(baseUrl: 'https://api.test'))
-        ..httpClientAdapter = adapter,
-    );
-
-    final tracks = await TrackRemoteDataSourceImpl(client).getPublishedTracks();
-
-    expect(adapter.requests.single.path, '/api/v1/app/tracks');
-    expect(tracks, hasLength(3));
-  });
-
-  test('mock mode serves the bundled example', () async {
-    final tracks = await TrackFakeDataSource(
-      _DiskBundle(),
-      latency: Duration.zero,
-    ).getPublishedTracks();
-    expect(tracks.map((t) => t.entity.id), [
-      'trk_general',
-      'trk_kids',
-      'trk_emar',
-    ]);
+  test('mock mode serves the bundled examples', () async {
+    final source = TrackFakeDataSource(_DiskBundle(), latency: Duration.zero);
+    expect(await source.getOnboardingTracks(), hasLength(3));
+    expect(await source.getCatalog(), hasLength(3));
   });
 
   group('TrackRepositoryImpl', () {
-    TrackModel model(String id, int order) =>
-        TrackModel.fromJson({'id': id, 'order': order});
+    TrackModel model(String id, int order, [List<Object?> levels = const []]) =>
+        TrackModel.fromJson({'id': id, 'levels': levels}, order: order);
 
     test('returns tracks in display order', () async {
       final result = await TrackRepositoryImpl(
-        _FixedDataSource([model('b', 2), model('a', 1)]),
-      ).getPublishedTracks();
+        _FixedDataSource(onboarding: [model('b', 2), model('a', 1)]),
+      ).getOnboardingTracks();
 
       expect(
         switch (result) {
@@ -147,6 +233,49 @@ void main() {
       );
     });
 
+    test('levels come with their track, fetched once', () async {
+      final source = _FixedDataSource(
+        onboarding: [
+          model('t', 0, [
+            {'id': 'l1'},
+            {'id': 'l2'},
+          ]),
+        ],
+      );
+      final repository = TrackRepositoryImpl(source);
+      await repository.getOnboardingTracks();
+
+      final result = await repository.getLevels('t');
+      expect((result as Ok<List<TrackLevel>>).value.map((l) => l.id), [
+        'l1',
+        'l2',
+      ]);
+      expect(source.onboardingCalls, 1);
+    });
+
+    test(
+      'a track no audience leads to has its levels in the catalog',
+      () async {
+        final source = _FixedDataSource(
+          catalog: [
+            model('old', 0, [
+              {'id': 'l1'},
+            ]),
+          ],
+        );
+        final result = await TrackRepositoryImpl(source).getLevels('old');
+        expect((result as Ok<List<TrackLevel>>).value.single.id, 'l1');
+        expect((source.onboardingCalls, source.catalogCalls), (1, 1));
+      },
+    );
+
+    test('a track the server does not list has no levels', () async {
+      final result = await TrackRepositoryImpl(
+        _FixedDataSource(),
+      ).getLevels('gone');
+      expect((result as Ok<List<TrackLevel>>).value, isEmpty);
+    });
+
     test('maps errors through the error funnel', () async {
       final result = await TrackRepositoryImpl(
         _FailingDataSource(),
@@ -154,77 +283,6 @@ void main() {
 
       expect(result, isA<Err<List<LearningTrack>>>());
       expect((result as Err).failure, isA<NetworkFailure>());
-    });
-  });
-
-  group('levels', () {
-    final levelsBody =
-        jsonDecode(
-              File(
-                TrackFakeDataSource.levelsAsset('trk_emar'),
-              ).readAsStringSync(),
-            )
-            as Map<String, Object?>;
-
-    test('the example levels parse with grade and display group', () {
-      final levels = parseLevels(ApiClient.unwrap(levelsBody));
-
-      expect(levels, hasLength(12));
-      final seventh = levels[6].entity;
-      expect(seventh.schoolGrade, 7);
-      expect(seventh.name.of('ar'), 'السابع');
-      expect(seventh.group?.of('ar'), 'الحلقة الثانية');
-      expect(levels.last.entity.name.of('ar'), 'البكالوريا');
-    });
-
-    test('a level without a display group has none', () {
-      final level = TrackLevelModel.fromJson(const {'id': 'l1'}).entity;
-      expect(level.group, isNull);
-      expect(level.schoolGrade, isNull);
-    });
-
-    test('GET /api/v1/app/tracks/{id}/levels', () async {
-      final adapter = FakeHttpAdapter(
-        (_) => FakeResponse(200, body: levelsBody),
-      );
-      final client = ApiClient(
-        Dio(BaseOptions(baseUrl: 'https://api.test'))
-          ..httpClientAdapter = adapter,
-      );
-
-      final levels = await TrackRemoteDataSourceImpl(
-        client,
-      ).getLevels('trk_emar');
-
-      expect(
-        adapter.requests.single.path,
-        '/api/v1/app/tracks/trk_emar/levels',
-      );
-      expect(levels, hasLength(12));
-    });
-
-    test('mock mode serves each track its own levels file', () async {
-      final levels = await TrackFakeDataSource(
-        _DiskBundle(),
-        latency: Duration.zero,
-      ).getLevels('trk_emar');
-      expect(levels.first.entity.id, 'lvl_emar_01');
-    });
-
-    test('the repository returns levels in display order', () async {
-      final result = await TrackRepositoryImpl(
-        _FixedDataSource(const [], [
-          TrackLevelModel.fromJson(const {'id': 'b', 'order': 2}),
-          TrackLevelModel.fromJson(const {'id': 'a', 'order': 1}),
-        ]),
-      ).getLevels('t');
-      expect(
-        switch (result) {
-          Ok(:final value) => value.map((l) => l.id),
-          Err() => null,
-        },
-        ['a', 'b'],
-      );
     });
   });
 
@@ -280,10 +338,12 @@ void main() {
 
     test('the repository returns units in display order', () async {
       final result = await TrackRepositoryImpl(
-        _FixedDataSource(const [], const [], [
-          TrackUnitModel.fromJson(const {'id': 'b', 'order': 2}),
-          TrackUnitModel.fromJson(const {'id': 'a', 'order': 1}),
-        ]),
+        _FixedDataSource(
+          units: [
+            TrackUnitModel.fromJson(const {'id': 'b', 'order': 2}),
+            TrackUnitModel.fromJson(const {'id': 'a', 'order': 1}),
+          ],
+        ),
       ).getUnits('l');
       expect(
         switch (result) {

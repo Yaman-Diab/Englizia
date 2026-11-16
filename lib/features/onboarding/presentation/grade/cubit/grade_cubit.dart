@@ -38,7 +38,7 @@ class GradeCubit extends Cubit<GradeState> {
   void select(TrackLevel level) => emit(state.copyWith(selected: () => level));
 
   Future<Result<List<TrackLevel>>> _loadLevels() async {
-    switch (await _tracks.getPublishedTracks()) {
+    switch (await _tracks.getOnboardingTracks()) {
       case Err(:final failure):
         return Err(failure);
       case Ok(:final value):

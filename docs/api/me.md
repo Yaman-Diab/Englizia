@@ -91,7 +91,7 @@ The common errors (`README.md`).
 
 ## `PATCH /api/v1/app/enrollments/{id}`
 
-«تغيير الصف»: `{ "levelId": "lvl_emar_08" }` moves an Emar learner to another grade, which keeps its own progress. The grades come from `GET /api/v1/app/tracks/{trackId}/levels` with `kidsMode` per level ([tracks.md](tracks.md)). Proposed, on the endpoint [placement.md](placement.md) already uses.
+«تغيير الصف»: `{ "levelId": "lvl_emar_08" }` moves an Emar learner to another grade, which keeps its own progress. The grades are the track's levels in `GET /api/v1/app/tracks` ([tracks.md](tracks.md)); a grade is marked «وضع الأطفال» by its track's kids mode until the server gives one per level. Proposed, on the endpoint [placement.md](placement.md) already uses.
 
 ## `GET /api/v1/app/me/preferences`, `PUT /api/v1/app/me/preferences`
 

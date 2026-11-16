@@ -59,7 +59,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | Contract | Used by | Data in the app |
 |---|---|---|
 | [`openapi.json`](openapi.json) | Register, login, refresh, logout, `/app/me`, ping | register, login, refresh and logout |
-| [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), later track switching | mock |
+| [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), «أنا»'s tracks and grades | live, units mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
 | [`auth.md`](auth.md) | Accounts: sign-up and sign-in, password recovery, the email's confirmation, Google and Apple, "save progress"'s guest account and its upgrades (ADR 10), onboarding's answers | live |
@@ -87,8 +87,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/me` | GET | — | `UserDto` | live, not used yet |
 | `/api/v1/app/me` | PUT | `UpdateMeRequest {displayName, timeZone, uiLanguage}` | `UserDto` | live, not used yet |
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
-| `/api/v1/app/tracks` | GET | — | track list ([tracks.md](tracks.md)) | proposed, mock |
-| `/api/v1/app/tracks/{trackId}/levels` | GET | — | level list ([tracks.md](tracks.md)) | proposed, mock |
+| `/api/v1/app/tracks` | GET | — (a session) | `{items: TrackCatalogItemDto[]}`, each with its levels ([tracks.md](tracks.md)) | live, used |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, version, exercises}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/answers/review` | POST | as an answer | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
@@ -127,7 +126,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
 | `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
-| `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions used |
+| `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions and onboarding's tracks used |
 | `/api/v1/auth/guest` | POST | `CreateGuestRequest {deviceId, platform, displayName}`, no session | `TokenResponse`, `accountType: "guest"` ([auth.md](auth.md)) | live, used |
 | `/api/v1/app/me/onboarding` | POST | `OnboardingRequest`, with the new account's token | `OnboardingResultDto` ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/password/forgot` | POST | `ForgotPasswordRequest {email}` | `202`, the same whether or not the email has an account ([auth.md](auth.md)) | live, used |
@@ -151,7 +150,7 @@ Paste-ready; each item names what the app needs and why.
 2. **Google and Apple for a guest.** Answered: `POST /api/v1/auth/guest/upgrade/google` and `/apple`.
    **Google's client.** The server must check the `idToken`'s audience against the "Web application" client of the app's Google Cloud project ([auth.md](auth.md)); the app's owner sends its ID.
 3. **Onboarding answers with account creation.** Answered: `POST /api/v1/app/me/onboarding`, sent with the new account's token right after it is made ([auth.md](auth.md)).
-4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/tracks`, `GET /app/tracks/{trackId}/levels`, `GET /app/levels/{levelId}/units`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the tracks, levels and settings calls must work **without a token**, because onboarding reads them before an account exists.
+4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/levels/{levelId}/units`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
 5. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
 6. **The password policy** in the OpenAPI document: any name length limit as `minLength`/`maxLength` (the password's 8 shows only in register's answer), and the `details` codes beyond `not_empty`. The codes per endpoint are there now, in each response's description; as an `enum` or an extension field they could be checked by a test.
 7. **`Retry-After` on 429.** Answered by the document: `auth.locked_out` (5 wrong passwords, 5 minutes) and `rate_limit.exceeded` both carry it, and the app counts it down. Not yet seen on the dev server.
