@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:englizia/core/security/protected_video.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_video.dart';
 import 'package:englizia/features/lessons/presentation/grammar/widgets/option_sheet.dart';
@@ -897,8 +898,8 @@ class _Cover extends StatelessWidget {
         ColoredBox(
           color: reader.videoBoard,
           child: cover != null
-              ? Image.network(
-                  cover,
+              ? Image(
+                  image: KeptMedia.image(cover),
                   fit: BoxFit.cover,
                   errorBuilder: (_, _, _) => const SizedBox.shrink(),
                 )

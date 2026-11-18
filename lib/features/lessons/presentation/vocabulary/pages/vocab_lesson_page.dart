@@ -11,6 +11,7 @@ import 'package:englizia/core/design_system/widgets/app_state_view.dart';
 import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
 import 'package:englizia/core/design_system/widgets/letter_panel.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/presentation/reader/widgets/reader_controls.dart';
@@ -517,8 +518,8 @@ class _ReviewTile extends StatelessWidget {
                             ColoredBox(
                               color: colors.tiles.neutral.background,
                               child: url.startsWith('http')
-                                  ? Image.network(
-                                      url,
+                                  ? Image(
+                                      image: KeptMedia.image(url),
                                       fit: BoxFit.cover,
                                       errorBuilder: (_, _, _) => LetterPanel(
                                         word: word.word,

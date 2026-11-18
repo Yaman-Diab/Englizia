@@ -7,6 +7,9 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 abstract interface class ConnectivityService {
   Future<bool> isOnline();
 
+  /// On Wi-Fi or a cable: a connection that doesn't spend mobile data.
+  Future<bool> isOnWifi();
+
   /// Emits on every change only.
   Stream<bool> get onlineChanges;
 }
@@ -20,6 +23,12 @@ final class PlusConnectivityService implements ConnectivityService {
   @override
   Future<bool> isOnline() async =>
       _isOnline(await _connectivity.checkConnectivity());
+
+  @override
+  Future<bool> isOnWifi() async =>
+      (await _connectivity.checkConnectivity()).any(
+        (r) => r == ConnectivityResult.wifi || r == ConnectivityResult.ethernet,
+      );
 
   @override
   Stream<bool> get onlineChanges =>

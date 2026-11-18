@@ -25,18 +25,24 @@ final class SettingsActions {
     required this.onWhatsApp,
     required this.onPrivacy,
     required this.onTerms,
+    required this.onShare,
     required this.onSignOut,
     required this.onCreateAccount,
     required this.onVerifyEmail,
     required this.onPassword,
     required this.onDelete,
     required this.version,
+    this.onDownloads,
   });
 
   final VoidCallback onBack;
   final ValueChanged<String> onWhatsApp;
   final VoidCallback onPrivacy;
   final VoidCallback onTerms;
+
+  /// Shares [link] through the phone's sheet, pointing from [origin] on an
+  /// iPad.
+  final void Function(Uri link, Rect origin) onShare;
   final Future<void> Function() onSignOut;
   final VoidCallback onCreateAccount;
   final Future<void> Function() onVerifyEmail;
@@ -44,6 +50,9 @@ final class SettingsActions {
   /// True once the new password was saved.
   final Future<bool?> Function() onPassword;
   final VoidCallback onDelete;
+
+  /// «الدروس المنزّلة»; null while the panel doesn't offer downloads.
+  final VoidCallback? onDownloads;
 
   final String version;
 }
@@ -140,6 +149,13 @@ class _SettingsPageState extends State<SettingsPage> {
     if (quality != null) await cubit.setVideoQuality(quality);
   }
 
+  /// Where [row] is on the screen: the share sheet points from it on an
+  /// iPad.
+  static Rect _boundsOf(BuildContext row) {
+    final box = row.findRenderObject()! as RenderBox;
+    return box.localToGlobal(Offset.zero) & box.size;
+  }
+
   Future<void> _password() async {
     final saved = await _actions.onPassword();
     if (saved != true || !mounted) return;
@@ -191,7 +207,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         ..._learning(me, state),
                         ..._display(device),
                         ..._sound(device, state),
-                        _support(me),
+                        _support(me, state.shareLink),
                         _leave(me),
                         const SizedBox(height: 28),
                         Text(
@@ -364,16 +380,25 @@ class _SettingsPageState extends State<SettingsPage> {
             value: qualityName(state.videoQuality),
             onPressed: () => _quality(state),
           ),
+          if (_actions.onDownloads case final open?)
+            SettingsRow(label: 'downloads_settings_row'.tr(), onPressed: open),
         ],
       ),
     ];
   }
 
-  Widget _support(MeState me) {
+  Widget _support(MeState me, Uri? shareLink) {
     final whatsapp = me.profile?.whatsapp;
     return SettingsGroup(
       title: 'settings_support'.tr(),
       rows: [
+        if (shareLink != null)
+          Builder(
+            builder: (row) => SettingsRow(
+              label: 'settings_share'.tr(),
+              onPressed: () => _actions.onShare(shareLink, _boundsOf(row)),
+            ),
+          ),
         if (whatsapp != null)
           SettingsRow(
             label: 'settings_whatsapp'.tr(),

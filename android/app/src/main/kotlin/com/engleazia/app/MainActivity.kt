@@ -29,6 +29,15 @@ class MainActivity : FlutterActivity() {
                 }
                 result.success(null)
             }
+        // Room left on the app's own volume, before a lesson is downloaded.
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/storage")
+            .setMethodCallHandler { call, result ->
+                if (call.method == "freeBytes") {
+                    result.success(android.os.StatFs(filesDir.path).availableBytes)
+                } else {
+                    result.notImplemented()
+                }
+            }
         // While a lesson's video shows: no screenshot, no recording (they come
         // out black), and no preview among the recent apps.
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "englizia/screen_secure")

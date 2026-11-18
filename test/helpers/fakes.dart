@@ -74,6 +74,12 @@ class FakeConnectivityService implements ConnectivityService {
   @override
   Future<bool> isOnline() async => _online;
 
+  /// Mobile data when false.
+  bool wifi = true;
+
+  @override
+  Future<bool> isOnWifi() async => _online && wifi;
+
   @override
   Stream<bool> get onlineChanges => _changes.stream;
 

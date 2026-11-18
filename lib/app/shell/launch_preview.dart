@@ -104,6 +104,10 @@ final class _Connection implements ConnectivityService {
       online && await sl<ConnectivityService>().isOnline();
 
   @override
+  Future<bool> isOnWifi() async =>
+      online && await sl<ConnectivityService>().isOnWifi();
+
+  @override
   Stream<bool> get onlineChanges =>
       online ? sl<ConnectivityService>().onlineChanges : const Stream.empty();
 }

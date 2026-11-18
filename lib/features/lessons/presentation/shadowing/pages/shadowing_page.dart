@@ -15,6 +15,7 @@ import 'package:englizia/core/design_system/widgets/lesson_progress_bar.dart';
 import 'package:englizia/core/design_system/widgets/mic_permission_sheet.dart';
 import 'package:englizia/core/design_system/widgets/said_word.dart';
 import 'package:englizia/core/l10n/failure_l10n.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
@@ -566,8 +567,8 @@ class _VideoStill extends StatelessWidget {
       color: reader.videoBoard,
       child: url == null
           ? placeholder
-          : Image.network(
-              url,
+          : Image(
+              image: KeptMedia.image(url),
               fit: BoxFit.cover,
               errorBuilder: (_, _, _) => placeholder,
             ),

@@ -48,10 +48,44 @@ import UIKit
       UIApplication.shared.isIdleTimerDisabled = on
       result(nil)
     }
+    // Room left for what the learner asks for, before a lesson is downloaded.
+    FlutterMethodChannel(
+      name: "englizia/storage",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    ).setMethodCallHandler { call, result in
+      guard call.method == "freeBytes" else {
+        result(FlutterMethodNotImplemented)
+        return
+      }
+      let home = URL(fileURLWithPath: NSHomeDirectory())
+      let values = try? home.resourceValues(
+        forKeys: [.volumeAvailableCapacityForImportantUsageKey])
+      result(values?.volumeAvailableCapacityForImportantUsage)
+    }
+    Self.keepDownloadsOutOfBackups()
     FlutterEventChannel(
       name: "englizia/screen_capture",
       binaryMessenger: engineBridge.applicationRegistrar.messenger()
     ).setStreamHandler(screenCapture)
+  }
+}
+
+extension AppDelegate {
+  /// The downloaded lessons (Application Support/media) stay on this phone:
+  /// they are sealed with a key that never leaves it, so a copy in iCloud or
+  /// on a computer would only take room.
+  static func keepDownloadsOutOfBackups() {
+    guard
+      let support = FileManager.default.urls(
+        for: .applicationSupportDirectory, in: .userDomainMask
+      ).first
+    else { return }
+    var media = support.appendingPathComponent("media", isDirectory: true)
+    try? FileManager.default.createDirectory(
+      at: media, withIntermediateDirectories: true)
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    try? media.setResourceValues(values)
   }
 }
 

@@ -162,6 +162,10 @@ abstract final class ApiEndpoints {
   static String lessonSpokenReview(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/answers/spoken-review';
 
+  // ASSUMPTION(api): docs/api/downloads.md.
+  static String lessonDownload(String lessonId) =>
+      '/api/v1/app/lessons/$lessonId/download';
+
   // ASSUMPTION(api): docs/api/lessons.md.
   static String lessonReports(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/reports';

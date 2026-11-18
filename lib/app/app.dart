@@ -8,12 +8,14 @@ import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/design_system/app_theme.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
+import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/notifications/push_channel.dart';
 import 'package:englizia/core/notifications/push_message.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/settings/settings_cubit.dart';
 import 'package:englizia/core/settings/settings_state.dart';
+import 'package:englizia/features/downloads/presentation/downloads/cubit/downloads_cubit.dart';
 import 'package:englizia/features/launch/presentation/splash/cubit/splash_cubit.dart';
 import 'package:englizia/features/lessons/data/answers_sync.dart';
 import 'package:englizia/features/notifications/data/services/push_token_sync.dart';
@@ -41,6 +43,10 @@ class _AppState extends State<App> {
   );
   late final AnswersSync _answers;
 
+  /// The downloaded lessons (ADR 22): one for the app, as a download goes on
+  /// while the screens change.
+  final _downloads = sl<DownloadsCubit>();
+
   /// Notifications that arrive while the app is open (ADR 21).
   final _notifications = sl<InAppNotificationsCubit>();
   final _session = sl<AppSessionController>();
@@ -54,10 +60,23 @@ class _AppState extends State<App> {
     super.initState();
     unawaited(_launch.start());
     _answers = sl<AnswersSync>()..start();
+    _session.addListener(_startDownloads);
+    _startDownloads();
+    // Back online: what was cut carries on, and what ran out is asked about.
+    _subscriptions.add(
+      sl<ConnectivityService>().onlineChanges
+          .where((online) => online)
+          .listen((_) => unawaited(_downloads.tidy())),
+    );
     _router.routerDelegate.addListener(_onRoute);
     _session.addListener(_openWaiting);
     _subscriptions.add(_launch.stream.listen((_) => _openWaiting()));
     unawaited(_startPush());
+  }
+
+  /// Downloads are the account's: they start with a session.
+  void _startDownloads() {
+    if (_session.hasSession) unawaited(_downloads.start());
   }
 
   Future<void> _startPush() async {
@@ -138,6 +157,7 @@ class _AppState extends State<App> {
       unawaited(subscription.cancel());
     }
     _session.removeListener(_openWaiting);
+    _session.removeListener(_startDownloads);
     _router.routerDelegate.removeListener(_onRoute);
     unawaited(_notifications.close());
     _answers.stop();
@@ -155,6 +175,7 @@ class _AppState extends State<App> {
         BlocProvider(create: (_) => sl<SettingsCubit>()),
         BlocProvider.value(value: _launch),
         BlocProvider.value(value: _notifications),
+        BlocProvider.value(value: _downloads),
       ],
       child: ScreenUtilInit(
         designSize: AppTheme.designSize,

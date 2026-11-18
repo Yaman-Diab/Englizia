@@ -7,6 +7,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/press_scale.dart';
 import 'package:englizia/core/design_system/motion/pulse.dart';
 import 'package:englizia/core/design_system/widgets/action_sheet.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -70,8 +71,8 @@ class KidPicture extends StatelessWidget {
       child: url.isEmpty
           ? null
           : url.startsWith('http')
-          ? Image.network(
-              url,
+          ? Image(
+              image: KeptMedia.image(url),
               fit: BoxFit.contain,
               errorBuilder: (_, _, _) => const SizedBox.shrink(),
             )

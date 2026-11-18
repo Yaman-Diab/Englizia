@@ -26,6 +26,7 @@ final class SettingsStorageService {
   static const _soundEffectsKey = 'settings.sound_effects';
   static const _vibrationKey = 'settings.vibration';
   static const _notificationsKey = 'settings.notifications';
+  static const _downloadsWifiOnlyKey = 'settings.downloads_wifi_only';
   static const _savedWordsKey = 'account.saved_words';
   static const _wordBankKey = 'account.word_bank';
   static const _wordBankOutboxKey = 'account.word_bank_outbox';
@@ -159,6 +160,13 @@ final class SettingsStorageService {
 
   Future<void> setVibration({required bool on}) async {
     await _prefs.setBool(_vibrationKey, on);
+  }
+
+  /// «عبر Wi-Fi فقط»: lessons download on Wi-Fi alone unless turned off.
+  bool get downloadsWifiOnly => _prefs.getBool(_downloadsWifiOnlyKey) ?? true;
+
+  Future<void> setDownloadsWifiOnly({required bool on}) async {
+    await _prefs.setBool(_downloadsWifiOnlyKey, on);
   }
 
   /// «الإشعارات», every kind or none (ADR 16), until the server keeps it.

@@ -13,6 +13,7 @@ import 'package:englizia/features/me/presentation/me/cubit/me_cubit.dart';
 import 'package:englizia/features/me/presentation/settings/cubit/preferences_cubit.dart';
 import 'package:englizia/features/me/presentation/settings/pages/account_pages.dart';
 import 'package:englizia/features/me/presentation/settings/pages/settings_page.dart';
+import 'package:englizia/features/settings/domain/entities/version_policy.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,20 +40,19 @@ void main() {
   late FakeProfileRepository profiles;
   late FakeLessonRepository lessons;
   late FakeNotificationPermission permission;
+  late FakeSettingsRepository settings;
+  final store = Uri.parse('https://play.google.com/store/apps/details?id=x');
 
   setUp(() {
     profiles = FakeProfileRepository(mockProfile(now: today));
     lessons = FakeLessonRepository();
     permission = FakeNotificationPermission(access: NotificationAccess.granted);
+    // The versions the splash kept, with the store page.
+    settings = FakeSettingsRepository()..kept = VersionPolicy(updateUrl: store);
   });
 
   PreferencesCubit cubit() {
-    final subject = PreferencesCubit(
-      profiles,
-      FakeSettingsRepository(),
-      lessons,
-      permission,
-    );
+    final subject = PreferencesCubit(profiles, settings, lessons, permission);
     addTearDown(subject.close);
     return subject;
   }
@@ -133,6 +133,17 @@ void main() {
       expect(subject.state.saving, isFalse);
     });
 
+    test('the share link is the kept store page, with no request', () async {
+      final subject = cubit();
+      await subject.start();
+      expect(subject.state.shareLink, store);
+
+      settings = FakeSettingsRepository();
+      final none = cubit();
+      await none.start();
+      expect(none.state.shareLink, isNull);
+    });
+
     test('vibration can be turned off for the whole app', () async {
       SharedPreferences.setMockInitialValues({});
       final settings = SettingsCubit(
@@ -154,6 +165,7 @@ void main() {
     Future<PreferencesCubit> pump(
       WidgetTester tester, {
       bool guest = false,
+      bool downloads = true,
       Locale locale = const Locale('ar'),
       Size size = defaultViewport,
       ThemeMode themeMode = ThemeMode.light,
@@ -186,6 +198,10 @@ void main() {
               onWhatsApp: (_) => did.add('whatsapp'),
               onPrivacy: () => did.add('privacy'),
               onTerms: () => did.add('terms'),
+              onShare: (link, origin) {
+                did.add('share $link');
+                expect(origin.isEmpty, isFalse);
+              },
               onSignOut: () async => did.add('out'),
               onCreateAccount: () => did.add('account'),
               onVerifyEmail: () async => did.add('verify'),
@@ -194,6 +210,7 @@ void main() {
                 return true;
               },
               onDelete: () => did.add('delete'),
+              onDownloads: downloads ? () => did.add('downloads') : null,
               version: '1.0.0',
             ),
           ),
@@ -244,6 +261,47 @@ void main() {
       expect(find.text('settings_notifications_off'.tr()), findsOneWidget);
       await tester.tap(find.text('settings_open_phone'.tr()));
       expect(permission.settingsOpened, 1);
+    });
+
+    testWidgets('«شارك التطبيق» sends the store page, from its row', (
+      tester,
+    ) async {
+      await pump(tester);
+      final share = find.text('settings_share'.tr());
+      await tester.scrollUntilVisible(share, 300);
+      await tester.ensureVisible(share);
+      await settle(tester);
+      await tester.tap(share);
+      expect(did, ['share $store']);
+    });
+
+    testWidgets('no store page, no row', (tester) async {
+      settings = FakeSettingsRepository();
+      await pump(tester);
+      await tester.scrollUntilVisible(
+        find.text('settings_version'.tr(args: ['1.0.0'])),
+        300,
+      );
+      expect(find.text('settings_share'.tr()), findsNothing);
+    });
+
+    testWidgets('the downloaded lessons, only when the panel offers them', (
+      tester,
+    ) async {
+      await pump(tester);
+      final row = find.text('downloads_settings_row'.tr());
+      await tester.scrollUntilVisible(row, 300);
+      await tester.ensureVisible(row);
+      await settle(tester);
+      await tester.tap(row);
+      expect(did, ['downloads']);
+
+      await pump(tester, downloads: false);
+      await tester.scrollUntilVisible(
+        find.text('settings_version'.tr(args: ['1.0.0'])),
+        300,
+      );
+      expect(find.text('downloads_settings_row'.tr()), findsNothing);
     });
 
     testWidgets('a saved password is said', (tester) async {

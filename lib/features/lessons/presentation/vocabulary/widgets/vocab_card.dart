@@ -8,6 +8,7 @@ import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
 import 'package:englizia/core/design_system/widgets/letter_panel.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/presentation/widgets/karaoke_text.dart';
 import 'package:englizia/features/lessons/presentation/widgets/save_star.dart';
@@ -271,8 +272,8 @@ class _Picture extends StatelessWidget {
               // neutral tile is its colour in both themes.
               color: context.colors.tiles.neutral.background,
               child: url.startsWith('http')
-                  ? Image.network(
-                      url,
+                  ? Image(
+                      image: KeptMedia.image(url),
                       fit: BoxFit.cover,
                       loadingBuilder: (_, image, progress) =>
                           progress == null ? image : const VocabSkeleton(),

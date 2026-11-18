@@ -1,4 +1,5 @@
 import 'package:englizia/core/config/app_config.dart';
+import 'package:englizia/core/media/media_vault.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/video/silent_audio_engine.dart';
 import 'package:englizia/core/video/video_engine.dart';
@@ -45,7 +46,7 @@ void registerLessonDependencies(GetIt sl) {
           : LessonRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<LessonRepository>(
-      () => LessonRepositoryImpl(sl(), settings: sl()),
+      () => LessonRepositoryImpl(sl(), settings: sl(), vault: sl()),
     )
     ..registerLazySingleton<UnitRemoteDataSource>(
       () => AppConfig.isMock
@@ -66,7 +67,9 @@ void registerLessonDependencies(GetIt sl) {
     ..registerLazySingleton<TeacherQuestionRepository>(
       () => TeacherQuestionRepositoryImpl(sl()),
     )
-    ..registerFactory<VideoEngine>(() => VideoPlayerEngine(sounds: sl()))
+    ..registerFactory<VideoEngine>(
+      () => VideoPlayerEngine(sounds: sl(), kept: sl<MediaVault>().playable),
+    )
     ..registerFactoryParam<GrammarLessonCubit, String, void>(
       (lessonId, _) => GrammarLessonCubit(sl(), sl(), sl(), lessonId: lessonId),
     )

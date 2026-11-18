@@ -118,6 +118,7 @@ void main() {
   group('the page', () {
     late List<(String, bool)> opened;
     late List<String> unitsOpened;
+    late List<UnitPlan> shown;
 
     Future<UnitCubit> pump(
       WidgetTester tester, {
@@ -128,6 +129,7 @@ void main() {
     }) async {
       opened = [];
       unitsOpened = [];
+      shown = [];
       units.unit = mockUnit(unitId);
       final subject = cubit(unitId);
       await tester.pumpLocalized(
@@ -137,6 +139,14 @@ void main() {
             onBack: () {},
             onOpen: (lesson, {required kids}) => opened.add((lesson.id, kids)),
             onUnit: (unit) => unitsOpened.add(unit.id),
+            // As big as the downloads the app puts there.
+            lessonTrailing: (_, lesson) => SizedBox.square(
+              dimension: 48,
+              key: ValueKey('trailing ${lesson.id}'),
+            ),
+            aboveLessons: (_) =>
+                const SizedBox(height: 72, key: ValueKey('above')),
+            onShown: shown.add,
           ),
         ),
         locale: locale,
@@ -286,6 +296,26 @@ void main() {
       await subject.start();
       await settle(tester);
       expect(find.text('common_retry'.tr()), findsOneWidget);
+    });
+
+    testWidgets('the parts the app adds: at the end of a lesson and over the '
+        'list, told when the unit comes; none on a locked unit', (
+      tester,
+    ) async {
+      await pump(tester);
+      final plan = shown.last;
+      expect(plan.id, UnitFakeDataSource.farm);
+      expect(find.byKey(const ValueKey('above')), findsOneWidget);
+      expect(
+        find.byKey(ValueKey('trailing ${plan.lessons.first.id}')),
+        findsOneWidget,
+      );
+
+      final locked = UnitFakeDataSource.units.firstWhere(
+        (id) => mockUnit(id).locked,
+      );
+      await pump(tester, unitId: locked);
+      expect(find.byKey(const ValueKey('above')), findsNothing);
     });
 
     testLayouts('every kind of unit fits', (tester, layout) async {

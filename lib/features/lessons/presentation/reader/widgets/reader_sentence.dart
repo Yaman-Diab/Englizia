@@ -6,6 +6,7 @@ import 'package:englizia/core/design_system/motion/entrance.dart';
 import 'package:englizia/core/design_system/motion/smooth_size.dart';
 import 'package:englizia/core/design_system/motion/timed_value.dart';
 import 'package:englizia/core/design_system/widgets/word_line.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/reader_cubit.dart';
 import 'package:equatable/equatable.dart';
@@ -261,8 +262,8 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                       child: ColoredBox(
                         color: colors.primary.surface,
                         child: image.startsWith('http')
-                            ? Image.network(
-                                image,
+                            ? Image(
+                                image: KeptMedia.image(image),
                                 fit: BoxFit.cover,
                                 errorBuilder: (_, _, _) =>
                                     const SizedBox.shrink(),

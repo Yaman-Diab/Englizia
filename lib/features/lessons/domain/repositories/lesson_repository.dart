@@ -39,6 +39,10 @@ abstract interface class LessonRepository {
 
   VideoQuality get videoQuality;
 
+  /// The address to play [video] from: a source downloaded to this phone
+  /// before any other, else the one for [quality].
+  String videoUrl(LessonVideo video, VideoQuality quality);
+
   Future<void> setVideoQuality(VideoQuality quality);
 
   ReaderPrefs get readerPrefs;

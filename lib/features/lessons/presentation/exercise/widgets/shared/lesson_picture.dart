@@ -1,6 +1,7 @@
 import 'package:englizia/core/design_system/app_theme_context.dart';
 import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
+import 'package:englizia/core/media/kept_media.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -20,8 +21,8 @@ class LessonPicture extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: url.startsWith('http')
-            ? Image.network(
-                url,
+            ? Image(
+                image: KeptMedia.image(url),
                 fit: BoxFit.contain,
                 loadingBuilder: (_, image, progress) =>
                     progress == null ? image : const AppSpinner(),

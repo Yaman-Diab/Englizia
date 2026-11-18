@@ -98,6 +98,14 @@
           "en": "Just {minutes} minutes keeps your streak going"
         }
       }
+    },
+    "downloads": {
+      "enabled": true,
+      "maxMegabytes": 1024,
+      "maxLessons": 40,
+      "validDays": 30,
+      "keepDoneDays": 14,
+      "minFreeMegabytes": 300
     }
   },
   "error": null,

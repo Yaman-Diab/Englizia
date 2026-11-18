@@ -35,6 +35,7 @@ class AppSessionController extends ChangeNotifier {
   static const _leavingLimit = Duration(seconds: 5);
 
   final _leavingTasks = <Future<void> Function()>[];
+  final _clearingTasks = <Future<void> Function()>[];
   SessionStatus _status = SessionStatus.unknown;
   bool _expiring = false;
 
@@ -67,7 +68,7 @@ class AppSessionController extends ChangeNotifier {
   /// only until the app closes.
   Future<bool> signIn(AuthTokens tokens) async {
     final saved = await _tokens.write(tokens);
-    await _settings.clearAccountData();
+    await _clearAccountData();
     _setStatus(_statusOf(tokens));
     return saved;
   }
@@ -78,6 +79,22 @@ class AppSessionController extends ChangeNotifier {
     final saved = await _tokens.write(tokens);
     _setStatus(_statusOf(tokens));
     return saved;
+  }
+
+  /// Adds what else to forget when the account's data is cleared: what a
+  /// feature keeps outside the preferences, as the downloaded lessons.
+  void onClearing(Future<void> Function() task) => _clearingTasks.add(task);
+
+  /// Never fails its caller: starting or ending a session must go on.
+  Future<void> _clearAccountData() async {
+    await _settings.clearAccountData();
+    for (final task in _clearingTasks) {
+      try {
+        await task();
+      } catch (error, stackTrace) {
+        AppLogger.error(error, stackTrace, 'Clearing account data failed');
+      }
+    }
   }
 
   /// Adds work to finish while the session's token still works: sending what
@@ -100,7 +117,7 @@ class AppSessionController extends ChangeNotifier {
   /// (best effort), then this. A guest who signs out loses the account.
   Future<void> signOut() async {
     await _tokens.clear();
-    await _settings.clearAccountData();
+    await _clearAccountData();
     _setStatus(SessionStatus.signedOut);
   }
 

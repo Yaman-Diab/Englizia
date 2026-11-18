@@ -84,5 +84,10 @@
 	<string>نحتاج الميكروفون لنسمع نطقك. التسجيل يُحذف بعد تحويله إلى نص.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>نحوّل كلامك إلى نص لنعرف الكلمات التي سمعناها، ثم يُحذف التسجيل.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

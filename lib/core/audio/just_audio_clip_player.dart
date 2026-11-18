@@ -14,13 +14,19 @@ final class JustAudioClipPlayer implements ClipPlayer {
   JustAudioClipPlayer({
     SoundPlayer sounds = const SilentSoundPlayer(),
     String? Function(String url)? bundled,
+    Future<Uri?> Function(String url)? kept,
     this.failsFirstLoad = false,
     this.timeout = const Duration(seconds: 15),
   }) : _sounds = sounds,
-       _bundled = bundled;
+       _bundled = bundled,
+       _kept = kept;
 
   final SoundPlayer _sounds;
   final String? Function(String url)? _bundled;
+
+  /// A clip kept on the phone (`MediaVault.playable`) plays with no
+  /// connection.
+  final Future<Uri?> Function(String url)? _kept;
 
   /// For mock mode, so the screens' failure can be seen once.
   bool failsFirstLoad;
@@ -42,8 +48,11 @@ final class JustAudioClipPlayer implements ClipPlayer {
         handleAudioSessionActivation: false,
       );
       final asset = _bundled?.call(url);
+      final kept = asset == null ? await _kept?.call(url) : null;
       final length =
-          await (asset != null ? player.setAsset(asset) : player.setUrl(url))
+          await (asset != null
+                  ? player.setAsset(asset)
+                  : player.setUrl('${kept ?? url}'))
               .timeout(timeout);
       return length ??
           await player.durationStream

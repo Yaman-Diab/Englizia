@@ -68,6 +68,8 @@ The app's versions are not here: they come from `GET /api/v1/app/system/config` 
 
 An unknown slot, a malformed time, or a goal or challenge option without its number or label is skipped. A response without any usable time, the reminder text, any goal or challenge option, their defaults or the challenge question is rejected.
 
+The `downloads` group (the limits for downloaded lessons) is in [downloads.md](downloads.md).
+
 ### Errors
 
 The common errors (`docs/api/README.md`).
@@ -80,7 +82,7 @@ Live (docs/api/openapi.json `SystemConfigDto`), answered **without a session** a
 |---|---|---|
 | `minSupportedVersion` | An older installed version stops at the update screen, with no way past it (student doc §4.1) | yes (the splash) |
 | `latestVersion` | An older one gets a reminder on home, once a day | yes |
-| `storeUrl` | The app's store page. Android opens Google Play's app first and this page after it; iOS opens this page only | yes |
+| `storeUrl` | The app's store page. Android opens Google Play's app first and this page after it; iOS opens this page only. «شارك التطبيق» shares it too | yes |
 | `onboarding` | The tracks each audience of "who will learn" leads to, with their levels ([tracks.md](tracks.md)) | yes |
 | `dailyGoalOptions` | The goals' minutes, each with its points (`{minutes, xp}`) | not yet: the goal step needs each choice's name ("مريح"), the default and a lesson's length, which only `GET /api/v1/app/settings` has (question 6) |
 | `supportWhatsapp` | Support's WhatsApp number; «أنا» and the settings open it, before the profile's own | yes |
@@ -99,3 +101,4 @@ A version that isn't a release number (a build `+12` or a tag `-beta` is ignored
 4. Times are phone-local "HH:mm" (the learner's time zone), not UTC instants. Confirm, and how the chosen time is sent back with the account (§4.3).
 5. The versions: answered by `GET /api/v1/app/system/config` (below).
 6. `system/config`'s `dailyGoalOptions` has the minutes and points only. Will the effective settings above (each goal's name, the default, a lesson's length, the streak challenge and the reminder times) come, or should they join `system/config`? Until then the goal, challenge and reminder steps run on the mock settings only.
+7. «شارك التطبيق» shares `storeUrl`, which is this platform's store only. Could `system/config` carry one link for both stores (a web page that sends each phone to its own)?
