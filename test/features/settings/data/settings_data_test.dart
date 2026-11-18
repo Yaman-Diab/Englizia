@@ -153,6 +153,42 @@ void main() {
     );
   });
 
+  test('the limits for downloads, every one from the panel', () {
+    expect(
+      EffectiveSettingsModel.fromJson(example()).entity.downloads,
+      const DownloadLimits(
+        maxBytes: 1024 * 1024 * 1024,
+        maxLessons: 40,
+        validFor: Duration(days: 30),
+        minFreeBytes: 300 * 1024 * 1024,
+        keepDoneFor: Duration(days: 14),
+      ),
+    );
+  });
+
+  test('downloads are off unless the panel gives every limit', () {
+    DownloadLimits? limits(Map<String, Object?>? downloads) =>
+        EffectiveSettingsModel.fromJson({
+          ...example(),
+          'downloads': downloads,
+        }).entity.downloads;
+    const whole = {
+      'enabled': true,
+      'maxMegabytes': 10,
+      'maxLessons': 2,
+      'validDays': 7,
+      'minFreeMegabytes': 0,
+    };
+
+    expect(limits(null), isNull);
+    expect(limits({...whole, 'enabled': false}), isNull);
+    expect(limits({...whole}..remove('validDays')), isNull);
+    expect(limits({...whole, 'maxLessons': 0}), isNull);
+    // No while for completed lessons: they are kept.
+    expect(limits(whole)?.keepDoneFor, isNull);
+    expect(limits(whole)?.minFreeBytes, 0);
+  });
+
   test('incomplete settings are rejected', () {
     expect(
       () => EffectiveSettingsModel.fromJson(

@@ -137,6 +137,40 @@ final class ChallengeSettings extends Equatable {
   List<Object?> get props => [options, defaultDays, question];
 }
 
+/// How much of the lessons a phone may keep to open with no connection, and
+/// for how long (ADR 22). Every number is the panel's.
+final class DownloadLimits extends Equatable {
+  const DownloadLimits({
+    required this.maxBytes,
+    required this.maxLessons,
+    required this.validFor,
+    required this.minFreeBytes,
+    this.keepDoneFor,
+  });
+
+  /// The room all downloads may take together.
+  final int maxBytes;
+  final int maxLessons;
+
+  /// How long a download opens before the server must be asked again.
+  final Duration validFor;
+
+  /// The room a download must leave on the phone.
+  final int minFreeBytes;
+
+  /// A completed lesson's download is removed after this; null keeps it.
+  final Duration? keepDoneFor;
+
+  @override
+  List<Object?> get props => [
+    maxBytes,
+    maxLessons,
+    validFor,
+    minFreeBytes,
+    keepDoneFor,
+  ];
+}
+
 /// The parts of the effective settings (after inheritance) the app reads
 /// before a track is chosen.
 final class EffectiveSettings extends Equatable {
@@ -144,12 +178,16 @@ final class EffectiveSettings extends Equatable {
     required this.reminder,
     required this.dailyGoal,
     required this.challenge,
+    this.downloads,
   });
 
   final ReminderSettings reminder;
   final DailyGoalSettings dailyGoal;
   final ChallengeSettings challenge;
 
+  /// Null when the panel doesn't offer downloads: the app then shows none.
+  final DownloadLimits? downloads;
+
   @override
-  List<Object?> get props => [reminder, dailyGoal, challenge];
+  List<Object?> get props => [reminder, dailyGoal, challenge, downloads];
 }

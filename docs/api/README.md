@@ -70,6 +70,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the goal and the reminder, the password and deleting the account | live, the profile and deletion mock |
 | [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
 | [`notifications.md`](notifications.md) | Notifications: the push token, what the server sends and what a tap opens (ADR 21) | proposed, mock |
+| [`downloads.md`](downloads.md) | Lessons downloaded to open with no connection: a lesson's files, and the panel's limits (ADR 22) | proposed, mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), the splash's version gate, later every screen that reads a setting | mock |
 
 ## Headers sent on every request
@@ -142,6 +143,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/google` | POST | `GoogleSignInRequest {idToken, deviceId, platform}` | `TokenResponse` with `isNewUser`; `401 auth.google_token_invalid`, `403 auth.account_disabled`, `409 auth.email_taken` or `auth.external_login_conflict` ([auth.md](auth.md)) | live, used (no real token sent yet, STATUS D-110) |
 | `/api/v1/auth/apple` | POST | `AppleSignInRequest {identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform}` | `TokenResponse` | live, not used |
 | `/api/v1/app/me/push-token` | PUT | `{token, platform, deviceId}` | `204` ([notifications.md](notifications.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}/download` | GET | — | `{lessonId, lessonVersion, lesson, files[]}` ([downloads.md](downloads.md)) | proposed, mock |
 | `/api/v1/auth/guest/upgrade/email` | POST | `{email, password, displayName}`, with the guest's session | `UserDto`; the session carries on ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/guest/upgrade/google` | POST | `{idToken}`, with the guest's session | `UserDto`; `409 auth.external_login_conflict` signs in to that account instead ([auth.md](auth.md)) | live, used |
 

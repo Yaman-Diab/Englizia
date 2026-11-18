@@ -43,6 +43,10 @@ import 'package:englizia/features/account/presentation/verify_email/cubit/verify
 import 'package:englizia/features/account/presentation/verify_email/pages/email_link_page.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_host.dart';
 import 'package:englizia/features/account/presentation/verify_email/widgets/verify_email_sheet.dart';
+import 'package:englizia/features/downloads/domain/entities/lesson_download.dart';
+import 'package:englizia/features/downloads/presentation/downloads/cubit/downloads_cubit.dart';
+import 'package:englizia/features/downloads/presentation/downloads/pages/downloads_page.dart';
+import 'package:englizia/features/downloads/presentation/downloads/widgets/download_parts.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
 import 'package:englizia/features/home/presentation/home/pages/home_page.dart';
 import 'package:englizia/features/launch/presentation/splash/cubit/splash_cubit.dart';
@@ -1029,6 +1033,12 @@ GoRouter createAppRouter(
                 onPrivacy: () => _openLegal(context, privacy: true),
                 onTerms: () => _openLegal(context, privacy: false),
                 onShare: (link, origin) => _shareApp(context, link, origin),
+                onDownloads:
+                    context.select<DownloadsCubit, bool>(
+                      (cubit) => cubit.state.available,
+                    )
+                    ? () => context.push<void>(AppRoutes.meSettingsDownloads)
+                    : null,
                 onSignOut: context.read<AccountCubit>().signOut,
                 onCreateAccount: () => context.push<void>(AppRoutes.signUp),
                 onVerifyEmail: () => showVerifyEmailSheet(context),
@@ -1106,8 +1116,29 @@ GoRouter createAppRouter(
                 context.push(_unitLessonPath(lesson, kids: kids)),
             onUnit: (unit) =>
                 context.pushReplacement(AppRoutes.unitOf(unit.id)),
+            // A parent downloads for a child from the settings' page; the
+            // kids' grid has no place for it.
+            lessonTrailing: (plan, lesson) => _downloadable(lesson)
+                ? LessonDownloadButton(request: _downloadOf(plan, lesson))
+                : null,
+            aboveLessons: (plan) => plan.kids
+                ? null
+                : UnitDownloadButton(
+                    requests: [
+                      for (final lesson in plan.lessons)
+                        if (_downloadable(lesson)) _downloadOf(plan, lesson),
+                    ],
+                  ),
+            onShown: (plan) => sl<DownloadsCubit>().markDone({
+              for (final lesson in plan.lessons)
+                if (lesson.done) lesson.id,
+            }),
           ),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.meSettingsDownloads,
+        builder: (context, _) => DownloadsPage(onBack: () => _back(context)),
       ),
       GoRoute(
         path: AppRoutes.verifyEmail,
@@ -1225,6 +1256,16 @@ Future<void> _openLegal(BuildContext context, {required bool privacy}) async {
     privacy ? AppRoutes.legalPrivacy : AppRoutes.legalTerms,
   );
 }
+
+/// A conversation is live with the server: there is nothing to keep.
+bool _downloadable(UnitLesson lesson) => lesson.scenarioId == null;
+
+DownloadRequest _downloadOf(UnitPlan plan, UnitLesson lesson) =>
+    DownloadRequest(
+      lessonId: lesson.id,
+      title: lesson.title,
+      unitTitle: plan.title,
+    );
 
 /// «شارك التطبيق»: the store page, through the phone's own sheet.
 Future<void> _shareApp(BuildContext context, Uri link, Rect origin) async {

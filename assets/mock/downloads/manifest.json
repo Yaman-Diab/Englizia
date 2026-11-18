@@ -1,0 +1,34 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "lessonId": "les_gen_prea1_01",
+    "lessonVersion": 3,
+    "lesson": {
+      "id": "les_gen_prea1_01",
+      "version": 3,
+      "exercises": []
+    },
+    "files": [
+      {
+        "url": "https://cdn.example.com/mock/lessons/farm.webp",
+        "kind": "picture",
+        "bytes": 40000,
+        "contentType": "image/webp"
+      },
+      {
+        "url": "https://example.com/mock/lessons/farm.mp3",
+        "kind": "clip",
+        "bytes": 60000,
+        "contentType": "audio/mpeg"
+      },
+      {
+        "url": "https://cdn.example.com/mock/lessons/farm/index.m3u8",
+        "kind": "video",
+        "bytes": 800000
+      }
+    ]
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

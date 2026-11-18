@@ -160,7 +160,7 @@ class InteractiveVideoCubit extends ReaderCubit implements PlayerActions {
     );
     _watchForSlow();
     await engine.open(
-      video.urlFor(state.quality),
+      lessons.videoUrl(video, state.quality),
       from: from,
       speed: state.speed,
       play: play,

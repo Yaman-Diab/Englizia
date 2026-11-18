@@ -33,6 +33,7 @@ class UnitTimeline extends StatelessWidget {
     this.settling,
     this.arrived,
     this.currentKey,
+    this.trailing,
     super.key,
   });
 
@@ -47,6 +48,9 @@ class UnitTimeline extends StatelessWidget {
   /// The lesson the chain just moved on to: its card opens.
   final String? arrived;
   final GlobalKey? currentKey;
+
+  /// At the end of a lesson's row, when it gives one: its download.
+  final Widget? Function(UnitLesson lesson)? trailing;
 
   static const _dimmed = .45;
 
@@ -72,6 +76,7 @@ class UnitTimeline extends StatelessWidget {
                 filling: lesson.id == settling,
                 arriving: lesson.id == arrived,
                 cardKey: currentKey,
+                trailing: trailing?.call(lesson),
                 onOpen: () => onOpen(lesson),
               ),
             ),
@@ -93,6 +98,7 @@ class _LessonRow extends StatelessWidget {
     required this.arriving,
     required this.cardKey,
     required this.onOpen,
+    this.trailing,
   });
 
   final int number;
@@ -107,6 +113,7 @@ class _LessonRow extends StatelessWidget {
   final bool arriving;
   final GlobalKey? cardKey;
   final VoidCallback onOpen;
+  final Widget? trailing;
 
   static const _rail = 40.0;
   static const _lineMin = 16.0;
@@ -206,6 +213,8 @@ class _LessonRow extends StatelessWidget {
                       ),
               ),
             ),
+            if (trailing case final trailing?)
+              Align(alignment: AlignmentDirectional.topCenter, child: trailing),
           ],
         ),
       ),

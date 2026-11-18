@@ -1,5 +1,6 @@
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/features/account/account_injection.dart';
+import 'package:englizia/features/downloads/downloads_injection.dart';
 import 'package:englizia/features/home/home_injection.dart';
 import 'package:englizia/features/launch/launch_injection.dart';
 import 'package:englizia/features/lessons/lessons_injection.dart';
@@ -29,4 +30,5 @@ Future<void> configureDependencies() async {
   registerHomeDependencies(sl);
   registerLaunchDependencies(sl);
   registerNotificationsDependencies(sl);
+  registerDownloadsDependencies(sl);
 }

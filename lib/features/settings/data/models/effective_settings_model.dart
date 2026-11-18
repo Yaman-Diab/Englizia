@@ -13,7 +13,37 @@ final class EffectiveSettingsModel {
     reminder: _reminder(_json.readMap('notifications')),
     dailyGoal: _dailyGoal(_json.readMap('motivation')),
     challenge: _challenge(_json.readMap('motivation')),
+    downloads: _downloads(_json.readMap('downloads')),
   );
+
+  static const _megabyte = 1024 * 1024;
+
+  /// Off unless the panel turns it on with every limit: a missing number is
+  /// never guessed.
+  // ASSUMPTION(api): the `downloads` group, docs/api/downloads.md.
+  static DownloadLimits? _downloads(Map<String, Object?>? downloads) {
+    if (downloads == null || !(downloads.readBool('enabled') ?? false)) {
+      return null;
+    }
+    final megabytes = downloads.readInt('maxMegabytes');
+    final lessons = downloads.readInt('maxLessons');
+    final days = downloads.readInt('validDays');
+    final free = downloads.readInt('minFreeMegabytes');
+    if (megabytes == null || lessons == null || days == null || free == null) {
+      return null;
+    }
+    if (megabytes <= 0 || lessons <= 0 || days <= 0 || free < 0) return null;
+    final doneDays = downloads.readInt('keepDoneDays');
+    return DownloadLimits(
+      maxBytes: megabytes * _megabyte,
+      maxLessons: lessons,
+      validFor: Duration(days: days),
+      minFreeBytes: free * _megabyte,
+      keepDoneFor: doneDays != null && doneDays > 0
+          ? Duration(days: doneDays)
+          : null,
+    );
+  }
 
   static ReminderSettings _reminder(Map<String, Object?>? notifications) {
     final reminder = notifications?.readMap('dailyReminder');

@@ -73,6 +73,13 @@ const testSettings = EffectiveSettings(
           'you challenge yourself?',
     ),
   ),
+  downloads: DownloadLimits(
+    maxBytes: 1024 * 1024 * 1024,
+    maxLessons: 40,
+    validFor: Duration(days: 30),
+    minFreeBytes: 300 * 1024 * 1024,
+    keepDoneFor: Duration(days: 14),
+  ),
 );
 
 /// Serves queued results in order, repeating the last one.

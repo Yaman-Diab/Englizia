@@ -306,7 +306,7 @@ class GrammarLessonCubit extends Cubit<GrammarLessonState>
     );
     _watchForSlow();
     await engine.open(
-      video.urlFor(state.quality),
+      _lessons.videoUrl(video, state.quality),
       from: from,
       speed: state.speed,
       play: play,

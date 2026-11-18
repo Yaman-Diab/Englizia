@@ -68,6 +68,8 @@ The app's versions are not here: they come from `GET /api/v1/app/system/config` 
 
 An unknown slot, a malformed time, or a goal or challenge option without its number or label is skipped. A response without any usable time, the reminder text, any goal or challenge option, their defaults or the challenge question is rejected.
 
+The `downloads` group (the limits for downloaded lessons) is in [downloads.md](downloads.md).
+
 ### Errors
 
 The common errors (`docs/api/README.md`).

@@ -11,12 +11,19 @@ import 'package:video_player/video_player.dart';
 /// on (S §8.1), through a small native channel: no keep-awake package fits the
 /// Flutter pin (ADR 15). While it plays, the app's sounds keep quiet (ADR 9).
 final class VideoPlayerEngine implements VideoEngine {
-  VideoPlayerEngine({SoundPlayer sounds = const SilentSoundPlayer()})
-    : _sounds = sounds;
+  VideoPlayerEngine({
+    SoundPlayer sounds = const SilentSoundPlayer(),
+    Future<Uri?> Function(String url)? kept,
+  }) : _sounds = sounds,
+       _kept = kept;
 
   static const _screen = MethodChannel('englizia/screen_awake');
 
   final SoundPlayer _sounds;
+
+  /// A video kept on the phone (`MediaVault.playable`) plays with no
+  /// connection.
+  final Future<Uri?> Function(String url)? _kept;
   VoidCallback? _quiet;
 
   final _changes = StreamController<VideoSnapshot>.broadcast();
@@ -38,7 +45,9 @@ final class VideoPlayerEngine implements VideoEngine {
     old?.removeListener(_report);
     _open.value = null;
     await old?.dispose();
-    final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+    final controller = VideoPlayerController.networkUrl(
+      await _kept?.call(url) ?? Uri.parse(url),
+    );
     try {
       await controller.initialize();
       if (_disposed) {

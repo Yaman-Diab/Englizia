@@ -241,7 +241,7 @@ class ShadowingCubit extends Cubit<ShadowingState> {
       await engine.open(
         video == null
             ? content.audioUrl
-            : video.video.urlFor(_lessons.videoQuality),
+            : _lessons.videoUrl(video.video, _lessons.videoQuality),
         from: sentence.start,
         speed: state.speed,
       );

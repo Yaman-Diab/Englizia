@@ -165,6 +165,7 @@ void main() {
     Future<PreferencesCubit> pump(
       WidgetTester tester, {
       bool guest = false,
+      bool downloads = true,
       Locale locale = const Locale('ar'),
       Size size = defaultViewport,
       ThemeMode themeMode = ThemeMode.light,
@@ -209,6 +210,7 @@ void main() {
                 return true;
               },
               onDelete: () => did.add('delete'),
+              onDownloads: downloads ? () => did.add('downloads') : null,
               version: '1.0.0',
             ),
           ),
@@ -281,6 +283,25 @@ void main() {
         300,
       );
       expect(find.text('settings_share'.tr()), findsNothing);
+    });
+
+    testWidgets('the downloaded lessons, only when the panel offers them', (
+      tester,
+    ) async {
+      await pump(tester);
+      final row = find.text('downloads_settings_row'.tr());
+      await tester.scrollUntilVisible(row, 300);
+      await tester.ensureVisible(row);
+      await settle(tester);
+      await tester.tap(row);
+      expect(did, ['downloads']);
+
+      await pump(tester, downloads: false);
+      await tester.scrollUntilVisible(
+        find.text('settings_version'.tr(args: ['1.0.0'])),
+        300,
+      );
+      expect(find.text('downloads_settings_row'.tr()), findsNothing);
     });
 
     testWidgets('a saved password is said', (tester) async {

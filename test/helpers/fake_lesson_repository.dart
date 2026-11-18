@@ -188,6 +188,10 @@ class FakeLessonRepository implements LessonRepository {
   VideoQuality get videoQuality => quality;
 
   @override
+  String videoUrl(LessonVideo video, VideoQuality quality) =>
+      video.urlFor(quality);
+
+  @override
   Future<void> setVideoQuality(VideoQuality quality) async =>
       this.quality = quality;
 

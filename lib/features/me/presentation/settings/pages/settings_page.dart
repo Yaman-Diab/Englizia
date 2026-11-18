@@ -32,6 +32,7 @@ final class SettingsActions {
     required this.onPassword,
     required this.onDelete,
     required this.version,
+    this.onDownloads,
   });
 
   final VoidCallback onBack;
@@ -49,6 +50,9 @@ final class SettingsActions {
   /// True once the new password was saved.
   final Future<bool?> Function() onPassword;
   final VoidCallback onDelete;
+
+  /// «الدروس المنزّلة»; null while the panel doesn't offer downloads.
+  final VoidCallback? onDownloads;
 
   final String version;
 }
@@ -376,6 +380,8 @@ class _SettingsPageState extends State<SettingsPage> {
             value: qualityName(state.videoQuality),
             onPressed: () => _quality(state),
           ),
+          if (_actions.onDownloads case final open?)
+            SettingsRow(label: 'downloads_settings_row'.tr(), onPressed: open),
         ],
       ),
     ];

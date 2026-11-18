@@ -26,6 +26,9 @@ class UnitPage extends StatefulWidget {
     required this.onBack,
     required this.onOpen,
     required this.onUnit,
+    this.lessonTrailing,
+    this.aboveLessons,
+    this.onShown,
     super.key,
   });
 
@@ -36,6 +39,14 @@ class UnitPage extends StatefulWidget {
 
   /// Another unit: the next one, or the one to finish first.
   final ValueChanged<UnitLink> onUnit;
+
+  /// At the end of a lesson's row, and over the list: the downloads, which
+  /// the app gives so this feature needn't know them.
+  final Widget? Function(UnitPlan plan, UnitLesson lesson)? lessonTrailing;
+  final Widget? Function(UnitPlan plan)? aboveLessons;
+
+  /// Each time the unit comes from the server.
+  final ValueChanged<UnitPlan>? onShown;
 
   @override
   State<UnitPage> createState() => _UnitPageState();
@@ -51,6 +62,23 @@ class _UnitPageState extends State<UnitPage> {
 
   /// The lesson the chain just moved on to, whose card opens.
   String? _arrived;
+
+  /// What the listener last acted on, as it hears of two things.
+  UnitPlan? _shown;
+  String? _settling;
+
+  @override
+  void initState() {
+    super.initState();
+    _settling = _cubit.state.settling;
+    // A unit kept from before is there before anything listens.
+    if (_cubit.state.plan case final plan?) {
+      _shown = plan;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onShown?.call(plan);
+      });
+    }
+  }
 
   /// Where the current lesson stays once scrolled to: under the cover's edge.
   static const _currentTop = 140.0;
@@ -143,8 +171,18 @@ class _UnitPageState extends State<UnitPage> {
     body: SafeArea(
       child: BlocConsumer<UnitCubit, UnitState>(
         listenWhen: (previous, current) =>
-            previous.settling != current.settling,
-        listener: _onSettling,
+            previous.settling != current.settling ||
+            previous.plan != current.plan,
+        listener: (context, state) {
+          if (state.plan case final plan? when plan != _shown) {
+            _shown = plan;
+            widget.onShown?.call(plan);
+          }
+          if (state.settling != _settling) {
+            _settling = state.settling;
+            _onSettling(context, state);
+          }
+        },
         builder: (context, state) {
           final plan = state.plan;
           if (plan == null) {
@@ -218,6 +256,12 @@ class _UnitPageState extends State<UnitPage> {
                                 ? AppSpacing.lg + 4
                                 : AppSpacing.xl,
                           ),
+                          if (!plan.locked)
+                            if (widget.aboveLessons?.call(plan)
+                                case final above?) ...[
+                              above,
+                              const SizedBox(height: AppSpacing.lg),
+                            ],
                           if (plan.kids)
                             KidUnitGrid(
                               plan: plan,
@@ -234,6 +278,12 @@ class _UnitPageState extends State<UnitPage> {
                               settling: state.settling,
                               arrived: _arrived,
                               currentKey: _currentKey,
+                              trailing: plan.locked
+                                  ? null
+                                  : (lesson) => widget.lessonTrailing?.call(
+                                      plan,
+                                      lesson,
+                                    ),
                               onOpen: (lesson) => _open(plan, lesson),
                             ),
                         ],

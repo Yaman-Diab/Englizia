@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/logging/app_logger.dart';
+import 'package:englizia/core/media/kept_lesson.dart';
+import 'package:englizia/core/media/media_vault.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/result/guard.dart';
@@ -24,11 +26,21 @@ import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 
 final class LessonRepositoryImpl implements LessonRepository {
-  LessonRepositoryImpl(this._remote, {required SettingsStorageService settings})
-    : _settings = settings;
+  LessonRepositoryImpl(
+    this._remote, {
+    required SettingsStorageService settings,
+    MediaVault vault = const NoMediaVault(),
+    DateTime Function()? now,
+  }) : _settings = settings,
+       _vault = vault,
+       _now = now ?? DateTime.now;
 
   final LessonRemoteDataSource _remote;
   final SettingsStorageService _settings;
+
+  /// The lessons downloaded to open with no connection (ADR 22).
+  final MediaVault _vault;
+  final DateTime Function() _now;
 
   /// Lessons kept to open offline: small enough for preferences (ADR 12).
   static const _cachedLessons = 5;
@@ -68,11 +80,35 @@ final class LessonRepositoryImpl implements LessonRepository {
       await _cacheLesson(lessonId, model.json);
       return lesson;
     });
-    return switch (fetched) {
-      Err(failure: NetworkFailure()) when cached != null => Ok(cached),
-      _ => fetched,
-    };
+    if (fetched case Err(failure: NetworkFailure())) {
+      final kept = cached ?? await _downloadedLesson(lessonId, seed);
+      if (kept != null) return Ok(kept);
+    }
+    return fetched;
   }
+
+  /// A downloaded lesson, until its download runs out.
+  Future<Lesson?> _downloadedLesson(String lessonId, String seed) async {
+    final json = KeptLesson.lessonOf(
+      await _vault.readJson(KeptLesson.nameOf(lessonId)),
+      _now(),
+    );
+    if (json == null) return null;
+    try {
+      return LessonModel(json).toEntity(seed);
+    } on FormatException catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Downloaded lesson unreadable');
+      return null;
+    }
+  }
+
+  @override
+  String videoUrl(LessonVideo video, VideoQuality quality) =>
+      video.sources
+          .where((source) => _vault.has(source.url))
+          .firstOrNull
+          ?.url ??
+      video.urlFor(quality);
 
   Lesson? _cachedLesson(String lessonId, String seed) {
     final json = _cache()[lessonId];
@@ -419,7 +455,7 @@ final class LessonRepositoryImpl implements LessonRepository {
       }
     }
     return LessonOnPhone(
-      kept: cached != null,
+      kept: cached != null || _vault.hasJson(KeptLesson.nameOf(lessonId)),
       done: waiting || _completedHere.contains(lessonId),
       resume: resume,
     );
