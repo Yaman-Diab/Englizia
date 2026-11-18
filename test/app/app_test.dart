@@ -8,6 +8,7 @@ import 'package:englizia/app/router/app_routes.dart';
 import 'package:englizia/app/shell/foundation_page.dart';
 import 'package:englizia/core/design_system/motion/entrance_choreography.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
+import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
@@ -133,6 +134,28 @@ void main() {
       );
     }
   }
+
+  testWidgets('a band belongs to its page: the next one opens without it', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      localizedTestRoot(locale: AppLocales.arabic, child: const App()),
+    );
+    await tester.pumpUntilLocalized();
+    await tester.openApp();
+    await tester.pumpUntilLocalized();
+    await tester.pump(const Duration(seconds: 1));
+
+    final welcome = tester.element(find.byType(WelcomePage));
+    showFailureSnackBar(welcome, const NetworkFailure(), onRetry: () {});
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('common_retry'.tr()), findsOneWidget);
+
+    unawaited(GoRouter.of(welcome).push<void>(AppRoutes.signIn));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('common_retry'.tr()), findsNothing);
+  });
 
   const tokens = AuthTokens(accessToken: 'a', refreshToken: 'r');
 
