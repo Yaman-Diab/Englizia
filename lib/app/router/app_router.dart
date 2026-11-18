@@ -12,8 +12,12 @@ import 'package:englizia/app/shell/tab_shell.dart';
 import 'package:englizia/core/audio/mic_cubit.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/config/app_info.dart';
+import 'package:englizia/core/design_system/app_theme_context.dart';
+import 'package:englizia/core/design_system/icons/app_icon.dart';
+import 'package:englizia/core/design_system/widgets/failure_snack_bar.dart';
 import 'package:englizia/core/di/service_locator.dart';
 import 'package:englizia/core/links/external_link.dart';
+import 'package:englizia/core/links/share_sheet.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/router/app_redirect.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
@@ -1024,6 +1028,7 @@ GoRouter createAppRouter(
                 onWhatsApp: _openWhatsApp,
                 onPrivacy: () => _openLegal(context, privacy: true),
                 onTerms: () => _openLegal(context, privacy: false),
+                onShare: (link, origin) => _shareApp(context, link, origin),
                 onSignOut: context.read<AccountCubit>().signOut,
                 onCreateAccount: () => context.push<void>(AppRoutes.signUp),
                 onVerifyEmail: () => showVerifyEmailSheet(context),
@@ -1218,6 +1223,21 @@ Future<void> _openLegal(BuildContext context, {required bool privacy}) async {
   if (!context.mounted) return;
   await context.push<void>(
     privacy ? AppRoutes.legalPrivacy : AppRoutes.legalTerms,
+  );
+}
+
+/// «شارك التطبيق»: the store page, through the phone's own sheet.
+Future<void> _shareApp(BuildContext context, Uri link, Rect origin) async {
+  final shared = await sl<ShareSheet>().share(
+    'settings_share_message'.tr(namedArgs: {'link': '$link'}),
+    origin: origin,
+  );
+  if (shared || !context.mounted) return;
+  showNoticeSnackBar(
+    context,
+    icon: AppIcon.infoCircle,
+    text: 'settings_share_unavailable'.tr(),
+    tone: context.colors.info,
   );
 }
 

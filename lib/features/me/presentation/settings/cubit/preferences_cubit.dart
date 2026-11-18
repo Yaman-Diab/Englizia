@@ -22,6 +22,7 @@ final class PreferencesState extends Equatable {
     this.videoQuality = VideoQuality.auto,
     this.saving = false,
     this.refused = false,
+    this.shareLink,
   });
 
   final LoadStatus load;
@@ -44,6 +45,9 @@ final class PreferencesState extends Equatable {
   /// The phone said no when asked: only its settings can allow them now.
   final bool refused;
 
+  /// The app's store page, which «شارك التطبيق» sends; none hides the row.
+  final Uri? shareLink;
+
   /// The phone keeps notifications off though they were wanted: the switch
   /// can't be on. Never asked yet, it still can be.
   bool get phoneBlocks =>
@@ -63,6 +67,7 @@ final class PreferencesState extends Equatable {
     VideoQuality? videoQuality,
     bool? saving,
     bool? refused,
+    Uri? shareLink,
   }) => PreferencesState(
     load: load ?? this.load,
     failure: failure != null ? failure() : this.failure,
@@ -73,6 +78,7 @@ final class PreferencesState extends Equatable {
     videoQuality: videoQuality ?? this.videoQuality,
     saving: saving ?? this.saving,
     refused: refused ?? this.refused,
+    shareLink: shareLink ?? this.shareLink,
   );
 
   @override
@@ -86,6 +92,7 @@ final class PreferencesState extends Equatable {
     videoQuality,
     saving,
     refused,
+    shareLink,
   ];
 }
 
@@ -108,7 +115,18 @@ class PreferencesCubit extends Cubit<PreferencesState> {
   final NotificationPermission _permission;
 
   Future<void> start() async {
-    emit(state.copyWith(videoQuality: _lessons.videoQuality));
+    // The versions the splash kept: no request for a link.
+    final kept = await _settings.getVersionPolicy(keptOnly: true);
+    if (isClosed) return;
+    emit(
+      state.copyWith(
+        videoQuality: _lessons.videoQuality,
+        shareLink: switch (kept) {
+          Ok(:final value) => value.updateUrl,
+          Err() => null,
+        },
+      ),
+    );
     final (preferences, settings, access) = await (
       _profiles.getPreferences(),
       _settings.getSettings(),

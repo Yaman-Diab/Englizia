@@ -14,6 +14,7 @@ import 'package:englizia/core/config/app_info.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/links/app_store.dart';
 import 'package:englizia/core/links/external_link.dart';
+import 'package:englizia/core/links/share_sheet.dart';
 import 'package:englizia/core/mail/mail_app.dart';
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/app_headers_interceptor.dart';
@@ -116,6 +117,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
     // A lesson's video out of screenshots and recordings (ADR 18).
     ..registerLazySingleton<ScreenProtection>(PlatformScreenProtection.new)
     ..registerLazySingleton<ExternalLink>(() => const PlatformExternalLink())
+    ..registerLazySingleton<ShareSheet>(() => const PlatformShareSheet())
     ..registerLazySingleton(
       () => AppStore(
         sl(),
