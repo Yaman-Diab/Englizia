@@ -101,9 +101,17 @@ class _AppState extends State<App> {
       ? ''
       : _router.state.uri.path;
 
-  /// «أنا» seen: its dot has done its work.
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+  String _shownPath = '';
+
   void _onRoute() {
-    if (_path == AppRoutes.me) unawaited(_notifications.seenMe());
+    final path = _path;
+    if (path == _shownPath) return;
+    _shownPath = path;
+    // A band belongs to the page it was shown on, not the next one.
+    _messenger.currentState?.clearSnackBars();
+    // «أنا» seen: its dot has done its work.
+    if (path == AppRoutes.me) unawaited(_notifications.seenMe());
   }
 
   /// A notification was tapped, on the phone or as the banner.
@@ -184,6 +192,7 @@ class _AppState extends State<App> {
           buildWhen: (previous, current) =>
               previous.themeMode != current.themeMode,
           builder: (context, settings) => MaterialApp.router(
+            scaffoldMessengerKey: _messenger,
             onGenerateTitle: (_) => 'app_name'.tr(),
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light(isArabic: isArabic),
