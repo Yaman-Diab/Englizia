@@ -215,6 +215,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   final SoundPlayer _sounds;
   final String lessonId;
   StreamSubscription<bool>? _connection;
+  StreamSubscription<AttemptVerdict>? _verdicts;
   final _clock = Stopwatch();
   var _secondsBefore = 0;
 
@@ -233,6 +234,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
 
   Future<void> start() async {
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
+    _verdicts ??= _lessons.verdicts.listen(_takeVerdict);
     final online = await _connectivity.isOnline();
     if (isClosed) return;
     emit(
@@ -268,6 +270,26 @@ class ExerciseCubit extends Cubit<ExerciseState> {
       case Err(:final failure):
         emit(state.copyWith(load: LoadStatus.failure, failure: () => failure));
     }
+  }
+
+  /// The server's marking is the one that counts: where it differs from the
+  /// phone's, the lesson's count takes it, and nothing on the screen changes.
+  void _takeVerdict(AttemptVerdict verdict) {
+    final id = verdict.questionId;
+    if (verdict.lessonId != lessonId ||
+        !state.done.contains(id) ||
+        state.uncounted.contains(id) ||
+        state.pending.contains(id) ||
+        state.right.contains(id) == verdict.correct) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        right: verdict.correct
+            ? {...state.right, id}
+            : ({...state.right}..remove(id)),
+      ),
+    );
   }
 
   /// The first question from [from] not done yet, or the lesson's end.
@@ -570,6 +592,7 @@ class ExerciseCubit extends Cubit<ExerciseState> {
   Future<void> close() async {
     _clip.stop();
     await _connection?.cancel();
+    await _verdicts?.cancel();
     return super.close();
   }
 }

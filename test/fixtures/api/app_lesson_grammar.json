@@ -1,0 +1,291 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "01a1f24f-eec9-7d31-8c4b-624e894c7858",
+    "versionId": "01a1f24f-f2b6-7cd3-871b-7eb62e9b501b",
+    "versionNo": 1,
+    "unitId": "01a1f24f-eda5-7458-8d96-85170e60ccd1",
+    "type": "grammar_video",
+    "titleAr": "الفعل to be: am وis وare",
+    "titleEn": "To be: am, is, are",
+    "objectiveAr": "أن تختار am أو is أو are بحسب الفاعل.",
+    "objectiveEn": null,
+    "minutes": 8,
+    "bookPages": null,
+    "publishedAt": "2026-11-19T05:38:08.125Z",
+    "content": {
+      "type": "grammar_video",
+      "withVideo": false,
+      "video": null,
+      "ruleCard": {
+        "summaryAr": "نستعمل am مع I، وis مع he وshe وit، وare مع you وwe وthey.",
+        "forms": [
+          [
+            "I",
+            "[am]"
+          ],
+          [
+            "he / she / it",
+            "[is]"
+          ],
+          [
+            "you / we / they",
+            "[are]"
+          ]
+        ],
+        "examples": [
+          {
+            "textEn": "I am a student.",
+            "highlight": [
+              1
+            ],
+            "translationAr": "أنا طالب.",
+            "audioMediaId": "01a1f24f-efe7-7610-a9c8-617871d2dc39"
+          },
+          {
+            "textEn": "She is my sister.",
+            "highlight": [
+              1
+            ],
+            "translationAr": "هي أختي.",
+            "audioMediaId": "01a1f24f-f03a-7ed6-8ffd-d014bacb090d"
+          },
+          {
+            "textEn": "They are at school.",
+            "highlight": [
+              1
+            ],
+            "translationAr": "هم في المدرسة.",
+            "audioMediaId": "01a1f24f-f043-7eb4-850a-e52ab8971f8a"
+          }
+        ]
+      }
+    },
+    "questions": [
+      {
+        "versionId": "01a1f24f-f290-7a84-98a0-59bfe7d9bdf4",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "مع he نستعمل is: He is a doctor.",
+        "bookPages": null,
+        "body": {
+          "prompt": "He ___ a doctor.",
+          "options": [
+            {
+              "id": "a",
+              "text": "is"
+            },
+            {
+              "id": "b",
+              "text": "am"
+            },
+            {
+              "id": "c",
+              "text": "are"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a1f24f-f29d-7a96-be94-4b8620f9c418",
+        "template": "picture_choice",
+        "instructionAr": "اختر الصورة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "She تعني «هي»، وteacher تعني «معلّمة».",
+        "bookPages": null,
+        "body": {
+          "prompt": "She is a teacher.",
+          "promptAudioMediaId": null,
+          "options": [
+            {
+              "id": "a",
+              "imageMediaId": "01a1f24f-f1bf-7891-8dba-5ad03a2becfc"
+            },
+            {
+              "id": "b",
+              "imageMediaId": "01a1f24f-f1c6-7f0b-8af6-e8ab45d88337"
+            },
+            {
+              "id": "c",
+              "imageMediaId": "01a1f24f-f1cf-7093-93a5-a69547ab76db"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a1f24f-f29e-7230-9538-bfaad0b825db",
+        "template": "gap_choice",
+        "instructionAr": "أكمل الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "مع we نستعمل are: We are friends.",
+        "bookPages": null,
+        "body": {
+          "sentence": "We ___ friends.",
+          "gapCount": 1,
+          "chips": [
+            "are",
+            "is",
+            "am"
+          ]
+        },
+        "answerKey": {
+          "gaps": [
+            "are"
+          ]
+        }
+      },
+      {
+        "versionId": "01a1f24f-f29e-797f-a811-db4307f6ebb6",
+        "template": "word_order",
+        "instructionAr": "رتّب الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "الترتيب: الفاعل، ثم am، ثم الباقي.",
+        "bookPages": null,
+        "body": {
+          "meaningAr": "أنا من سوريا.",
+          "chips": [
+            "I",
+            "am",
+            "from",
+            "Syria",
+            "is"
+          ]
+        },
+        "answerKey": {
+          "chips": [
+            "I",
+            "am",
+            "from",
+            "Syria"
+          ],
+          "alternatives": []
+        }
+      },
+      {
+        "versionId": "01a1f24f-f29e-787f-b377-43060c815468",
+        "template": "matching",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "كل فاعل مع فعله: I am، وShe is، وThey are.",
+        "bookPages": null,
+        "body": {
+          "rightKind": "text",
+          "left": [
+            "I",
+            "She",
+            "They"
+          ],
+          "right": [
+            {
+              "text": "am",
+              "imageMediaId": null
+            },
+            {
+              "text": "is",
+              "imageMediaId": null
+            },
+            {
+              "text": "are",
+              "imageMediaId": null
+            }
+          ]
+        },
+        "answerKey": {
+          "pairs": [
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "versionId": "01a1f24f-f29e-725f-9e62-efc69e0c3ca6",
+        "template": "listen_choose",
+        "instructionAr": "استمع واختر ما سمعته",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "مع you نستعمل are دائمًا، للمفرد وللجمع.",
+        "bookPages": null,
+        "body": {
+          "audioMediaId": "01a1f24f-f25e-7e9f-950c-f98e9e69dcfb",
+          "transcript": "You are my friend.",
+          "options": [
+            {
+              "id": "a",
+              "text": "You are my friend."
+            },
+            {
+              "id": "b",
+              "text": "You is my friend."
+            },
+            {
+              "id": "c",
+              "text": "You am my friend."
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      }
+    ],
+    "media": {
+      "01a1f24f-efe7-7610-a9c8-617871d2dc39": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f24f-efe7-7610-a9c8-617871d2dc39.mp3",
+        "sizeBytes": 9161
+      },
+      "01a1f24f-f03a-7ed6-8ffd-d014bacb090d": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f24f-f03a-7ed6-8ffd-d014bacb090d.mp3",
+        "sizeBytes": 9944
+      },
+      "01a1f24f-f043-7eb4-850a-e52ab8971f8a": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f24f-f043-7eb4-850a-e52ab8971f8a.mp3",
+        "sizeBytes": 9788
+      },
+      "01a1f24f-f1bf-7891-8dba-5ad03a2becfc": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-f1bf-7891-8dba-5ad03a2becfc.webp",
+        "sizeBytes": 6990
+      },
+      "01a1f24f-f1c6-7f0b-8af6-e8ab45d88337": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-f1c6-7f0b-8af6-e8ab45d88337.webp",
+        "sizeBytes": 5724
+      },
+      "01a1f24f-f1cf-7093-93a5-a69547ab76db": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-f1cf-7093-93a5-a69547ab76db.webp",
+        "sizeBytes": 4794
+      },
+      "01a1f24f-f25e-7e9f-950c-f98e9e69dcfb": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f24f-f25e-7e9f-950c-f98e9e69dcfb.mp3",
+        "sizeBytes": 9474
+      }
+    }
+  },
+  "error": null,
+  "traceId": "f65dfb658300724fa29f992b299eacdc"
+}

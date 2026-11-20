@@ -53,21 +53,26 @@ Evaluation evaluate(Exercise exercise, ExerciseDraft draft) => switch ((
   _ => throw ArgumentError.value(draft, 'draft', 'Not for this exercise'),
 };
 
+/// An order's words as they are compared: the server's own rule, so the two
+/// markings agree (docs/api/lessons.md).
+String _ordered(Iterable<String> texts) => orderWords(texts).join(' ');
+
 SequenceEvaluation _order(WordOrderExercise exercise, SequenceDraft draft) {
-  final built = plainWords(draft.chips.map((chip) => chip.text).join(' '));
-  final right = [
-    exercise.answer,
-    ...exercise.alternatives,
-  ].any((sentence) => plainWords(sentence) == built);
-  final expected = [for (final word in exercise.answerWords) plainWords(word)];
+  final built = _ordered(draft.chips.map((chip) => chip.text));
+  final right =
+      built == _ordered(exercise.answerWords) ||
+      exercise.alternatives.any((sentence) => _ordered([sentence]) == built);
+  final expected = [
+    for (final word in exercise.answerWords) _ordered([word]),
+  ];
   return SequenceEvaluation(
     correct: right,
     needsReview:
         !right &&
-        exercise.reviewable.any((sentence) => plainWords(sentence) == built),
+        exercise.reviewable.any((sentence) => _ordered([sentence]) == built),
     words: [
       for (final (i, chip) in draft.chips.indexed)
-        right || (i < expected.length && plainWords(chip.text) == expected[i]),
+        right || (i < expected.length && _ordered([chip.text]) == expected[i]),
     ],
   );
 }

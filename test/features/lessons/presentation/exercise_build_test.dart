@@ -326,11 +326,13 @@ void main() {
       var draft = subject.state.draft! as PairsDraft;
       expect(draft.matched, isEmpty);
       expect(draft.mistakes, {'field'});
+      expect(draft.wrong, {'egg': 'field'}, reason: 'the word, and with what');
       await tester.pump(const Duration(milliseconds: 700));
 
       await pair(tester, 'حقل', 'cow');
       draft = subject.state.draft! as PairsDraft;
       expect(draft.mistakes, {'field'});
+      expect(draft.wrong, {'egg': 'field', 'cow': 'field'});
 
       await tester.pump(const Duration(milliseconds: 700));
       await pair(tester, 'حقل', 'field');

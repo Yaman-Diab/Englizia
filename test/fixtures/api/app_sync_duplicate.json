@@ -1,0 +1,21 @@
+{
+  "statusCode": 200,
+  "message": "Request completed successfully",
+  "data": {
+    "attempts": [
+      {
+        "clientAttemptId": "1de901f5-2752-41cd-8fe4-ca1f0b643bed",
+        "status": "duplicate",
+        "attemptId": "01a1f924-99ae-7f5b-945e-fd2754d262ab",
+        "isCorrect": true,
+        "error": null
+      }
+    ],
+    "lessons": [],
+    "units": [],
+    "levels": [],
+    "serverTime": "2026-11-20T13:28:08.750Z"
+  },
+  "error": null,
+  "traceId": "586436ce191bd84ec29b2fdbffac3970"
+}

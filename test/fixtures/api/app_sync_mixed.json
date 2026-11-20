@@ -1,0 +1,60 @@
+{
+  "statusCode": 200,
+  "message": "Request completed successfully",
+  "data": {
+    "attempts": [
+      {
+        "clientAttemptId": "32940801-e7f9-4066-b1a7-e635dfe90fda",
+        "status": "accepted",
+        "attemptId": "01a1f924-9f6c-796c-81d6-6027e6d4f70e",
+        "isCorrect": false,
+        "error": null
+      },
+      {
+        "clientAttemptId": "1fc75e6f-f253-49bc-8449-ebb7dcfd845b",
+        "status": "rejected",
+        "attemptId": null,
+        "isCorrect": null,
+        "error": {
+          "code": "question.answer_invalid",
+          "message": "The answer does not fit this question.",
+          "details": null
+        }
+      },
+      {
+        "clientAttemptId": "3e2ca82e-705f-4c60-833b-871224196e22",
+        "status": "rejected",
+        "attemptId": null,
+        "isCorrect": null,
+        "error": {
+          "code": "question.version_unknown",
+          "message": "The question version was not found in this lesson version.",
+          "details": null
+        }
+      },
+      {
+        "clientAttemptId": "fad873e4-4afd-42f2-b5a3-5868244d3d6e",
+        "status": "rejected",
+        "attemptId": null,
+        "isCorrect": null,
+        "error": {
+          "code": "validation.failed",
+          "message": "One or more fields are invalid.",
+          "details": [
+            {
+              "field": "hintsUsed",
+              "code": "inclusive_between",
+              "message": "'Hints Used' must be between 0 and 10. You entered 11."
+            }
+          ]
+        }
+      }
+    ],
+    "lessons": [],
+    "units": [],
+    "levels": [],
+    "serverTime": "2026-11-20T13:28:09.316Z"
+  },
+  "error": null,
+  "traceId": "1f869c5c5b158ddaedf9b3b42c9410f2"
+}

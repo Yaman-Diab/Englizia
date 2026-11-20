@@ -1,13 +1,67 @@
 # Lessons
 
-Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/lessons/`); nothing is confirmed by the backend team yet.
-Requirements: student doc §7.1 (the exercise container), §7.3 (templates), §2 principle 6; server doc §19.2, §19.3 and §20.6.
+Status: **partly live.** On the dev server (docs/api/openapi.json): a lesson (`GET /api/v1/app/lessons/{lessonId}`) and its answers (`POST /api/v1/app/sync`), with six question templates and one lesson type published, a grammar lesson with no video. The app uses both. Real answers: `test/fixtures/api/app_lesson_*.json` and `app_sync_*.json`. Everything else on this page is **proposed** and runs in mock mode only (`assets/mock/lessons/`): the other templates and lesson types, the unit, reports, words, watching, the teacher's questions, completion and the AI's review.
+Requirements: student doc §7.1 (the exercise container), §7.3 (templates), §2 principle 6; server doc §19.2, §19.3 and §20.6. For what is live, the backend's notes B-18 and B-19 (2026-11-19) and its answers of 2026-11-20 are the reference.
 
-The exercise fields are those of the content package (server doc §20.6), under the API's rules (`README.md`): camelCase, lower-camel enum values, absolute media URLs. So `instruction_ar` is `instructionAr`, `book_ref` is `bookRef`, `multiple_choice` is `multipleChoice`.
+## `GET /api/v1/app/lessons/{lessonId}` (live)
 
-## `GET /api/v1/app/lessons/{lessonId}`
+The published lesson, whole, with its questions and their keys: «تحقق» has to work offline (S §7.1), and the server marks each answer again when it arrives. Needs a session, a guest's or a member's. It carries an `ETag` (`Cache-Control: private, no-cache`), which the app doesn't use yet (STATUS D-123). A locked lesson answers `200` all the same: the locks are the map's.
 
-The published lesson, whole, with its exercises and their keys: "check" has to work offline (S §7.1), and the server marks each answer again when it arrives. Needs a session, a guest's or a member's. The server leaves out questions whose template this app version can't show (server doc §19.2).
+```json
+{ "id": "…", "versionId": "…", "versionNo": 1, "unitId": "…", "type": "grammar_video",
+  "titleAr": "الفعل to be: am وis وare", "titleEn": "To be: am, is, are",
+  "objectiveAr": "…", "objectiveEn": null, "minutes": 8, "bookPages": null, "publishedAt": "…",
+  "content": { "type": "grammar_video", "withVideo": false, "video": null,
+    "ruleCard": { "summaryAr": "…", "forms": [["I", "[am]"], ["he / she / it", "[is]"]],
+      "examples": [{ "textEn": "I am a student.", "highlight": [1], "translationAr": "أنا طالب.", "audioMediaId": "…" }] } },
+  "questions": [
+    { "versionId": "…", "template": "multiple_choice", "instructionAr": "اختر الكلمة المناسبة",
+      "instructionIsDefault": true, "instructionAudioMediaId": null, "hintAr": null, "explanationAr": "…", "bookPages": null,
+      "body": { "prompt": "He ___ a doctor.", "options": [{ "id": "a", "text": "is" }] },
+      "answerKey": { "optionId": "a" } } ],
+  "media": { "<id>": { "kind": "audio", "url": "https://…/media/audio/….mp3", "sizeBytes": 9161 } } }
+```
+
+| Field | The app |
+|---|---|
+| `versionId` | The version the learner sees; every answer names it (`lessonVersionId`). A lesson in progress carries on with the version it started on, kept on the phone |
+| `versionNo` | The version as a number, for what the app still sends to proposed endpoints |
+| `type` | `grammar_video`, `interactive_video`, `interactive_text`, `vocabulary`, `conversation`. Only `grammar_video` is published; the app reads the others from the mock, in its own shape (below) |
+| `titleAr`, `titleEn` | The app shows `titleAr` in both languages for now (D-123) |
+| `content.ruleCard` | The rule's summary: `summaryAr`; `forms`, rows whose first cell says who and whose others are joined, the letters between `[` and `]` marked; `examples`, where `highlight` counts the words of `textEn` from 0, split at its spaces |
+| `content.withVideo`, `video` | With no video the exercises are open at once. No lesson with a video is published, so the shape of `video` isn't known: such a lesson's content can't be shown yet, and the page says so (question 1) |
+| `questions[].versionId` | The question's only id; an answer names it (`questionVersionId`) |
+| `instructionAr`, `hintAr`, `explanationAr` | Shown as they are, in Arabic, in both app languages |
+| `instructionAudioMediaId`, `bookPages`, `objectiveAr`, `minutes` | Not shown yet (D-123) |
+| `media` | Each file once, by id; a `…MediaId` names one. Its links are public, with no token, and don't run out |
+
+The six templates, each with its `body` and `answerKey`:
+
+| `template` | `body` | `answerKey` | The app's name |
+|---|---|---|---|
+| `multiple_choice` | `prompt` with one `___`, `options[{id, text}]` | `{optionId}` | `multipleChoice` |
+| `picture_choice` | `prompt`, `promptAudioMediaId`, `options[{id, imageMediaId}]` | `{optionId}` | `imageChoice` |
+| `listen_choose` | `audioMediaId`, `transcript`, `options[{id, text}]` | `{optionId}` | `listenChoose` |
+| `gap_choice` | `sentence` with a `___` for each gap, `gapCount`, `chips[]`: the answers and the extra ones | `{gaps[]}` | `fillChoices` |
+| `word_order` | `meaningAr`, `chips[]`: the answer's and the extra ones | `{chips[], alternatives[][]}`, each alternative as its words | `wordOrder` |
+| `matching` | `rightKind` (`text` or `image`), `left[]`, `right[{text, imageMediaId}]` | `{pairs[]}`: for each of `left`, the place in `right` of what goes with it | `matching` |
+
+The app puts this lesson in its own shape before reading it (`server_lesson.dart`), so one reader serves it and the mock's lessons. Options are shuffled on the phone, the same for this phone each time. A question the app can't read is skipped and logged, and a template it doesn't know is left out (question 5). A picture has no text for a screen reader (question 3).
+
+### Marking on the phone
+
+The server's marking is the one that counts, and the phone marks by the same rules, so the two agree:
+
+| Template | Right when |
+|---|---|
+| The three choices | The option is the key's |
+| `gap_choice` | Each gap holds its key's text, letter for letter: case counts, and nothing is trimmed |
+| `word_order` | The cards' words are the key's, or one alternative's, by the rule R45: each card split at its spaces, all punctuation (Unicode `P`) taken out, lower case, and what is left empty dropped. "have to" is two words, and "It's" is "its" |
+| `matching` | Every pair is the key's |
+
+## The app's own shape (proposed)
+
+The templates and lesson types the server doesn't have yet come from the mock in this shape, which is also the one the server's lesson is put in. Its fields are those of the content package (server doc §20.6), under the API's rules (`README.md`): camelCase, lower-camel enum values, absolute media URLs. So `instruction_ar` is `instructionAr`, `book_ref` is `bookRef`, `multiple_choice` is `multipleChoice`. The backend sends each new template's shape, answer and marking rule before the app needs it; until then these are the app's guesses.
 
 ### Response `200`
 
@@ -151,7 +205,7 @@ A question the app can't read is skipped and logged, so it can't leave the learn
 
 ### A kids' lesson (`kids`)
 
-In kids mode (S §13), a lesson comes with `kids`: its screens in order, the words it teaches, and the guide's recorded lines. Its questions stay in `exercises` as any lesson's, answered and completed the same way (`answers`, `complete`); a `question` screen names one by its `id`. Proposed, from designs `Kid Lesson` and `Kid Media`.
+In kids mode (S §13), a lesson comes with `kids`: its screens in order, the words it teaches, and the guide's recorded lines. Its questions stay in `exercises` as any lesson's, answered and completed the same way (the sync, `complete`); a `question` screen names one by its `id`. Proposed, from designs `Kid Lesson` and `Kid Media`.
 
 ```json
 "kids": {
@@ -172,7 +226,7 @@ In kids mode (S §13), a lesson comes with `kids`: its screens in order, the wor
 | `steps[].instructionAudio` | The screen's Arabic instruction (`instruction_ar_audio`), played by itself; pressing the guide plays it again |
 | `kind: word` | «بطاقة الكلمة» (Starter 2): its picture, the word and its voice, said after the instruction |
 | `kind: letter` | «بطاقة الحرف» (Starter 1): the capital (the small one is shown beside it), its video and its length in ms in case the player can't tell, its voice, and two words that start with it |
-| `kind: question` | One of `exercises`: `listenChoose` with letters (`text`) for «اسمع واختر الحرف», `imageChoice` for «اسمع واختر الصورة», `matching` with pictures for «طابق». No check button: pressing answers. The first answer to each goes to `answers`, so the server records a mistake on its concept without a word to the child |
+| `kind: question` | One of `exercises`: `listenChoose` with letters (`text`) for «اسمع واختر الحرف», `imageChoice` for «اسمع واختر الصورة», `matching` with pictures for «طابق». No check button: pressing answers. The first answer to each goes through the sync, so the server records a mistake on its concept without a word to the child |
 | `kind: story` | «قصة مصوّرة» (S §13.3): `pages[]` of `{image, audio, words[{text, startMs}], marked[]}`. Each page is told with its words lit from `startMs`; a `marked` word (a `words[]` entry, matched by its letters) is underlined and opens its card: picture and voice, no text. The child turns the pages, or lets them turn; past the last, a star |
 | `kind: song` | «أنشودة»: `video`, `videoMs`, `pictures[]` drawn over it, and `lines[]` of `{words[{text, startMs}]}` lit with the video's own clock. It opens at 0.75, «عادي» plays at 1; no translation. «غنِّ مرة أخرى» starts it over, «التالي» gives the star |
 | `kind: dialogue` | «حوار مكتوب»: `character` (a word: name and picture), `opening`, `closing` and each of `replies[]` `{word, answer, echo}`, every line `{en, audio}`. The child picks a reply by its picture, the character answers, then the child says `echo` (`echoInstructionAudio` asks for it) and any try earns the star before `closing` |
@@ -252,7 +306,7 @@ The current lesson is the first not done; `unitReview` waits until every other l
 
 ## `POST /api/v1/app/lessons/{lessonId}/answers/review`
 
-Asks the server to judge an order in `reviewOrders`, with the same body as an answer, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
+Asks the server to judge an order in `reviewOrders`, with `{attemptId, lessonVersion, questionId, answer, hinted}`, while the learner waits. `200` with `{ "correct": true }`. On any failure the learner reads "we'll check it later, and it won't count as wrong", and the server judges it when it can (S §16.3). Proposed.
 
 ## `POST /api/v1/app/lessons/{lessonId}/words`
 
@@ -341,7 +395,7 @@ Open with the backend team: what counts as completing a lesson with content befo
 
 ## `POST /api/v1/app/lessons/{lessonId}/answers/spoken-review`
 
-The learner's own words on a `speakAnswer` question, judged by the server's AI while they wait, with the same body as an answer. Only the words are sent, never a recording. The app holds no AI key (S §16.3). Proposed.
+The learner's own words on a `speakAnswer` question, judged by the server's AI while they wait, with `{attemptId, lessonVersion, questionId, answer: {text, typed}, hinted}`. Only the words are sent, never a recording. The app holds no AI key (S §16.3). Proposed.
 
 | `outcome` | With | The app |
 |---|---|---|
@@ -349,36 +403,65 @@ The learner's own words on a `speakAnswer` question, judged by the server's AI w
 | `offTopic` | `note` | Neutral: another try or a skip, not counted, and the question stays |
 | `quotaOut` | | Says the day's allowance is over, and moves on, uncounted |
 
-On any failure the learner reads "we'll check it later, and it won't count as wrong", and the answer goes to `/answers` under the same `attemptId` when it can (S §16.3): the server judges it there.
+On any failure the learner reads "we'll check it later, and it won't count as wrong". The answer isn't kept: the server has no such template yet, and will take it through the sync with a `pending_ai` status when it has (STATUS D-123).
 
-## `POST /api/v1/app/lessons/{lessonId}/answers`
+## `POST /api/v1/app/sync` (live)
 
-One checked answer. Safe to repeat: the server ignores an `attemptId` it has seen.
-
-### Request
+The answers kept on the phone, together. An answer is marked on the phone at «تحقق», kept in a queue under a new id, and sent when the phone can; the server marks it again on the version the learner saw, and keeps it once however often it comes. Only lesson questions of the six templates go: an answer to any other template is neither kept nor sent, as the server would refuse it. Nothing of the placement test goes here.
 
 ```json
-{
-  "attemptId": "6f1c8f60-0000-4000-8000-000000000000",
-  "lessonVersion": 1,
-  "questionId": "q1",
-  "answer": { "optionId": "o2" },
-  "hinted": true
-}
+{ "sentAt": "2026-11-20T14:00:05.000Z",
+  "attempts": [ { "clientAttemptId": "…", "lessonVersionId": "…", "questionVersionId": "…", "runId": "…",
+                  "answer": { "optionId": "a" }, "hintsUsed": 0, "clientCreatedAt": "2026-11-20T14:00:00.000Z" } ] }
 ```
 
-| Field | Type | Meaning |
-|---|---|---|
-| `attemptId` | string | A UUID made on the phone when the answer is checked, the same on every resend |
-| `lessonVersion` | int | The version the learner answered |
-| `questionId` | string | The question |
-| `answer` | object | By way of answering. Choice templates: `{optionId}`. `fillChoices`: `{words}`, one per blank in order. `wordOrder`: `{words}` as placed. `matching`: `{mistakes}`, the pairs with a mistake on the way, each once, for the question's concept (S §7.3). `listenWrite`, `fillTyped`, `translation`: `{text}`. `errorCorrection`: `{tokenId, replacement}`. `speakAnswer`: `{text, typed}`. `sentenceOrder`, `spelling`: `{words}`, one per place. `repeatSentence`: `{heardWords, totalWords}`, sent only when enough was heard, and never what was said (S §7.5) |
-| `hinted` | bool | The hint was opened on this question: a right answer is an assisted success (S §7.1) |
+| Field | The app |
+|---|---|
+| `clientAttemptId` | A UUID made at «تحقق», the same on every send |
+| `lessonVersionId`, `questionVersionId` | The lesson's and the question's `versionId`, as the learner saw them. An old version is always taken, so a changed lesson never empties the queue |
+| `runId` | A UUID for one go at the lesson: made with its first answer, kept through a stop, and new once the lesson is finished. The server tells a first try by it |
+| `answer` | One field: `{optionId}`, `{gaps[]}` (each card's text as it came), `{chips[]}` (as placed) or `{pairs[]}` |
+| `hintsUsed` | 0 to 10. The app has one hint a question: 1 when it was opened |
+| `clientCreatedAt`, `sentAt` | The phone's clock in UTC, ending in `Z`; the server corrects a wrong clock by `sentAt` |
 
-### Errors
+**A matching.** The app corrects each pair as it is made (S §7.3), so its pairs always end right, while the server marks one whole answer and refuses one where a place is used twice (`question.answer_invalid`, checked on the dev server). So with no mistake the key goes; with one, the word's first wrong try goes as its two pairs changed over, each pair once at most. Question 2.
 
-The app assumes 400, 404, 409, 410 and 422 mean this answer will never be accepted: it drops it and logs that, so it can't hold back the others. Anything else, it sends again later. To confirm with the backend team.
+`200`, with one result for each answer, in their order:
 
-### Response
+```json
+{ "attempts": [ { "clientAttemptId": "…", "status": "accepted", "attemptId": "…", "isCorrect": true, "error": null } ],
+  "lessons": [ { "lessonId": "…", "state": "completed", "best": { "firstTryCorrect": 6, "questionCount": 6 } } ],
+  "units": [], "levels": [], "serverTime": "…" }
+```
 
-`200` or `204`; the app reads nothing from it. Marks and XP stay on the server. The app's own marking only drives what the learner sees; if the two differ, the screen doesn't change, and completion and points follow the server (ADR 11).
+| `status` | The app |
+|---|---|
+| `accepted` | Takes it off the phone. Where `isCorrect` differs from the phone's marking, the lesson's count takes the server's, with no word to the learner |
+| `duplicate` | The same: the reply carries its first marking |
+| `rejected` | Takes it off the phone and logs `error.code`: `validation.failed`, `lesson.version_unknown`, `enrollment.not_found`, `question.version_unknown` or `question.answer_invalid` |
+| Any other | Takes it off the phone, keeps its own marking, and logs it. `pending_ai` will come with the AI's templates |
+
+An answer the reply doesn't mention stays for the next send. `lessons`, `units` and `levels` say what the answers completed and opened; the app doesn't read them yet, as its home and unit are on proposed endpoints (STATUS D-123). Fields it doesn't know are ignored.
+
+When the request fails whole, the server keeps nothing:
+
+| Answer | The app |
+|---|---|
+| No connection, a timeout, `5xx`, `429`, `409 content.duplicate` | Keeps the answers as they are and tries again by itself after 2, 4, 8, 16… seconds, up to 5 minutes, at a random point in the second half of each wait, or after `Retry-After` when the server gives one |
+| `401` | The token is renewed and the request sent again, as everywhere |
+| `400 validation.failed` | `details[].field` names what couldn't be read by its place in this request (`attempts[3].clientCreatedAt`): those answers are dropped, logged with the `traceId`, and the rest sent again. When it names anything else (`sentAt`, `attempts`), the request itself is wrong: it is logged, and no answer is sent again until the app restarts; none is thrown away |
+| `413 sync.batch_too_large` | The batch is halved |
+| `404 user.not_found` | The account was deleted while its token still works: the session ends, and what the phone kept for it goes |
+
+When it is sent: as each answer is checked, when the app opens with a session, when the connection returns, when a lesson ends, and every 3 minutes while the app is open. One send at a time, the oldest answers first, 200 at most in a request.
+
+The queue is the account's: signing in or out clears what the phone kept, after a last try to send it (5 seconds at most). A guest's answers go with its account on the server.
+
+## Questions for the backend team
+
+1. A grammar lesson with a video (`withVideo: true`): what does `video` carry (its sources, length, captions), and where does the share to watch before the exercises come from?
+2. A matching: the app corrects pair by pair, so the only whole answer it has is the right one. It sends a first wrong try as two pairs changed over. Is that what should be marked as the first try, or would the pairs that had a mistake serve better?
+3. `picture_choice` options and a matching's pictures have no text, so a screen reader has nothing to say for them. Could each carry one?
+4. `forms`: is the first cell always the row's name and the rest its forms? Can a row be a heading?
+5. A question the app can't show (a template newer than the app): does the lesson still complete without its answer?
+6. Kids' lessons use the six templates. The app's kid screens outside them are the word card, the letter card, the story, the song, the written dialogue and «كرّر بعدي» (S §13, designs `Kid Lesson` and `Kid Media`): which of them will a kids' lesson carry, and in what shape?

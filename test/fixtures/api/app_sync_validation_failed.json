@@ -1,0 +1,16 @@
+{
+  "statusCode": 400,
+  "message": "One or more fields are invalid.",
+  "data": null,
+  "error": {
+    "code": "validation.failed",
+    "details": [
+      {
+        "field": "attempts[0].clientAttemptId",
+        "code": "invalid",
+        "message": "The value is not valid."
+      }
+    ]
+  },
+  "traceId": "dabeac199fda417d799baea544c3aba0"
+}
