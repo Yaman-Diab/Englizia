@@ -2,22 +2,56 @@ import 'dart:convert';
 
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
+import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/features/lessons/data/models/server_unit.dart';
 import 'package:englizia/features/lessons/data/models/unit_plan_model.dart';
+import 'package:englizia/features/tracks/data/datasources/enrollments_reader.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class UnitRemoteDataSource {
   Future<UnitPlanModel> getUnit(String unitId);
 }
 
+/// The server has no call for one unit: it is read from its level's map
+/// (`GET /app/enrollments/{trackId}/map`, docs/api/home.md).
 final class UnitRemoteDataSourceImpl implements UnitRemoteDataSource {
-  const UnitRemoteDataSourceImpl(this._client);
+  UnitRemoteDataSourceImpl(this._client);
 
   final ApiClient _client;
 
+  /// The track whose map held the last unit, so the next is found without
+  /// asking again which track is in use.
+  String? _trackId;
+
   @override
-  Future<UnitPlanModel> getUnit(String unitId) async =>
-      UnitPlanModel(asJsonMap(await _client.get(ApiEndpoints.unit(unitId))));
+  Future<UnitPlanModel> getUnit(String unitId) async {
+    final last = _trackId;
+    if (last != null) {
+      try {
+        if (await _unitOf(last, unitId) case final unit?) return unit;
+      } on ApiException catch (error) {
+        // No longer joined: the active track is asked for below.
+        if (error.statusCode != ApiStatusCodes.notFound) rethrow;
+      }
+    }
+    final active = await EnrollmentsReader(_client).activeTrackId();
+    final unit = active == null || active == last
+        ? null
+        : await _unitOf(active, unitId);
+    if (unit == null) {
+      throw const ApiException(statusCode: ApiStatusCodes.notFound);
+    }
+    _trackId = active;
+    return unit;
+  }
+
+  Future<UnitPlanModel?> _unitOf(String trackId, String unitId) async {
+    final map = asJsonMap(await _client.get(ApiEndpoints.levelMap(trackId)));
+    final unit = unitFromMap(map, unitId);
+    return unit == null ? null : UnitPlanModel(unit);
+  }
 }
 
 /// Mock mode (`env/mock.json`): the bundled units, one of each kind the

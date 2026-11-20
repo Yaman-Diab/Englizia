@@ -17,6 +17,7 @@ import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
+import 'package:englizia/features/lessons/data/models/server_lesson.dart';
 import 'package:englizia/features/lessons/data/models/sync_model.dart';
 import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
@@ -244,6 +245,10 @@ final class LessonRepositoryImpl implements LessonRepository {
   @override
   Future<Result<LessonResult>> completeLesson(LessonSummary summary) async {
     final lessonId = summary.lessonId;
+    // Opened again, it is a new run.
+    final store = _store();
+    if (store.runs.remove(lessonId) != null) await _keep(store);
+    if (_fromServer(lessonId)) return _endOnServer(summary);
     final id = _completionIds[lessonId] ??= SettingsStorageService.randomId();
     final request = completionToJson(summary, id);
     Future<void> keep() async {
@@ -251,9 +256,6 @@ final class LessonRepositoryImpl implements LessonRepository {
       await _enqueue(_completionKind, lessonId, id, request);
     }
 
-    // Opened again, it is a new run.
-    final store = _store();
-    if (store.runs.remove(lessonId) != null) await _keep(store);
     await sendSaved();
     // The server must have the answers first, or its numbers would be wrong.
     if (_store().unsent.isNotEmpty) {
@@ -268,6 +270,34 @@ final class LessonRepositoryImpl implements LessonRepository {
       _completionIds.remove(lessonId);
     }
     return result;
+  }
+
+  bool _fromServer(String lessonId) =>
+      switch (_opened[lessonId] ?? _keptModel(lessonId)) {
+        final model? => isServerLesson(model.json),
+        null => false,
+      };
+
+  /// The server completes a lesson by its answers, with no call of its own:
+  /// the end only waits for them to be there. Its numbers are the phone's,
+  /// which the server's markings have set right as they came; points, the
+  /// goal and the streak aren't the server's to give yet.
+  Future<Result<LessonResult>> _endOnServer(LessonSummary summary) async {
+    final lessonId = summary.lessonId;
+    await sendSaved();
+    final waiting = _store().unsent.any(
+      (entry) => entry['kind'] == _answerKind && entry['lessonId'] == lessonId,
+    );
+    if (waiting) return const Err(NetworkFailure());
+    _completedHere.add(lessonId);
+    return Ok(
+      LessonResult(
+        rightFirstTime: summary.rightFirstTime,
+        counted: summary.counted,
+        seconds: summary.seconds,
+        pending: summary.pending,
+      ),
+    );
   }
 
   Map<String, Object?> _watches() {

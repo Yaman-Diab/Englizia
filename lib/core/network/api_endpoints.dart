@@ -34,9 +34,6 @@ abstract final class ApiEndpoints {
   // Confirmed in docs/api/openapi.json: the goal and the reminder.
   static const learning = '/api/v1/app/me/learning';
 
-  // ASSUMPTION(api): proposed, docs/api/home.md.
-  static const home = '/api/v1/app/home';
-
   // ASSUMPTION(api): proposed, docs/api/notifications.md.
   static const pushToken = '/api/v1/app/me/push-token';
 
@@ -78,12 +75,14 @@ abstract final class ApiEndpoints {
   static String activeEnrollment(String trackId) =>
       '/api/v1/app/enrollments/$trackId/active';
 
+  /// The track's level as the learner has it: its units, their lessons, and
+  /// what is open. Confirmed in docs/api/openapi.json.
+  static String levelMap(String trackId) =>
+      '/api/v1/app/enrollments/$trackId/map';
+
   // Confirmed in docs/api/openapi.json.
   static String enrollmentLevel(String trackId) =>
       '/api/v1/app/enrollments/$trackId/level';
-
-  // ASSUMPTION(api): docs/api/lessons.md.
-  static String unit(String unitId) => '/api/v1/app/units/$unitId';
 
   // Confirmed in docs/api/openapi.json.
   static String lesson(String lessonId) => '/api/v1/app/lessons/$lessonId';

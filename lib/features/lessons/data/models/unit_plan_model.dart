@@ -2,10 +2,12 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 
-// ASSUMPTION(api): this whole file is proposed (docs/api/lessons.md).
+// The app's own shape of a unit (docs/api/lessons.md). Against the server it
+// is read from the level's map (server_unit.dart); mock mode serves it whole.
+// ASSUMPTION(api): what the map doesn't carry is proposed.
 
-/// A unit's screen as `GET /api/v1/app/units/{unitId}` sends it. The raw
-/// [json] is what the phone keeps for offline.
+/// A unit's screen in the app's own shape. The raw [json] is what the phone
+/// keeps for offline.
 final class UnitPlanModel {
   const UnitPlanModel(this.json);
 

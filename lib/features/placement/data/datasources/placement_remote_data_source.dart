@@ -7,6 +7,7 @@ import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/placement/data/models/placement_models.dart';
+import 'package:englizia/features/tracks/data/datasources/enrollments_reader.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class PlacementRemoteDataSource {
@@ -38,19 +39,7 @@ final class PlacementRemoteDataSourceImpl implements PlacementRemoteDataSource {
   final ApiClient _client;
 
   @override
-  Future<String?> activeTrackId() async {
-    final items =
-        asJsonMap(
-          await _client.get(ApiEndpoints.enrollments),
-        ).readList('items') ??
-        const [];
-    final enrollments = [for (final item in items) asJsonMap(item)];
-    return (enrollments
-                .where((e) => e.readBool('isActive') ?? false)
-                .firstOrNull ??
-            enrollments.firstOrNull)
-        ?.readString('trackId');
-  }
+  Future<String?> activeTrackId() => EnrollmentsReader(_client).activeTrackId();
 
   @override
   Future<PlacementStateModel> getState(String trackId) async =>
