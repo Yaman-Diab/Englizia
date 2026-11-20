@@ -31,7 +31,22 @@
         "nameAr": "A1 المبتدئ",
         "nameEn": "A1 Beginner",
         "cefrCode": "a1",
-        "gradeNumber": null
+        "gradeNumber": null,
+        "taglineAr": "مبتدئ",
+        "canDoStatements": [
+          {
+            "ar": "تعرّف بنفسك وتسأل أسئلة بسيطة",
+            "en": "Introduce yourself and ask simple questions"
+          },
+          {
+            "ar": "تفهم كلمات وجملًا مألوفة عن حياتك",
+            "en": "Understand familiar words and sentences about your life"
+          },
+          {
+            "ar": "تملأ نموذجًا باسمك وعنوانك",
+            "en": "Fill in a form with your name and address"
+          }
+        ]
       },
       "lowerLevel": null,
       "skills": [

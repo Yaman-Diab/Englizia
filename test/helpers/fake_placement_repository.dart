@@ -57,18 +57,27 @@ const testLevels = [
     code: 'Pre-A1',
     cefr: 'pre_a1',
     name: LocalizedText(ar: 'البداية', en: 'Beginning'),
+    tagline: 'البداية',
+    canDo: [LocalizedText(ar: 'تقرأ الحروف', en: 'Read the letters')],
   ),
   PlacementLevel(
     id: 'a1',
     code: 'A1',
     cefr: 'a1',
-    name: LocalizedText(ar: 'مبتدئ', en: 'Beginner'),
+    name: LocalizedText(ar: 'المستوى الثاني', en: 'Level two'),
+    tagline: 'مبتدئ',
+    canDo: [
+      LocalizedText(ar: 'تعرّف بنفسك', en: 'Introduce yourself'),
+      LocalizedText(ar: 'تسأل أسئلة بسيطة', en: 'Ask simple questions'),
+      // One the panel wrote in Arabic only.
+      LocalizedText(ar: 'تملأ نموذجًا باسمك'),
+    ],
   ),
   PlacementLevel(
     id: 'a2',
     code: 'A2',
     cefr: 'a2',
-    name: LocalizedText(ar: 'أساسي', en: 'Elementary'),
+    name: LocalizedText(ar: 'المستوى الثالث', en: 'Level three'),
   ),
 ];
 

@@ -10,6 +10,8 @@ final class PlacementLevel extends Equatable {
     required this.code,
     required this.cefr,
     required this.name,
+    this.tagline,
+    this.canDo = const [],
   });
 
   /// The track's level to start from; empty for a step the learner can't
@@ -24,8 +26,15 @@ final class PlacementLevel extends Equatable {
   final String cefr;
   final LocalizedText name;
 
+  /// The level in a word, as the panel wrote it («أساسي»); none hides it.
+  final String? tagline;
+
+  /// What a learner at this level can do, in the panel's order; with none,
+  /// that part isn't shown.
+  final List<LocalizedText> canDo;
+
   @override
-  List<Object?> get props => [id, code, cefr, name];
+  List<Object?> get props => [id, code, cefr, name, tagline, canDo];
 }
 
 enum PlacementSkillKind { vocabulary, grammar, reading, listening }

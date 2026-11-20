@@ -31,7 +31,9 @@
         "nameAr": "A1 المبتدئ",
         "nameEn": "A1 Beginner",
         "cefrCode": "a1",
-        "gradeNumber": null
+        "gradeNumber": null,
+        "taglineAr": null,
+        "canDoStatements": []
       },
       "lowerLevel": null,
       "skills": [
@@ -65,5 +67,5 @@
     "retakeAvailableAt": "2026-12-20T12:29:55.987Z"
   },
   "error": null,
-  "traceId": "00000000000000000000000000000000"
+  "traceId": "0b8ad386d923c3f21bb4a919e642ea2b"
 }

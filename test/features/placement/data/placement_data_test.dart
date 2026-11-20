@@ -183,12 +183,34 @@ void main() {
       expect(result.levelIndex, 0);
       expect(result.levels.first.id, '01a1f24f-ea3e-7f94-9d61-e30272387f0a');
       expect(result.levels.first.name.of('en'), 'A1 Beginner');
+      // The demo track's levels have no word and no sentences yet.
+      expect(result.levels.first.tagline, isNull);
+      expect(result.levels.first.canDo, isEmpty);
       expect(result.canLower, isFalse);
       expect(result.skills.map((s) => (s.kind, s.score)), [
         (PlacementSkillKind.vocabulary, .86),
         (PlacementSkillKind.grammar, 0.0),
         (PlacementSkillKind.reading, 0.0),
         (PlacementSkillKind.listening, 0.0),
+      ]);
+    });
+
+    test('a level\u2019s word and what it can do, as the panel wrote them', () {
+      final json = data('app_placement_done');
+      asJsonMap(asJsonMap(json['result'])['level'])
+        ..['taglineAr'] = 'أساسي'
+        ..['canDoStatements'] = [
+          {'ar': 'تتحدث عن يومك', 'en': 'Talk about your day'},
+          {'ar': 'تسأل عن الطريق', 'en': null},
+          {'en': 'No Arabic: left out'},
+        ];
+
+      final level = PlacementStateModel(json).result.levels.first;
+
+      expect(level.tagline, 'أساسي');
+      expect(level.canDo.map((line) => (line.ar, line.en)), [
+        ('تتحدث عن يومك', 'Talk about your day'),
+        ('تسأل عن الطريق', ''),
       ]);
     });
 
