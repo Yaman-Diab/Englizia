@@ -1,9 +1,53 @@
 # Home: the «تعلّم» tab
 
-Status: **proposed**, every field. Nothing here is confirmed by the backend team. The app runs on this contract in mock mode (`assets/mock/home/`: the general track, Emar, and a child's with `env/mock_kids.json`), with the design's frames as scenarios on the dev page.
+Status: **live in part.** The server has no call for home. In its place the app reads three live ones (docs/api/openapi.json) and puts them in the shape below, which the mock still serves whole (`assets/mock/home/`: the general track, Emar, and a child's with `env/mock_kids.json`, with the design's frames as scenarios on the dev page): the account (`GET /api/v1/app/me`), the joined tracks (`GET /api/v1/app/enrollments`) and the active track's map (`GET /api/v1/app/enrollments/{trackId}/map`). Real answers: `test/fixtures/api/app_map_*.json`, `app_enrollments_one.json` and `app_me_guest.json`. The week, the streak, the review, the one-time notices and the level after this one aren't on the server yet, so against it home draws its v0.1 frame (STATUS D-092).
 Requirements: student doc §6.1 (home), §6.2 (units), §3.1–§3.2 (tracks), §5.3 (email reminder), §12.3 (level check), §13.5 (kids), §14 (Emar), §15 (streak, freezes), §21 (offline). Design `Home Archipelago`.
 
-## `GET /api/v1/app/home`
+## What the server has (live)
+
+### `GET /api/v1/app/enrollments/{trackId}/map`
+
+The track's level as the learner has it: its units, their lessons, and what is open. Needs a session; a track not joined is `404 enrollment.not_found`. It carries an `ETag`, which the app doesn't use yet.
+
+```json
+{ "trackId": "…", "levelLabel": "level", "unlockMode": "sequential", "kidsMode": false,
+  "features": { "aiConversation": false, "comments": false, "leaderboard": false, "errorBankUi": false },
+  "level": { "id": "…", "nameAr": "A1 المبتدئ", "nameEn": "A1 Beginner", "cefrCode": "a1", "gradeNumber": null, "taglineAr": null },
+  "nextLessonId": "…", "unitCount": 2,
+  "units": [ { "id": "…", "titleAr": "التعريف بالنفس", "titleEn": "About me", "coverUrl": "https://…webp",
+      "objectives": [{ "ar": "…", "en": "…" }], "concepts": [{ "nameAr": "…", "nameEn": "…" }], "bookPages": null,
+      "lessonCount": 2, "minutes": 15, "state": "unlocked", "test": null,
+      "lessons": [ { "id": "…", "versionId": "…", "versionNo": 1, "type": "grammar_video", "titleAr": "…", "titleEn": "…",
+          "minutes": 8, "bookPages": null, "state": "completed", "best": { "firstTryCorrect": 6, "questionCount": 6 } } ] } ] }
+```
+
+`unlockMode` is `sequential` or `all_open`; a unit's `state` is `locked`, `unlocked` or `completed`; a lesson's is `locked`, `available`, `in_progress` or `completed`.
+
+### How home is put together
+
+One read of the tracks, then the account and the active track's map together (`server_home.dart`):
+
+| From | In the app's shape |
+|---|---|
+| `GET /app/me`: `displayName`, `emailVerified`, `accountType`, `authMethods` | `learner.name`, `emailVerified`, `signIn`: `guest` for a guest account, else by `authMethods`, assumed to name `password`, `google` or `apple` (question 3) |
+| The map's completed lessons | `learner.lessonsDone`: those of this level only, as the server has no count of all (question 5) |
+| `GET /app/enrollments` `items[]` | `enrollments[]`: the track's id stands for the enrollment's too, as the server names an enrollment by its track; `track.nameAr`, the level's names, `unitNo`, `unitCount`, `isActive`. The active one's cover is its unit's, the others' their track's |
+| An enrollment's `child`, its track's `kidsMode` and `levelLabel` | `audience`: `child` with a child or a kids' track, `schoolStudent` with `levelLabel: grade`, else `self` (assumed, question 2) |
+| `unlockMode` | `enrollment.ordered`: false for `all_open` |
+| `level` | `level.id`; `label` is its CEFR code (`A1`, `Pre-A1`), or its name when it has none; `name` is `nameAr` without that code in front; `cefr`. `level.completed` once every unit is `completed`. No `next` (question 4) |
+| `units[].state` | `completed` is `done`; `unlocked` is `current` for the unit that holds `nextLessonId` (else the first unlocked one) and `open` for any other; `locked` is `locked`, named after the unit before it in a track that opens in order |
+| `units[].lessons[]` | The current unit's `lessons[]`, and a locked unit's `preview`: `type` as the app's `kind`, `titleAr`, `minutes`, `bookPages.from` as `page`, `done` for `state: completed`. Where a lesson stopped is the phone's own |
+| `GET /app/placement?trackId=`, asked only while the enrollment's `placementPending` | `cards.placement.estimatedMinutes`, from `test.estimatedSeconds` without and with the deciding stage; home shows without the card if that call fails |
+
+With no track joined there is no home to draw, and home says it failed.
+
+Not used yet: `features`, a unit's `test`, `lessons[].best` and `versionId`, `taglineAr`, and the English names of the level and the lessons (STATUS D-124).
+
+### A unit's screen
+
+The server has no call for one unit either: its screen is read from the same map (`unitFromMap`), in the shape of `GET /units/{id}` in [lessons.md](lessons.md). Its number is its place in the level; `objectives` are «ستتعلّم أن…» and `concepts` «قواعد الوحدة», in Arabic; the unit that locks it and the next one are its neighbours. The app remembers which track held the last unit, and asks for the active one again when a unit isn't there.
+
+## The app's own shape: `GET /api/v1/app/home` (mock mode)
 
 One call draws the tab for the **active** enrollment: the learner, the level's units in order, the current unit's lessons, today against the goal, what is due for review, and the cards and one-time notices to show. Needs a session (guest or member). The phone keeps the last response and shows it at once, then refreshes (S §6.1, §21).
 
@@ -144,13 +188,15 @@ The common errors (`README.md`). Offline, the phone shows what it kept with «ل
 
 ## Switching track
 
-`PUT /api/v1/app/enrollments/{trackId}/active` ([me.md](me.md)), then `GET /api/v1/app/home` again.
+`PUT /api/v1/app/enrollments/{trackId}/active` ([me.md](me.md)), then home again: the tracks, and the new active one's map.
 
 ## Questions for the backend team
 
-1. Is one home endpoint acceptable, or should the app combine the profile, the level's units and the current unit?
-2. Confirm `units[].title {ar, en}`: tracks.md has `title` + `topic`, lessons.md a single `title`.
-3. Confirm `welcomeBack` (three days without activity, by the learner's day) and that the server computes it.
-4. `review.minutes`: is there an estimate on the server?
-5. `events[]`: may the app tell the server a notice was seen (`POST /api/v1/app/home/events/{id}/seen`, safe to repeat), so it doesn't show again on another phone? Not called yet.
-6. `resume.questions`, `ai`, `levelCheck`, `preview`, `freezesPerWeek`, `greetingAudio`, `cards`: confirm each, or say where it comes from.
+1. Home is put together from the account, the tracks and the map. Where will the rest come from: the week (minutes a day against the goal, and the day's start), the streak and its freezes, what is due for review, and the one-time notices (a freeze used, the streak broken)?
+2. Whose track an enrollment is (the learner's own, a child's, a school's): is there a field for it? The app reads it from `child`, `kidsMode` and `levelLabel`.
+3. `authMethods`: which names can it hold?
+4. The level after this one, for «المستوى التالي» and «ابدأ B1»: `GET /api/v1/app/tracks` lists no levels for the demo track.
+5. The lessons a learner has finished in all, for the first day and the email reminder: the map only has this level's.
+6. A lesson `in_progress`: is where it stopped kept, for another phone?
+7. A unit's `test`: what does it carry?
+8. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation and the level check among a unit's lessons, a kid's stars and recorded titles: will the map carry them?

@@ -5,7 +5,7 @@ Requirements: student doc §7.1 (the exercise container), §7.3 (templates), §2
 
 ## `GET /api/v1/app/lessons/{lessonId}` (live)
 
-The published lesson, whole, with its questions and their keys: «تحقق» has to work offline (S §7.1), and the server marks each answer again when it arrives. Needs a session, a guest's or a member's. It carries an `ETag` (`Cache-Control: private, no-cache`), which the app doesn't use yet (STATUS D-123). A locked lesson answers `200` all the same: the locks are the map's.
+The published lesson, whole, with its questions and their keys: «تحقق» has to work offline (S §7.1), and the server marks each answer again when it arrives. Needs a session, a guest's or a member's. It carries an `ETag` (`Cache-Control: private, no-cache`), which the app doesn't use yet (STATUS D-124). A locked lesson answers `200` all the same: the locks are the map's.
 
 ```json
 { "id": "…", "versionId": "…", "versionNo": 1, "unitId": "…", "type": "grammar_video",
@@ -242,7 +242,7 @@ The common errors (`README.md`). With an unknown lesson, `404`.
 
 ## `GET /api/v1/app/units/{unitId}`
 
-A unit's screen (S §6.2, §13.5, §14): what it teaches and its lessons in the panel's order, however many and of whatever kinds. Needs a session. The phone keeps the last few for offline. Proposed, from design `Unit`. Mock: `assets/mock/units/<unitId>.json`.
+A unit's screen (S §6.2, §13.5, §14): what it teaches and its lessons in the panel's order, however many and of whatever kinds. The phone keeps the last few for offline. The server has no such call: there a unit is read from its level's map ([home.md](home.md)) and put in this shape, which is the app's own, from design `Unit`, and which mock mode serves. Mock: `assets/mock/units/<unitId>.json`.
 
 ```json
 {
@@ -370,6 +370,8 @@ Open with the backend team: the panel's questions page (SV §9.1) was designed a
 
 ## `POST /api/v1/app/lessons/{lessonId}/complete`
 
+A lesson of the server's has no such call: the server completes a lesson by its answers and says so in the sync's reply. So its end only waits for its answers to be with the server, then shows the phone's own numbers, which the server's markings have set right as they came; with answers still on the phone it says they are kept, and tries again when the connection returns. Points, the goal and the streak aren't the server's to give yet (STATUS D-123). What follows is proposed, for the mock's lessons.
+
 The last question is done. Sent after the lesson's answers, and returns the official numbers (S §7.6). Proposed.
 
 ```json
@@ -441,7 +443,7 @@ The answers kept on the phone, together. An answer is marked on the phone at «�
 | `rejected` | Takes it off the phone and logs `error.code`: `validation.failed`, `lesson.version_unknown`, `enrollment.not_found`, `question.version_unknown` or `question.answer_invalid` |
 | Any other | Takes it off the phone, keeps its own marking, and logs it. `pending_ai` will come with the AI's templates |
 
-An answer the reply doesn't mention stays for the next send. `lessons`, `units` and `levels` say what the answers completed and opened; the app doesn't read them yet, as its home and unit are on proposed endpoints (STATUS D-123). Fields it doesn't know are ignored.
+An answer the reply doesn't mention stays for the next send. `lessons`, `units` and `levels` say what the answers completed and opened; the app doesn't read them, as home and the unit ask the map again when the learner comes back ([home.md](home.md)). Fields it doesn't know are ignored.
 
 When the request fails whole, the server keeps nothing:
 

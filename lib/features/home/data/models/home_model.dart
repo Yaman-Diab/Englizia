@@ -7,10 +7,11 @@ import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 
-// ASSUMPTION(api): this whole file is proposed (docs/api/home.md).
+// The app's own shape of home (docs/api/home.md). Against the server it is
+// put together from live calls (server_home.dart); mock mode serves it whole.
+// ASSUMPTION(api): what the server doesn't have yet is proposed.
 
-/// Home as `GET /api/v1/app/home` sends it. The raw [json] is what the phone
-/// keeps. The enrollments, the streak and the week read as «أنا» reads them,
+/// Home in the app's own shape. The raw [json] is what the phone keeps. The enrollments, the streak and the week read as «أنا» reads them,
 /// and a lesson as the unit's screen does.
 final class HomeModel {
   const HomeModel(this.json);

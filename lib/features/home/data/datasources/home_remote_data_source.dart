@@ -7,7 +7,9 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
 import 'package:englizia/features/home/data/models/home_model.dart';
+import 'package:englizia/features/home/data/models/server_home.dart';
 import 'package:englizia/features/me/data/datasources/profile_remote_data_source.dart';
+import 'package:englizia/features/tracks/data/datasources/enrollments_reader.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class HomeRemoteDataSource {
@@ -19,9 +21,44 @@ final class HomeRemoteDataSourceImpl implements HomeRemoteDataSource {
 
   final ApiClient _client;
 
+  /// The server has no call for home: it is put together from the account,
+  /// the joined tracks and the active track's map (docs/api/home.md).
   @override
-  Future<HomeModel> getHome() async =>
-      HomeModel(asJsonMap(await _client.get(ApiEndpoints.home)));
+  Future<HomeModel> getHome() async {
+    final enrollments = await EnrollmentsReader(_client).all();
+    final active = EnrollmentsReader.activeOf(enrollments);
+    final trackId = active?.readString('trackId');
+    if (active == null || trackId == null) {
+      throw const FormatException('Home: no track joined');
+    }
+    final [me, map] = await Future.wait([
+      _client.get(ApiEndpoints.me),
+      _client.get(ApiEndpoints.levelMap(trackId)),
+    ]);
+    return HomeModel(
+      homeFromServer(
+        me: asJsonMap(me),
+        enrollments: enrollments,
+        map: asJsonMap(map),
+        placement: (active.readBool('placementPending') ?? false)
+            ? await _placement(trackId)
+            : null,
+      ),
+    );
+  }
+
+  /// The test's state, for its card. Home shows without it.
+  Future<Map<String, Object?>?> _placement(String trackId) async {
+    try {
+      return asJsonMap(
+        await _client.get(ApiEndpoints.placement, query: {'trackId': trackId}),
+      );
+    } on ApiException {
+      return null;
+    } on NetworkException {
+      return null;
+    }
+  }
 }
 
 /// The mock server, with what the dev page and the cubit's clock reach.

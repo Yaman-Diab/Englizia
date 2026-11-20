@@ -1587,6 +1587,11 @@ void main() {
 
     Future<void> settle() => Future<void>.delayed(Duration.zero);
 
+    List<Object?> unsent() => switch (settings.lessonProgress) {
+      final saved? => (jsonDecode(saved) as Map)['unsent'] as List,
+      null => const [],
+    };
+
     const spoken = ExerciseAttempt(
       lessonId: 'les',
       lessonVersion: 3,
@@ -1796,6 +1801,86 @@ void main() {
       expect(remote.completed.single['seconds'], 60);
     });
 
+    group('a lesson of the server’s ends by its answers', () {
+      const first = '01a1f24f-f290-7a84-98a0-59bfe7d9bdf4';
+      const answer = ExerciseAttempt(
+        lessonId: 'real',
+        lessonVersion: 1,
+        questionId: first,
+        draft: ChoiceDraft('a'),
+        hinted: false,
+      );
+      const done = LessonSummary(
+        lessonId: 'real',
+        lessonVersion: 1,
+        rightFirstTime: 5,
+        counted: 6,
+        pending: 0,
+        seconds: 90,
+        outline: LessonOutline(),
+      );
+
+      setUp(() async {
+        remote.lesson = asJsonMap(
+          ApiClient.unwrap(
+            jsonDecode(
+              File(
+                'test/fixtures/api/app_lesson_grammar.json',
+              ).readAsStringSync(),
+            ),
+          ),
+        );
+        await repository.getLesson('real');
+      });
+
+      test(
+        'with its answers there, it is done, with no call of its own',
+        () async {
+          await repository.saveAttempt(answer);
+
+          final result = await repository.completeLesson(done);
+
+          expect(
+            result,
+            const Ok(
+              LessonResult(
+                rightFirstTime: 5,
+                counted: 6,
+                seconds: 90,
+                pending: 0,
+              ),
+            ),
+          );
+          expect(remote.sent.single['questionVersionId'], first);
+          expect(remote.completed, isEmpty);
+          expect(repository.onPhone('real').done, isTrue);
+          expect(unsent(), isEmpty);
+        },
+      );
+
+      test('with answers still on the phone it waits for them', () async {
+        remote.offline = true;
+        await repository.saveAttempt(answer);
+
+        expect(await repository.completeLesson(done), isA<Err<LessonResult>>());
+        expect(repository.onPhone('real').done, isFalse);
+        expect(unsent(), hasLength(1), reason: 'only the answer waits');
+
+        remote.offline = false;
+        expect(await repository.completeLesson(done), isA<Ok<LessonResult>>());
+        expect(remote.completed, isEmpty);
+      });
+
+      test('its end starts a new run', () async {
+        await repository.saveAttempt(answer);
+        await repository.completeLesson(done);
+        await repository.saveAttempt(answer);
+        await settle();
+
+        expect(remote.sent.map((a) => a['runId']).toSet(), hasLength(2));
+      });
+    });
+
     test('with no connection it waits, and goes with its one id', () async {
       remote.offline = true;
       final first = await repository.completeLesson(finished);
@@ -1826,11 +1911,6 @@ void main() {
       });
       expect(remote.sent, isEmpty);
     });
-
-    List<Object?> unsent() => switch (settings.lessonProgress) {
-      final saved? => (jsonDecode(saved) as Map)['unsent'] as List,
-      null => const [],
-    };
 
     test('a spoken answer the server missed is not kept', () async {
       remote.offline = true;

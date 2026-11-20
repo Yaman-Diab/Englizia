@@ -68,7 +68,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`talk.md`](talk.md) | «تحدّث»: the scenarios, the intro, a conversation's turns and its summary's notes | mock |
 | [`practice.md`](practice.md) | The «تدرّب» tab, a review of the word bank, «كلماتي» | mock |
 | [`me.md`](me.md) | «أنا» and the settings: the profile, its name, the active track and the grade, the goal and the reminder, the password and deleting the account | live, the profile and deletion mock |
-| [`home.md`](home.md) | The «تعلّم» tab: the active track's units, the current unit's lessons, today, the review, the cards and one-time notices | mock |
+| [`home.md`](home.md) | The «تعلّم» tab and a unit's screen: put together from the account, the joined tracks and the active track's map; today, the review, the cards and one-time notices in mock mode only | live in part |
 | [`notifications.md`](notifications.md) | Notifications: the push token, what the server sends and what a tap opens (ADR 21) | proposed, mock |
 | [`downloads.md`](downloads.md) | Lessons downloaded to open with no connection: a lesson's files, and the panel's limits (ADR 22) | proposed, mock |
 | [`settings.md`](settings.md) | Onboarding reminder step (reminder times, the reminder's text), the splash's version gate, later every screen that reads a setting | mock |
@@ -125,7 +125,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/placement/sessions/{id}/stages/{n}` | POST | `{answers: [{questionId, optionId} or {questionId, dontKnow}]}` | the session as it now stands; safe to repeat ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/placement/sessions/{id}/choose` | POST | `{trackId, choice: result or lower}` | `EnrollmentDto` ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/enrollments` | GET | — | the learner's enrollments; the placement test takes the active one's track | live, used |
-| `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
+| `/api/v1/app/enrollments/{trackId}/map` | GET | — | the level's units and their lessons, with what is done and open ([home.md](home.md)) | live, used |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions, links and onboarding's tracks used |
 | `/api/v1/auth/guest` | POST | `CreateGuestRequest {deviceId, platform, displayName}`, no session | `TokenResponse`, `accountType: "guest"` ([auth.md](auth.md)) | live, used |

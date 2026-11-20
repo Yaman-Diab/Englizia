@@ -73,6 +73,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
+- Home and the unit screen read the server: your track and its level, its units and their lessons, what is done and what is open. A lesson's end comes once its answers are with the server.
 - Lessons come from the server, and their answers go to it: each answer is kept on the phone the moment it is checked and sent with the others when there is a connection, again by itself if that fails, and never twice. The server's marking is the one that counts.
 - The placement test runs on the server: its state, its stages sent as each one ends, the result with the track's own levels, and the choice of where to start. An unfinished test carries on where the phone got to; a finished one waiting for a choice opens its result.
 - Download a lesson or a whole unit, video included, and open it with no connection. Downloads stay inside the app, sealed on the phone; they say their size before they start, come on Wi-Fi only unless you choose otherwise, carry on after a cut, and are managed from «التنزيلات» in the settings.
