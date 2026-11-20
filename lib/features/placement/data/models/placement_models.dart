@@ -28,6 +28,8 @@ final class PlacementLevelModel {
     required this.id,
     required this.name,
     required this.cefr,
+    this.tagline,
+    this.canDo = const [],
   });
 
   static PlacementLevelModel? fromJson(Map<String, Object?>? json) {
@@ -40,12 +42,29 @@ final class PlacementLevelModel {
         en: json.readString('nameEn') ?? '',
       ),
       cefr: json.readString('cefrCode'),
+      tagline: json.readString('taglineAr'),
+      canDo: [
+        for (final item
+            in json.readList('canDoStatements') ?? const <Object?>[])
+          if (item is Map)
+            if (item.cast<String, Object?>().readString('ar') case final ar?)
+              LocalizedText(
+                ar: ar,
+                en: item.cast<String, Object?>().readString('en') ?? '',
+              ),
+      ],
     );
   }
 
   final String id;
   final LocalizedText name;
   final String? cefr;
+
+  /// `taglineAr`: the level in a word, written in the panel.
+  final String? tagline;
+
+  /// `canDoStatements`: up to five, in the panel's order.
+  final List<LocalizedText> canDo;
 }
 
 /// `GET /api/v1/app/placement?trackId=`: where the account stands with the test
@@ -145,6 +164,8 @@ final class PlacementStateModel {
         code: placementCode(code),
         cefr: code,
         name: own?.name ?? LocalizedText(ar: placementCode(code)),
+        tagline: own?.tagline,
+        canDo: own?.canDo ?? const [],
       );
     }
 

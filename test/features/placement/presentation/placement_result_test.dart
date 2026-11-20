@@ -291,16 +291,17 @@ void main() {
       expect(find.text('placement_result_estimated'.tr()), findsOneWidget);
       // On the ladder and as the level.
       expect(find.text('A1'), findsNWidgets(2));
+      // The level in a word, as the panel wrote it; not its name.
       expect(find.text('مبتدئ'), findsOneWidget);
+      expect(find.text('المستوى الثاني'), findsNothing);
       expect(find.text('placement_result_can'.tr()), findsOneWidget);
-      // What A1 can do: the app's own words for the step.
-      for (final key in const [
-        'placement_can_a1_1',
-        'placement_can_a1_2',
-        'placement_can_a1_3',
-      ]) {
-        expect(find.text(key.tr()), findsOneWidget);
-      }
+      // What the level can do: the panel's sentences, in their order.
+      final lines = [
+        for (final line in testLevels[1].canDo)
+          tester.getTopLeft(find.text(line.ar)).dy,
+      ];
+      expect(lines, hasLength(3));
+      expect(lines, orderedEquals([...lines]..sort()));
       expect(find.text('placement_result_skills'.tr()), findsOneWidget);
       expect(find.text('placement_skill_vocabulary'.tr()), findsOneWidget);
       expect(find.text('placement_result_note'.tr()), findsOneWidget);
@@ -343,6 +344,47 @@ void main() {
       expect(find.text('placement_skill_needs_work'.tr()), findsNothing);
     });
 
+    testWidgets('a level the panel said nothing of shows neither part', (
+      tester,
+    ) async {
+      // A2 has no word and no sentences.
+      await pumpPage(
+        tester,
+        _with(const [
+          Ok(
+            PlacementResult(
+              levels: testLevels,
+              levelIndex: 2,
+              skills: testSkills,
+            ),
+          ),
+        ]),
+      );
+
+      expect(find.text('A2'), findsNWidgets(2));
+      expect(find.text('المستوى الثالث'), findsNothing);
+      expect(find.text('placement_result_can'.tr()), findsNothing);
+      expect(find.text('placement_result_skills'.tr()), findsOneWidget);
+    });
+
+    testWidgets('in English a sentence reads in English, when it has one', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        _with(const [Ok(_atA1)]),
+        layout: (
+          locale: const Locale('en'),
+          size: defaultViewport,
+          themeMode: ThemeMode.light,
+        ),
+      );
+
+      expect(find.text('Introduce yourself'), findsOneWidget);
+      expect(find.text('تعرّف بنفسك'), findsNothing);
+      expect(find.text('تملأ نموذجًا باسمك'), findsOneWidget);
+    });
+
     testWidgets('the first level: from the beginning, nothing lower', (
       tester,
     ) async {
@@ -350,6 +392,7 @@ void main() {
       expect(find.text('placement_result_from_start'.tr()), findsOneWidget);
       expect(find.text('البداية'), findsNothing);
       expect(find.text('placement_result_first_week'.tr()), findsOneWidget);
+      expect(find.text('تقرأ الحروف'), findsOneWidget);
       expect(find.text('onboarding_level_beginner_cta'.tr()), findsOneWidget);
       expect(find.byType(TextButton), findsNothing);
       final guide = tester.widget<Mascot>(find.byType(Mascot));

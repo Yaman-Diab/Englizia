@@ -213,6 +213,9 @@ class _PlacementResultPageState extends State<PlacementResultPage>
     }
 
     final pre = state.isFirstLevel;
+    // The level in a word, from the panel. The first step shows none: the
+    // level it starts at is the one above it.
+    final tagline = pre ? null : level.tagline;
     final (String caption, TextStyle captionStyle) = state.lowered
         ? (
             'placement_result_chose'.tr(),
@@ -283,7 +286,7 @@ class _PlacementResultPageState extends State<PlacementResultPage>
                         child: Semantics(
                           container: true,
                           liveRegion: true,
-                          label: pre
+                          label: tagline == null
                               ? 'placement_result_heading_first'.tr(
                                   namedArgs: {'caption': caption, 'code': code},
                                 )
@@ -291,7 +294,7 @@ class _PlacementResultPageState extends State<PlacementResultPage>
                                   namedArgs: {
                                     'caption': caption,
                                     'code': code,
-                                    'name': level.name.of(language),
+                                    'name': tagline,
                                   },
                                 ),
                           child: ExcludeSemantics(
@@ -321,9 +324,9 @@ class _PlacementResultPageState extends State<PlacementResultPage>
                                         ),
                                       ),
                                     ),
-                                    if (!pre)
+                                    if (tagline != null)
                                       Text(
-                                        level.name.of(language),
+                                        tagline,
                                         style: texts.title.copyWith(
                                           color: colors.textPrimary,
                                         ),
@@ -358,18 +361,21 @@ class _PlacementResultPageState extends State<PlacementResultPage>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _SectionTitle(
-                      pre
-                          ? 'placement_result_first_week'.tr()
-                          : 'placement_result_can'.tr(),
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    for (final (i, line) in canDo(level.cefr).indexed) ...[
-                      if (i > 0) const SizedBox(height: AppSpacing.md),
-                      _CanDo(line),
+                    if (level.canDo.isNotEmpty) ...[
+                      _SectionTitle(
+                        pre
+                            ? 'placement_result_first_week'.tr()
+                            : 'placement_result_can'.tr(),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      for (final (i, line) in level.canDo.indexed) ...[
+                        if (i > 0) const SizedBox(height: AppSpacing.md),
+                        _CanDo(line.of(language)),
+                      ],
                     ],
                     if (skills.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.xxl),
+                      if (level.canDo.isNotEmpty)
+                        const SizedBox(height: AppSpacing.xxl),
                       _SectionTitle('placement_result_skills'.tr()),
                       const SizedBox(height: AppSpacing.md),
                       for (final (i, skill) in skills.indexed) ...[
@@ -816,36 +822,3 @@ class _Badge extends StatelessWidget {
     ),
   );
 }
-
-/// What a learner at a step of the ladder can do: the app's own words, three
-/// for each step (docs/api/placement.md). For the first step, what the first
-/// week teaches.
-// ASSUMPTION(design): the final sentences aren't written yet; these stand in
-// for them (docs/STATUS.md).
-List<String> canDo(String cefr) => switch (cefr) {
-  'a1' => [
-    'placement_can_a1_1'.tr(),
-    'placement_can_a1_2'.tr(),
-    'placement_can_a1_3'.tr(),
-  ],
-  'a2' => [
-    'placement_can_a2_1'.tr(),
-    'placement_can_a2_2'.tr(),
-    'placement_can_a2_3'.tr(),
-  ],
-  'b1' => [
-    'placement_can_b1_1'.tr(),
-    'placement_can_b1_2'.tr(),
-    'placement_can_b1_3'.tr(),
-  ],
-  'b2' => [
-    'placement_can_b2_1'.tr(),
-    'placement_can_b2_2'.tr(),
-    'placement_can_b2_3'.tr(),
-  ],
-  _ => [
-    'placement_can_pre_a1_1'.tr(),
-    'placement_can_pre_a1_2'.tr(),
-    'placement_can_pre_a1_3'.tr(),
-  ],
-};

@@ -79,7 +79,9 @@ After the last stage the session is `completed`, its `stage`, `block` and `quest
 
 ```json
 "result": { "sessionId": "…", "cefr": "a2", "completedAt": "…", "versionNo": 1, "form": "a", "isRetake": false,
-            "level":      { "id": "…", "nameAr": "المستوى الثالث", "nameEn": "A2", "cefrCode": "a2", "gradeNumber": null },
+            "level":      { "id": "…", "nameAr": "المستوى الثالث", "nameEn": "A2", "cefrCode": "a2", "gradeNumber": null,
+                            "taglineAr": "أساسي",
+                            "canDoStatements": [ { "ar": "تتحدث عن يومك وعائلتك بجمل بسيطة", "en": "…" } ] },
             "lowerLevel": { "id": "…", "nameAr": "المستوى الثاني", "nameEn": "A1", "cefrCode": "a1", "gradeNumber": null },
             "skills": [ { "skill": "vocabulary", "correct": 7, "total": 9, "percent": 78 }, "…" ], "strongestSkill": "vocabulary" },
 "retakeAvailableAt": "…"
@@ -88,7 +90,8 @@ After the last stage the session is `completed`, its `stage`, `block` and `quest
 | From | In 3.07 |
 |---|---|
 | `cefr` (`pre_a1`…`b2`) | Where the guide stands on the ladder, Pre-A1 to B2, drawn by the app |
-| «تستطيع أن…» | The app's own three sentences for each step, not the server's (the final ones aren't written yet: STATUS D-122) |
+| `level.taglineAr` | The level in a word under its code («أساسي»), as the content team wrote it in the panel, shown as it is in both app languages. `null` shows none; a Pre-A1 result shows none either, as its level is the one above it |
+| `level.canDoStatements` | «تستطيع أن…», or for a Pre-A1 result «في أسبوعك الأول ستتعلّم أن…»: up to 5 of `{ar, en}`, in their order, each in the app's language when it has it. `[]` hides the part, title and all. The dev server's demo levels have none yet, so a filled answer hasn't been seen: its shape is the backend's word (2026-11-20). `lowerLevel` carries both too; the app shows the result's own |
 | `skills`, in their order | «مهاراتك», as bars against one another, never a number; the strongest and the weakest marked |
 | `level` | «ابدأ من …», named as the track names it. A `pre_a1` result starts at the track's first level |
 | `lowerLevel` | «ابدأ من مستوى أقل»; none (`null`) hides it |
