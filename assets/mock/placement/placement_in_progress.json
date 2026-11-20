@@ -1,0 +1,30 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "trackId": "01a1f24f-ea3e-7693-b3a7-a60061ac9a53",
+    "state": "in_progress",
+    "reason": null,
+    "test": {
+      "versionNo": 1,
+      "listenCount": 2,
+      "questionCount": {
+        "withoutTiebreak": 27,
+        "withTiebreak": 35
+      },
+      "estimatedSeconds": {
+        "withoutTiebreak": 675,
+        "withTiebreak": 875
+      }
+    },
+    "isRetake": false,
+    "session": {
+      "id": "01a1f8ee-ac11-702b-ab34-4fe1c8c95017",
+      "stage": 2
+    },
+    "result": null,
+    "retakeAvailableAt": null
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

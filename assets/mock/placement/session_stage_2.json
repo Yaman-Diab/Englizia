@@ -1,0 +1,461 @@
+{
+  "statusCode": 200,
+  "message": "Stage submitted successfully",
+  "data": {
+    "id": "01a1f8ee-ac11-702b-ab34-4fe1c8c95017",
+    "status": "in_progress",
+    "versionNo": 1,
+    "form": "a",
+    "isRetake": false,
+    "listenCount": 2,
+    "stage": 2,
+    "block": "low",
+    "questions": [
+      {
+        "id": "01a1f8d3-00ec-7efd-bc42-b5bdeddba630",
+        "skill": "vocabulary",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 1. I drink ___ every morning.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "milk"
+          },
+          {
+            "id": "b",
+            "text": "chair"
+          },
+          {
+            "id": "c",
+            "text": "green"
+          },
+          {
+            "id": "d",
+            "text": "slowly"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-00f7-7ebd-b0d3-4f2fa39ac501",
+        "skill": "grammar",
+        "template": "multiple_choice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 2. I ___ to school yesterday.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "walk"
+          },
+          {
+            "id": "b",
+            "text": "walked"
+          },
+          {
+            "id": "c",
+            "text": "walks"
+          },
+          {
+            "id": "d",
+            "text": "walking"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-0100-7a55-b5ba-3c23d5aa09b1",
+        "skill": "reading",
+        "template": "multiple_choice",
+        "instructionAr": "اقرأ النص ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 3. When is the meeting now?",
+        "passage": "The meeting moved from Monday to Thursday because the manager is travelling.",
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "On Monday"
+          },
+          {
+            "id": "b",
+            "text": "On Friday"
+          },
+          {
+            "id": "c",
+            "text": "On Thursday"
+          },
+          {
+            "id": "d",
+            "text": "Today"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-0109-7339-846f-de8f5b520903",
+        "skill": "listening",
+        "template": "listen_choose",
+        "instructionAr": "استمع ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 4. What did you hear?",
+        "passage": null,
+        "audioMediaId": "01a1f8d3-010d-722b-b08e-d0727a204f16",
+        "options": [
+          {
+            "id": "a",
+            "text": "The sun is yellow."
+          },
+          {
+            "id": "b",
+            "text": "I am a student."
+          },
+          {
+            "id": "c",
+            "text": "She eats an egg."
+          },
+          {
+            "id": "d",
+            "text": "They are at school."
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-011d-7200-b4b2-035faa9e2974",
+        "skill": "vocabulary",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 5. You need a ___ to open the door.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "key"
+          },
+          {
+            "id": "b",
+            "text": "cup"
+          },
+          {
+            "id": "c",
+            "text": "shoe"
+          },
+          {
+            "id": "d",
+            "text": "window"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-0126-7290-b327-e0d974c5bd99",
+        "skill": "grammar",
+        "template": "multiple_choice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 6. There ___ two cats in the garden.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "is"
+          },
+          {
+            "id": "b",
+            "text": "are"
+          },
+          {
+            "id": "c",
+            "text": "be"
+          },
+          {
+            "id": "d",
+            "text": "am"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-0130-7ead-b6a0-c533dc566dd0",
+        "skill": "reading",
+        "template": "multiple_choice",
+        "instructionAr": "اقرأ النص ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 7. When is the meeting now?",
+        "passage": "The meeting moved from Monday to Thursday because the manager is travelling.",
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "On Monday"
+          },
+          {
+            "id": "b",
+            "text": "On Friday"
+          },
+          {
+            "id": "c",
+            "text": "On Thursday"
+          },
+          {
+            "id": "d",
+            "text": "Today"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-013a-7a59-895b-a38e517355ed",
+        "skill": "listening",
+        "template": "listen_choose",
+        "instructionAr": "استمع ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 8. What did you hear?",
+        "passage": null,
+        "audioMediaId": "01a1f8d3-013d-7174-9841-c31d6e39e6e3",
+        "options": [
+          {
+            "id": "a",
+            "text": "I am a student."
+          },
+          {
+            "id": "b",
+            "text": "She eats an egg."
+          },
+          {
+            "id": "c",
+            "text": "The cat is in the box."
+          },
+          {
+            "id": "d",
+            "text": "The sun is yellow."
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-014d-7e90-9fdf-09146112de74",
+        "skill": "vocabulary",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 9. The opposite of \"hot\" is ___.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "cold"
+          },
+          {
+            "id": "b",
+            "text": "big"
+          },
+          {
+            "id": "c",
+            "text": "happy"
+          },
+          {
+            "id": "d",
+            "text": "fast"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-0157-77e3-b28b-95b1358f95b2",
+        "skill": "grammar",
+        "template": "multiple_choice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 10. He has lived here ___ 2015.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "for"
+          },
+          {
+            "id": "b",
+            "text": "since"
+          },
+          {
+            "id": "c",
+            "text": "from"
+          },
+          {
+            "id": "d",
+            "text": "at"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-0160-7e54-a05d-2da87e634959",
+        "skill": "reading",
+        "template": "multiple_choice",
+        "instructionAr": "اقرأ النص ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 11. When is the meeting now?",
+        "passage": "The meeting moved from Monday to Thursday because the manager is travelling.",
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "On Monday"
+          },
+          {
+            "id": "b",
+            "text": "On Friday"
+          },
+          {
+            "id": "c",
+            "text": "On Thursday"
+          },
+          {
+            "id": "d",
+            "text": "Today"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-016a-7823-a51e-b4543fee578e",
+        "skill": "listening",
+        "template": "listen_choose",
+        "instructionAr": "استمع ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 12. What did you hear?",
+        "passage": null,
+        "audioMediaId": "01a1f8d3-016e-7948-8198-d66bf75bd976",
+        "options": [
+          {
+            "id": "a",
+            "text": "She eats an egg."
+          },
+          {
+            "id": "b",
+            "text": "The cat is in the box."
+          },
+          {
+            "id": "c",
+            "text": "He has got a bike."
+          },
+          {
+            "id": "d",
+            "text": "I am a student."
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-01b9-7b78-9088-0784ce0aa8f8",
+        "skill": "vocabulary",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 13. I drink ___ every morning.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "milk"
+          },
+          {
+            "id": "b",
+            "text": "chair"
+          },
+          {
+            "id": "c",
+            "text": "green"
+          },
+          {
+            "id": "d",
+            "text": "slowly"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-01d7-7398-bc7d-2c915743163a",
+        "skill": "grammar",
+        "template": "multiple_choice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 14. I ___ to school yesterday.",
+        "passage": null,
+        "audioMediaId": null,
+        "options": [
+          {
+            "id": "a",
+            "text": "walk"
+          },
+          {
+            "id": "b",
+            "text": "walked"
+          },
+          {
+            "id": "c",
+            "text": "walks"
+          },
+          {
+            "id": "d",
+            "text": "walking"
+          }
+        ]
+      },
+      {
+        "id": "01a1f8d3-01f6-7fd9-b52c-fa7dccf9a141",
+        "skill": "listening",
+        "template": "listen_choose",
+        "instructionAr": "استمع ثم أجب",
+        "instructionAudioMediaId": null,
+        "prompt": "[demo] a·low 15. What did you hear?",
+        "passage": null,
+        "audioMediaId": "01a1f8d3-01fc-788b-b7f0-697b25c2ec04",
+        "options": [
+          {
+            "id": "a",
+            "text": "The cat is in the box."
+          },
+          {
+            "id": "b",
+            "text": "He has got a bike."
+          },
+          {
+            "id": "c",
+            "text": "She eats an egg."
+          },
+          {
+            "id": "d",
+            "text": "We walked to school."
+          }
+        ]
+      }
+    ],
+    "media": {
+      "01a1f8d3-010d-722b-b08e-d0727a204f16": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f8d3-010d-722b-b08e-d0727a204f16.mp3",
+        "sizeBytes": 9788
+      },
+      "01a1f8d3-013d-7174-9841-c31d6e39e6e3": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f8d3-013d-7174-9841-c31d6e39e6e3.mp3",
+        "sizeBytes": 9944
+      },
+      "01a1f8d3-016e-7948-8198-d66bf75bd976": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f8d3-016e-7948-8198-d66bf75bd976.mp3",
+        "sizeBytes": 9161
+      },
+      "01a1f8d3-01fc-788b-b7f0-697b25c2ec04": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a1f8d3-01fc-788b-b7f0-697b25c2ec04.mp3",
+        "sizeBytes": 10101
+      }
+    },
+    "result": null
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

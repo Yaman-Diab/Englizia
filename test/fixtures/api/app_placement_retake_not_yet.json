@@ -1,0 +1,10 @@
+{
+  "statusCode": 409,
+  "message": "The test can be taken again 30 days after the last one.",
+  "data": null,
+  "error": {
+    "code": "placement.retake_not_yet",
+    "details": null
+  },
+  "traceId": "00000000000000000000000000000000"
+}

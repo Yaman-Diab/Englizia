@@ -1,0 +1,10 @@
+{
+  "statusCode": 409,
+  "message": "Finish the test before choosing a level.",
+  "data": null,
+  "error": {
+    "code": "placement.session_not_completed",
+    "details": null
+  },
+  "traceId": "00000000000000000000000000000000"
+}

@@ -174,12 +174,14 @@ void main() {
     late int skips;
     late int lessons;
     late int backs;
+    late List<String> results;
 
     setUp(() {
       starts = 0;
       skips = 0;
       lessons = 0;
       backs = 0;
+      results = [];
     });
 
     Future<PlacementIntroCubit> pumpPage(
@@ -209,6 +211,7 @@ void main() {
             onStart: () async => starts++,
             onSkip: () => skips++,
             onLessons: () => lessons++,
+            onResult: results.add,
           ),
         ),
         locale: layout?.locale ?? const Locale('ar'),
@@ -274,7 +277,9 @@ void main() {
       expect(skips, 1);
     });
 
-    testWidgets('an unfinished test: continue, or start over', (tester) async {
+    testWidgets('an unfinished test: continue, or back to the lessons', (
+      tester,
+    ) async {
       await pumpPage(tester, status: inProgress);
       expect(
         find.text(
@@ -284,10 +289,28 @@ void main() {
       );
       await tester.tap(find.text('placement_continue'.tr()));
       expect(starts, 1);
-      await tester.tap(find.text('placement_restart'.tr()));
-      await tester.pump();
-      await tester.pump();
-      expect(starts, 2);
+      // The server keeps a session going: there is no starting it over.
+      await tester.tap(find.text('placement_back_to_lessons'.tr()));
+      expect(lessons, 1);
+    });
+
+    testWidgets('a finished test waiting for its choice opens the result', (
+      tester,
+    ) async {
+      await pumpPage(
+        tester,
+        status: const PlacementAwaitingChoice(attemptId: 's-1'),
+      );
+      expect(find.text('placement_result_waiting'.tr()), findsOneWidget);
+      await tester.tap(find.text('placement_see_result'.tr()));
+      expect(results, ['s-1']);
+      expect(starts, 0);
+    });
+
+    test('the track is given to the test', () async {
+      final placement = FakePlacementRepository();
+      await cubitWith(placement: placement).start('trk');
+      expect(placement.tracks, ['trk']);
     });
 
     testWidgets('an open retake: the result, and back to the lessons', (
@@ -404,6 +427,7 @@ void main() {
             onStart: () async {},
             onSkip: () {},
             onLessons: () => lessons++,
+            onResult: results.add,
           ),
         ),
       );
@@ -418,7 +442,7 @@ void main() {
       expect(lessons, 1);
     });
 
-    testWidgets('offline with an unfinished test saved: no starting over', (
+    testWidgets('offline with an unfinished test saved: back to the lessons', (
       tester,
     ) async {
       connectivity.online = false;
@@ -437,13 +461,16 @@ void main() {
             onStart: () async {},
             onSkip: () {},
             onLessons: () {},
+            onResult: (_) {},
           ),
         ),
       );
       await tester.settleEntrance(const Duration(seconds: 2));
       expect(find.text('placement_continue'.tr()), findsOneWidget);
       expect(button(tester).onPressed, isNull);
-      expect(other(tester).onPressed, isNull);
+      // Going back needs no connection.
+      expect(find.text('placement_back_to_lessons'.tr()), findsOneWidget);
+      expect(other(tester).onPressed, isNotNull);
     });
 
     testWidgets('offline knowing nothing: promises no first test', (
@@ -471,6 +498,7 @@ void main() {
             onStart: () async {},
             onSkip: () {},
             onLessons: () {},
+            onResult: (_) {},
           ),
         ),
       );
@@ -490,6 +518,7 @@ void main() {
             onStart: () async {},
             onSkip: () => skips++,
             onLessons: () {},
+            onResult: (_) {},
           ),
         ),
       );
@@ -517,6 +546,7 @@ void main() {
             onStart: () async {},
             onSkip: () => skips++,
             onLessons: () {},
+            onResult: (_) {},
           ),
         ),
       );
@@ -532,39 +562,6 @@ void main() {
       await tester.pump();
       expect(placement.defers, 2);
       expect(skips, 1);
-    });
-
-    testWidgets('starting over asks the server first, and reloads on return', (
-      tester,
-    ) async {
-      final placement = FakePlacementRepository(
-        const [Ok(testPlacementSummary)],
-        const [Ok(inProgress), Ok(PlacementInProgress(stage: 1, question: 1))],
-      );
-      final cubit = cubitWith(placement: placement);
-      await cubit.start(null);
-      var opened = 0;
-      await tester.pumpLocalized(
-        BlocProvider.value(
-          value: cubit,
-          child: PlacementIntroPage(
-            onBack: () {},
-            onStart: () async => opened++,
-            onSkip: () {},
-            onLessons: () {},
-          ),
-        ),
-      );
-      await tester.settleEntrance(const Duration(seconds: 2));
-      await tester.tap(find.text('placement_restart'.tr()));
-      await tester.pump();
-      await tester.pump();
-      await tester.pump();
-      expect(placement.restarts, 1);
-      expect(opened, 1);
-      expect(placement.statusCalls, 2);
-      expect(cubit.state.done, isNull);
-      await tester.pump(const Duration(seconds: 2));
     });
 
     testWidgets('a server failure offers a retry', (tester) async {
@@ -583,6 +580,7 @@ void main() {
             onStart: () async {},
             onSkip: () {},
             onLessons: () {},
+            onResult: (_) {},
           ),
         ),
       );

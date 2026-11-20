@@ -1,28 +1,31 @@
 import 'package:englizia/core/l10n/localized_text.dart';
 import 'package:equatable/equatable.dart';
 
-/// One level of the track, as the ladder shows it. What it says comes from the
-/// control panel.
+/// One step of the ladder, Pre-A1 to B2. Its name is the track's level when
+/// the learner may start there; what it says a learner can do is the app's
+/// own (docs/api/placement.md).
 final class PlacementLevel extends Equatable {
   const PlacementLevel({
     required this.id,
     required this.code,
+    required this.cefr,
     required this.name,
-    required this.canDo,
   });
 
+  /// The track's level to start from; empty for a step the learner can't
+  /// start at.
   final String id;
 
-  /// CEFR code, e.g. "A2".
+  /// As shown, e.g. "Pre-A1", "A2".
   final String code;
+
+  /// As the server names it, e.g. "pre_a1", "a2": what a learner at this
+  /// step can do is told by it.
+  final String cefr;
   final LocalizedText name;
 
-  /// What a learner at this level can do; for the first level, what the first
-  /// week teaches.
-  final List<LocalizedText> canDo;
-
   @override
-  List<Object?> get props => [id, code, name, canDo];
+  List<Object?> get props => [id, code, cefr, name];
 }
 
 enum PlacementSkillKind { vocabulary, grammar, reading, listening }
@@ -44,15 +47,19 @@ final class PlacementResult extends Equatable {
     required this.levels,
     required this.levelIndex,
     required this.skills,
+    this.canLower = false,
   });
 
-  /// The track's levels, from the first.
+  /// The ladder, from the first step.
   final List<PlacementLevel> levels;
 
   /// Where the learner came out.
   final int levelIndex;
   final List<PlacementSkill> skills;
 
+  /// The track has a level below the result to start from instead.
+  final bool canLower;
+
   @override
-  List<Object?> get props => [levels, levelIndex, skills];
+  List<Object?> get props => [levels, levelIndex, skills, canLower];
 }

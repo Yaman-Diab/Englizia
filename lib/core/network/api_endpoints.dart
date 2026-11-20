@@ -51,40 +51,28 @@ abstract final class ApiEndpoints {
 
   // Confirmed in docs/api/openapi.json; a member's, with a session.
   static const tracks = '/api/v1/app/tracks';
-  // ASSUMPTION(api): docs/api/placement.md.
-  static const placementSummary = '/api/v1/app/placement/summary';
-  // ASSUMPTION(api): docs/api/placement.md.
-  static const placementStatus = '/api/v1/app/placement/status';
-  // ASSUMPTION(api): docs/api/placement.md.
-  static const placementAttempts = '/api/v1/app/placement/attempts';
+  // Confirmed in docs/api/openapi.json: the learner's enrollments.
+  static const enrollments = '/api/v1/app/enrollments';
+  // Confirmed in docs/api/openapi.json: `?trackId=`.
+  static const placement = '/api/v1/app/placement';
+  // Confirmed in docs/api/openapi.json.
+  static const placementSessions = '/api/v1/app/placement/sessions';
   // ASSUMPTION(api): docs/api/settings.md.
   static const settings = '/api/v1/app/settings';
   // Confirmed in docs/api/openapi.json; answered without a session.
   static const systemConfig = '/api/v1/app/system/config';
 
-  // ASSUMPTION(api): docs/api/placement.md.
-  static String placementStage(String attemptId, int stage) =>
-      '/api/v1/app/placement/attempts/$attemptId/stages/$stage';
+  // Confirmed in docs/api/openapi.json.
+  static String placementSession(String sessionId) =>
+      '/api/v1/app/placement/sessions/$sessionId';
 
-  // ASSUMPTION(api): docs/api/placement.md.
-  static String placementAnswers(String attemptId) =>
-      '/api/v1/app/placement/attempts/$attemptId/answers';
+  // Confirmed in docs/api/openapi.json.
+  static String placementStage(String sessionId, int stage) =>
+      '/api/v1/app/placement/sessions/$sessionId/stages/$stage';
 
-  // ASSUMPTION(api): docs/api/placement.md.
-  static String placementStageComplete(String attemptId, int stage) =>
-      '/api/v1/app/placement/attempts/$attemptId/stages/$stage/complete';
-
-  // ASSUMPTION(api): docs/api/placement.md.
-  static String placementResult(String attemptId) =>
-      '/api/v1/app/placement/attempts/$attemptId/result';
-
-  // ASSUMPTION(api): docs/api/placement.md.
-  static String placementAccept(String attemptId) =>
-      '/api/v1/app/placement/attempts/$attemptId/accept';
-
-  // ASSUMPTION(api): docs/api/placement.md.
-  static String enrollment(String enrollmentId) =>
-      '/api/v1/app/enrollments/$enrollmentId';
+  // Confirmed in docs/api/openapi.json.
+  static String placementChoose(String sessionId) =>
+      '/api/v1/app/placement/sessions/$sessionId/choose';
 
   // Confirmed in docs/api/openapi.json: an enrollment is its track's.
   static String activeEnrollment(String trackId) =>

@@ -1,0 +1,32 @@
+{
+  "statusCode": 200,
+  "message": "Level chosen successfully",
+  "data": {
+    "trackId": "01a1f24f-ea3e-7693-b3a7-a60061ac9a53",
+    "track": {
+      "nameAr": "الإنجليزية العامة (تجريبي)",
+      "nameEn": "General English (demo)",
+      "coverUrl": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-e928-7f07-88e1-f4a97a690c2e.webp",
+      "entryMode": "placement",
+      "kidsMode": false,
+      "levelLabel": "level"
+    },
+    "level": {
+      "id": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
+      "nameAr": "A1 المبتدئ",
+      "nameEn": "A1 Beginner",
+      "cefrCode": "a1",
+      "gradeNumber": null
+    },
+    "isActive": true,
+    "entryMethod": "placement",
+    "placementPending": false,
+    "child": null,
+    "joinedAt": "2026-11-20T12:28:58.270Z",
+    "available": true,
+    "unitNo": 1,
+    "unitCount": 2
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

@@ -55,8 +55,10 @@ final class PlacementResultState extends Equatable {
 
   PlacementLevel? get level => result?.levels[levelIndex];
 
-  /// The level below, which the learner may choose once.
-  PlacementLevel? get lowerLevel => result == null || lowered || levelIndex == 0
+  /// The level below, which the learner may choose once, when the track has
+  /// one.
+  PlacementLevel? get lowerLevel =>
+      result == null || lowered || !result!.canLower || levelIndex == 0
       ? null
       : result!.levels[levelIndex - 1];
 
@@ -167,7 +169,10 @@ class PlacementResultCubit extends Cubit<PlacementResultState> {
     final level = state.level;
     if (level == null || state.accepting || state.accepted) return;
     emit(state.copyWith(accepting: true, actionFailure: () => null));
-    final result = await _placement.acceptLevel(_attemptId, level.id);
+    final result = await _placement.acceptLevel(
+      _attemptId,
+      lower: state.lowered,
+    );
     if (isClosed) return;
     switch (result) {
       case Ok():

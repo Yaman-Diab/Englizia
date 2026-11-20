@@ -55,20 +55,20 @@ const testLevels = [
   PlacementLevel(
     id: 'pre',
     code: 'Pre-A1',
+    cefr: 'pre_a1',
     name: LocalizedText(ar: 'البداية', en: 'Beginning'),
-    canDo: [LocalizedText(ar: 'تعرّف بنفسك', en: 'Introduce yourself')],
   ),
   PlacementLevel(
     id: 'a1',
     code: 'A1',
+    cefr: 'a1',
     name: LocalizedText(ar: 'مبتدئ', en: 'Beginner'),
-    canDo: [LocalizedText(ar: 'تسأل أسئلة بسيطة', en: 'Ask simple questions')],
   ),
   PlacementLevel(
     id: 'a2',
     code: 'A2',
+    cefr: 'a2',
     name: LocalizedText(ar: 'أساسي', en: 'Elementary'),
-    canDo: [LocalizedText(ar: 'تتحدث عن يومك', en: 'Talk about your day')],
   ),
 ];
 
@@ -82,6 +82,7 @@ const testResult = PlacementResult(
   levels: testLevels,
   levelIndex: 2,
   skills: testSkills,
+  canLower: true,
 );
 
 const testPlacementSummary = PlacementSummary(
@@ -109,12 +110,14 @@ class FakePlacementRepository implements PlacementRepository {
   final List<Result<PlacementSummary>> results;
   final List<Result<PlacementStatus>> statuses;
 
-  /// What restarting and putting off answer, one after another.
+  /// What putting off answers, one after another.
   final List<Result<void>> actions;
   var calls = 0;
   var statusCalls = 0;
-  var restarts = 0;
   var defers = 0;
+
+  /// The tracks asked for, in order; null is the active one.
+  final tracks = <String?>[];
 
   final List<Result<PlacementAttempt>> attempts;
 
@@ -130,7 +133,12 @@ class FakePlacementRepository implements PlacementRepository {
   final List<Result<PlacementResult>> placementResults;
   final List<Result<void>> accepts;
   var resultCalls = 0;
-  final accepted = <String>[];
+
+  /// Each «ابدأ من …»: true when the learner chose the level below.
+  final accepted = <bool>[];
+
+  @override
+  void useTrack(String? trackId) => tracks.add(trackId);
 
   @override
   Future<Result<PlacementSummary>> getSummary() async =>
@@ -139,12 +147,6 @@ class FakePlacementRepository implements PlacementRepository {
   @override
   Future<Result<PlacementStatus>> getStatus() async =>
       statuses[(statusCalls++).clamp(0, statuses.length - 1)];
-
-  @override
-  Future<Result<void>> restartTest() async {
-    restarts++;
-    return _action();
-  }
 
   @override
   Future<Result<void>> deferTest() async {
@@ -195,11 +197,13 @@ class FakePlacementRepository implements PlacementRepository {
       placementResults[(resultCalls++).clamp(0, placementResults.length - 1)];
 
   @override
-  Future<Result<void>> acceptLevel(String attemptId, String levelId) async {
-    accepted.add(levelId);
+  Future<Result<void>> acceptLevel(
+    String attemptId, {
+    required bool lower,
+  }) async {
+    accepted.add(lower);
     return accepts[(accepted.length - 1).clamp(0, accepts.length - 1)];
   }
 
-  Result<void> _action() =>
-      actions[(restarts + defers - 1).clamp(0, actions.length - 1)];
+  Result<void> _action() => actions[(defers - 1).clamp(0, actions.length - 1)];
 }

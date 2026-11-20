@@ -14,8 +14,8 @@ import 'package:englizia/features/tracks/domain/repositories/track_repository.da
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// What the screen asks the server before moving on.
-enum PlacementAction { restart, skip }
+/// What the screen asks for before moving on.
+enum PlacementAction { skip }
 
 final class PlacementIntroState extends Equatable {
   const PlacementIntroState({
@@ -67,9 +67,6 @@ final class PlacementIntroState extends Equatable {
 
   bool get _testReachable =>
       online && summary != null && status != null && !busy;
-
-  /// «ابدأ من جديد» needs the same as starting.
-  bool get canRestart => _testReachable;
 
   bool get canStart => _testReachable && status is! PlacementRetakeLocked;
 
@@ -144,6 +141,7 @@ class PlacementIntroCubit extends Cubit<PlacementIntroState> {
   Future<void> start(String? trackId, {bool newAccount = false}) async {
     _trackId = trackId;
     _newAccount = newAccount;
+    _placement.useTrack(trackId);
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
     final online = await _connectivity.isOnline();
     if (isClosed) return;
@@ -193,10 +191,7 @@ class PlacementIntroCubit extends Cubit<PlacementIntroState> {
     );
   }
 
-  /// «ابدأ من جديد»: throws away the unfinished test, then the questions open.
-  Future<void> restart() => _act(PlacementAction.restart);
-
-  /// «ابدأ من البداية دون اختبار»: tells the server, then the lessons open.
+  /// «ابدأ من البداية دون اختبار»: the lessons open at the first level.
   Future<void> skip() => _act(PlacementAction.skip);
 
   Future<void> retryAction() async {
@@ -208,7 +203,6 @@ class PlacementIntroCubit extends Cubit<PlacementIntroState> {
     _lastAction = action;
     emit(state.copyWith(running: () => action, actionFailure: () => null));
     final result = await switch (action) {
-      PlacementAction.restart => _placement.restartTest(),
       PlacementAction.skip => _placement.deferTest(),
     };
     if (isClosed) return;

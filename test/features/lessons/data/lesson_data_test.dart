@@ -7,6 +7,7 @@ import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
+import 'package:englizia/core/random/stable_order.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
@@ -29,7 +30,6 @@ import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:englizia/features/lessons/domain/services/feedback_content.dart';
-import 'package:englizia/features/lessons/domain/services/stable_order.dart';
 import 'package:flutter_test/flutter_test.dart' hide Evaluation;
 import 'package:shared_preferences/shared_preferences.dart';
 

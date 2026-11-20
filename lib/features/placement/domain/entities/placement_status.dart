@@ -24,6 +24,16 @@ final class PlacementInProgress extends PlacementStatus {
   List<Object?> get props => [stage, question];
 }
 
+/// Finished, and the result waits for the learner to choose where to start.
+final class PlacementAwaitingChoice extends PlacementStatus {
+  const PlacementAwaitingChoice({required this.attemptId});
+
+  final String attemptId;
+
+  @override
+  List<Object?> get props => [attemptId];
+}
+
 /// Has a result, and may take the test again.
 final class PlacementRetakeOpen extends PlacementStatus {
   const PlacementRetakeOpen({required this.level, required this.daysAgo});

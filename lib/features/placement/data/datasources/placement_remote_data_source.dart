@@ -2,35 +2,34 @@ import 'dart:convert';
 
 import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/network/api_endpoints.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
+import 'package:englizia/core/network/api_exception.dart';
+import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/network/json_reader.dart';
-import 'package:englizia/core/network/network_exception.dart';
-import 'package:englizia/features/placement/data/models/placement_result_model.dart';
-import 'package:englizia/features/placement/data/models/placement_status_model.dart';
-import 'package:englizia/features/placement/data/models/placement_summary_model.dart';
-import 'package:englizia/features/placement/data/models/placement_test_models.dart';
+import 'package:englizia/features/placement/data/models/placement_models.dart';
 import 'package:flutter/services.dart';
 
 abstract interface class PlacementRemoteDataSource {
-  Future<PlacementSummaryModel> getSummary();
+  /// The learner's active track, or null when they joined none.
+  Future<String?> activeTrackId();
 
-  Future<PlacementStatusModel> getStatus();
+  Future<PlacementStateModel> getState(String trackId);
 
-  Future<void> restartTest();
+  /// The running session, or a new one at its first stage.
+  Future<PlacementSessionModel> startSession(String trackId);
 
-  Future<void> deferTest(String enrollmentId);
+  Future<PlacementSessionModel> getSession(String sessionId);
 
-  Future<PlacementAttemptModel> startAttempt();
+  /// [answers] are `{questionId, optionId}` or `{questionId, dontKnow: true}`,
+  /// one for each question of [stage].
+  Future<PlacementSessionModel> submitStage(
+    String sessionId,
+    int stage,
+    List<Map<String, Object?>> answers,
+  );
 
-  Future<PlacementStageModel> getStage(String attemptId, int stage);
-
-  /// [answer] is `{answerId, questionId, optionId, plays}`.
-  Future<void> sendAnswer(String attemptId, Map<String, Object?> answer);
-
-  Future<PlacementNextModel> completeStage(String attemptId, int stage);
-
-  Future<PlacementResultModel> getResult(String attemptId);
-
-  Future<void> acceptLevel(String attemptId, String levelId);
+  /// [choice] is `result` or `lower`.
+  Future<void> choose(String sessionId, String trackId, String choice);
 }
 
 final class PlacementRemoteDataSourceImpl implements PlacementRemoteDataSource {
@@ -39,190 +38,152 @@ final class PlacementRemoteDataSourceImpl implements PlacementRemoteDataSource {
   final ApiClient _client;
 
   @override
-  Future<PlacementSummaryModel> getSummary() async =>
-      PlacementSummaryModel.fromJson(
-        asJsonMap(await _client.get(ApiEndpoints.placementSummary)),
-      );
-
-  @override
-  Future<PlacementStatusModel> getStatus() async =>
-      PlacementStatusModel.fromJson(
-        asJsonMap(await _client.get(ApiEndpoints.placementStatus)),
-      );
-
-  @override
-  Future<void> restartTest() =>
-      _client.post(ApiEndpoints.placementAttempts, data: {'restart': true});
-
-  @override
-  Future<void> deferTest(String enrollmentId) => _client.patch(
-    ApiEndpoints.enrollment(enrollmentId),
-    data: {'placement_state': 'deferred'},
-  );
-
-  @override
-  Future<PlacementAttemptModel> startAttempt() async =>
-      PlacementAttemptModel.fromJson(
+  Future<String?> activeTrackId() async {
+    final items =
         asJsonMap(
-          await _client.post(
-            ApiEndpoints.placementAttempts,
-            data: const <String, Object?>{},
+          await _client.get(ApiEndpoints.enrollments),
+        ).readList('items') ??
+        const [];
+    final enrollments = [for (final item in items) asJsonMap(item)];
+    return (enrollments
+                .where((e) => e.readBool('isActive') ?? false)
+                .firstOrNull ??
+            enrollments.firstOrNull)
+        ?.readString('trackId');
+  }
+
+  @override
+  Future<PlacementStateModel> getState(String trackId) async =>
+      PlacementStateModel(
+        asJsonMap(
+          await _client.get(
+            ApiEndpoints.placement,
+            query: {'trackId': trackId},
           ),
         ),
       );
 
   @override
-  Future<PlacementStageModel> getStage(String attemptId, int stage) async =>
-      PlacementStageModel.fromJson(
-        asJsonMap(
-          await _client.get(ApiEndpoints.placementStage(attemptId, stage)),
-        ),
-      );
-
-  @override
-  Future<void> sendAnswer(String attemptId, Map<String, Object?> answer) =>
-      _client.post(ApiEndpoints.placementAnswers(attemptId), data: answer);
-
-  @override
-  Future<PlacementNextModel> completeStage(String attemptId, int stage) async =>
-      PlacementNextModel.fromJson(
+  Future<PlacementSessionModel> startSession(String trackId) async =>
+      PlacementSessionModel(
         asJsonMap(
           await _client.post(
-            ApiEndpoints.placementStageComplete(attemptId, stage),
+            ApiEndpoints.placementSessions,
+            data: {'trackId': trackId},
           ),
         ),
       );
 
   @override
-  Future<PlacementResultModel> getResult(String attemptId) async =>
-      PlacementResultModel.fromJson(
-        asJsonMap(await _client.get(ApiEndpoints.placementResult(attemptId))),
+  Future<PlacementSessionModel> getSession(String sessionId) async =>
+      PlacementSessionModel(
+        asJsonMap(await _client.get(ApiEndpoints.placementSession(sessionId))),
       );
 
   @override
-  Future<void> acceptLevel(String attemptId, String levelId) => _client.post(
-    ApiEndpoints.placementAccept(attemptId),
-    data: {'levelId': levelId},
+  Future<PlacementSessionModel> submitStage(
+    String sessionId,
+    int stage,
+    List<Map<String, Object?>> answers,
+  ) async => PlacementSessionModel(
+    asJsonMap(
+      await _client.post(
+        ApiEndpoints.placementStage(sessionId, stage),
+        data: {'answers': answers},
+      ),
+    ),
   );
+
+  @override
+  Future<void> choose(String sessionId, String trackId, String choice) =>
+      _client.post(
+        ApiEndpoints.placementChoose(sessionId),
+        data: {'trackId': trackId, 'choice': choice},
+      );
 }
 
-/// Mock mode (`env/mock.json`): the contract's examples from the bundled
-/// assets the tests also use. Each opening of the test's intro shows the next
-/// status, so all of them can be seen. Deleted once the endpoints are confirmed.
+/// Mock mode (`env/mock.json`): a session that goes through the dev server's
+/// own answers, saved as they came (`assets/mock/placement/`), with its state
+/// kept in memory. Deleted once the endpoints are confirmed (docs/STATUS.md).
 final class PlacementFakeDataSource implements PlacementRemoteDataSource {
   PlacementFakeDataSource(
     this._bundle, {
-    this.latency = const Duration(milliseconds: 400),
+    this.latency = const Duration(milliseconds: 600),
   });
 
-  static const asset = 'assets/mock/placement/summary.json';
-  static const attemptAsset = 'assets/mock/placement/attempt.json';
-  static String stageAsset(int stage) =>
-      'assets/mock/placement/stage_$stage.json';
-  static const resultAssets = [
-    'assets/mock/placement/result_a2.json',
-    'assets/mock/placement/result_pre_a1.json',
-    'assets/mock/placement/result_b2.json',
-  ];
-  static const statusAssets = [
-    'assets/mock/placement/status_none.json',
-    'assets/mock/placement/status_in_progress.json',
-    'assets/mock/placement/status_retake_available.json',
-    'assets/mock/placement/status_retake_locked.json',
-  ];
+  static const _folder = 'assets/mock/placement';
+  static const availableAsset = '$_folder/placement_available.json';
+  static const inProgressAsset = '$_folder/placement_in_progress.json';
+  static const resultAsset = '$_folder/placement_result.json';
+  static const doneAsset = '$_folder/placement_done.json';
+  static const stage1Asset = '$_folder/session_stage_1.json';
+  static const stage2Asset = '$_folder/session_stage_2.json';
+  static const completedAsset = '$_folder/session_completed.json';
 
   final AssetBundle _bundle;
   final Duration latency;
-  var _opened = 0;
-  var _failedOnce = false;
-  var _resultFailedOnce = false;
-  var _results = 0;
 
-  @override
-  Future<PlacementSummaryModel> getSummary() async {
-    await Future<void>.delayed(latency);
-    final body = jsonDecode(await _bundle.loadString(asset));
-    return PlacementSummaryModel.fromJson(asJsonMap(ApiClient.unwrap(body)));
-  }
+  /// 0 none · 1 at stage 1 · 2 at stage 2 · 3 finished · 4 chosen.
+  var _step = 0;
 
-  @override
-  Future<PlacementStatusModel> getStatus() async {
-    await Future<void>.delayed(latency);
-    final body = jsonDecode(
-      await _bundle.loadString(statusAssets[_opened++ % statusAssets.length]),
-    );
-    return PlacementStatusModel.fromJson(asJsonMap(ApiClient.unwrap(body)));
-  }
-
-  @override
-  Future<void> restartTest() => Future<void>.delayed(latency);
-
-  @override
-  Future<void> deferTest(String enrollmentId) => Future<void>.delayed(latency);
-
-  Future<Map<String, Object?>> _data(String path) async {
+  Future<Map<String, Object?>> _read(String asset) async {
     await Future<void>.delayed(latency);
     return asJsonMap(
-      ApiClient.unwrap(jsonDecode(await _bundle.loadString(path))),
+      ApiClient.unwrap(jsonDecode(await _bundle.loadString(asset))),
     );
   }
 
   @override
-  Future<PlacementAttemptModel> startAttempt() async =>
-      PlacementAttemptModel.fromJson(await _data(attemptAsset));
+  Future<String?> activeTrackId() async => 'trk_general';
 
   @override
-  Future<PlacementStageModel> getStage(String attemptId, int stage) async =>
-      PlacementStageModel.fromJson(await _data(stageAsset(stage)));
+  Future<PlacementStateModel> getState(String trackId) async =>
+      PlacementStateModel(
+        await _read(switch (_step) {
+          0 => availableAsset,
+          1 || 2 => inProgressAsset,
+          3 => resultAsset,
+          _ => doneAsset,
+        }),
+      );
 
   @override
-  Future<void> sendAnswer(String attemptId, Map<String, Object?> answer) =>
-      Future<void>.delayed(latency);
-
-  /// The first result fails once for lack of a connection; then each finished
-  /// test comes out at the next of A2, Pre-A1 and B2, so all can be seen.
-  @override
-  Future<PlacementResultModel> getResult(String attemptId) async {
-    if (!_resultFailedOnce) {
-      _resultFailedOnce = true;
-      await Future<void>.delayed(latency * 3);
-      throw const NetworkException('connectionError');
+  Future<PlacementSessionModel> startSession(String trackId) async {
+    if (_step >= 3) {
+      throw const ApiException(
+        statusCode: ApiStatusCodes.conflict,
+        code: ApiErrorCodes.placementRetakeNotYet,
+      );
     }
-    final data = await _data(resultAssets[_results++ % resultAssets.length]);
-    return PlacementResultModel.fromJson(data);
+    if (_step == 0) _step = 1;
+    return _session();
+  }
+
+  Future<PlacementSessionModel> _session() async => PlacementSessionModel(
+    await _read(switch (_step) {
+      1 => stage1Asset,
+      2 => stage2Asset,
+      _ => completedAsset,
+    }),
+  );
+
+  @override
+  Future<PlacementSessionModel> getSession(String sessionId) => _session();
+
+  @override
+  Future<PlacementSessionModel> submitStage(
+    String sessionId,
+    int stage,
+    List<Map<String, Object?>> answers,
+  ) async {
+    // The same stage again answers as the session now stands.
+    if (stage == _step && _step < 3) _step++;
+    return _session();
   }
 
   @override
-  Future<void> acceptLevel(String attemptId, String levelId) =>
-      Future<void>.delayed(latency);
-
-  /// The second stage fails once for lack of a connection and then asks for
-  /// the deciding one, so those screens can be seen. Each mock stage is short.
-  @override
-  Future<PlacementNextModel> completeStage(String attemptId, int stage) async {
+  Future<void> choose(String sessionId, String trackId, String choice) async {
     await Future<void>.delayed(latency);
-    if (stage == 2 && !_failedOnce) {
-      _failedOnce = true;
-      throw const NetworkException('connectionError');
-    }
-    return PlacementNextModel.fromJson(switch (stage) {
-      1 => const {
-        'next': {
-          'stage': 2,
-          'questionCount': 4,
-          'listeningCount': 1,
-          'deciding': false,
-        },
-      },
-      2 => const {
-        'next': {
-          'stage': 3,
-          'questionCount': 2,
-          'listeningCount': 0,
-          'deciding': true,
-        },
-      },
-      _ => const {'next': null},
-    });
+    _step = 4;
   }
 }
