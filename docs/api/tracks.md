@@ -1,6 +1,6 @@
 # Tracks
 
-Status: **live** on the dev server for the tracks and their levels; the units are **proposed**. The dev server has no track yet, so every list is empty (`test/fixtures/api/app_system_config.json`, `app_tracks_empty.json`). Mock mode serves the same shapes with the three onboarding tracks (`assets/mock/settings/system_config.json`, `assets/mock/tracks/catalog.json`); delete `trk_emar` from both to see the «قريبًا» state, exactly as hiding the track in the panel would.
+Status: **live** on the dev server for the tracks and their levels; the units are **proposed**. The dev server has one track, General English (demo), whose `levels` come empty from `GET /api/v1/app/tracks` (docs/api/home.md, question 4); the fixtures `app_system_config.json` and `app_tracks_empty.json` were saved before it existed. Mock mode serves the same shapes with the three onboarding tracks (`assets/mock/settings/system_config.json`, `assets/mock/tracks/catalog.json`); delete `trk_emar` from both to see the «قريبًا» state, exactly as hiding the track in the panel would.
 Requirements: student doc §3.1–3.2 and §4.2, server doc §5.2 and §19.2.
 
 A track brings its levels with it: there is no levels endpoint. The app keeps them by track for the session, from whichever list it fetched.
@@ -80,4 +80,4 @@ A level with no published unit returns an empty list; "preparing" then says the 
 
 1. A level has no `nameEn`, `stageLabelEn` or `cefrCode` in `GradeLevelDto` (`EnrollmentLevelDto` has the last two): the English app shows the Arabic names. Add them?
 2. A level has no kids mode of its own; the panel sets it by level (server doc §6.6), and «تغيير الصف» marks such a grade «وضع الأطفال». The app takes the track's for now. Add `kidsMode` to `GradeLevelDto`?
-3. Agree the units path and fields above, and whether a unit's title is a single string (as the course writes it) or bilingual. "Preparing" names the first unit with it.
+3. "Preparing" names the first unit of the level, from the proposed `GET /api/v1/app/levels/{levelId}/units` above. Once the learner has joined, the track's map has the units (docs/api/home.md): is the map the way to read them, so this call isn't needed?

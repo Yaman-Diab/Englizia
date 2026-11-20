@@ -120,13 +120,13 @@ A wrong current password is `400 auth.current_password_invalid` (a 400, as the s
 
 ## `DELETE /api/v1/app/me`
 
-«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 7), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
+«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 5), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
 
 ## Questions for the backend team
 
 1. Is one profile endpoint acceptable, or should «أنا» read the account, the tracks and the stats separately?
 2. Confirm the streak's freezes: how many, how often one is added, and that one is used automatically.
 3. Confirm that the week starts on Saturday (the owner's decision, 2026-11-08) and that `days` are that week, seven days in the order to show.
-4. Switching the track and changing the grade: answered by the enrollments endpoints above. Confirm progress is kept per level.
+4. Changing the level or the grade (`PUT /api/v1/app/enrollments/{trackId}/level`): is the progress of the level left kept, for a learner who comes back to it?
 5. The notifications' switch: where does the server keep it, so it follows the account to another phone? Confirm the deletion above and its error code for a wrong password.
 6. Joining another track from «أنا» (`«انضم»`): `POST /api/v1/app/enrollments` (`JoinTrackRequest {trackId, start, levelId, child}`) enrols; the flow per entry method (the placement test, the grade step) still has no design.

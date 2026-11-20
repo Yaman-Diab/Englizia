@@ -17,5 +17,5 @@ Google is a way in from v0.1 (student doc §4.3, §5.1): one press on "save prog
 - Nothing works outside mock mode until the console's clients exist and the server checks the same Web client (STATUS D-110); a build without the client ID says «تعذّر الدخول بهذه الطريقة» instead of opening the sheet.
 - Android reports a signing key Google doesn't know as the sheet being closed, so a setup mistake looks like nothing happened; the reason goes to the log (STATUS D-111).
 - A guest who signs in with Google leaves the guest account behind, and a first-time Google account from the sign-in screen has no onboarding answers: both wait for the server (docs/api/README.md, requests 2 and 3; STATUS D-042, D-112).
-- Signing in again before deleting an account still has no contract for Google (docs/api/auth.md, question 7).
+- Signing in again before deleting an account still has no contract for Google (docs/api/auth.md, question 5).
 - Apple's sign-in can follow the same shape: its own source, `ProviderFailure`, a `SocialSession`.

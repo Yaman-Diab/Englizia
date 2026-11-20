@@ -102,6 +102,4 @@ Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. T
 2. A guest who signs in to an email account that exists leaves the guest behind (the app says the email has an account and offers sign-in): merge instead?
 3. Time zone: the app sends an `Etc/GMT` zone from the phone's offset. A city (`Asia/Damascus`) follows daylight-saving changes; the app can send one once a package is chosen (STATUS D-043). Confirm `Etc/GMT-3` is accepted.
 4. Onboarding's answers: confirm `start: "beginner"` with a level is right for a learner who chose where to start, and what `409` on `me/onboarding` means.
-5. Google: the server must check the `idToken`'s audience against the app's "Web application" client, `959713011641-tsd0sntqf723o1rsmrmkcce05p88di17.apps.googleusercontent.com` (Cloud project `engleazia`). Please confirm it is set on the dev server.
-6. Google for a guest: answered by `POST /api/v1/auth/guest/upgrade/google`.
-7. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.
+5. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.

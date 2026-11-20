@@ -99,6 +99,5 @@ A version that isn't a release number (a build `+12` or a tag `-beta` is ignored
 2. Confirm the placeholder name in the reminder body (`{minutes}`; the panel shows it as `{الدقائق}`).
 3. Is `averageLessonMinutes` acceptable as a setting (or should the app count lessons another way)? The weekly total is minutes × 7.
 4. Times are phone-local "HH:mm" (the learner's time zone), not UTC instants. Confirm, and how the chosen time is sent back with the account (§4.3).
-5. The versions: answered by `GET /api/v1/app/system/config` (below).
-6. `system/config`'s `dailyGoalOptions` has the minutes and points only. Will the effective settings above (each goal's name, the default, a lesson's length, the streak challenge and the reminder times) come, or should they join `system/config`? Until then the goal, challenge and reminder steps run on the mock settings only.
-7. «شارك التطبيق» shares `storeUrl`, which is this platform's store only. Could `system/config` carry one link for both stores (a web page that sends each phone to its own)?
+5. `system/config`'s `dailyGoalOptions` has the minutes and points only. Will the effective settings above (each goal's name, the default, a lesson's length, the streak challenge and the reminder times) come, or should they join `system/config`? Until then the goal, challenge and reminder steps run on the mock settings only.
+6. «شارك التطبيق» shares `storeUrl`, which is this platform's store only. Could `system/config` carry one link for both stores (a web page that sends each phone to its own)?
