@@ -58,9 +58,9 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Contract | Used by | Data in the app |
 |---|---|---|
-| [`openapi.json`](openapi.json) | The App API: auth, the guest and its upgrades, `/app/me`, onboarding, `system/config`, tracks, enrollments, ping | live, the endpoints below marked used |
+| [`openapi.json`](openapi.json) | The App API: auth, the guest and its upgrades, `/app/me`, onboarding, `system/config`, tracks, enrollments and the track's map, the placement test, a lesson, sync, ping | live, the endpoints below marked used |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), «أنا»'s tracks and grades | live, units mock |
-| [`placement.md`](placement.md) | Onboarding "how much English do you know?", later the placement test | mock |
+| [`placement.md`](placement.md) | Onboarding "how much English do you know?", "preparing", the placement test's intro, questions and result | live |
 | [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
 | [`auth.md`](auth.md) | Accounts: sign-up and sign-in, password recovery, the email's confirmation, Google and Apple, "save progress"'s guest account and its upgrades (ADR 10), onboarding's answers | live |
 | [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
@@ -119,15 +119,12 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/lessons/{id}/answers/spoken-review` | POST | as an answer | `{outcome, note?, better?}` ([lessons.md](lessons.md)) | proposed |
 | `/api/v1/app/lessons/{id}/reports` | POST | `{reportId, lessonVersion, questionId, reason, answer?}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/answers` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
-| `/api/v1/app/placement/summary` | GET | — | duration and stages ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/status` | GET | — | `{state, stage?, question?, lastLevel?, daysSinceResult?, daysUntilRetake?}` ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/attempts` | POST | `{}` or `{restart: true}` | `{attemptId, stageSizes, stage, answered}` ([placement.md](placement.md)) | `restart` from the backend guide, the rest proposed; mock |
-| `/api/v1/app/placement/attempts/{id}/stages/{n}` | GET | — | `{stage, questions}`, no answer keys ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/attempts/{id}/answers` | POST | `{answerId, questionId, optionId, dontKnow, plays}` | none; safe to repeat ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/attempts/{id}/stages/{n}/complete` | POST | — | `{next}`, null at the end ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/attempts/{id}/result` | GET | — | `{levelId, levels, skills}` ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/placement/attempts/{id}/accept` | POST | `{levelId}` | none ([placement.md](placement.md)) | proposed, mock |
-| `/api/v1/app/enrollments/{id}` | PATCH | `{placement_state: "deferred"}` | ignored ([placement.md](placement.md)) | from the backend guide, unconfirmed, mock |
+| `/api/v1/app/placement?trackId=` | GET | — | the state: `available`, `in_progress`, `result`, `done` or `unavailable`, with the test, the session and the result ([placement.md](placement.md)) | live, used |
+| `/api/v1/app/placement/sessions` | POST | `{trackId}` | the session at its stage, with its questions ([placement.md](placement.md)) | live, used |
+| `/api/v1/app/placement/sessions/{id}` | GET | — | the session ([placement.md](placement.md)) | live, used |
+| `/api/v1/app/placement/sessions/{id}/stages/{n}` | POST | `{answers: [{questionId, optionId} or {questionId, dontKnow}]}` | the session as it now stands; safe to repeat ([placement.md](placement.md)) | live, used |
+| `/api/v1/app/placement/sessions/{id}/choose` | POST | `{trackId, choice: result or lower}` | `EnrollmentDto` ([placement.md](placement.md)) | live, used |
+| `/api/v1/app/enrollments` | GET | — | the learner's enrollments; the placement test takes the active one's track | live, used |
 | `/api/v1/app/home` | GET | — | the active enrollment's tab ([home.md](home.md)) | proposed, mock |
 | `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
 | `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions, links and onboarding's tracks used |
@@ -155,7 +152,7 @@ Paste-ready; each item names what the app needs and why.
 2. **Google and Apple for a guest.** Answered: `POST /api/v1/auth/guest/upgrade/google` and `/apple`.
    **Google's client.** The server must check the `idToken`'s audience against the "Web application" client of the app's Google Cloud project ([auth.md](auth.md)); the app's owner sends its ID.
 3. **Onboarding answers with account creation.** Answered: `POST /api/v1/app/me/onboarding`, sent with the new account's token right after it is made ([auth.md](auth.md)).
-4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/levels/{levelId}/units`, `GET /app/placement/summary`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
+4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/levels/{levelId}/units`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
 5. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
 6. **The password policy** in the OpenAPI document: any name length limit as `minLength`/`maxLength` (the password's 8 shows only in register's answer), and the `details` codes beyond `not_empty`. The codes per endpoint are there now, in each response's description; as an `enum` or an extension field they could be checked by a test.
 7. **`Retry-After` on 429.** Answered by the document: `auth.locked_out` (5 wrong passwords, 5 minutes) and `rate_limit.exceeded` both carry it, and the app counts it down. Not yet seen on the dev server.

@@ -25,12 +25,16 @@ class QuestionContent extends StatelessWidget {
     final cubit = context.read<PlacementTestCubit>();
     final colors = context.colors;
     final texts = context.texts;
-    final instruction = switch (question.kind) {
-      PlacementQuestionKind.vocabulary => 'placement_q_vocabulary'.tr(),
-      PlacementQuestionKind.grammar => 'placement_q_grammar'.tr(),
-      PlacementQuestionKind.reading => 'placement_q_reading'.tr(),
-      PlacementQuestionKind.listening => 'placement_q_listening'.tr(),
-    };
+    // The panel's own words where it has them, in Arabic; the app's otherwise.
+    final instruction =
+        question.instruction.isNotEmpty && context.locale.languageCode == 'ar'
+        ? question.instruction
+        : switch (question.kind) {
+            PlacementQuestionKind.vocabulary => 'placement_q_vocabulary'.tr(),
+            PlacementQuestionKind.grammar => 'placement_q_grammar'.tr(),
+            PlacementQuestionKind.reading => 'placement_q_reading'.tr(),
+            PlacementQuestionKind.listening => 'placement_q_listening'.tr(),
+          };
     final sentence =
         question.kind == PlacementQuestionKind.vocabulary ||
         question.kind == PlacementQuestionKind.grammar;

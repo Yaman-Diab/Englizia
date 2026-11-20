@@ -127,6 +127,7 @@ class PreparingCubit extends Cubit<PreparingState> {
             return failure;
         }
       case PreparingStepKind.test:
+        _placement.useTrack(_path.trackId);
         switch (await _placement.getSummary()) {
           case Ok(:final value):
             emit(state.copyWith(test: value));

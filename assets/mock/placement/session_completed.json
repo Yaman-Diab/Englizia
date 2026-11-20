@@ -1,0 +1,49 @@
+{
+  "statusCode": 200,
+  "message": "Stage submitted successfully",
+  "data": {
+    "id": "01a1f8ee-ac11-702b-ab34-4fe1c8c95017",
+    "status": "completed",
+    "versionNo": 1,
+    "form": "a",
+    "isRetake": false,
+    "listenCount": 2,
+    "stage": null,
+    "block": null,
+    "questions": [],
+    "media": {},
+    "result": {
+      "cefr": "pre_a1",
+      "completedAt": "2026-11-20T12:29:55.987Z",
+      "skills": [
+        {
+          "skill": "vocabulary",
+          "correct": 6,
+          "total": 7,
+          "percent": 86
+        },
+        {
+          "skill": "grammar",
+          "correct": 0,
+          "total": 7,
+          "percent": 0
+        },
+        {
+          "skill": "reading",
+          "correct": 0,
+          "total": 6,
+          "percent": 0
+        },
+        {
+          "skill": "listening",
+          "correct": 0,
+          "total": 7,
+          "percent": 0
+        }
+      ],
+      "strongestSkill": "vocabulary"
+    }
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

@@ -73,6 +73,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
+- The placement test runs on the server: its state, its stages sent as each one ends, the result with the track's own levels, and the choice of where to start. An unfinished test carries on where the phone got to; a finished one waiting for a choice opens its result.
 - Download a lesson or a whole unit, video included, and open it with no connection. Downloads stay inside the app, sealed on the phone; they say their size before they start, come on Wi-Fi only unless you choose otherwise, carry on after a cut, and are managed from «التنزيلات» in the settings.
 - «شارك التطبيق» in the settings: a line with the app's store page, through the phone's own share sheet.
 - Switching tracks, changing the grade, the daily goal and the reminder are saved on the server; the privacy and terms pages and support's WhatsApp come from the panel.

@@ -501,6 +501,8 @@ GoRouter createAppRouter(
               onStart: () => context.push(AppRoutes.placementQuestions),
               onSkip: () => context.go(AppRoutes.home),
               onLessons: () => context.go(AppRoutes.home),
+              onResult: (attemptId) =>
+                  context.go(AppRoutes.placementResult, extra: attemptId),
             ),
           );
         },

@@ -1,0 +1,16 @@
+{
+  "statusCode": 400,
+  "message": "One or more fields are invalid.",
+  "data": null,
+  "error": {
+    "code": "validation.failed",
+    "details": [
+      {
+        "field": "trackId",
+        "code": "not_empty",
+        "message": "'Track Id' must not be empty."
+      }
+    ]
+  },
+  "traceId": "00000000000000000000000000000000"
+}

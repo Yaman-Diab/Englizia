@@ -1,0 +1,10 @@
+{
+  "statusCode": 404,
+  "message": "You have not joined this track.",
+  "data": null,
+  "error": {
+    "code": "enrollment.not_found",
+    "details": null
+  },
+  "traceId": "00000000000000000000000000000000"
+}

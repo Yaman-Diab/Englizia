@@ -364,9 +364,9 @@ class _PlacementResultPageState extends State<PlacementResultPage>
                           : 'placement_result_can'.tr(),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    for (final (i, line) in level.canDo.indexed) ...[
+                    for (final (i, line) in canDo(level.cefr).indexed) ...[
                       if (i > 0) const SizedBox(height: AppSpacing.md),
-                      _CanDo(line.of(language)),
+                      _CanDo(line),
                     ],
                     if (skills.isNotEmpty) ...[
                       const SizedBox(height: AppSpacing.xxl),
@@ -816,3 +816,36 @@ class _Badge extends StatelessWidget {
     ),
   );
 }
+
+/// What a learner at a step of the ladder can do: the app's own words, three
+/// for each step (docs/api/placement.md). For the first step, what the first
+/// week teaches.
+// ASSUMPTION(design): the final sentences aren't written yet; these stand in
+// for them (docs/STATUS.md).
+List<String> canDo(String cefr) => switch (cefr) {
+  'a1' => [
+    'placement_can_a1_1'.tr(),
+    'placement_can_a1_2'.tr(),
+    'placement_can_a1_3'.tr(),
+  ],
+  'a2' => [
+    'placement_can_a2_1'.tr(),
+    'placement_can_a2_2'.tr(),
+    'placement_can_a2_3'.tr(),
+  ],
+  'b1' => [
+    'placement_can_b1_1'.tr(),
+    'placement_can_b1_2'.tr(),
+    'placement_can_b1_3'.tr(),
+  ],
+  'b2' => [
+    'placement_can_b2_1'.tr(),
+    'placement_can_b2_2'.tr(),
+    'placement_can_b2_3'.tr(),
+  ],
+  _ => [
+    'placement_can_pre_a1_1'.tr(),
+    'placement_can_pre_a1_2'.tr(),
+    'placement_can_pre_a1_3'.tr(),
+  ],
+};

@@ -2031,6 +2031,182 @@
         ]
       }
     },
+    "/api/v1/app/enrollments/{trackId}/map": {
+      "get": {
+        "tags": [
+          "Enrollments"
+        ],
+        "parameters": [
+          {
+            "name": "trackId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfLevelMapDto"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app/lessons/{lessonId}": {
+      "get": {
+        "tags": [
+          "LessonContent"
+        ],
+        "parameters": [
+          {
+            "name": "lessonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "If-None-Match",
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfLessonContentDto"
+                }
+              }
+            }
+          },
+          "304": {
+            "description": "Not Modified",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/app/me": {
       "get": {
         "tags": [
@@ -2355,6 +2531,605 @@
         ]
       }
     },
+    "/api/v1/app/placement": {
+      "get": {
+        "tags": [
+          "PlacementTest"
+        ],
+        "parameters": [
+          {
+            "name": "trackId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPlacementStateDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app/placement/sessions": {
+      "post": {
+        "tags": [
+          "PlacementTest"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartPlacementRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartPlacementRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartPlacementRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPlacementSessionDto"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPlacementSessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app/placement/sessions/{sessionId}": {
+      "get": {
+        "tags": [
+          "PlacementTest"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPlacementSessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app/placement/sessions/{sessionId}/stages/{stage}": {
+      "post": {
+        "tags": [
+          "PlacementTest"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "stage",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "maximum": 3,
+              "minimum": 1,
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitPlacementStageRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitPlacementStageRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitPlacementStageRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfPlacementSessionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app/placement/sessions/{sessionId}/choose": {
+      "post": {
+        "tags": [
+          "PlacementTest"
+        ],
+        "parameters": [
+          {
+            "name": "sessionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoosePlacementLevelRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoosePlacementLevelRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChoosePlacementLevelRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfEnrollmentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/app/sync": {
+      "post": {
+        "tags": [
+          "Sync"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SyncRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfSyncResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Payload Too Large",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/app/system/ping": {
       "get": {
         "tags": [
@@ -2606,6 +3381,98 @@
           }
         }
       },
+      "ApiResponseOfLessonContentDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LessonContentDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseOfLevelMapDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LevelMapDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
       "ApiResponseOfListDataOfEnrollmentDto": {
         "required": [
           "statusCode",
@@ -2827,6 +3694,98 @@
           }
         }
       },
+      "ApiResponseOfPlacementSessionDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementSessionDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseOfPlacementStateDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementStateDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
       "ApiResponseOfResetTokenInfo": {
         "required": [
           "statusCode",
@@ -2855,6 +3814,52 @@
               },
               {
                 "$ref": "#/components/schemas/ResetTokenInfo"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseOfSyncResponseDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SyncResponseDto"
               }
             ]
           },
@@ -3062,6 +4067,154 @@
           }
         }
       },
+      "AttemptAnswerRequest": {
+        "required": [
+          "optionId",
+          "gaps",
+          "chips",
+          "pairs"
+        ],
+        "type": "object",
+        "properties": {
+          "optionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "gaps": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "chips": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "pairs": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "AttemptErrorDto": {
+        "required": [
+          "code",
+          "message",
+          "details"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "details": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/ErrorDetail"
+            }
+          }
+        }
+      },
+      "AttemptResultDto": {
+        "required": [
+          "clientAttemptId",
+          "status",
+          "attemptId",
+          "isCorrect",
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "clientAttemptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AttemptResultStatus"
+          },
+          "attemptId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "isCorrect": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AttemptErrorDto"
+              }
+            ]
+          }
+        }
+      },
+      "AttemptResultStatus": {
+        "enum": [
+          "accepted",
+          "duplicate",
+          "rejected"
+        ]
+      },
+      "BookPagesDto": {
+        "required": [
+          "from",
+          "to"
+        ],
+        "type": "object",
+        "properties": {
+          "from": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "to": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          }
+        }
+      },
       "CefrLevel": {
         "enum": [
           "pre_a1",
@@ -3167,6 +4320,32 @@
           }
         }
       },
+      "ChoosePlacementLevelRequest": {
+        "required": [
+          "trackId",
+          "choice"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "choice": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementChoice"
+              }
+            ]
+          }
+        }
+      },
       "CreateGuestRequest": {
         "required": [
           "deviceId",
@@ -3261,7 +4440,8 @@
           "entryMethod",
           "placementPending",
           "child",
-          "joinedAt"
+          "joinedAt",
+          "available"
         ],
         "type": "object",
         "properties": {
@@ -3296,6 +4476,27 @@
           },
           "joinedAt": {
             "format": "date-time"
+          },
+          "available": {
+            "type": "boolean"
+          },
+          "unitNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "unitCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -3413,6 +4614,31 @@
           },
           "message": {
             "type": "string"
+          }
+        }
+      },
+      "EstimatedSecondsDto": {
+        "required": [
+          "withoutTiebreak",
+          "withTiebreak"
+        ],
+        "type": "object",
+        "properties": {
+          "withoutTiebreak": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "withTiebreak": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -3542,6 +4768,67 @@
           null
         ]
       },
+      "LearnerQuestionDto": {
+        "required": [
+          "versionId",
+          "template",
+          "instructionAr",
+          "instructionIsDefault",
+          "instructionAudioMediaId",
+          "hintAr",
+          "explanationAr",
+          "bookPages",
+          "body",
+          "answerKey"
+        ],
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "template": {
+            "$ref": "#/components/schemas/QuestionTemplate"
+          },
+          "instructionAr": {
+            "type": "string"
+          },
+          "instructionIsDefault": {
+            "type": "boolean"
+          },
+          "instructionAudioMediaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "hintAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "explanationAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bookPages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookPagesDto"
+              }
+            ]
+          },
+          "body": {},
+          "answerKey": {}
+        }
+      },
       "LearningReason": {
         "enum": [
           "communication",
@@ -3552,12 +4839,263 @@
           "exams"
         ]
       },
+      "LessonContentDto": {
+        "required": [
+          "id",
+          "versionId",
+          "versionNo",
+          "unitId",
+          "type",
+          "titleAr",
+          "titleEn",
+          "objectiveAr",
+          "objectiveEn",
+          "minutes",
+          "bookPages",
+          "publishedAt",
+          "content",
+          "questions",
+          "media"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/LessonType"
+          },
+          "titleAr": {
+            "type": "string"
+          },
+          "titleEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "objectiveAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "objectiveEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "minutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "bookPages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookPagesDto"
+              }
+            ]
+          },
+          "publishedAt": {
+            "format": "date-time"
+          },
+          "content": {},
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearnerQuestionDto"
+            }
+          },
+          "media": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LessonMediaItemDto"
+            }
+          }
+        }
+      },
+      "LessonMediaItemDto": {
+        "required": [
+          "kind",
+          "url",
+          "sizeBytes"
+        ],
+        "type": "object",
+        "properties": {
+          "kind": {
+            "$ref": "#/components/schemas/MediaKind"
+          },
+          "url": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "LessonScoreDto": {
+        "required": [
+          "firstTryCorrect",
+          "questionCount"
+        ],
+        "type": "object",
+        "properties": {
+          "firstTryCorrect": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          }
+        }
+      },
+      "LessonState": {
+        "enum": [
+          "locked",
+          "available",
+          "in_progress",
+          "completed"
+        ]
+      },
+      "LessonType": {
+        "enum": [
+          "grammar_video",
+          "interactive_video",
+          "interactive_text",
+          "vocabulary",
+          "conversation"
+        ]
+      },
+      "LessonUnlockMode": {
+        "enum": [
+          "sequential",
+          "all_open"
+        ]
+      },
       "LevelLabel": {
         "enum": [
           "level",
           "grade",
           "book"
         ]
+      },
+      "LevelMapDto": {
+        "required": [
+          "trackId",
+          "levelLabel",
+          "unlockMode",
+          "kidsMode",
+          "features",
+          "level",
+          "nextLessonId",
+          "unitCount",
+          "units"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "levelLabel": {
+            "$ref": "#/components/schemas/LevelLabel"
+          },
+          "unlockMode": {
+            "$ref": "#/components/schemas/LessonUnlockMode"
+          },
+          "kidsMode": {
+            "type": "boolean"
+          },
+          "features": {
+            "$ref": "#/components/schemas/MapFeaturesDto"
+          },
+          "level": {
+            "$ref": "#/components/schemas/MapLevelDto"
+          },
+          "nextLessonId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "unitCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapUnitDto"
+            }
+          }
+        }
+      },
+      "LevelMoveDto": {
+        "required": [
+          "trackId",
+          "fromLevelId",
+          "toLevelId"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromLevelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toLevelId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
       },
       "LevelStart": {
         "enum": [
@@ -3640,6 +5178,279 @@
             ]
           }
         }
+      },
+      "MapConceptDto": {
+        "required": [
+          "nameAr",
+          "nameEn"
+        ],
+        "type": "object",
+        "properties": {
+          "nameAr": {
+            "type": "string"
+          },
+          "nameEn": {
+            "type": "string"
+          }
+        }
+      },
+      "MapFeaturesDto": {
+        "required": [
+          "aiConversation",
+          "comments",
+          "leaderboard",
+          "errorBankUi"
+        ],
+        "type": "object",
+        "properties": {
+          "aiConversation": {
+            "type": "boolean"
+          },
+          "comments": {
+            "type": "boolean"
+          },
+          "leaderboard": {
+            "type": "boolean"
+          },
+          "errorBankUi": {
+            "type": "boolean"
+          }
+        }
+      },
+      "MapLessonDto": {
+        "required": [
+          "id",
+          "versionId",
+          "versionNo",
+          "type",
+          "titleAr",
+          "titleEn",
+          "minutes",
+          "bookPages",
+          "state",
+          "best"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "type": {
+            "$ref": "#/components/schemas/LessonType"
+          },
+          "titleAr": {
+            "type": "string"
+          },
+          "titleEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "minutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "bookPages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookPagesDto"
+              }
+            ]
+          },
+          "state": {
+            "$ref": "#/components/schemas/LessonState"
+          },
+          "best": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LessonScoreDto"
+              }
+            ]
+          }
+        }
+      },
+      "MapLevelDto": {
+        "required": [
+          "id",
+          "nameAr",
+          "nameEn",
+          "cefrCode",
+          "gradeNumber",
+          "taglineAr"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nameAr": {
+            "type": "string"
+          },
+          "nameEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cefrCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CefrLevel"
+              }
+            ]
+          },
+          "gradeNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "taglineAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "MapObjectiveDto": {
+        "required": [
+          "ar",
+          "en"
+        ],
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
+          }
+        }
+      },
+      "MapUnitDto": {
+        "required": [
+          "id",
+          "titleAr",
+          "titleEn",
+          "coverUrl",
+          "objectives",
+          "concepts",
+          "bookPages",
+          "lessonCount",
+          "minutes",
+          "state",
+          "test",
+          "lessons"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "titleAr": {
+            "type": "string"
+          },
+          "titleEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "coverUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "objectives": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapObjectiveDto"
+            }
+          },
+          "concepts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapConceptDto"
+            }
+          },
+          "bookPages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookPagesDto"
+              }
+            ]
+          },
+          "lessonCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "minutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "state": {
+            "$ref": "#/components/schemas/UnitState"
+          },
+          "test": {},
+          "lessons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MapLessonDto"
+            }
+          }
+        }
+      },
+      "MediaKind": {
+        "enum": [
+          "image",
+          "audio"
+        ]
       },
       "OnboardingAudience": {
         "enum": [
@@ -3850,6 +5661,600 @@
           }
         }
       },
+      "PlacementAnswerRequest": {
+        "required": [
+          "questionId",
+          "optionId",
+          "dontKnow"
+        ],
+        "type": "object",
+        "properties": {
+          "questionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "optionId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dontKnow": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      },
+      "PlacementBlock": {
+        "enum": [
+          "routing",
+          "low",
+          "mid",
+          "high",
+          "pre_a1_a1",
+          "a1_a2",
+          "a2_b1",
+          "b1_b2",
+          null
+        ]
+      },
+      "PlacementChoice": {
+        "enum": [
+          "result",
+          "lower",
+          null
+        ]
+      },
+      "PlacementFormLabel": {
+        "enum": [
+          "a",
+          "b"
+        ]
+      },
+      "PlacementLearnerOptionDto": {
+        "required": [
+          "id",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      },
+      "PlacementLearnerQuestionDto": {
+        "required": [
+          "id",
+          "skill",
+          "template",
+          "instructionAr",
+          "instructionAudioMediaId",
+          "prompt",
+          "passage",
+          "audioMediaId",
+          "options"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "skill": {
+            "$ref": "#/components/schemas/PlacementSkill"
+          },
+          "template": {
+            "$ref": "#/components/schemas/QuestionTemplate"
+          },
+          "instructionAr": {
+            "type": "string"
+          },
+          "instructionAudioMediaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "passage": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "audioMediaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlacementLearnerOptionDto"
+            }
+          }
+        }
+      },
+      "PlacementQuestionCountDto": {
+        "required": [
+          "withoutTiebreak",
+          "withTiebreak"
+        ],
+        "type": "object",
+        "properties": {
+          "withoutTiebreak": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "withTiebreak": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "PlacementResultDto": {
+        "required": [
+          "sessionId",
+          "cefr",
+          "completedAt",
+          "versionNo",
+          "form",
+          "isRetake",
+          "level",
+          "lowerLevel",
+          "skills",
+          "strongestSkill"
+        ],
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cefr": {
+            "$ref": "#/components/schemas/CefrLevel"
+          },
+          "completedAt": {
+            "format": "date-time"
+          },
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "form": {
+            "$ref": "#/components/schemas/PlacementFormLabel"
+          },
+          "isRetake": {
+            "type": "boolean"
+          },
+          "level": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EnrollmentLevelDto"
+              }
+            ]
+          },
+          "lowerLevel": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/EnrollmentLevelDto"
+              }
+            ]
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlacementSkillScoreDto"
+            }
+          },
+          "strongestSkill": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementSkill"
+              }
+            ]
+          }
+        }
+      },
+      "PlacementSessionDto": {
+        "required": [
+          "id",
+          "status",
+          "versionNo",
+          "form",
+          "isRetake",
+          "listenCount",
+          "stage",
+          "block",
+          "questions",
+          "media",
+          "result"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/PlacementSessionStatus"
+          },
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "form": {
+            "$ref": "#/components/schemas/PlacementFormLabel"
+          },
+          "isRetake": {
+            "type": "boolean"
+          },
+          "listenCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "stage": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "block": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementBlock"
+              }
+            ]
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlacementLearnerQuestionDto"
+            }
+          },
+          "media": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LessonMediaItemDto"
+            }
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementSessionResultDto"
+              }
+            ]
+          }
+        }
+      },
+      "PlacementSessionRefDto": {
+        "required": [
+          "id",
+          "stage"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stage": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "PlacementSessionResultDto": {
+        "required": [
+          "cefr",
+          "completedAt",
+          "skills",
+          "strongestSkill"
+        ],
+        "type": "object",
+        "properties": {
+          "cefr": {
+            "$ref": "#/components/schemas/CefrLevel"
+          },
+          "completedAt": {
+            "format": "date-time"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlacementSkillScoreDto"
+            }
+          },
+          "strongestSkill": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementSkill"
+              }
+            ]
+          }
+        }
+      },
+      "PlacementSessionStatus": {
+        "enum": [
+          "in_progress",
+          "completed"
+        ]
+      },
+      "PlacementSkill": {
+        "enum": [
+          "vocabulary",
+          "grammar",
+          "reading",
+          "listening"
+        ]
+      },
+      "PlacementSkillScoreDto": {
+        "required": [
+          "skill",
+          "correct",
+          "total",
+          "percent"
+        ],
+        "type": "object",
+        "properties": {
+          "skill": {
+            "$ref": "#/components/schemas/PlacementSkill"
+          },
+          "correct": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "percent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "PlacementState": {
+        "enum": [
+          "unavailable",
+          "available",
+          "in_progress",
+          "result",
+          "done"
+        ]
+      },
+      "PlacementStateDto": {
+        "required": [
+          "trackId",
+          "state",
+          "reason",
+          "test",
+          "isRetake",
+          "session",
+          "result",
+          "retakeAvailableAt"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "$ref": "#/components/schemas/PlacementState"
+          },
+          "reason": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementUnavailableReason"
+              }
+            ]
+          },
+          "test": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementTestDto"
+              }
+            ]
+          },
+          "isRetake": {
+            "type": "boolean"
+          },
+          "session": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementSessionRefDto"
+              }
+            ]
+          },
+          "result": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementResultDto"
+              }
+            ]
+          },
+          "retakeAvailableAt": {
+            "format": "date-time"
+          }
+        }
+      },
+      "PlacementTestDto": {
+        "required": [
+          "versionNo",
+          "listenCount",
+          "questionCount",
+          "estimatedSeconds"
+        ],
+        "type": "object",
+        "properties": {
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "listenCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "questionCount": {
+            "$ref": "#/components/schemas/PlacementQuestionCountDto"
+          },
+          "estimatedSeconds": {
+            "$ref": "#/components/schemas/EstimatedSecondsDto"
+          }
+        }
+      },
+      "PlacementUnavailableReason": {
+        "enum": [
+          "track_not_placement",
+          "no_published_version",
+          null
+        ]
+      },
+      "ProgressLessonDto": {
+        "required": [
+          "lessonId",
+          "state",
+          "best"
+        ],
+        "type": "object",
+        "properties": {
+          "lessonId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "$ref": "#/components/schemas/LessonState"
+          },
+          "best": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LessonScoreDto"
+              }
+            ]
+          }
+        }
+      },
+      "ProgressUnitDto": {
+        "required": [
+          "unitId",
+          "state"
+        ],
+        "type": "object",
+        "properties": {
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "state": {
+            "$ref": "#/components/schemas/UnitState"
+          }
+        }
+      },
+      "QuestionTemplate": {
+        "enum": [
+          "multiple_choice",
+          "picture_choice",
+          "gap_choice",
+          "word_order",
+          "matching",
+          "listen_choose"
+        ]
+      },
       "RefreshRequest": {
         "required": [
           "refreshToken"
@@ -3942,6 +6347,162 @@
         "properties": {
           "email": {
             "type": "string"
+          }
+        }
+      },
+      "StartPlacementRequest": {
+        "required": [
+          "trackId"
+        ],
+        "type": "object",
+        "properties": {
+          "trackId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
+      "SubmitPlacementStageRequest": {
+        "required": [
+          "answers"
+        ],
+        "type": "object",
+        "properties": {
+          "answers": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/PlacementAnswerRequest"
+            }
+          }
+        }
+      },
+      "SyncAttemptRequest": {
+        "required": [
+          "clientAttemptId",
+          "lessonVersionId",
+          "questionVersionId",
+          "runId",
+          "answer",
+          "hintsUsed",
+          "clientCreatedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "clientAttemptId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "lessonVersionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "questionVersionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "runId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "answer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AttemptAnswerRequest"
+              }
+            ]
+          },
+          "hintsUsed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "clientCreatedAt": {
+            "format": "date-time"
+          }
+        }
+      },
+      "SyncRequest": {
+        "required": [
+          "sentAt",
+          "attempts"
+        ],
+        "type": "object",
+        "properties": {
+          "sentAt": {
+            "format": "date-time"
+          },
+          "attempts": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SyncAttemptRequest"
+            }
+          }
+        }
+      },
+      "SyncResponseDto": {
+        "required": [
+          "attempts",
+          "lessons",
+          "units",
+          "levels",
+          "serverTime"
+        ],
+        "type": "object",
+        "properties": {
+          "attempts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttemptResultDto"
+            }
+          },
+          "lessons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressLessonDto"
+            }
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressUnitDto"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LevelMoveDto"
+            }
+          },
+          "serverTime": {
+            "format": "date-time"
           }
         }
       },
@@ -4153,6 +6714,13 @@
         "enum": [
           "ar",
           "en"
+        ]
+      },
+      "UnitState": {
+        "enum": [
+          "locked",
+          "unlocked",
+          "completed"
         ]
       },
       "UpdateLearningRequest": {
@@ -4407,7 +6975,16 @@
       "name": "Enrollments"
     },
     {
+      "name": "LessonContent"
+    },
+    {
       "name": "Me"
+    },
+    {
+      "name": "PlacementTest"
+    },
+    {
+      "name": "Sync"
     },
     {
       "name": "System"

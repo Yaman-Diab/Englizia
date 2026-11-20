@@ -1,4 +1,5 @@
 import 'package:englizia/core/config/app_config.dart';
+import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
 import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
 import 'package:englizia/features/placement/domain/repositories/placement_repository.dart';
@@ -16,7 +17,14 @@ void registerPlacementDependencies(GetIt sl) {
           : PlacementRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<PlacementRepository>(
-      () => PlacementRepositoryImpl(sl(), settings: sl()),
+      () => PlacementRepositoryImpl(
+        sl(),
+        settings: sl(),
+        // Mock mode plays the test before an account exists too.
+        hasSession: AppConfig.isMock
+            ? () async => true
+            : () async => await sl<TokenStorage>().read() != null,
+      ),
     )
     ..registerFactory(() => PlacementIntroCubit(sl(), sl(), sl(), sl()))
     ..registerFactory(() => PlacementTestCubit(sl(), sl()))

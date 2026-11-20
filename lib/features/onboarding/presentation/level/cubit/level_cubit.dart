@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
@@ -27,6 +28,7 @@ class LevelCubit extends Cubit<LevelState> {
   /// the connection.
   Future<void> start(String? trackId) async {
     _trackId = trackId;
+    _placement.useTrack(trackId);
     _connection ??= _connectivity.onlineChanges.listen(_setOnline);
     final online = await _connectivity.isOnline();
     if (isClosed) return;
@@ -45,8 +47,12 @@ class LevelCubit extends Cubit<LevelState> {
     ).wait;
     if (isClosed) return;
 
+    // Before the account exists the server can't say what the test takes:
+    // the step shows the choice without it.
     final failure = switch ((summary, levels)) {
-      (Err(:final failure), _) || (_, Err(:final failure)) => failure,
+      (Err(failure: final failure), _) when failure is! UnauthorizedFailure =>
+        failure,
+      (_, Err(:final failure)) => failure,
       _ => null,
     };
     emit(

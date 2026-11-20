@@ -1,7 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart' hide TextDirection;
 import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
@@ -11,32 +7,18 @@ import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/error/failure.dart';
-import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/storage/settings_storage_service.dart';
-import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
-import 'package:englizia/features/placement/data/models/placement_result_model.dart';
-import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
 import 'package:englizia/features/placement/domain/entities/placement_result.dart';
 import 'package:englizia/features/placement/presentation/result/cubit/placement_result_cubit.dart';
 import 'package:englizia/features/placement/presentation/result/pages/placement_result_page.dart';
 import 'package:englizia/features/placement/presentation/result/widgets/level_ladder.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fake_placement_repository.dart';
 import '../../../helpers/fakes.dart';
 import '../../../helpers/pump_app.dart';
-
-class _DiskBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async =>
-      ByteData.sublistView(File(key).readAsBytesSync());
-}
 
 const _atFirst = PlacementResult(
   levels: testLevels,
@@ -48,6 +30,7 @@ const _atA1 = PlacementResult(
   levels: testLevels,
   levelIndex: 1,
   skills: testSkills,
+  canLower: true,
 );
 
 FakePlacementRepository _with(
@@ -72,131 +55,6 @@ void main() {
     addTearDown(cubit.close);
     return cubit;
   }
-
-  group('data', () {
-    late FakeHttpAdapter adapter;
-    late SettingsStorageService settings;
-    late FakeResponse Function(RequestOptions) answer;
-
-    setUp(() async {
-      SharedPreferences.setMockInitialValues({});
-      settings = SettingsStorageService(await SharedPreferences.getInstance());
-      answer = (_) => const FakeResponse(200);
-      adapter = FakeHttpAdapter((options) => answer(options));
-    });
-
-    PlacementRepositoryImpl repository() => PlacementRepositoryImpl(
-      PlacementRemoteDataSourceImpl(
-        ApiClient(
-          Dio(BaseOptions(baseUrl: 'https://api.test'))
-            ..httpClientAdapter = adapter,
-        ),
-      ),
-      settings: settings,
-    );
-
-    test('every mock result parses, from the panel\'s levels', () async {
-      final bundle = _DiskBundle();
-      for (final (asset, code) in [
-        ('assets/mock/placement/result_a2.json', 'A2'),
-        ('assets/mock/placement/result_pre_a1.json', 'Pre-A1'),
-        ('assets/mock/placement/result_b2.json', 'B2'),
-      ]) {
-        final body = jsonDecode(await bundle.loadString(asset));
-        final result = PlacementResultModel.fromJson(
-          (ApiClient.unwrap(body)! as Map).cast<String, Object?>(),
-        ).entity;
-        expect(result.levels[result.levelIndex].code, code);
-        expect(result.levels, hasLength(5));
-        expect(result.levels.first.canDo, hasLength(3));
-        expect(result.skills, hasLength(4));
-      }
-    });
-
-    test('a level outside the ladder is rejected', () {
-      expect(
-        () => PlacementResultModel.fromJson(const {
-          'levelId': 'x',
-          'levels': <Object>[],
-        }),
-        throwsFormatException,
-      );
-    });
-
-    test('a skill this version doesn\'t know is left out', () {
-      final result = PlacementResultModel.fromJson(const {
-        'levelId': 'a',
-        'levels': [
-          {
-            'id': 'a',
-            'code': 'A1',
-            'name': {'ar': 'مبتدئ', 'en': 'Beginner'},
-            'canDo': [
-              {'ar': 'تقرأ', 'en': 'Read'},
-            ],
-          },
-        ],
-        'skills': [
-          {'skill': 'speaking', 'score': 1},
-          {'skill': 'grammar', 'score': .5},
-        ],
-      }).entity;
-      expect(result.skills.single.kind, PlacementSkillKind.grammar);
-      expect(result.levels.single.canDo.single.en, 'Read');
-    });
-
-    test('the result: GET, and the attempt is forgotten', () async {
-      await settings.setPlacementProgress('{}');
-      await settings.setPlacementStatus('{}');
-      final body = jsonDecode(
-        await _DiskBundle().loadString('assets/mock/placement/result_a2.json'),
-      );
-      answer = (_) => FakeResponse(200, body: body);
-
-      final result = await repository().getResult('att');
-      expect(result, isA<Ok<PlacementResult>>());
-      expect(
-        adapter.requests.single.path,
-        '/api/v1/app/placement/attempts/att/result',
-      );
-      expect(settings.placementProgress, isNull);
-      expect(settings.placementStatus, isNull);
-    });
-
-    test('with no connection, what is kept stays', () async {
-      await settings.setPlacementProgress('{}');
-      answer = (options) => throw DioException.connectionError(
-        requestOptions: options,
-        reason: 'offline',
-      );
-      final result = await repository().getResult('att');
-      expect((result as Err).failure, isA<NetworkFailure>());
-      expect(settings.placementProgress, isNotNull);
-    });
-
-    test('accepting: POST with the level', () async {
-      expect(await repository().acceptLevel('att', 'a1'), isA<Ok<void>>());
-      final request = adapter.requests.single;
-      expect(request.method, 'POST');
-      expect(request.path, '/api/v1/app/placement/attempts/att/accept');
-      expect(request.data, {'levelId': 'a1'});
-    });
-
-    test('mock mode fails once, then walks through the levels', () async {
-      final fake = PlacementFakeDataSource(
-        _DiskBundle(),
-        latency: Duration.zero,
-      );
-      await expectLater(fake.getResult('att'), throwsException);
-      final codes = <String>[];
-      for (var i = 0; i < 3; i++) {
-        final result = (await fake.getResult('att')).entity;
-        codes.add(result.levels[result.levelIndex].code);
-      }
-      expect(codes, ['A2', 'Pre-A1', 'B2']);
-      await fake.acceptLevel('att', 'a');
-    });
-  });
 
   group('PlacementResultCubit', () {
     test('opens on the measured level', () async {
@@ -265,6 +123,27 @@ void main() {
       expect(cubit.state.level?.code, 'A1');
     });
 
+    test(
+      'a track with nothing below the result offers nothing lower',
+      () async {
+        final cubit = cubitWith(
+          _with(const [
+            Ok(
+              PlacementResult(
+                levels: testLevels,
+                levelIndex: 2,
+                skills: testSkills,
+              ),
+            ),
+          ]),
+        );
+        await cubit.load();
+        expect(cubit.state.lowerLevel, isNull);
+        cubit.lower();
+        expect(cubit.state.levelIndex, 2);
+      },
+    );
+
     test('the first level has nothing lower', () async {
       final cubit = cubitWith(_with(const [Ok(_atFirst)]));
       await cubit.load();
@@ -280,7 +159,7 @@ void main() {
       await cubit.load();
       cubit.lower();
       await cubit.accept();
-      expect(placement.accepted, ['a1']);
+      expect(placement.accepted, [true]);
       expect(cubit.state.accepted, isTrue);
     });
 
@@ -414,7 +293,14 @@ void main() {
       expect(find.text('A1'), findsNWidgets(2));
       expect(find.text('مبتدئ'), findsOneWidget);
       expect(find.text('placement_result_can'.tr()), findsOneWidget);
-      expect(find.text('تسأل أسئلة بسيطة'), findsOneWidget);
+      // What A1 can do: the app's own words for the step.
+      for (final key in const [
+        'placement_can_a1_1',
+        'placement_can_a1_2',
+        'placement_can_a1_3',
+      ]) {
+        expect(find.text(key.tr()), findsOneWidget);
+      }
       expect(find.text('placement_result_skills'.tr()), findsOneWidget);
       expect(find.text('placement_skill_vocabulary'.tr()), findsOneWidget);
       expect(find.text('placement_result_note'.tr()), findsOneWidget);
@@ -523,7 +409,7 @@ void main() {
       await tester.tap(find.byType(AppButton));
       await tester.pump();
       await tester.pump();
-      expect(placement.accepted, ['a2']);
+      expect(placement.accepted, [false]);
       expect(starts, 1);
     });
 

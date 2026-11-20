@@ -1,143 +1,124 @@
 # Placement test
 
-Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/placement/`); nothing is confirmed by the backend team yet.
-Requirements: student doc §4.2 (the "how much English do you know?" step) and §12, server doc §12 and §19.3.
+Status: **live** on the dev server (docs/api/openapi.json), with a published demo version on the track "General English (demo)": every one of its questions starts with `[demo]`. The app uses all five requests. Real answers: `test/fixtures/api/app_placement_*.json`; mock mode goes through the same answers (`assets/mock/placement/`).
+Requirements: student doc §4.2 and §12, server doc §12 and §19.3. The backend's note N-3b (2026-11-20) is the reference for what follows.
 
-## `GET /api/v1/app/placement/summary`
+The test and its result are the account's, one for the platform; each request names a `trackId` so the server knows the enrollment and the track's levels. Only a track whose `entryMode` is `placement` has one: kids, Emar and direct tracks don't. A learner joins with `"start": "placement"` (onboarding or `POST /api/v1/app/enrollments`) and starts at the first level with `placementPending: true`. The app takes the track onboarding chose, else the active enrollment (`GET /api/v1/app/enrollments`, `isActive`).
 
-The published placement test as it is introduced to the learner, before any question is loaded. Used by the onboarding level step, "preparing" and the test's intro screen. Available without a token, since onboarding runs before sign-up. Answer keys never reach the app; this endpoint carries no questions.
+Two stages, 12 questions then 15, and a deciding third of 8 when the result falls between two levels. **A stage goes to the server when it ends**, whole; until then its answers stay on the phone, and the server knows nothing of a stage not sent. Nothing of the test goes through `POST /api/v1/app/sync`. The server marks: the phone never gets the right answer nor a question's level. Every call needs an account (a guest's too); before one exists the app asks nothing.
 
-### Response `200`
+## `GET /api/v1/app/placement?trackId=`
+
+Where the account stands, read by the intro (3.01), "preparing", the result (3.07) and the home's notices (15.22).
 
 ```json
-{
-  "statusCode": 200,
-  "message": "Data retrieved successfully",
-  "data": {
-    "version": "2026.1",
-    "estimatedMinutes": { "min": 12, "max": 15 },
-    "stages": 2,
-    "optionalStage": true
-  },
-  "error": null,
-  "traceId": "0HN7…"
-}
+{ "trackId": "…", "state": "available", "reason": null,
+  "test": { "versionNo": 1, "listenCount": 2,
+            "questionCount": { "withoutTiebreak": 27, "withTiebreak": 35 },
+            "estimatedSeconds": { "withoutTiebreak": 675, "withTiebreak": 875 } },
+  "isRetake": false, "session": null, "result": null, "retakeAvailableAt": null }
 ```
 
-| Field | Type | Meaning | Used by the app today |
-|---|---|---|---|
-| `version` | string | Published test version (results are stored against it) | not yet |
-| `estimatedMinutes.min` / `.max` | int | Estimated duration, computed by the server from the question count at about 25 s per question (server doc §12.5) | yes ("12–15 دقيقة") |
-| `stages` | int | Stages every learner takes: routing, then a block | yes ("مرحلتان…") |
-| `optionalStage` | bool | Whether a short deciding stage may be added at a boundary | yes ("…وقد تُضاف مرحلة ثالثة قصيرة") |
-
-### Errors
-
-The common errors (`docs/api/README.md`). With no published test version, `404` with code `placement_unavailable`; the app then hides the test and offers a start from the first level.
-
-## `GET /api/v1/app/placement/status`
-
-Where this account stands with the test, for the test's intro (S §12.2). Needs a session, a guest's or a member's.
-
-Every state also carries `enrollmentId`, the learner's enrollment in the track, which the app needs to put the test off. **The app assumes this field**: nothing else gives it the id.
-
-| `state` | Other fields | Screen |
+| `state` | When | The app |
 |---|---|---|
-| `none` | — | First test |
-| `inProgress` | `stage`, `question` (both from 1) | "You stopped at question 9 of the first stage": continue or start over |
-| `retakeAvailable` | `lastLevel` (CEFR), `daysSinceResult` | "Your last result: A2, 34 days ago": take it again |
-| `retakeLocked` | `daysUntilRetake` | "You can take the test again in 12 days": button disabled |
+| `available` | A first test, or a retake (`isRetake: true`, with the last `result`) | The intro: what the test takes from `test` (minutes from `estimatedSeconds`, without then with the deciding stage), or the last result and how long ago |
+| `in_progress` | A session not finished: `session: {id, stage}` | «تابع الاختبار», at the question the phone got to in that stage |
+| `result` | Finished, and the learner hasn't chosen where to start | «اعرض نتيجتك»: the result opens until they choose |
+| `done` | Chosen; `retakeAvailableAt` 30 days after the result | A retake waits until then |
+| `unavailable` | `reason: track_not_placement` or `no_published_version` | Nothing of the test is shown |
 
-The server counts the days, as it knows the wait (30 days by default, from the panel) and its clock is the one that counts. A state the app doesn't know reads as `none`, since the server still decides what starting means. A known state with its fields missing is an error.
+A missing `trackId` is `400`; a track not joined `404 enrollment.not_found`. With no connection the app shows the state it last kept (its dates are absolute, so the days still count).
 
-The app saves the last response on the phone, with when it was saved. With no connection the intro shows that state, adding the days passed to `daysSinceResult` and taking them from `daysUntilRetake` (never under 1: only the server can say the wait is over). It is forgotten when a session starts or ends, so it never reaches another account.
+«ابدأ من البداية دون اختبار» sends nothing: the learner is already at the first level, and `placementPending` stays `true`.
 
-Status: **proposed**, mock (`assets/mock/placement/status_*.json`).
+## `POST /api/v1/app/placement/sessions`
 
-## `POST /api/v1/app/placement/attempts`
+«ابدأ الاختبار»: `{ "trackId": "…" }`. `201` with a new session at stage 1, or `200` with the running one (two taps give one session). A retake takes the other form (`form: a`, `b`, `a`…). Before 30 days: `409 placement.retake_not_yet`.
 
-Opening the questions sends `{}`: the attempt to carry on with, the unfinished one or a new one. «ابدأ من جديد» first sends `{ "restart": true }`, which throws away the unfinished test.
+## `GET /api/v1/app/placement/sessions/{sessionId}`
 
-```json
-{ "attemptId": "att_1", "stageSizes": [12, 15], "stage": 1, "answered": 8 }
-```
-
-`stageSizes` holds the stages known so far, `stage` the one to carry on with (from 1), and `answered` how many of its questions the server has. The server picks the form (A or B) and pins the published version here.
-
-Status: `restart` given by the owner from the backend guide, **unconfirmed**; the rest **proposed**, mock.
-
-## `GET /api/v1/app/placement/attempts/{id}/stages/{n}`
-
-All the questions of a stage at once, so it can't stop halfway for lack of a connection. **No answer keys, ever** (S §12.1). Options come in the order to show them, already shuffled for this learner.
+The session, to carry on after a stop; the same body comes from «ابدأ» and from each stage.
 
 ```json
-{
-  "stage": 1,
+{ "id": "…", "status": "in_progress", "versionNo": 1, "form": "a", "isRetake": false, "listenCount": 2,
+  "stage": 1, "block": "routing",
   "questions": [
-    { "id": "q1", "type": "vocabulary", "before": "I usually", "after": "breakfast at seven.",
-      "options": [{ "id": "o1", "text": "have" }] },
-    { "id": "q3", "type": "reading", "passage": "…", "ask": "Why did Omar leave work early?", "options": [] },
-    { "id": "q4", "type": "listening", "audioUrl": "https://…", "maxPlays": 2, "ask": "What time does the train leave?", "options": [] }
-  ]
-}
+    { "id": "…", "skill": "vocabulary", "template": "multiple_choice",
+      "instructionAr": "اختر الكلمة المناسبة", "instructionAudioMediaId": null,
+      "prompt": "I drink ___ every morning.", "passage": null, "audioMediaId": null,
+      "options": [ { "id": "a", "text": "milk" }, "…" ] } ],
+  "media": { "019a…": { "kind": "audio", "url": "https://api-dev.engleazia.com/media/audio/…mp3", "sizeBytes": 8847 } },
+  "result": null }
 ```
 
-`type` is `vocabulary`, `grammar`, `reading` or `listening`; the app writes each one's instruction itself. `maxPlays` comes from the test's version. A type the app doesn't know fails the whole stage.
+| Field | The app |
+|---|---|
+| `skill` | `vocabulary`, `grammar` (the sentence split at its `___`), `reading` (its `passage`, 3.04), `listening` (its `audioMediaId`, 3.05) |
+| `template` | `multiple_choice` or `listen_choose`, four options `a`–`d`; anything else can't be shown, and the stage fails |
+| `options` | Shuffled by the phone, the same for this phone each time (no `correct`, `transcript` or `cefr` comes) |
+| `instructionAr` | Shown as it is in Arabic; the app's own words in English |
+| `listenCount` | How often a clip may play; the phone counts and keeps the listens |
+| `media` | Each file once, by id. Its links are public, with no token, and don't run out |
+| `block` | Not shown |
 
-Status: **proposed**, mock (`assets/mock/placement/stage_*.json`).
+How many questions each stage has, for the progress bar: the stage's own `questions`, and the test's totals for the others.
 
-## `POST /api/v1/app/placement/attempts/{id}/answers`
+## `POST /api/v1/app/placement/sessions/{sessionId}/stages/{stage}`
 
-One answer, sent when given, and again until it arrives: `{ "answerId", "questionId", "optionId", "dontKnow", "plays" }`. `answerId` is made on the phone and stays the same, **so a repeat must not count twice**. `optionId` is null with `dontKnow: true`. `plays` is how often the clip was played.
-
-Status: **proposed**, mock.
-
-## `POST /api/v1/app/placement/attempts/{id}/stages/{n}/complete`
-
-Sent when a stage's answers have all arrived. The server marks it and answers with what follows, with no score:
+The stage's answers, one for each of its questions; «لا أعرف» is `dontKnow` and counts as wrong:
 
 ```json
-{ "next": { "stage": 2, "questionCount": 15, "listeningCount": 4, "deciding": false } }
+{ "answers": [ { "questionId": "…", "optionId": "b" }, { "questionId": "…", "dontKnow": true } ] }
 ```
 
-`deciding: true` is the short stage on the edge of two levels. `"next": null` means the test is over and its result is ready. It must be safe to repeat, as the response can be lost.
+`200` with the session as it now stands: `in_progress` with the next stage and all its questions (3.06 says how many, and how many listening), or `completed` with `result` (below). A stage sent before (the answer lost, and sent again) is safe: `200` with the session as it is, the new answers ignored. `409 placement.stage_not_current` (a later stage, or a finished session): the app reads the session and goes on from it. `400 validation.failed` is a bug in the app and keeps nothing: `answers` empty or over 15, an option not `a`–`d`, both or neither of `optionId` and `dontKnow`, a question of the stage with no answer (`questions[{id}]`, `missing`), or one not of the stage or twice.
 
-Status: **proposed**, mock.
+## The result (3.07)
 
-## `GET /api/v1/app/placement/attempts/{id}/result`
-
-The result of a finished attempt. An estimate; the app shows no numbers, so `score` only compares the skills with one another, on any scale.
+After the last stage the session is `completed`, its `stage`, `block` and `questions` empty, and `result: {cefr, completedAt, skills[], strongestSkill}`. The levels to start from are the track's, so the app reads them from `GET /api/v1/app/placement?trackId=`:
 
 ```json
-{
-  "levelId": "lvl_a2",
-  "levels": [
-    { "id": "lvl_a2", "code": "A2", "name": { "ar": "أساسي", "en": "Elementary" },
-      "canDo": [{ "ar": "تتحدث عن يومك…", "en": "Talk about your day…" }] }
-  ],
-  "skills": [{ "skill": "vocabulary", "score": 1.0 }]
-}
+"result": { "sessionId": "…", "cefr": "a2", "completedAt": "…", "versionNo": 1, "form": "a", "isRetake": false,
+            "level":      { "id": "…", "nameAr": "المستوى الثالث", "nameEn": "A2", "cefrCode": "a2", "gradeNumber": null },
+            "lowerLevel": { "id": "…", "nameAr": "المستوى الثاني", "nameEn": "A1", "cefrCode": "a1", "gradeNumber": null },
+            "skills": [ { "skill": "vocabulary", "correct": 7, "total": 9, "percent": 78 }, "…" ], "strongestSkill": "vocabulary" },
+"retakeAvailableAt": "…"
 ```
 
-`levels` are all the track's levels from the first, as the ladder shows them and any can become the start. `canDo` comes from the panel: for the first level it says what the first week teaches. `skill` is `vocabulary`, `grammar`, `reading` or `listening`; one the app doesn't know is left out. A `levelId` not in `levels` is an error. The server should have the result ready when the last stage closes; the app waits on this one request, with no polling.
+| From | In 3.07 |
+|---|---|
+| `cefr` (`pre_a1`…`b2`) | Where the guide stands on the ladder, Pre-A1 to B2, drawn by the app |
+| «تستطيع أن…» | The app's own three sentences for each step, not the server's (the final ones aren't written yet: STATUS D-122) |
+| `skills`, in their order | «مهاراتك», as bars against one another, never a number; the strongest and the weakest marked |
+| `level` | «ابدأ من …», named as the track names it. A `pre_a1` result starts at the track's first level |
+| `lowerLevel` | «ابدأ من مستوى أقل»; none (`null`) hides it |
 
-Status: **proposed**, mock (`assets/mock/placement/result_*.json`).
+A learner who closes 3.07 without choosing finds it again (`state: result`).
 
-## `POST /api/v1/app/placement/attempts/{id}/accept`
+## `POST /api/v1/app/placement/sessions/{sessionId}/choose`
 
-«ابدأ من …»: `{ "levelId": "lvl_a2" }`, the level measured or the one below, which is where the learner starts. Leaving the screen another way sends nothing, so **the server should start the learner at the measured level until told otherwise**. It should also keep the result for "Me" (S §12.2).
+`{ "trackId": "…", "choice": "result" }` or `"lower"`. `200` with the enrollment (`EnrollmentDto`): the new level, `entryMethod: "placement"`, `placementPending: false`; the state becomes `done`, and choosing again with the same session is allowed. The first level's progress stays. The track's map (`GET /api/v1/app/enrollments/{trackId}/map`) changes with the level; the app doesn't read it yet. A second placement track joined later shows the same result with its own levels, and is chosen with its own `trackId`, with no new test.
 
-Status: **proposed**, mock.
+| Code | Status | When | The app |
+|---|---|---|---|
+| `placement.session_not_completed` | 409 | Before the last stage | Reads the session and goes on |
+| `placement.session_not_latest` | 409 | An older session than the latest result | Chooses with `result.sessionId` from the state |
+| `placement.no_lower_level` | 422 | `lower` with none | The link isn't shown when `lowerLevel` is null |
 
-## `PATCH /api/v1/app/enrollments/{id}`
+## Other codes
 
-«ابدأ من البداية دون اختبار»: `{ "placement_state": "deferred" }` starts the learner from the track's first level, with the test still available from "Me". The app then goes home. `{id}` is `enrollmentId` from the status above.
+| Code | Status | When | The app |
+|---|---|---|---|
+| `placement.session_not_found` | 404 | No such session, or another learner's | Reads the state |
+| `placement.track_not_placement` | 422 | A track with no test | Shows no test |
+| `placement.not_available` | 422 | No published version | Shows no test |
+| `enrollment.not_found` | 404 | The track isn't joined | — |
+| `enrollment.level_not_available` | 422 | The track has no published level | — |
 
-Status: given by the owner from the backend guide, **unconfirmed** by the backend developer, mock.
+Deleting the account, and a guest signing out, deletes its sessions and answers.
 
 ## Questions for the backend team
 
-1. Confirm the path and field names, and that it is available without a token.
-2. Confirm `stages` counts the mandatory stages only, and the error for "no published version".
-3. Confirm the attempt's endpoints above, and that the status's `question` and the attempt's `answered` agree: the app continues from `answered` plus what it hasn't sent yet.
-4. Confirm the two actions above, with these details the app assumed: the `/api/v1/app/` prefix on both paths; where `enrollmentId` comes from (assumed: the status response); and `placement_state`, which is snake_case where every other field in the API is camelCase.
+1. «ابدأ من جديد» on an unfinished test (S §12.2, the design "Placement Intro"): there is no way to throw a session away, so the app offers only «تابع الاختبار» and the lessons (STATUS D-121). Is a restart planned?
+2. The onboarding step "how much English" comes before the account exists, so it can't say how long the test takes. Could `system/config` carry the published test's `estimatedSeconds`?
+3. `GET /api/v1/app/tracks` lists no levels for the General English (demo) track (`levels: []`): are a CEFR track's levels left out on purpose?

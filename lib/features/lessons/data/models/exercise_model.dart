@@ -1,5 +1,6 @@
 import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/core/random/stable_order.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/kid_lesson_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
@@ -7,7 +8,6 @@ import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
-import 'package:englizia/features/lessons/domain/services/stable_order.dart';
 
 // ASSUMPTION(api): this whole file is proposed (docs/api/lessons.md).
 

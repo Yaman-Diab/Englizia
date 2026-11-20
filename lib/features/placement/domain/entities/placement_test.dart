@@ -50,11 +50,15 @@ final class PlacementQuestion extends Equatable {
     this.ask = '',
     this.audioUrl = '',
     this.maxPlays = 0,
+    this.instruction = '',
   });
 
   final String id;
   final PlacementQuestionKind kind;
   final List<PlacementOption> options;
+
+  /// What to do, as the panel words it, in Arabic; empty when it says none.
+  final String instruction;
 
   /// Vocabulary and grammar: the sentence around its blank.
   final String before;
@@ -81,6 +85,7 @@ final class PlacementQuestion extends Equatable {
     ask,
     audioUrl,
     maxPlays,
+    instruction,
   ];
 }
 

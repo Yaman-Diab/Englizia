@@ -1,8 +1,5 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
@@ -12,31 +9,18 @@ import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/design_system/widgets/choice_surface.dart';
 import 'package:englizia/core/design_system/widgets/notice_card.dart';
 import 'package:englizia/core/error/failure.dart';
-import 'package:englizia/core/network/api_client.dart';
 import 'package:englizia/core/result/result.dart';
-import 'package:englizia/core/storage/settings_storage_service.dart';
-import 'package:englizia/features/placement/data/datasources/placement_remote_data_source.dart';
-import 'package:englizia/features/placement/data/repositories/placement_repository_impl.dart';
 import 'package:englizia/features/placement/domain/entities/placement_test.dart';
 import 'package:englizia/features/placement/presentation/test/cubit/placement_test_cubit.dart';
 import 'package:englizia/features/placement/presentation/test/pages/placement_test_page.dart';
 import 'package:englizia/features/placement/presentation/test/widgets/stage_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../helpers/fake_http_adapter.dart';
 import '../../../helpers/fake_placement_repository.dart';
 import '../../../helpers/fakes.dart';
 import '../../../helpers/pump_app.dart';
-
-class _DiskBundle extends CachingAssetBundle {
-  @override
-  Future<ByteData> load(String key) async =>
-      ByteData.sublistView(File(key).readAsBytesSync());
-}
 
 const _toSecond = PlacementNextStage(
   stage: 2,
@@ -76,232 +60,6 @@ void main() {
     [Ok(questions)],
     completions,
   );
-
-  group('data', () {
-    late FakeHttpAdapter adapter;
-    late SettingsStorageService settings;
-    late FakeResponse Function(RequestOptions) answer;
-
-    setUp(() async {
-      SharedPreferences.setMockInitialValues({});
-      settings = SettingsStorageService(await SharedPreferences.getInstance());
-      answer = (_) => const FakeResponse(200);
-      adapter = FakeHttpAdapter((options) => answer(options));
-    });
-
-    PlacementRepositoryImpl repository() => PlacementRepositoryImpl(
-      PlacementRemoteDataSourceImpl(
-        ApiClient(
-          Dio(BaseOptions(baseUrl: 'https://api.test'))
-            ..httpClientAdapter = adapter,
-        ),
-      ),
-      settings: settings,
-    );
-
-    FakeResponse data(Map<String, Object?> data) =>
-        FakeResponse(200, body: {'statusCode': 200, 'data': data});
-
-    void goOffline() => answer = (options) =>
-        throw DioException.connectionError(
-          requestOptions: options,
-          reason: 'offline',
-        );
-
-    const given = PlacementAnswer(
-      attemptId: 'att',
-      stage: 1,
-      questionId: 'q1',
-      optionId: 'o1',
-      plays: 0,
-    );
-
-    test('the attempt: POST attempts', () async {
-      answer = (_) => data(const {
-        'attemptId': 'att',
-        'stageSizes': [12, 15],
-        'stage': 1,
-        'answered': 8,
-      });
-      final result = await repository().startAttempt();
-      expect(
-        (result as Ok<PlacementAttempt>).value,
-        const PlacementAttempt(
-          id: 'att',
-          stageSizes: [12, 15],
-          stage: 1,
-          answered: 8,
-        ),
-      );
-      expect(adapter.requests.single.method, 'POST');
-      expect(adapter.requests.single.path, '/api/v1/app/placement/attempts');
-    });
-
-    test('a stage: every kind of question, with no answer key', () async {
-      final bundle = _DiskBundle();
-      final body = jsonDecode(
-        await bundle.loadString(PlacementFakeDataSource.stageAsset(1)),
-      );
-      answer = (_) => FakeResponse(200, body: body);
-      final result = await repository().getStage('att', 1);
-      final questions = (result as Ok<List<PlacementQuestion>>).value;
-      expect(
-        adapter.requests.single.path,
-        '/api/v1/app/placement/attempts/att/stages/1',
-      );
-      expect(questions.map((q) => q.kind), PlacementQuestionKind.values);
-      expect(questions.first.before, 'I usually');
-      expect(questions[2].passage, isNotEmpty);
-      expect(questions[3].maxPlays, 2);
-      expect(jsonEncode(body), isNot(contains('correct')));
-    });
-
-    test(
-      'a question it can\'t show is a failure, not a broken screen',
-      () async {
-        answer = (_) => data(const {
-          'questions': [
-            {'id': 'q', 'type': 'speaking', 'options': <Object>[]},
-          ],
-        });
-        final result = await repository().getStage('att', 1);
-        expect((result as Err).failure, isA<UnknownFailure>());
-      },
-    );
-
-    test(
-      'an answer is kept, sent once under a stable id, then let go',
-      () async {
-        await repository().saveAnswer(given);
-        await pumpEventQueue();
-
-        final request = adapter.requests.single;
-        expect(request.path, '/api/v1/app/placement/attempts/att/answers');
-        final sent = request.data! as Map;
-        expect(sent['questionId'], 'q1');
-        expect(sent['optionId'], 'o1');
-        expect(sent['dontKnow'], isFalse);
-        expect(sent['answerId'], isNotEmpty);
-        expect(sent.containsKey('stage'), isFalse);
-        expect(repository().unsentAnswers('att', 1), 0);
-      },
-    );
-
-    test('«I don\'t know» is sent as such', () async {
-      await repository().saveAnswer(
-        const PlacementAnswer(
-          attemptId: 'att',
-          stage: 1,
-          questionId: 'q1',
-          optionId: null,
-          plays: 0,
-        ),
-      );
-      await pumpEventQueue();
-      final sent = adapter.requests.single.data! as Map;
-      expect(sent['optionId'], isNull);
-      expect(sent['dontKnow'], isTrue);
-    });
-
-    test('offline an answer stays, under the same id when sent', () async {
-      goOffline();
-      await repository().saveAnswer(given);
-      await pumpEventQueue();
-      expect(repository().unsentAnswers('att', 1), 1);
-      expect(repository().unsentAnswers('att', 2), 0);
-      final id = (adapter.requests.single.data! as Map)['answerId'];
-
-      answer = (_) => const FakeResponse(200);
-      adapter.requests.clear();
-      await repository().completeStage('att', 1);
-      expect((adapter.requests.first.data! as Map)['answerId'], id);
-      expect(repository().unsentAnswers('att', 1), 0);
-    });
-
-    test(
-      'closing a stage sends what is left, then asks what follows',
-      () async {
-        goOffline();
-        final repo = repository();
-        await repo.saveAnswer(given);
-        await pumpEventQueue();
-
-        answer = (options) => options.path.endsWith('/complete')
-            ? data(const {
-                'next': {
-                  'stage': 2,
-                  'questionCount': 15,
-                  'listeningCount': 4,
-                  'deciding': false,
-                },
-              })
-            : const FakeResponse(200);
-        adapter.requests.clear();
-        final result = await repo.completeStage('att', 1);
-        expect((result as Ok<PlacementNextStage?>).value, _toSecond);
-        expect(adapter.requests.map((r) => r.path), [
-          '/api/v1/app/placement/attempts/att/answers',
-          '/api/v1/app/placement/attempts/att/stages/1/complete',
-        ]);
-      },
-    );
-
-    test('offline, closing a stage fails and keeps the answers', () async {
-      goOffline();
-      final repo = repository();
-      await repo.saveAnswer(given);
-      await pumpEventQueue();
-      final result = await repo.completeStage('att', 1);
-      expect((result as Err).failure, isA<NetworkFailure>());
-      expect(repo.unsentAnswers('att', 1), 1);
-    });
-
-    test('with no next stage, the test is over', () async {
-      answer = (_) => data(const {'next': null});
-      final result = await repository().completeStage('att', 3);
-      expect((result as Ok<PlacementNextStage?>).value, isNull);
-    });
-
-    test('listens are kept per question, and only for that attempt', () async {
-      final repo = repository();
-      await repo.savePlays('att', 'q4', 1);
-      expect(repo.playsUsed('att', 'q4'), 1);
-      expect(repo.playsUsed('other', 'q4'), 0);
-    });
-
-    test('starting over forgets the answers kept', () async {
-      goOffline();
-      final repo = repository();
-      await repo.saveAnswer(given);
-      await pumpEventQueue();
-
-      answer = (_) => const FakeResponse(201);
-      await repo.restartTest();
-      expect(repo.unsentAnswers('att', 1), 0);
-    });
-
-    test('something broken on the phone counts as nothing kept', () async {
-      await settings.setPlacementProgress('not json');
-      expect(repository().unsentAnswers('att', 1), 0);
-    });
-
-    test('mock mode walks through a whole test', () async {
-      final fake = PlacementFakeDataSource(
-        _DiskBundle(),
-        latency: Duration.zero,
-      );
-      final attempt = (await fake.startAttempt()).entity;
-      for (final stage in [1, 2, 3]) {
-        expect((await fake.getStage(attempt.id, stage)).questions, isNotEmpty);
-      }
-      expect((await fake.completeStage(attempt.id, 1)).entity?.stage, 2);
-      // The second stage fails once, to show the offline screen.
-      await expectLater(fake.completeStage(attempt.id, 2), throwsException);
-      final deciding = (await fake.completeStage(attempt.id, 2)).entity;
-      expect(deciding?.deciding, isTrue);
-      expect((await fake.completeStage(attempt.id, 3)).entity, isNull);
-    });
-  });
 
   group('PlacementTestCubit', () {
     test('opens on the first question, with nothing chosen', () async {

@@ -1,0 +1,69 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "trackId": "01a1f24f-ea3e-7693-b3a7-a60061ac9a53",
+    "state": "result",
+    "reason": null,
+    "test": {
+      "versionNo": 1,
+      "listenCount": 2,
+      "questionCount": {
+        "withoutTiebreak": 27,
+        "withTiebreak": 35
+      },
+      "estimatedSeconds": {
+        "withoutTiebreak": 675,
+        "withTiebreak": 875
+      }
+    },
+    "isRetake": true,
+    "session": null,
+    "result": {
+      "sessionId": "01a1f8ee-ac11-702b-ab34-4fe1c8c95017",
+      "cefr": "pre_a1",
+      "completedAt": "2026-11-20T12:29:55.987Z",
+      "versionNo": 1,
+      "form": "a",
+      "isRetake": false,
+      "level": {
+        "id": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
+        "nameAr": "A1 المبتدئ",
+        "nameEn": "A1 Beginner",
+        "cefrCode": "a1",
+        "gradeNumber": null
+      },
+      "lowerLevel": null,
+      "skills": [
+        {
+          "skill": "vocabulary",
+          "correct": 6,
+          "total": 7,
+          "percent": 86
+        },
+        {
+          "skill": "grammar",
+          "correct": 0,
+          "total": 7,
+          "percent": 0
+        },
+        {
+          "skill": "reading",
+          "correct": 0,
+          "total": 6,
+          "percent": 0
+        },
+        {
+          "skill": "listening",
+          "correct": 0,
+          "total": 7,
+          "percent": 0
+        }
+      ],
+      "strongestSkill": "vocabulary"
+    },
+    "retakeAvailableAt": "2026-12-20T12:29:55.987Z"
+  },
+  "error": null,
+  "traceId": "00000000000000000000000000000000"
+}

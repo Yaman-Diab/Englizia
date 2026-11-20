@@ -44,4 +44,14 @@ abstract final class ApiErrorCodes {
 
   /// 403: the account was disabled from the dashboard.
   static const accountDisabled = 'auth.account_disabled';
+
+  /// 409 from a placement stage: not the session's current one (sent twice,
+  /// or the session is over). Read the session and go on from it.
+  static const placementStageNotCurrent = 'placement.stage_not_current';
+
+  /// 409 from «اختر»: an older session than the account's latest result.
+  static const placementSessionNotLatest = 'placement.session_not_latest';
+
+  /// 409 from «ابدأ الاختبار»: the 30 days since the last result aren't over.
+  static const placementRetakeNotYet = 'placement.retake_not_yet';
 }

@@ -1,0 +1,10 @@
+{
+  "statusCode": 422,
+  "message": "There is no level below this one in the track.",
+  "data": null,
+  "error": {
+    "code": "placement.no_lower_level",
+    "details": null
+  },
+  "traceId": "00000000000000000000000000000000"
+}

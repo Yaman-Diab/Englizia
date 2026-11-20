@@ -1,0 +1,16 @@
+{
+  "statusCode": 400,
+  "message": "Send one answer for each question of the stage, and no other.",
+  "data": null,
+  "error": {
+    "code": "validation.failed",
+    "details": [
+      {
+        "field": "questions[01a1f8d2-fee1-702a-9898-37733cdc3aff]",
+        "code": "missing",
+        "message": "This question of the stage has no answer."
+      }
+    ]
+  },
+  "traceId": "00000000000000000000000000000000"
+}

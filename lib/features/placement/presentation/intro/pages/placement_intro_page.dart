@@ -35,6 +35,7 @@ class PlacementIntroPage extends StatefulWidget {
     required this.onStart,
     required this.onSkip,
     required this.onLessons,
+    required this.onResult,
     super.key,
   });
 
@@ -48,6 +49,9 @@ class PlacementIntroPage extends StatefulWidget {
 
   /// A learner with a result already goes back to the lessons.
   final VoidCallback onLessons;
+
+  /// A finished test whose result waits for the learner's choice: it opens.
+  final ValueChanged<String> onResult;
 
   @override
   State<PlacementIntroPage> createState() => _PlacementIntroPageState();
@@ -68,10 +72,6 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
     switch (action) {
       case PlacementAction.skip:
         widget.onSkip();
-      case PlacementAction.restart:
-        final cubit = context.read<PlacementIntroCubit>();
-        await widget.onStart();
-        if (mounted) await cubit.reopened();
     }
   }
 
@@ -180,6 +180,11 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
         icon: AppIcon.calendar,
         title: 'placement_retake_after'.plural(daysLeft),
       ),
+      PlacementAwaitingChoice() => NoticeCard(
+        icon: AppIcon.checkCircle,
+        primary: true,
+        title: 'placement_result_waiting'.tr(),
+      ),
       _ => null,
     };
     return SingleChildScrollView(
@@ -268,17 +273,19 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
     final levelName = state.firstLevel?.name.of(context.locale.languageCode);
     final start = switch (status) {
       PlacementInProgress() => 'placement_continue'.tr(),
+      PlacementAwaitingChoice() => 'placement_see_result'.tr(),
       PlacementRetakeOpen() ||
       PlacementRetakeLocked() => 'placement_retake'.tr(),
       _ => 'preparing_start_test'.tr(),
     };
     final cubit = context.read<PlacementIntroCubit>();
     final (other, onOther) = switch (status) {
-      PlacementInProgress() => (
-        'placement_restart'.tr(),
-        state.canRestart ? cubit.restart : null,
-      ),
-      PlacementRetakeOpen() || PlacementRetakeLocked() => (
+      // The server keeps the session going: it can be carried on, not
+      // thrown away (docs/api/placement.md).
+      PlacementInProgress() ||
+      PlacementAwaitingChoice() ||
+      PlacementRetakeOpen() ||
+      PlacementRetakeLocked() => (
         'placement_back_to_lessons'.tr(),
         state.busy ? null : widget.onLessons,
       ),
@@ -320,7 +327,11 @@ class _PlacementIntroPageState extends State<PlacementIntroPage> {
             AppButton(
               label: start,
               size: AppButtonSize.large,
-              onPressed: state.canStart ? _start : null,
+              onPressed: switch (status) {
+                PlacementAwaitingChoice(:final attemptId) =>
+                  state.busy ? null : () => widget.onResult(attemptId),
+                _ => state.canStart ? _start : null,
+              },
             ),
             if (other != null) ...[
               const SizedBox(height: AppSpacing.xxs),
