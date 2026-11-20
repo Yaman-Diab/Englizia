@@ -85,7 +85,12 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/lessons.md.
   static String unit(String unitId) => '/api/v1/app/units/$unitId';
 
+  // Confirmed in docs/api/openapi.json.
   static String lesson(String lessonId) => '/api/v1/app/lessons/$lessonId';
+
+  /// The answers kept on the phone, in batches. Confirmed in
+  /// docs/api/openapi.json.
+  static const sync = '/api/v1/app/sync';
 
   // ASSUMPTION(api): docs/api/lessons.md.
   static String lessonAnswerReview(String lessonId) =>
@@ -157,10 +162,6 @@ abstract final class ApiEndpoints {
   // ASSUMPTION(api): docs/api/lessons.md.
   static String lessonReports(String lessonId) =>
       '/api/v1/app/lessons/$lessonId/reports';
-
-  // ASSUMPTION(api): docs/api/lessons.md.
-  static String lessonAnswers(String lessonId) =>
-      '/api/v1/app/lessons/$lessonId/answers';
 
   // ASSUMPTION(api): docs/api/tracks.md.
   static String levelUnits(String levelId) =>

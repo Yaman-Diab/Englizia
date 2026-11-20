@@ -380,6 +380,9 @@ class KidLessonCubit extends Cubit<KidLessonState> {
   final _sent = <String>{};
   final _pairMistakes = <String>{};
 
+  /// Each word's first wrong picture, by their pairs.
+  final _pairWrong = <String, String>{};
+
   void _later(Duration wait, void Function() then) =>
       _timers.add(Timer(wait, () => isClosed ? null : then()));
 
@@ -577,6 +580,7 @@ class KidLessonCubit extends Cubit<KidLessonState> {
     if (picked != pairId) {
       _misses++;
       _pairMistakes.add(picked);
+      _pairWrong.putIfAbsent(pairId, () => picked);
       emit(state.copyWith(wordFlash: () => pairId));
       _miss();
       return;
@@ -591,6 +595,7 @@ class KidLessonCubit extends Cubit<KidLessonState> {
           total: question.pairs.length,
           matched: matched,
           mistakes: {..._pairMistakes},
+          wrong: {..._pairWrong},
         ),
       );
       _win(pairId);
@@ -743,6 +748,7 @@ class KidLessonCubit extends Cubit<KidLessonState> {
     _rightFirstTime = 0;
     _sent.clear();
     _pairMistakes.clear();
+    _pairWrong.clear();
     _startedAt = _now();
     emit(KidLessonState(stage: KidStage.playing, lesson: state.lesson));
     _enter();

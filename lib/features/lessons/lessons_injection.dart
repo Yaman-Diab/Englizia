@@ -46,7 +46,14 @@ void registerLessonDependencies(GetIt sl) {
           : LessonRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<LessonRepository>(
-      () => LessonRepositoryImpl(sl(), settings: sl(), vault: sl()),
+      () => LessonRepositoryImpl(
+        sl(),
+        settings: sl(),
+        vault: sl(),
+        // Deleted on the server while its token still works: the same end
+        // as a session the server no longer takes.
+        onAccountGone: () => sl<AppSessionController>().expire(),
+      ),
     )
     ..registerLazySingleton<UnitRemoteDataSource>(
       () => AppConfig.isMock

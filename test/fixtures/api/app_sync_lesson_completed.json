@@ -1,0 +1,63 @@
+{
+  "statusCode": 200,
+  "message": "Request completed successfully",
+  "data": {
+    "attempts": [
+      {
+        "clientAttemptId": "0b92cad0-154f-4e43-b4d5-f3985bb8671c",
+        "status": "accepted",
+        "attemptId": "01a1f924-a1a9-77eb-b22f-a6cb578fae46",
+        "isCorrect": true,
+        "error": null
+      },
+      {
+        "clientAttemptId": "0ca283aa-ac05-46f3-931a-dfe3cf8ee836",
+        "status": "accepted",
+        "attemptId": "01a1f924-a1a9-780d-b0c6-55c5855631b5",
+        "isCorrect": true,
+        "error": null
+      },
+      {
+        "clientAttemptId": "5ab90ac4-2581-4ff2-baaf-88244ecb08d7",
+        "status": "accepted",
+        "attemptId": "01a1f924-a1ab-721b-9205-4d0ff88b5c36",
+        "isCorrect": true,
+        "error": null
+      },
+      {
+        "clientAttemptId": "8498fa86-5124-4801-9923-0c8fa5d5ec83",
+        "status": "accepted",
+        "attemptId": "01a1f924-a1ae-7142-90ed-1256c7bad01c",
+        "isCorrect": true,
+        "error": null
+      },
+      {
+        "clientAttemptId": "01e16e9d-656d-4704-b22c-1f6aea88c832",
+        "status": "accepted",
+        "attemptId": "01a1f924-a1ae-7082-820b-3ada9f86a33e",
+        "isCorrect": true,
+        "error": null
+      }
+    ],
+    "lessons": [
+      {
+        "lessonId": "01a1f24f-eec9-7d31-8c4b-624e894c7858",
+        "state": "completed",
+        "best": {
+          "firstTryCorrect": 6,
+          "questionCount": 6
+        }
+      },
+      {
+        "lessonId": "01a1f24f-f304-732f-bcc9-59276e455482",
+        "state": "available",
+        "best": null
+      }
+    ],
+    "units": [],
+    "levels": [],
+    "serverTime": "2026-11-20T13:28:09.892Z"
+  },
+  "error": null,
+  "traceId": "52e99458e1ca7b05e440756b07d5b8bd"
+}

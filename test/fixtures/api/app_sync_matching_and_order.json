@@ -1,0 +1,75 @@
+{
+  "statusCode": 200,
+  "message": "Request completed successfully",
+  "data": {
+    "attempts": [
+      {
+        "clientAttemptId": "24caf9ad-0c11-43f8-8cdf-3e1aba0997b0",
+        "status": "accepted",
+        "attemptId": "01a1f92c-8a05-7ee1-b5bb-50ea14014045",
+        "isCorrect": false,
+        "error": null
+      },
+      {
+        "clientAttemptId": "78824ae5-9fe9-4eeb-b74d-d498d89556cb",
+        "status": "rejected",
+        "attemptId": null,
+        "isCorrect": null,
+        "error": {
+          "code": "question.answer_invalid",
+          "message": "The answer does not fit this question.",
+          "details": null
+        }
+      },
+      {
+        "clientAttemptId": "ce328697-7b69-45da-a5d9-d93e7cd26ff3",
+        "status": "rejected",
+        "attemptId": null,
+        "isCorrect": null,
+        "error": {
+          "code": "question.answer_invalid",
+          "message": "The answer does not fit this question.",
+          "details": null
+        }
+      },
+      {
+        "clientAttemptId": "a819de7e-de5c-4067-be45-3650b16c4c6c",
+        "status": "rejected",
+        "attemptId": null,
+        "isCorrect": null,
+        "error": {
+          "code": "question.answer_invalid",
+          "message": "The answer does not fit this question.",
+          "details": null
+        }
+      },
+      {
+        "clientAttemptId": "275378f1-37d6-4b47-a1ea-b7bc07505660",
+        "status": "accepted",
+        "attemptId": "01a1f92c-8a05-7e0b-ade3-1f7f5a7ccdda",
+        "isCorrect": true,
+        "error": null
+      },
+      {
+        "clientAttemptId": "115693f9-629c-4c48-84d0-a3c68f334635",
+        "status": "accepted",
+        "attemptId": "01a1f92c-8a06-7db8-8609-348cfa442d8c",
+        "isCorrect": false,
+        "error": null
+      },
+      {
+        "clientAttemptId": "05a89aa4-ff5a-4bf7-a270-3ef540bee10a",
+        "status": "accepted",
+        "attemptId": "01a1f92c-8a06-7790-9b6d-f74b3c799d7e",
+        "isCorrect": false,
+        "error": null
+      }
+    ],
+    "lessons": [],
+    "units": [],
+    "levels": [],
+    "serverTime": "2026-11-20T13:36:48.125Z"
+  },
+  "error": null,
+  "traceId": "1e33ee1e0f2e9539484fdd0f6b0d060d"
+}

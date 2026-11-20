@@ -5,20 +5,30 @@ import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/kid_lesson_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
+import 'package:englizia/features/lessons/data/models/server_lesson.dart';
 import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 
-// ASSUMPTION(api): this whole file is proposed (docs/api/lessons.md).
+// The app's own shape of a lesson. The server's lesson is put in it first
+// (server_lesson.dart); the templates and lesson types the server doesn't
+// have yet are read from it as the mock gives them.
+// ASSUMPTION(api): those are proposed (docs/api/lessons.md).
 
 /// The lesson as it came, so it can be kept on the phone as it is.
 final class LessonModel {
   const LessonModel(this.json);
 
+  /// The server's shape, or the app's own.
   final Map<String, Object?> json;
+
+  /// In the app's own shape.
+  Map<String, Object?> get own =>
+      isServerLesson(json) ? lessonFromServer(json) : json;
 
   /// [seed] is this learner's, for the order of the options.
   Lesson toEntity(String seed) {
+    final json = own;
     final id = json.readString('id');
     final version = json.readInt('version');
     if (id == null || version == null) {
@@ -783,13 +793,15 @@ Evaluation spokenReviewFromJson(Map<String, Object?> json) =>
       _ => throw const FormatException('Spoken review: no known outcome'),
     };
 
-/// What is kept on the phone: each lesson's progress, and the answers not on
-/// the server yet.
+/// What is kept on the phone: each lesson's progress and run, and the answers
+/// not on the server yet.
 final class LessonStoreModel {
   LessonStoreModel({
     Map<String, Map<String, Object?>>? lessons,
+    Map<String, String>? runs,
     List<Map<String, Object?>>? unsent,
   }) : lessons = lessons ?? {},
+       runs = runs ?? {},
        unsent = unsent ?? [];
 
   factory LessonStoreModel.fromJson(Map<String, Object?> json) =>
@@ -799,6 +811,11 @@ final class LessonStoreModel {
               in (json.readMap('lessons') ?? const <String, Object?>{}).entries)
             entry.key: asJsonMap(entry.value),
         },
+        runs: {
+          for (final entry
+              in (json.readMap('runs') ?? const <String, Object?>{}).entries)
+            if (entry.value case final String run) entry.key: run,
+        },
         unsent: [
           for (final answer in json.readList('unsent') ?? const <Object?>[])
             asJsonMap(answer),
@@ -806,6 +823,11 @@ final class LessonStoreModel {
       );
 
   final Map<String, Map<String, Object?>> lessons;
+
+  /// Each lesson's run in progress, by lesson id: one id from its first answer
+  /// to its last, kept through a stop, and a new one when it starts over. The
+  /// server tells a first try by it.
+  final Map<String, String> runs;
 
   /// `{id, kind, lessonId, request}`, in the order to send them.
   final List<Map<String, Object?>> unsent;
@@ -837,5 +859,9 @@ final class LessonStoreModel {
         'seconds': progress.seconds,
       };
 
-  Map<String, Object?> toJson() => {'lessons': lessons, 'unsent': unsent};
+  Map<String, Object?> toJson() => {
+    'lessons': lessons,
+    'runs': runs,
+    'unsent': unsent,
+  };
 }

@@ -6,6 +6,7 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
+import 'package:englizia/features/lessons/data/models/sync_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:flutter/services.dart';
@@ -13,8 +14,12 @@ import 'package:flutter/services.dart';
 abstract interface class LessonRemoteDataSource {
   Future<LessonModel> getLesson(String lessonId);
 
-  /// [request] comes from `attemptToJson`.
-  Future<void> sendAnswer(String lessonId, Map<String, Object?> request);
+  /// The answers kept on the phone, 200 at most, the oldest first: each
+  /// comes from `syncAttemptToJson`. One result for each, in their order.
+  Future<List<SyncResultModel>> sync(
+    List<Map<String, Object?>> attempts, {
+    required DateTime sentAt,
+  });
 
   /// [request] comes from `attemptToJson`; true when the answer is right.
   Future<bool> reviewAnswer(String lessonId, Map<String, Object?> request);
@@ -56,8 +61,17 @@ final class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
       LessonModel(asJsonMap(await _client.get(ApiEndpoints.lesson(lessonId))));
 
   @override
-  Future<void> sendAnswer(String lessonId, Map<String, Object?> request) =>
-      _client.post(ApiEndpoints.lessonAnswers(lessonId), data: request);
+  Future<List<SyncResultModel>> sync(
+    List<Map<String, Object?>> attempts, {
+    required DateTime sentAt,
+  }) async => syncResultsFromJson(
+    asJsonMap(
+      await _client.post(
+        ApiEndpoints.sync,
+        data: {'sentAt': syncTime(sentAt), 'attempts': attempts},
+      ),
+    ),
+  );
 
   @override
   Future<bool> reviewAnswer(
@@ -119,8 +133,9 @@ final class LessonRemoteDataSourceImpl implements LessonRemoteDataSource {
       _client.post(ApiEndpoints.lessonReports(lessonId), data: request);
 }
 
-/// Mock mode (`env/mock.json`): the contract's example from the bundled asset
-/// the tests also use. Deleted once the endpoints are confirmed.
+/// Mock mode (`env/mock.json`): lessons in the app's own shape from the
+/// bundled assets the tests also use. Deleted once every lesson type comes
+/// from the server.
 final class LessonFakeDataSource implements LessonRemoteDataSource {
   LessonFakeDataSource(
     this._bundle, {
@@ -174,9 +189,21 @@ final class LessonFakeDataSource implements LessonRemoteDataSource {
     return LessonModel(asJsonMap(ApiClient.unwrap(body)));
   }
 
+  /// Takes every answer, and marks none: the phone's marking stands.
   @override
-  Future<void> sendAnswer(String lessonId, Map<String, Object?> request) =>
-      Future<void>.delayed(latency);
+  Future<List<SyncResultModel>> sync(
+    List<Map<String, Object?>> attempts, {
+    required DateTime sentAt,
+  }) async {
+    await Future<void>.delayed(latency);
+    return [
+      for (final attempt in attempts)
+        SyncResultModel(
+          attemptId: '${attempt['clientAttemptId']}',
+          status: SyncStatus.accepted,
+        ),
+    ];
+  }
 
   @override
   Future<bool> reviewAnswer(

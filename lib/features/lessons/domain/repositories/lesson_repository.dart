@@ -7,13 +7,31 @@ import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/lessons/domain/entities/vocabulary.dart';
 
+/// How sending what the phone kept ended.
+final class SendOutcome {
+  /// Nothing is left that another try would send.
+  const SendOutcome.sent() : waiting = false, retryAfter = null;
+
+  /// Something stays on the phone for another try.
+  const SendOutcome.waiting({this.retryAfter}) : waiting = true;
+
+  final bool waiting;
+
+  /// How long the server asked to wait, when it did.
+  final Duration? retryAfter;
+}
+
 abstract interface class LessonRepository {
   /// The lesson with its exercises and keys.
   Future<Result<Lesson>> getLesson(String lessonId);
 
   /// Keeps the answer on the phone and sends it when it can, under a stable
   /// attempt id, so the server ignores a repeat. Never fails. Returns that id.
+  /// An answer to a template the server doesn't mark yet isn't kept.
   Future<String> saveAttempt(ExerciseAttempt attempt);
+
+  /// The server's marking of each answer it took, as it comes.
+  Stream<AttemptVerdict> get verdicts;
 
   /// Asks the server to judge what the phone can't: true when it is right.
   Future<Result<bool>> reviewAttempt(ExerciseAttempt attempt, String attemptId);
@@ -75,8 +93,9 @@ abstract interface class LessonRepository {
   /// Keeps the report on the phone and sends it when it can. Never fails.
   Future<void> saveReport(ExerciseReport report);
 
-  /// Sends what the phone kept, as when the connection is back.
-  Future<void> sendSaved();
+  /// Sends what the phone kept, as when the connection is back. Never fails:
+  /// what couldn't go waits, and the outcome says so.
+  Future<SendOutcome> sendSaved();
 
   ExerciseProgress progress(String lessonId);
 

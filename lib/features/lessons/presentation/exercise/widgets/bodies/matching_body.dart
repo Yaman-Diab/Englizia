@@ -101,6 +101,7 @@ class _MatchingBodyState extends State<MatchingBody> {
       total: draft.total,
       matched: {...draft.matched, pair.id},
       mistakes: draft.mistakes,
+      wrong: draft.wrong,
     );
     setState(() {
       _picked = null;
@@ -120,12 +121,16 @@ class _MatchingBodyState extends State<MatchingBody> {
 
   void _mismatched(PairsDraft draft, _Pick first, _Pick second) {
     AppHaptics.mediumImpact();
+    final word = first.side == _Side.word ? first : second;
+    final meaning = first.side == _Side.word ? second : first;
     // The first mistake of a pair counts, and only the first (S §7.3).
     widget.answer.onDraft(
       PairsDraft(
         total: draft.total,
         matched: draft.matched,
         mistakes: {...draft.mistakes, first.pair.id},
+        wrong: {...draft.wrong}
+          ..putIfAbsent(word.pair.id, () => meaning.pair.id),
       ),
     );
     setState(() {

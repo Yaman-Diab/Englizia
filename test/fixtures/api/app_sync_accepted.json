@@ -1,0 +1,27 @@
+{
+  "statusCode": 200,
+  "message": "Request completed successfully",
+  "data": {
+    "attempts": [
+      {
+        "clientAttemptId": "1de901f5-2752-41cd-8fe4-ca1f0b643bed",
+        "status": "accepted",
+        "attemptId": "01a1f924-99ae-7f5b-945e-fd2754d262ab",
+        "isCorrect": true,
+        "error": null
+      }
+    ],
+    "lessons": [
+      {
+        "lessonId": "01a1f24f-eec9-7d31-8c4b-624e894c7858",
+        "state": "in_progress",
+        "best": null
+      }
+    ],
+    "units": [],
+    "levels": [],
+    "serverTime": "2026-11-20T13:28:07.801Z"
+  },
+  "error": null,
+  "traceId": "ceeecd1512a120bb8bfa6ea3092c54d3"
+}

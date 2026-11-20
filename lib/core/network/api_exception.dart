@@ -11,6 +11,7 @@ final class ApiException implements Exception {
     this.code,
     this.fieldErrors = const {},
     this.fieldCodes = const {},
+    this.fields = const [],
     this.retryAfter,
     this.traceId,
   });
@@ -33,6 +34,7 @@ final class ApiException implements Exception {
         code: envelopeError.readString('code'),
         fieldErrors: details.messages,
         fieldCodes: details.codes,
+        fields: details.fields,
         retryAfter: _parseRetryAfter(retryAfterHeader),
         traceId: json.readString('traceId'),
       );
@@ -61,6 +63,10 @@ final class ApiException implements Exception {
   /// Field name (camelCase) → stable codes (`not_empty`, …), for the app's
   /// own field messages.
   final Map<String, List<String>> fieldCodes;
+
+  /// The fields as the server names them, whole: a list's item is told by its
+  /// place (`attempts[3].clientCreatedAt`), which the maps above drop.
+  final List<String> fields;
   final Duration? retryAfter;
 
   /// Server correlation id, for support and logs.
@@ -75,15 +81,21 @@ final class ApiException implements Exception {
 
   /// `error.details`: `[{field, code, message}]`; a detail without a field
   /// is about the whole request and stays out of the field maps.
-  static ({Map<String, List<String>> messages, Map<String, List<String>> codes})
+  static ({
+    Map<String, List<String>> messages,
+    Map<String, List<String>> codes,
+    List<String> fields,
+  })
   _parseDetails(List<Object?>? raw) {
     final messages = <String, List<String>>{};
     final codes = <String, List<String>>{};
+    final fields = <String>[];
     for (final item in raw ?? const <Object?>[]) {
       if (item is! Map) continue;
       final detail = item.cast<String, Object?>();
       final field = detail.readString('field');
       if (field == null) continue;
+      fields.add(field);
       final key = normalizeField(field);
       if (detail.readString('message') case final message?) {
         messages[key] = [...?messages[key], message];
@@ -92,7 +104,7 @@ final class ApiException implements Exception {
         codes[key] = [...?codes[key], code];
       }
     }
-    return (messages: messages, codes: codes);
+    return (messages: messages, codes: codes, fields: fields);
   }
 
   /// ProblemDetails `errors`: `{Field: [messages]}`.

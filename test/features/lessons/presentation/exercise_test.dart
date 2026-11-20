@@ -84,6 +84,48 @@ void main() {
       await subject.close();
     });
 
+    test('the server’s marking replaces the phone’s, quietly', () async {
+      final subject = cubit();
+      await subject.start();
+      final question = subject.state.question! as ChoiceExercise;
+      subject.select(question.answerId);
+      await subject.check();
+      expect(subject.state.right, {question.id});
+      final shown = subject.state.evaluation;
+
+      lessons.serverVerdicts.add(
+        AttemptVerdict(
+          lessonId: 'les',
+          questionId: question.id,
+          correct: false,
+        ),
+      );
+      await pumpEventQueue();
+
+      expect(subject.state.right, isEmpty);
+      expect(subject.state.evaluation, shown, reason: 'no word of it');
+
+      lessons.serverVerdicts
+        ..add(
+          AttemptVerdict(
+            lessonId: 'other',
+            questionId: question.id,
+            correct: true,
+          ),
+        )
+        ..add(
+          const AttemptVerdict(
+            lessonId: 'les',
+            questionId: 'not answered',
+            correct: true,
+          ),
+        );
+      await pumpEventQueue();
+
+      expect(subject.state.right, isEmpty);
+      await subject.close();
+    });
+
     test('a failed load offers a retry that recovers', () async {
       lessons.failure = const NetworkFailure();
       final subject = cubit();

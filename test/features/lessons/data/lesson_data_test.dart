@@ -18,6 +18,7 @@ import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
+import 'package:englizia/features/lessons/data/models/sync_model.dart';
 import 'package:englizia/features/lessons/data/models/vocabulary_model.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
@@ -38,7 +39,15 @@ import '../../../helpers/fake_lesson_repository.dart';
 import '../../../helpers/fakes.dart';
 
 class _Remote implements LessonRemoteDataSource {
+  /// Every answer that reached the server, in order.
   final sent = <Map<String, Object?>>[];
+
+  /// The answers as they went, a request at a time.
+  final batches = <List<Map<String, Object?>>>[];
+  final sentAt = <DateTime>[];
+
+  /// What the server says of an answer; it takes them all when null.
+  SyncResultModel? Function(Map<String, Object?> attempt)? says;
   final reviewed = <Map<String, Object?>>[];
   final reports = <Map<String, Object?>>[];
   final completed = <Map<String, Object?>>[];
@@ -46,7 +55,6 @@ class _Remote implements LessonRemoteDataSource {
   final words = <Map<String, Object?>>[];
   final shadowing = <Map<String, Object?>>[];
   final contentDone = <Map<String, Object?>>[];
-  final lessons = <String>[];
   var reviewSays = true;
   var offline = false;
   ApiException? failWith;
@@ -127,15 +135,26 @@ class _Remote implements LessonRemoteDataSource {
   }
 
   @override
-  Future<void> sendAnswer(String lessonId, Map<String, Object?> request) async {
+  Future<List<SyncResultModel>> sync(
+    List<Map<String, Object?>> attempts, {
+    required DateTime sentAt,
+  }) async {
     if (offline) throw const NetworkException('connectionError');
+    batches.add(attempts);
+    this.sentAt.add(sentAt);
     if (refuseOnce case final error?) {
       refuseOnce = null;
       throw error;
     }
-    lessons.add(lessonId);
-    sent.add(request);
+    sent.addAll(attempts);
+    return [for (final attempt in attempts) ?(says ?? _taken)(attempt)];
   }
+
+  static SyncResultModel _taken(Map<String, Object?> attempt) =>
+      SyncResultModel(
+        attemptId: attempt['clientAttemptId']! as String,
+        status: SyncStatus.accepted,
+      );
 }
 
 const _attempt = ExerciseAttempt(
@@ -1531,14 +1550,24 @@ void main() {
       expect(model.toEntity('s').exercises, hasLength(21));
     });
 
-    test('an answer goes to its lesson, with its attempt id', () async {
-      await source.sendAnswer('les', {'attemptId': 'a1'});
+    test(
+      'the answers go together, with the phone\u2019s time in UTC',
+      () async {
+        await source.sync([
+          {'clientAttemptId': 'a1'},
+        ], sentAt: DateTime.utc(2026, 11, 20, 14, 0, 5));
 
-      final request = adapter.requests.single;
-      expect(request.method, 'POST');
-      expect(request.path, '/api/v1/app/lessons/les/answers');
-      expect(request.data, {'attemptId': 'a1'});
-    });
+        final request = adapter.requests.single;
+        expect(request.method, 'POST');
+        expect(request.path, '/api/v1/app/sync');
+        expect(request.data, {
+          'sentAt': '2026-11-20T14:00:05.000Z',
+          'attempts': [
+            {'clientAttemptId': 'a1'},
+          ],
+        });
+      },
+    );
   });
 
   group('the repository', () {
@@ -1551,6 +1580,9 @@ void main() {
       settings = SettingsStorageService(await SharedPreferences.getInstance());
       remote = _Remote();
       repository = LessonRepositoryImpl(remote, settings: settings);
+      addTearDown(repository.dispose);
+      // An answer is sent in the terms of the lesson the learner saw.
+      await repository.getLesson('les');
     });
 
     Future<void> settle() => Future<void>.delayed(Duration.zero);
@@ -1582,9 +1614,8 @@ void main() {
     test(
       'a unit learns from the phone: kept, where it stopped, done',
       () async {
-        expect(repository.onPhone('les'), const LessonOnPhone());
+        expect(repository.onPhone('never'), const LessonOnPhone());
 
-        await repository.getLesson('les');
         final total = remote.lesson.readList('exercises')!.length;
         await repository.saveProgress(
           'les',
@@ -1796,33 +1827,33 @@ void main() {
       expect(remote.sent, isEmpty);
     });
 
-    test(
-      'a spoken answer the server missed goes later, the same attempt',
-      () async {
-        remote.offline = true;
-        final result = await repository.reviewSpoken(spoken);
-        await settle();
-        expect(result, isA<Err<Evaluation>>());
+    List<Object?> unsent() => switch (settings.lessonProgress) {
+      final saved? => (jsonDecode(saved) as Map)['unsent'] as List,
+      null => const [],
+    };
 
-        remote.offline = false;
-        await repository.sendSaved();
+    test('a spoken answer the server missed is not kept', () async {
+      remote.offline = true;
+      final result = await repository.reviewSpoken(spoken);
+      await settle();
+      expect(result, isA<Err<Evaluation>>());
 
-        expect(remote.sent.single['questionId'], 'q18');
-        expect(remote.sent.single['attemptId'], isNotEmpty);
-      },
-    );
+      remote.offline = false;
+      await repository.sendSaved();
 
-    List<Object?> unsent() =>
-        (jsonDecode(settings.lessonProgress!) as Map)['unsent'] as List;
+      expect(remote.sent, isEmpty);
+      expect(unsent(), isEmpty);
+    });
 
     test('an answer is sent, then no longer kept', () async {
       await repository.saveAttempt(_attempt);
       await repository.sendSaved();
 
-      expect(remote.lessons, ['les']);
-      expect(remote.sent.single, containsPair('questionId', 'q1'));
-      expect(remote.sent.single, containsPair('lessonVersion', 3));
-      expect(remote.sent.single, containsPair('hinted', true));
+      final sent = remote.sent.single;
+      expect(sent['questionVersionId'], 'q1');
+      expect(sent['answer'], {'optionId': 'o2'});
+      expect(sent['hintsUsed'], 1);
+      expect(sent['clientCreatedAt'], endsWith('Z'));
       await settle();
       expect(unsent(), isEmpty);
     });
@@ -1839,8 +1870,8 @@ void main() {
         remote.offline = false;
         await repository.sendSaved();
 
-        expect(remote.sent.single['attemptId'], kept['attemptId']);
-        expect(remote.sent.single['attemptId'], isNotEmpty);
+        expect(remote.sent.single['clientAttemptId'], kept['clientAttemptId']);
+        expect(remote.sent.single['clientAttemptId'], isNotEmpty);
       },
     );
 
@@ -1861,7 +1892,8 @@ void main() {
       remote.offline = false;
       await LessonRepositoryImpl(remote, settings: settings).sendSaved();
 
-      expect(remote.sent.map((a) => a['questionId']), ['q1', 'q2']);
+      expect(remote.sent.map((a) => a['questionVersionId']), ['q1', 'q2']);
+      expect(remote.batches, hasLength(1), reason: 'together');
     });
 
     test('sending twice at once sends each answer once', () async {
@@ -1984,7 +2016,7 @@ void main() {
         remote.offline = true;
 
         expect(
-          await repository.getLesson('les'),
+          await repository.getLesson('never'),
           isA<Err<Lesson>>().having(
             (e) => e.failure,
             'failure',
@@ -2115,48 +2147,288 @@ void main() {
       });
     });
 
-    group('an answer the server refuses', () {
-      for (final status in [400, 404, 409, 410, 422]) {
-        test('$status is dropped, and the rest go on', () async {
-          remote.offline = true;
-          await repository.saveAttempt(_attempt);
-          await repository.saveAttempt(
-            const ExerciseAttempt(
-              lessonId: 'les',
-              lessonVersion: 3,
-              questionId: 'q2',
-              draft: ChoiceDraft('o1'),
-              hinted: false,
-            ),
-          );
-          await settle();
-          remote
-            ..offline = false
-            ..refuseOnce = ApiException(statusCode: status);
+    group('the sync', () {
+      const second = ExerciseAttempt(
+        lessonId: 'les',
+        lessonVersion: 3,
+        questionId: 'q2',
+        draft: ChoiceDraft('o1'),
+        hinted: false,
+      );
 
-          await repository.sendSaved();
+      /// Two answers kept with no connection, then the connection back.
+      Future<void> keepTwo() async {
+        remote.offline = true;
+        await repository.saveAttempt(_attempt);
+        await repository.saveAttempt(second);
+        await settle();
+        remote.offline = false;
+      }
 
-          expect(remote.sent.map((a) => a['questionId']), ['q2']);
+      SyncResultModel result(
+        Map<String, Object?> attempt,
+        SyncStatus status, {
+        bool? correct,
+      }) => SyncResultModel(
+        attemptId: attempt['clientAttemptId']! as String,
+        status: status,
+        correct: correct,
+      );
+
+      for (final status in SyncStatus.values) {
+        test('${status.name} takes the answer off the phone', () async {
+          remote.says = (attempt) => result(attempt, status);
+          await keepTwo();
+
+          final outcome = await repository.sendSaved();
+
+          expect(outcome.waiting, isFalse);
+          expect(remote.batches, hasLength(1));
           expect(unsent(), isEmpty);
         });
       }
 
-      test('a server error stays, and goes later', () async {
-        remote.refuseOnce = const ApiException(statusCode: 500);
-        await repository.saveAttempt(_attempt);
-        await settle();
-        expect(remote.sent, isEmpty);
+      test('an answer the reply leaves out waits for another send', () async {
+        remote.says = (attempt) => attempt['questionVersionId'] == 'q1'
+            ? result(attempt, SyncStatus.accepted)
+            : null;
+        await keepTwo();
+
+        final outcome = await repository.sendSaved();
+
+        expect(outcome.waiting, isTrue);
+        expect(remote.batches.map((b) => b.length), [2, 1]);
         expect(unsent(), hasLength(1));
+      });
+
+      test('a reply with no result stops the round, and keeps all', () async {
+        remote.says = (_) => null;
+        await keepTwo();
+
+        final outcome = await repository.sendSaved();
+
+        expect(outcome.waiting, isTrue);
+        expect(remote.batches, hasLength(1));
+        expect(unsent(), hasLength(2));
+      });
+
+      test('a server error keeps the batch as it is for later', () async {
+        await keepTwo();
+        remote.refuseOnce = const ApiException(
+          statusCode: 503,
+          retryAfter: Duration(seconds: 30),
+        );
+
+        final outcome = await repository.sendSaved();
+
+        expect(outcome.waiting, isTrue);
+        expect(outcome.retryAfter, const Duration(seconds: 30));
+        expect(unsent(), hasLength(2));
+
+        expect((await repository.sendSaved()).waiting, isFalse);
+        expect(remote.batches.last, remote.batches.first);
+        expect(unsent(), isEmpty);
+      });
+
+      test('no connection is a wait too', () async {
+        remote.offline = true;
+        await repository.saveAttempt(_attempt);
+
+        expect((await repository.sendSaved()).waiting, isTrue);
+      });
+
+      test('an answer the request names is dropped, the rest sent', () async {
+        await keepTwo();
+        remote.refuseOnce = const ApiException(
+          statusCode: 400,
+          code: 'validation.failed',
+          fields: ['attempts[0].clientCreatedAt'],
+        );
+
+        final outcome = await repository.sendSaved();
+
+        expect(outcome.waiting, isFalse);
+        expect(remote.batches.map((b) => b.length), [2, 1]);
+        expect(remote.sent.single['questionVersionId'], 'q2');
+        expect(unsent(), isEmpty);
+      });
+
+      test('a request refused as a whole is not sent again', () async {
+        await keepTwo();
+        remote.refuseOnce = const ApiException(
+          statusCode: 400,
+          code: 'validation.failed',
+          fields: ['sentAt'],
+        );
+
+        final outcome = await repository.sendSaved();
+        await repository.sendSaved();
+
+        expect(outcome.waiting, isFalse, reason: 'another try can\u2019t help');
+        expect(remote.batches, hasLength(1));
+        expect(unsent(), hasLength(2), reason: 'no answer is thrown away');
+      });
+
+      test('too many at once go in halves', () async {
+        await keepTwo();
+        remote.refuseOnce = const ApiException(
+          statusCode: 413,
+          code: 'sync.batch_too_large',
+        );
 
         await repository.sendSaved();
-        expect(remote.sent, hasLength(1));
+
+        expect(remote.batches.map((b) => b.length), [2, 1, 1]);
+        expect(unsent(), isEmpty);
+      });
+
+      test('more than 200 go in batches, the oldest first', () async {
+        final store = LessonStoreModel(
+          unsent: [
+            for (var i = 0; i < 450; i++)
+              {
+                'id': 'a$i',
+                'kind': 'answer',
+                'lessonId': 'les',
+                'request': {'clientAttemptId': 'a$i'},
+              },
+          ],
+        );
+        await settings.setLessonProgress(jsonEncode(store.toJson()));
+
+        await repository.sendSaved();
+
+        expect(remote.batches.map((b) => b.length), [200, 200, 50]);
+        expect(remote.sent.first['clientAttemptId'], 'a0');
+        expect(remote.sent.last['clientAttemptId'], 'a449');
+      });
+
+      test('an answer kept before the sync existed is dropped', () async {
+        final store = LessonStoreModel(
+          unsent: [
+            {
+              'id': 'old',
+              'kind': 'answer',
+              'lessonId': 'les',
+              'request': {'attemptId': 'old', 'questionId': 'q1'},
+            },
+          ],
+        );
+        await settings.setLessonProgress(jsonEncode(store.toJson()));
+
+        await repository.sendSaved();
+
+        expect(remote.batches, isEmpty);
+        expect(unsent(), isEmpty);
+      });
+
+      test('an account the server deleted ends the session', () async {
+        var gone = 0;
+        final repository = LessonRepositoryImpl(
+          remote,
+          settings: settings,
+          // As the session's end does.
+          onAccountGone: () async {
+            gone++;
+            await settings.clearAccountData();
+          },
+        );
+        addTearDown(repository.dispose);
+        await keepTwo();
+        remote.refuseOnce = const ApiException(
+          statusCode: 404,
+          code: 'user.not_found',
+        );
+
+        await repository.sendSaved();
+        await repository.sendSaved();
+
+        expect(gone, 1);
+        expect(remote.batches, hasLength(1));
+        expect(unsent(), isEmpty);
+      });
+
+      test('the server\u2019s marking replaces the phone\u2019s', () async {
+        await repository.saveProgress(
+          'les',
+          const ExerciseProgress(done: {'q1', 'q2'}, right: {'q1'}),
+        );
+        remote.says = (attempt) => result(
+          attempt,
+          SyncStatus.accepted,
+          correct: attempt['questionVersionId'] == 'q2',
+        );
+        final verdicts = <AttemptVerdict>[];
+        final listening = repository.verdicts.listen(verdicts.add);
+        addTearDown(listening.cancel);
+
+        await keepTwo();
+        await repository.sendSaved();
+        await settle();
+
+        expect(repository.progress('les').right, {'q2'});
+        expect(verdicts, const [
+          AttemptVerdict(lessonId: 'les', questionId: 'q1', correct: false),
+          AttemptVerdict(lessonId: 'les', questionId: 'q2', correct: true),
+        ]);
+      });
+
+      test('a lesson\u2019s answers share its run, and a new start has a new '
+          'one', () async {
+        await keepTwo();
+        await repository.sendSaved();
+        final first = remote.sent.map((a) => a['runId']).toSet();
+        expect(first, hasLength(1));
+
+        await LessonRepositoryImpl(
+          remote,
+          settings: settings,
+        ).saveAttempt(_attempt);
+        await settle();
+        expect(remote.sent.last['runId'], first.single, reason: 'carried on');
+
+        await repository.clearProgress('les');
+        await repository.saveAttempt(_attempt);
+        await settle();
+        expect(remote.sent.last['runId'], isNot(first.single));
+      });
+
+      test('a template the server doesn\u2019t mark is not kept', () async {
+        await repository.saveAttempt(
+          const ExerciseAttempt(
+            lessonId: 'les',
+            lessonVersion: 3,
+            questionId: 'q9',
+            draft: SpeechDraft([true]),
+            hinted: false,
+          ),
+        );
+        await settle();
+
+        expect(remote.batches, isEmpty);
+        expect(unsent(), isEmpty);
+      });
+
+      test('a lesson never opened has no answer to keep', () async {
+        await repository.saveAttempt(
+          const ExerciseAttempt(
+            lessonId: 'unknown',
+            lessonVersion: 1,
+            questionId: 'q1',
+            draft: ChoiceDraft('o1'),
+            hinted: false,
+          ),
+        );
+        await settle();
+
+        expect(remote.batches, isEmpty);
       });
     });
 
     test('a failed fetch is a failure, not a throw', () async {
       remote.offline = true;
 
-      expect(await repository.getLesson('les'), isA<Err<Lesson>>());
+      expect(await repository.getLesson('never'), isA<Err<Lesson>>());
     });
   });
 }

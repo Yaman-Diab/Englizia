@@ -54,4 +54,10 @@ abstract final class ApiErrorCodes {
 
   /// 409 from «ابدأ الاختبار»: the 30 days since the last result aren't over.
   static const placementRetakeNotYet = 'placement.retake_not_yet';
+
+  /// 404 from the sync: the account was deleted while its token still works.
+  static const userNotFound = 'user.not_found';
+
+  /// 413 from the sync: more answers than one request may carry.
+  static const syncBatchTooLarge = 'sync.batch_too_large';
 }

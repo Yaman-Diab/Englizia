@@ -57,6 +57,7 @@ final class PairsDraft extends ExerciseDraft {
     required this.total,
     this.matched = const {},
     this.mistakes = const {},
+    this.wrong = const {},
   });
 
   final int total;
@@ -65,11 +66,15 @@ final class PairsDraft extends ExerciseDraft {
   final Set<String> matched;
   final Set<String> mistakes;
 
+  /// A word's first wrong try: its pair's id, to the id of the pair whose
+  /// other side it was put with. The server marks the first try, so it is sent.
+  final Map<String, String> wrong;
+
   @override
   bool get isComplete => matched.length >= total;
 
   @override
-  List<Object?> get props => [total, matched, mistakes];
+  List<Object?> get props => [total, matched, mistakes, wrong];
 }
 
 /// What was typed.
@@ -334,6 +339,23 @@ final class ExerciseAttempt extends Equatable {
     draft,
     hinted,
   ];
+}
+
+/// The server's marking of an answer it took. It is the one that counts, so
+/// it replaces the phone's where they differ, with no word to the learner.
+final class AttemptVerdict extends Equatable {
+  const AttemptVerdict({
+    required this.lessonId,
+    required this.questionId,
+    required this.correct,
+  });
+
+  final String lessonId;
+  final String questionId;
+  final bool correct;
+
+  @override
+  List<Object?> get props => [lessonId, questionId, correct];
 }
 
 /// What a learner can report about a question (S §18).

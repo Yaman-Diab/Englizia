@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -222,8 +223,22 @@ class FakeLessonRepository implements LessonRepository {
   @override
   Future<void> saveReport(ExerciseReport report) async => reports.add(report);
 
+  /// What a send says of itself.
+  SendOutcome outcome = const SendOutcome.sent();
+
   @override
-  Future<void> sendSaved() async => sends++;
+  Future<SendOutcome> sendSaved() async {
+    sends++;
+    return outcome;
+  }
+
+  /// What the server says of the answers it took.
+  final serverVerdicts = StreamController<AttemptVerdict>.broadcast();
+
+  @override
+  Stream<AttemptVerdict> get verdicts => serverVerdicts.stream;
+
+  Future<void> dispose() => serverVerdicts.close();
 
   @override
   ExerciseProgress progress(String lessonId) =>

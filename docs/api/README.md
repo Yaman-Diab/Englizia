@@ -61,7 +61,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | [`openapi.json`](openapi.json) | The App API: auth, the guest and its upgrades, `/app/me`, onboarding, `system/config`, tracks, enrollments and the track's map, the placement test, a lesson, sync, ping | live, the endpoints below marked used |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), «أنا»'s tracks and grades | live, units mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", "preparing", the placement test's intro, questions and result | live |
-| [`lessons.md`](lessons.md) | A lesson's exercises and their answers | mock |
+| [`lessons.md`](lessons.md) | A lesson, its questions and their answers: the server's lesson and the sync are live; the other templates and lesson types, the unit and what a lesson reports besides are proposed | live in part |
 | [`auth.md`](auth.md) | Accounts: sign-up and sign-in, password recovery, the email's confirmation, Google and Apple, "save progress"'s guest account and its upgrades (ADR 10), onboarding's answers | live |
 | [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
 | [`explanations.md`](explanations.md) | «اشرح لي» under a wrong answer, in a lesson or a concept's session | mock |
@@ -93,8 +93,8 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
 | `/api/v1/app/tracks` | GET | — (a session) | `{items: TrackCatalogItemDto[]}`, each with its levels ([tracks.md](tracks.md)) | live, used |
 | `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
-| `/api/v1/app/lessons/{id}` | GET | — | `{id, version, exercises}`, with keys ([lessons.md](lessons.md)) | proposed, mock |
-| `/api/v1/app/lessons/{id}/answers/review` | POST | as an answer | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}` | GET | — | `{id, versionId, versionNo, type, content, questions[], media}`, with keys ([lessons.md](lessons.md)) | live, used |
+| `/api/v1/app/lessons/{id}/answers/review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/words` | POST | `{spanId or wordId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed |
 | `/api/v1/app/concepts` | GET | — | today's concepts with their new questions, those later and those mastered ([concepts.md](concepts.md)) | proposed |
 | `/api/v1/app/concepts/answers` | POST | `{answerId, conceptId, questionId, correct, answeredAt}` | none; safe to repeat | proposed |
@@ -116,9 +116,9 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/lessons/{id}/questions` | GET | — | **Only the caller's** questions and replies ([lessons.md](lessons.md), ADR 14) | proposed |
 | `/api/v1/app/lessons/{id}/questions` | POST | `{questionId, text, videoSeconds?}` | The question; safe to repeat | proposed |
 | `/api/v1/app/lessons/{id}/complete` | POST | `{completionId, lessonVersion, seconds}` | The official numbers ([lessons.md](lessons.md)) | proposed |
-| `/api/v1/app/lessons/{id}/answers/spoken-review` | POST | as an answer | `{outcome, note?, better?}` ([lessons.md](lessons.md)) | proposed |
+| `/api/v1/app/lessons/{id}/answers/spoken-review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{outcome, note?, better?}` ([lessons.md](lessons.md)) | proposed |
 | `/api/v1/app/lessons/{id}/reports` | POST | `{reportId, lessonVersion, questionId, reason, answer?}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
-| `/api/v1/app/lessons/{id}/answers` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
+| `/api/v1/app/sync` | POST | `{sentAt, attempts: [{clientAttemptId, lessonVersionId, questionVersionId, runId, answer, hintsUsed, clientCreatedAt}]}` | one result for each answer (`accepted`, `duplicate` or `rejected`), and what they completed; safe to repeat ([lessons.md](lessons.md)) | live, used |
 | `/api/v1/app/placement?trackId=` | GET | — | the state: `available`, `in_progress`, `result`, `done` or `unavailable`, with the test, the session and the result ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/placement/sessions` | POST | `{trackId}` | the session at its stage, with its questions ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/placement/sessions/{id}` | GET | — | the session ([placement.md](placement.md)) | live, used |
@@ -162,6 +162,6 @@ Paste-ready; each item names what the app needs and why.
 11. **The confirmation link's code.** Answered: a bad `/auth/email/verify` token is now `auth.email_link_invalid` (`test/fixtures/api/auth_email_verify_link_invalid.json`), which the app reads as an expired link, like the recovery's. Please announce a code's change before it reaches the dev server: this one made the expired-link screen show a form error until the app followed.
 12. **App gate.** Answered: `GET /api/v1/app/system/config` carries the versions and the store page, and every `/app/` call refuses a version below the minimum with `426 app.update_required`; the app follows both.
 13. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
-14. **Attempts** accept a client-generated `attemptId` so resending never duplicates an attempt or XP (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
+14. **Attempts** accept a client-generated id so resending never duplicates an attempt or XP. Answered for lesson questions: `clientAttemptId` in `POST /api/v1/app/sync` ([lessons.md](lessons.md)) (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
 15. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.
 16. **Lesson content** follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids), with its JSON Schema in v0.1.
