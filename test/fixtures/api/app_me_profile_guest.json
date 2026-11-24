@@ -1,0 +1,30 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "name": "متعلّم",
+    "emailVerified": false,
+    "learningSince": "2026-11-20T13:27:34.487Z",
+    "accountNumber": "EZ-1011",
+    "signIn": "guest",
+    "tracks": [
+      {
+        "enrollmentId": "01a1f24f-ea3e-7693-b3a7-a60061ac9a53",
+        "trackId": "01a1f24f-ea3e-7693-b3a7-a60061ac9a53",
+        "title": "الإنجليزية العامة (تجريبي)",
+        "audience": "adult",
+        "levelId": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
+        "levelLabel": "A1",
+        "levelName": "A1 المبتدئ",
+        "unit": 1,
+        "units": 2,
+        "unitCover": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-ed68-767e-accc-e6c18cefd300.webp",
+        "active": true
+      }
+    ],
+    "lessonsDone": 1,
+    "learningDays": 1
+  },
+  "error": null,
+  "traceId": "7589d71ccb3358ba457903f3fb68ad55"
+}

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:englizia/core/error/failure.dart';
 import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/result/result.dart';
@@ -221,6 +222,84 @@ void main() {
 
     expect(adapter.requests.single.path, '/api/v1/app/settings');
     expect(settings.entity, testSettings);
+  });
+
+  group('while the server has no settings', () {
+    late Map<String, FakeResponse> answers;
+    late FakeHttpAdapter adapter;
+
+    SettingsRemoteDataSourceImpl source({bool bundled = true}) {
+      adapter = FakeHttpAdapter(
+        (request) => answers[request.path] ?? const FakeResponse(500, body: {}),
+      );
+      return SettingsRemoteDataSourceImpl(
+        ApiClient(
+          Dio(BaseOptions(baseUrl: 'https://api.test'))
+            ..httpClientAdapter = adapter,
+        ),
+        bundled: bundled ? _DiskBundle() : null,
+      );
+    }
+
+    const missing = FakeResponse(
+      404,
+      body: {
+        'statusCode': 404,
+        'error': {'code': 'route.not_found'},
+      },
+    );
+
+    setUp(() {
+      answers = {
+        '/api/v1/app/settings': missing,
+        '/api/v1/app/system/config': FakeResponse(
+          200,
+          body: jsonDecode(
+            File('test/fixtures/api/app_system_config.json').readAsStringSync(),
+          ),
+        ),
+      };
+    });
+
+    test('onboarding reads the bundled ones', () async {
+      final settings = await source().getSettings();
+
+      expect(settings.entity.challenge, testSettings.challenge);
+      expect(settings.entity.reminder, testSettings.reminder);
+      expect(settings.entity.dailyGoal.defaultMinutes, 10);
+    });
+
+    test('their goals are those system/config offers', () async {
+      answers['/api/v1/app/system/config'] = const FakeResponse(
+        200,
+        body: {
+          'statusCode': 200,
+          'data': {
+            'dailyGoalOptions': [
+              {'minutes': 10, 'xp': 40},
+              {'minutes': 20, 'xp': 80},
+            ],
+          },
+        },
+      );
+
+      final goals = (await source().getSettings()).entity.dailyGoal.options;
+
+      expect(goals.map((g) => g.minutes), [10, 20]);
+    });
+
+    test('another failure is still one', () async {
+      answers['/api/v1/app/settings'] = const FakeResponse(500, body: {});
+
+      await expectLater(source().getSettings(), throwsA(isA<ApiException>()));
+    });
+
+    test('with nothing bundled, the server\u2019s answer stands', () async {
+      await expectLater(
+        source(bundled: false).getSettings(),
+        throwsA(isA<ApiException>()),
+      );
+    });
   });
 
   test('mock mode serves the bundled example', () async {

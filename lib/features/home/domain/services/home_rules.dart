@@ -66,7 +66,10 @@ abstract final class HomeRules {
 
   /// When the learner's day starts before home has data of its own: the
   /// contract's default (docs/api/README.md, Times).
-  static const defaultDayStart = '04:00';
+  /// The learner's day starts at midnight on their clock, for the streak,
+  /// the days learned and what shows once a day; the server has no setting
+  /// for it (the backend's answers of 2026-11-23, §3).
+  static const defaultDayStart = '00:00';
 
   /// The kept one-time notices.
   static const seenEventsKept = 20;

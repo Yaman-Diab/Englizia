@@ -2,7 +2,10 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 
-// ASSUMPTION(api): this whole file is proposed (docs/api/me.md).
+// Live on the dev server (docs/api/me.md); what it doesn't send yet (the
+// week, the streak, points, the word bank, stars) is proposed, and «أنا»
+// draws without it.
+// ASSUMPTION(api): those parts' shapes are the app's (docs/api/me.md).
 
 /// «أنا» as `GET /api/v1/app/me/profile` sends it. The raw [json] is what the
 /// phone keeps.
@@ -73,9 +76,12 @@ final class ProfileModel {
     };
   }
 
+  /// The server's names (`OnboardingAudience`), and the mock's older ones.
   static const _audiences = {
-    'self': TrackAudience.self,
+    'adult': TrackAudience.self,
     'child': TrackAudience.child,
+    'school_student': TrackAudience.schoolStudent,
+    'self': TrackAudience.self,
     'schoolStudent': TrackAudience.schoolStudent,
   };
 

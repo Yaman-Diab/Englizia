@@ -15,6 +15,7 @@ final class SecureTokenStorage implements TokenStorage {
   static const _kindKey = 'auth.account_kind';
   static const _accessExpiryKey = 'auth.access_expires_at';
   static const _refreshExpiryKey = 'auth.refresh_expires_at';
+  static const _userKey = 'auth.user_id';
 
   final FlutterSecureStorage _storage;
   AuthTokens? _cache;
@@ -29,6 +30,7 @@ final class SecureTokenStorage implements TokenStorage {
       final kind = await _storage.read(key: _kindKey);
       final accessExpiry = await _storage.read(key: _accessExpiryKey);
       final refreshExpiry = await _storage.read(key: _refreshExpiryKey);
+      final user = await _storage.read(key: _userKey);
       _cache = access == null || refresh == null
           ? null
           : AuthTokens(
@@ -40,6 +42,7 @@ final class SecureTokenStorage implements TokenStorage {
                   : AccountKind.member,
               accessExpiresAt: DateTime.tryParse(accessExpiry ?? ''),
               refreshExpiresAt: DateTime.tryParse(refreshExpiry ?? ''),
+              userId: user,
             );
       _loaded = true;
     } catch (error, stackTrace) {
@@ -59,6 +62,10 @@ final class SecureTokenStorage implements TokenStorage {
       await _storage.write(key: _kindKey, value: tokens.kind.name);
       await _writeTime(_accessExpiryKey, tokens.accessExpiresAt);
       await _writeTime(_refreshExpiryKey, tokens.refreshExpiresAt);
+      final user = tokens.userId;
+      user == null
+          ? await _storage.delete(key: _userKey)
+          : await _storage.write(key: _userKey, value: user);
       return true;
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage write failed');
@@ -76,6 +83,7 @@ final class SecureTokenStorage implements TokenStorage {
       await _storage.delete(key: _kindKey);
       await _storage.delete(key: _accessExpiryKey);
       await _storage.delete(key: _refreshExpiryKey);
+      await _storage.delete(key: _userKey);
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Secure storage clear failed');
     }

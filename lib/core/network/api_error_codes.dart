@@ -55,6 +55,13 @@ abstract final class ApiErrorCodes {
   /// 409 from «ابدأ الاختبار»: the 30 days since the last result aren't over.
   static const placementRetakeNotYet = 'placement.retake_not_yet';
 
+  /// 422 from a level's change: the track moves to its next level by
+  /// itself; only a grade is chosen.
+  static const gradeChangeNotAllowed = 'enrollment.grade_change_not_allowed';
+
+  /// 404: no such endpoint on this server.
+  static const routeNotFound = 'route.not_found';
+
   /// 404 from the sync: the account was deleted while its token still works.
   static const userNotFound = 'user.not_found';
 

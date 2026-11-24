@@ -115,9 +115,9 @@ class PreparingCubit extends Cubit<PreparingState> {
         if (kind == PreparingStepKind.level) return _settleLevel();
         return null;
       case PreparingStepKind.unit:
-        final levelId = state.level?.id;
-        if (levelId == null) return null;
-        switch (await _tracks.getUnits(levelId)) {
+        // A track without levels to choose from names none: the level the
+        // learner was put in is the one.
+        switch (await _tracks.getUnits(state.level?.id)) {
           case Ok(:final value):
             if (value.firstOrNull case final unit?) {
               emit(state.copyWith(unit: unit));

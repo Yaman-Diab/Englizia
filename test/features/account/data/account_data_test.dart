@@ -153,9 +153,8 @@ void main() {
         'timeZone': 'Etc/GMT-3',
         'learnerKind': 'adult',
         'trackId': 'trk_general',
+        // A placement track's first level is the server's to choose.
         'start': 'beginner',
-        'levelId': 'lvl_gen_prea1',
-        'child': null,
         'learningReasons': ['travel', 'career'],
         'dailyGoalMinutes': 15,
         'streakGoalDays': 14,
@@ -180,28 +179,86 @@ void main() {
     expect(request['reminderTime'], isNull);
   });
 
-  test('the test or the grade decide where the learner starts', () {
-    final test = OnboardingModel.request(
-      adult.copyWith(placementTest: true),
-      language: 'en',
-      timeZone: 'UTC',
+  group('each kind of track sends only what it takes', () {
+    const grade7 = TrackLevel(
+      id: 'grade_7',
+      order: 7,
+      name: LocalizedText(ar: '7'),
     );
-    expect((test['start'], test['levelId']), ('placement', null));
 
-    final grade = OnboardingModel.request(
-      const OnboardingPath(
-        audience: TrackAudience.schoolStudent,
-        grade: TrackLevel(
-          id: 'grade_7',
-          order: 7,
-          name: LocalizedText(ar: '7'),
+    (Object?, Object?, bool, bool) startOf(OnboardingPath path) {
+      final request = OnboardingModel.request(
+        path,
+        language: 'ar',
+        timeZone: 'UTC',
+      );
+      return (
+        request['start'],
+        request['levelId'],
+        request.containsKey('start'),
+        request.containsKey('levelId'),
+      );
+    }
+
+    test('a placement track: the test, or the beginning, and no level', () {
+      expect(startOf(adult.copyWith(placementTest: true)), (
+        'placement',
+        null,
+        true,
+        false,
+      ));
+      expect(startOf(adult), ('beginner', null, true, false));
+    });
+
+    test('a grade track: the grade, and no start', () {
+      expect(
+        startOf(
+          const OnboardingPath(
+            audience: TrackAudience.schoolStudent,
+            entryMethod: TrackEntryMethod.gradeSelection,
+            grade: grade7,
+          ),
         ),
-      ),
-      language: 'ar',
-      timeZone: 'UTC',
-    );
-    expect(grade['learnerKind'], 'school_student');
-    expect((grade['start'], grade['levelId']), (null, 'grade_7'));
+        (null, 'grade_7', false, true),
+      );
+    });
+
+    test('a direct track: neither', () {
+      expect(
+        startOf(
+          const OnboardingPath(
+            audience: TrackAudience.child,
+            trackId: 'trk_kids',
+            entryMethod: TrackEntryMethod.directStart,
+            startLevel: grade7,
+          ),
+        ),
+        (null, null, false, false),
+      );
+    });
+
+    test('no kind known: what the answers chose', () {
+      expect(
+        startOf(
+          const OnboardingPath(
+            audience: TrackAudience.schoolStudent,
+            grade: grade7,
+          ),
+        ),
+        (null, 'grade_7', false, true),
+      );
+    });
+
+    test('no child is left out, not null', () {
+      expect(
+        OnboardingModel.request(
+          adult,
+          language: 'ar',
+          timeZone: 'UTC',
+        ).containsKey('child'),
+        isFalse,
+      );
+    });
   });
 
   test('the phone\'s offset as an IANA zone', () {

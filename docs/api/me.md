@@ -1,6 +1,8 @@
 # Me: the learner's profile
 
-Status: **proposed**, except `PUT /api/v1/app/me` (the name), which the dev server's OpenAPI confirms. The app runs on this contract in mock mode (`assets/mock/me/`, a child's with `env/mock_kids.json`); nothing else is confirmed by the backend team yet.
+Status: **live in part.** `GET /api/v1/app/me/profile` is on the dev server with the names below (the backend's answers of 2026-11-23, §1.2), and so are the name (`PUT /api/v1/app/me`), the track's switch and the grade's change. Real answer: `test/fixtures/api/app_me_profile_guest.json`. It sends the name, the email and whether it is confirmed, `learningSince`, `accountNumber`, `whatsapp` (support's number), `signIn` (`email`, `google`, `apple`, `guest` or `trial`), the tracks, `lessonsDone` (every lesson finished, in every track), `learningDays` (the days with at least one lesson answer) and the last `placement`; a field with no value is left out, in this response alone. The week, the streak, points, stars (v1.0) and the words (v0.4) aren't built, so «أنا» draws its v0.1 frame against the server. A track's `audience` is `adult`, `child` or `school_student`; its `enrollmentId` is its `trackId`. The mock (`assets/mock/me/`, a child's with `env/mock_kids.json`) still serves the whole proposed shape.
+
+From the backend (2026-11-23): a learner keeps up to 3 freezes, one more each Saturday, each used by itself on a day missed; the week runs Saturday to Friday, seven days in order; changing the level keeps every lesson's progress, and coming back to a level shows its lessons done.
 Requirements: student doc §19.1 («أنا»), §13.5 (kids), §15 (streak and freezes), §12 (the placement test's result and its wait), §14 (Emar's grades). Design `Me v2`.
 
 ## `GET /api/v1/app/me/profile`
@@ -43,7 +45,6 @@ Everything «أنا» shows, in one response. Needs a session. The phone keeps t
     "points": { "total": 1240, "week": 86 },
     "week": {
       "goalMinutes": 10,
-      "dayStart": "04:00",
       "today": 4,
       "days": [{ "date": "2026-11-01", "minutes": 14 }, { "date": "2026-11-03", "frozen": true }, { "date": "2026-11-06" }]
     },
@@ -73,7 +74,7 @@ Everything «أنا» shows, in one response. Needs a session. The phone keeps t
 | `streak` | Days in a row the daily goal was reached; `freezes` of `maxFreezes` left, and the weekday (`1` Monday … `7` Sunday) the next one is added. Absent before v1.0 |
 | `points` | XP in all and this week. Absent before v1.0 |
 | `week.days[]` | The week from Saturday to Friday that holds today (seven days, the first Saturday): `minutes`, or `frozen`, or neither for a day still to come. `today` is its index, Saturday being 0. Decided by the owner, 2026-11-08; the freezes are also added on Saturday morning (SV §17.7) |
-| `week.goalMinutes`, `dayStart` | The daily goal and when a day starts (`HH:mm`), both from the effective settings |
+| `week.goalMinutes` | The daily goal, from the effective settings. The day starts at midnight on the learner's clock, with no field for it |
 | `placement` | The last placement test: the level, when, when it can be taken again, and the whole wait (`waitDays`) for the ring |
 | `wordBank` | The bank's words and those due today, for its row |
 
@@ -120,13 +121,9 @@ A wrong current password is `400 auth.current_password_invalid` (a 400, as the s
 
 ## `DELETE /api/v1/app/me`
 
-«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 5), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
+«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 4), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
 
 ## Questions for the backend team
 
-1. Is one profile endpoint acceptable, or should «أنا» read the account, the tracks and the stats separately?
-2. Confirm the streak's freezes: how many, how often one is added, and that one is used automatically.
-3. Confirm that the week starts on Saturday (the owner's decision, 2026-11-08) and that `days` are that week, seven days in the order to show.
-4. Changing the level or the grade (`PUT /api/v1/app/enrollments/{trackId}/level`): is the progress of the level left kept, for a learner who comes back to it?
-5. The notifications' switch: where does the server keep it, so it follows the account to another phone? Confirm the deletion above and its error code for a wrong password.
-6. Joining another track from «أنا» (`«انضم»`): `POST /api/v1/app/enrollments` (`JoinTrackRequest {trackId, start, levelId, child}`) enrols; the flow per entry method (the placement test, the grade step) still has no design.
+1. The notifications' switch: where does the server keep it, so it follows the account to another phone? Confirm the deletion above and its error code for a wrong password.
+2. Joining another track from «أنا» (`«انضم»`): `POST /api/v1/app/enrollments` (`JoinTrackRequest {trackId, start, levelId, child}`) enrols; the flow per entry method (the placement test, the grade step) still has no design.

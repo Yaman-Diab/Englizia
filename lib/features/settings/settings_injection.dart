@@ -10,7 +10,7 @@ void registerSettingsDependencies(GetIt sl) {
     ..registerLazySingleton<SettingsRemoteDataSource>(
       () => AppConfig.isMock
           ? SettingsFakeDataSource(rootBundle)
-          : SettingsRemoteDataSourceImpl(sl()),
+          : SettingsRemoteDataSourceImpl(sl(), bundled: rootBundle),
     )
     ..registerLazySingleton<SettingsRepository>(
       () => SettingsRepositoryImpl(sl(), sl()),

@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:englizia/core/audio/clip_playback.dart';
@@ -6,7 +8,10 @@ import 'package:englizia/core/design_system/mascot/mascot.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/app_spinner.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/network/api_client.dart';
+import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/core/state/load_status.dart';
+import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/explanation.dart';
@@ -675,6 +680,37 @@ void main() {
       await tester.tap(cards.first);
       await tester.pump();
       expect(subject.state.selectedId, isNotNull);
+      semantics.dispose();
+      await leaveClean(tester, subject);
+    });
+
+    testWidgets('a picture with no text is read by its place', (tester) async {
+      // The dev server's picture question: its pictures carry no text.
+      final lesson = LessonModel(
+        asJsonMap(
+          ApiClient.unwrap(
+            jsonDecode(
+              File(
+                'test/fixtures/api/app_lesson_grammar.json',
+              ).readAsStringSync(),
+            ),
+          ),
+        ),
+      ).toEntity('seed');
+      lessons.exercises = lesson.exercises
+          .whereType<ImageChoiceExercise>()
+          .toList();
+      final subject = await pump(tester);
+      final semantics = tester.ensureSemantics();
+
+      for (final n in ['1', '2', '3']) {
+        expect(
+          find.bySemanticsLabel(
+            'lesson_picture_of'.tr(namedArgs: {'n': n, 'total': '3'}),
+          ),
+          findsOneWidget,
+        );
+      }
       semantics.dispose();
       await leaveClean(tester, subject);
     });

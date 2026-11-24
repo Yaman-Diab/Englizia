@@ -36,7 +36,7 @@ final class TrackRepositoryImpl implements TrackRepository {
   });
 
   @override
-  Future<Result<List<TrackUnit>>> getUnits(String levelId) => guard(() async {
+  Future<Result<List<TrackUnit>>> getUnits(String? levelId) => guard(() async {
     final models = await _remote.getUnits(levelId);
     return [for (final model in models) model.entity]
       ..sort((a, b) => a.order.compareTo(b.order));

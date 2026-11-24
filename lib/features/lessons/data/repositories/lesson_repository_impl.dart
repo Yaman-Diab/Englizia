@@ -36,10 +36,12 @@ final class LessonRepositoryImpl implements LessonRepository {
     MediaVault vault = const NoMediaVault(),
     DateTime Function()? now,
     Future<void> Function()? onAccountGone,
+    String? Function()? userId,
   }) : _settings = settings,
        _vault = vault,
        _now = now ?? DateTime.now,
-       _onAccountGone = onAccountGone;
+       _onAccountGone = onAccountGone,
+       _userId = userId ?? (() => null);
 
   final LessonRemoteDataSource _remote;
   final SettingsStorageService _settings;
@@ -50,6 +52,9 @@ final class LessonRepositoryImpl implements LessonRepository {
 
   /// The server no longer has the account: the session ends here.
   final Future<void> Function()? _onAccountGone;
+
+  /// The account in use, whose answers are the ones to send.
+  final String? Function() _userId;
 
   /// Lessons kept to open offline: small enough for preferences (ADR 12).
   static const _cachedLessons = 5;
@@ -208,8 +213,58 @@ final class LessonRepositoryImpl implements LessonRepository {
     );
     // A template the server doesn't mark yet is neither kept nor sent.
     if (request == null) return id;
-    await _enqueue(_answerKind, lessonId, id, request, store: store);
+    await _keep(store);
+    final answers = _answers()
+      ..add({
+        'id': id,
+        'lessonId': lessonId,
+        'userId': ?_userId(),
+        'request': request,
+      });
+    await _keepAnswers(answers);
+    unawaited(sendSaved());
     return id;
+  }
+
+  /// The answers not on the server yet, every account's, oldest first.
+  List<Map<String, Object?>> _answers() {
+    final saved = _settings.answerQueue;
+    if (saved == null) return [];
+    try {
+      return [
+        for (final entry in jsonDecode(saved) as List<Object?>)
+          asJsonMap(entry),
+      ];
+    } on Object catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Kept answers unreadable');
+      return [];
+    }
+  }
+
+  Future<void> _keepAnswers(List<Map<String, Object?>> answers) async {
+    try {
+      await _settings.setAnswerQueue(jsonEncode(answers));
+    } catch (error, stackTrace) {
+      AppLogger.error(error, stackTrace, 'Keeping the answers failed');
+    }
+  }
+
+  /// One of the answers of the account in use. The server keeps an answer for
+  /// the token's owner, so another's waits for its own learner (B-28). One kept
+  /// before answers had an owner goes with whoever is signed in.
+  bool _mine(Map<String, Object?> entry) {
+    final owner = entry['userId'];
+    return owner == null || owner == _userId();
+  }
+
+  @override
+  Future<void> forgetAnswers(String? userId) async {
+    final answers = _answers();
+    final before = answers.length;
+    answers.removeWhere(
+      (entry) => entry['userId'] == null || entry['userId'] == userId,
+    );
+    if (answers.length != before) await _keepAnswers(answers);
   }
 
   LessonModel? _keptModel(String lessonId) => switch (_cache()[lessonId]) {
@@ -258,7 +313,7 @@ final class LessonRepositoryImpl implements LessonRepository {
 
     await sendSaved();
     // The server must have the answers first, or its numbers would be wrong.
-    if (_store().unsent.isNotEmpty) {
+    if (_store().unsent.isNotEmpty || _answers().any(_mine)) {
       await keep();
       return const Err(NetworkFailure());
     }
@@ -285,8 +340,8 @@ final class LessonRepositoryImpl implements LessonRepository {
   Future<Result<LessonResult>> _endOnServer(LessonSummary summary) async {
     final lessonId = summary.lessonId;
     await sendSaved();
-    final waiting = _store().unsent.any(
-      (entry) => entry['kind'] == _answerKind && entry['lessonId'] == lessonId,
+    final waiting = _answers().any(
+      (entry) => _mine(entry) && entry['lessonId'] == lessonId,
     );
     if (waiting) return const Err(NetworkFailure());
     _completedHere.add(lessonId);
@@ -498,9 +553,7 @@ final class LessonRepositoryImpl implements LessonRepository {
   Future<void> _sendAll() async {
     await _sendAnswers();
     while (true) {
-      final first = _store().unsent
-          .where((entry) => entry['kind'] != _answerKind)
-          .firstOrNull;
+      final first = _store().unsent.firstOrNull;
       if (first == null) return;
       final lessonId = first['lessonId']! as String;
       final request = asJsonMap(first['request']);
@@ -548,6 +601,7 @@ final class LessonRepositoryImpl implements LessonRepository {
         if (error.statusCode == ApiStatusCodes.notFound &&
             error.code == ApiErrorCodes.userNotFound) {
           AppLogger.warning('Sync: the account is gone');
+          await forgetAnswers(_userId());
           await _onAccountGone?.call();
           return;
         }
@@ -561,21 +615,31 @@ final class LessonRepositoryImpl implements LessonRepository {
     }
   }
 
-  /// What to send now. An entry kept by a version before the sync existed has
-  /// no place in it, and goes.
+  /// What to send now: the account's own answers. An answer kept where the
+  /// account's data was, before answers had a place of their own, moves to
+  /// it; one kept by a version before the sync existed has no place, and goes.
   Future<List<Map<String, Object?>>> _nextBatch() async {
     final store = _store();
-    bool old(Map<String, Object?> entry) =>
-        entry['kind'] == _answerKind &&
-        asJsonMap(entry['request'])['clientAttemptId'] is! String;
-    if (store.unsent.any(old)) {
-      store.unsent.removeWhere(old);
+    final legacy = [
+      for (final entry in store.unsent)
+        if (entry['kind'] == _answerKind) entry,
+    ];
+    if (legacy.isNotEmpty) {
+      store.unsent.removeWhere((entry) => entry['kind'] == _answerKind);
+      await _keepAnswers([
+        ..._answers(),
+        for (final entry in legacy)
+          if (asJsonMap(entry['request'])['clientAttemptId'] is String)
+            {
+              'id': entry['id'],
+              'lessonId': entry['lessonId'],
+              'userId': ?_userId(),
+              'request': entry['request'],
+            },
+      ]);
       await _keep(store);
     }
-    return store.unsent
-        .where((entry) => entry['kind'] == _answerKind)
-        .take(_batch)
-        .toList();
+    return _answers().where(_mine).take(_batch).toList();
   }
 
   /// A sync refused whole: true when it is worth sending again now.
@@ -614,9 +678,9 @@ final class LessonRepositoryImpl implements LessonRepository {
       _syncBroken = true;
       return false;
     }
-    final store = _store();
-    store.unsent.removeWhere((entry) => gone.contains(entry['id']));
-    await _keep(store);
+    await _keepAnswers(
+      _answers()..removeWhere((entry) => gone.contains(entry['id'])),
+    );
     return true;
   }
 
@@ -653,8 +717,10 @@ final class LessonRepositoryImpl implements LessonRepository {
           AppLogger.warning('Sync: unknown status ${result.statusName}');
       }
     }
-    store.unsent.removeWhere((entry) => settled.contains(entry['id']));
     await _keep(store);
+    await _keepAnswers(
+      _answers()..removeWhere((entry) => settled.contains(entry['id'])),
+    );
     if (!_verdicts.isClosed) verdicts.forEach(_verdicts.add);
     return settled.length;
   }

@@ -5,6 +5,7 @@ import 'package:englizia/core/audio/clip_playback.dart';
 import 'package:englizia/core/audio/clip_player.dart';
 import 'package:englizia/core/audio/sound_player.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
@@ -317,7 +318,11 @@ class HomeCubit extends Cubit<HomeState> {
     }
   }
 
-  /// «ابدأ B1»: the next level, then its home.
+  /// «ابدأ B1»: the next level, then its home. A grade is the learner's to
+  /// choose; on any other track the server moves to the next level by itself
+  /// once the last unit is done, and refuses the change (`422
+  /// enrollment.grade_change_not_allowed`, the backend's answers of
+  /// 2026-11-23, §2.2): the level it moved to is then only asked for again.
   Future<Failure?> startNextLevel() async {
     final home = state.home;
     final next = home?.level.next;
@@ -327,7 +332,11 @@ class HomeCubit extends Cubit<HomeState> {
       next.id,
     );
     if (isClosed) return null;
-    if (result case Err(:final failure)) return failure;
+    if (result case Err(
+      :final failure,
+    ) when failure.code != ApiErrorCodes.gradeChangeNotAllowed) {
+      return failure;
+    }
     _keepProfile();
     emit(state.copyWith(levelJustDone: false));
     await refresh();

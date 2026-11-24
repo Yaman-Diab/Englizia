@@ -17,20 +17,23 @@ const _cefr = {
   'c1': 'c1',
 };
 
-/// Whose track it is.
-// ASSUMPTION(api): an enrollment doesn't say it; read from what it carries
-// (docs/api/home.md, question 2).
+/// Whose track it is: the track's own `onboardingAudience`, else what the
+/// enrollment carries.
 String _audience(Map<String, Object?> enrollment) {
   final track = enrollment.readMap('track');
+  if (track?.readString('onboardingAudience') case final audience?) {
+    return audience;
+  }
   if (enrollment['child'] != null || (track?.readBool('kidsMode') ?? false)) {
     return 'child';
   }
-  return track?.readString('levelLabel') == 'grade' ? 'schoolStudent' : 'self';
+  return track?.readString('levelLabel') == 'grade'
+      ? 'school_student'
+      : 'adult';
 }
 
-/// How the account signs in, as home's email reminder asks.
-// ASSUMPTION(api): `authMethods` is a list of names (docs/api/home.md,
-// question 3).
+/// How the account signs in, as home's email reminder asks: `authMethods`
+/// holds `password`, `google` and `apple`, and a guest's is empty.
 String _signIn(Map<String, Object?> me) {
   if (me.readString('accountType') == 'guest') return 'guest';
   final methods = [
@@ -60,11 +63,13 @@ Map<String, Object?> homeFromServer({
   final units = mapUnits(map);
   final level = map.readMap('level');
   final names = levelNames(level);
+  final next = map.readMap('nextLevel');
+  final nextNames = levelNames(next);
   // The unit the learner is in: the one that holds the next lesson, else the
   // first not finished that is open.
-  final next = map.readString('nextLessonId');
+  final nextLesson = map.readString('nextLessonId');
   var current = units.indexWhere(
-    (unit) => lessonsFromMap(unit).any((lesson) => lesson['id'] == next),
+    (unit) => lessonsFromMap(unit).any((lesson) => lesson['id'] == nextLesson),
   );
   if (current < 0) {
     current = units.indexWhere((u) => u.readString('state') == 'unlocked');
@@ -103,6 +108,14 @@ Map<String, Object?> homeFromServer({
       'name': names.name,
       'cefr': ?_cefr[level?.readString('cefrCode')],
       'completed': completed,
+      // The first level published after this one; none after the last.
+      if (next?.readString('id') case final id?)
+        'next': {
+          'id': id,
+          'label': nextNames.label,
+          'name': nextNames.name,
+          'cefr': ?_cefr[next?.readString('cefrCode')],
+        },
     },
     'units': [
       for (final (i, unit) in units.indexed)
@@ -160,7 +173,8 @@ Map<String, Object?> _track(
     'unit': ?enrollment.readInt('unitNo'),
     'units': ?enrollment.readInt('unitCount'),
     'unitCover':
-        ?((active ? currentUnit?.readString('coverUrl') : null) ??
+        ?(enrollment.readString('unitCoverUrl') ??
+        (active ? currentUnit?.readString('coverUrl') : null) ??
         track?.readString('coverUrl')),
     'active': active,
   };

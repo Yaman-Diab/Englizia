@@ -93,6 +93,10 @@ abstract interface class LessonRepository {
   /// Keeps the report on the phone and sends it when it can. Never fails.
   Future<void> saveReport(ExerciseReport report);
 
+  /// Forgets the answers kept for [userId]'s account, which the server no
+  /// longer has: a guest who signed out, or an account deleted.
+  Future<void> forgetAnswers(String? userId);
+
   /// Sends what the phone kept, as when the connection is back. Never fails:
   /// what couldn't go waits, and the outcome says so.
   Future<SendOutcome> sendSaved();

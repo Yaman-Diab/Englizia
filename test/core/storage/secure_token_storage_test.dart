@@ -63,6 +63,7 @@ void main() {
     kind: AccountKind.guest,
     accessExpiresAt: DateTime.utc(2026, 11),
     refreshExpiresAt: DateTime.utc(2026, 12),
+    userId: 'user-1',
   );
 
   late _Keystore keystore;

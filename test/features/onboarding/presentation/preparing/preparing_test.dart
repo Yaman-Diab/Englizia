@@ -172,6 +172,32 @@ void main() {
       expect(preparing.state.goalMinutes, 10);
     });
 
+    test(
+      'a track with no levels to choose still names its first unit',
+      () async {
+        // The catalog lists levels for grade tracks only: the map has the unit.
+        tracks = FakeTrackRepository(
+          levels: const [Ok(<TrackLevel>[])],
+          units: const [
+            Ok([_hello]),
+          ],
+        );
+        final preparing = cubit();
+
+        await preparing.start(
+          path: const OnboardingPath(
+            audience: TrackAudience.self,
+            trackId: 'trk_general',
+          ),
+          account: memberTokens,
+        );
+
+        expect(preparing.state.level, isNull);
+        expect(tracks.unitRequests, [null]);
+        expect(preparing.state.unit, _hello);
+      },
+    );
+
     test('the test branch loads the placement test', () async {
       final preparing = cubit();
       await preparing.start(
