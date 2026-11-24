@@ -43,7 +43,7 @@ class _FailingDataSource implements TrackRemoteDataSource {
       throw const NetworkException('connectionError');
 
   @override
-  Future<List<TrackUnitModel>> getUnits(String levelId) async =>
+  Future<List<TrackUnitModel>> getUnits(String? levelId) async =>
       throw const NetworkException('connectionError');
 }
 
@@ -73,7 +73,7 @@ class _FixedDataSource implements TrackRemoteDataSource {
   }
 
   @override
-  Future<List<TrackUnitModel>> getUnits(String levelId) async => units;
+  Future<List<TrackUnitModel>> getUnits(String? levelId) async => units;
 }
 
 ApiClient _client(FakeHttpAdapter adapter) => ApiClient(
@@ -308,24 +308,63 @@ void main() {
       expect(unit.title, '');
     });
 
-    test('GET /api/v1/app/levels/{id}/units', () async {
-      final adapter = FakeHttpAdapter(
-        (_) => FakeResponse(200, body: unitsBody),
-      );
-      final client = ApiClient(
-        Dio(BaseOptions(baseUrl: 'https://api.test'))
-          ..httpClientAdapter = adapter,
-      );
+    group('from the server: the active track\u2019s map', () {
+      const track = '01a1f24f-ea3e-7693-b3a7-a60061ac9a53';
+      const level = '01a1f24f-ea3e-7f94-9d61-e30272387f0a';
+      Object? fixture(String name) =>
+          jsonDecode(File('test/fixtures/api/$name.json').readAsStringSync());
 
-      final units = await TrackRemoteDataSourceImpl(
-        client,
-      ).getUnits('lvl_gen_prea1');
+      late FakeHttpAdapter adapter;
+      late TrackRemoteDataSourceImpl source;
+      var enrollments = 'app_enrollments_one';
 
-      expect(
-        adapter.requests.single.path,
-        '/api/v1/app/levels/lvl_gen_prea1/units',
-      );
-      expect(units, hasLength(2));
+      setUp(() {
+        enrollments = 'app_enrollments_one';
+        adapter = FakeHttpAdapter(
+          (request) => switch (request.path) {
+            '/api/v1/app/enrollments' => FakeResponse(
+              200,
+              body: fixture(enrollments),
+            ),
+            '/api/v1/app/enrollments/$track/map' => FakeResponse(
+              200,
+              body: fixture('app_map_new_learner'),
+            ),
+            _ => const FakeResponse(404),
+          },
+        );
+        source = TrackRemoteDataSourceImpl(
+          ApiClient(
+            Dio(BaseOptions(baseUrl: 'https://api.test'))
+              ..httpClientAdapter = adapter,
+          ),
+        );
+      });
+
+      test('the units of the level the learner is in, in order', () async {
+        final units = await source.getUnits(null);
+
+        expect(adapter.requests.map((r) => r.path), [
+          '/api/v1/app/enrollments',
+          '/api/v1/app/enrollments/$track/map',
+        ]);
+        expect(units.map((u) => (u.entity.order, u.entity.title)), [
+          (1, 'التعريف بالنفس'),
+          (2, 'الأشياء من حولي'),
+        ]);
+        expect(units.first.entity.topic?.of('en'), 'About me');
+      });
+
+      test('the level named, when it is the learner\u2019s', () async {
+        expect(await source.getUnits(level), hasLength(2));
+        expect(await source.getUnits('another-level'), isEmpty);
+      });
+
+      test('no track joined: no units', () async {
+        enrollments = 'app_enrollments_empty';
+
+        expect(await source.getUnits(null), isEmpty);
+      });
     });
 
     test('mock mode serves a default example to other levels', () async {

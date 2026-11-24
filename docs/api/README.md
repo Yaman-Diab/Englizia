@@ -92,7 +92,6 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/enrollments/{trackId}/level` | PUT | `ChangeLevelRequest {levelId}` | `EnrollmentDto` ([me.md](me.md)) | live, used |
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
 | `/api/v1/app/tracks` | GET | — (a session) | `{items: TrackCatalogItemDto[]}`, each with its levels ([tracks.md](tracks.md)) | live, used |
-| `/api/v1/app/levels/{levelId}/units` | GET | — | unit list ([tracks.md](tracks.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, versionId, versionNo, type, content, questions[], media}`, with keys ([lessons.md](lessons.md)) | live, used |
 | `/api/v1/app/lessons/{id}/answers/review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
 | `/api/v1/app/lessons/{id}/words` | POST | `{spanId or wordId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed |
@@ -126,7 +125,7 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/placement/sessions/{id}/choose` | POST | `{trackId, choice: result or lower}` | `EnrollmentDto` ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/enrollments` | GET | — | the learner's enrollments; the placement test takes the active one's track | live, used |
 | `/api/v1/app/enrollments/{trackId}/map` | GET | — | the level's units and their lessons, with what is done and open ([home.md](home.md)) | live, used |
-| `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed, mock |
+| `/api/v1/app/settings` | GET | — | effective settings by section ([settings.md](settings.md)) | proposed for v0.5; the app reads the bundled ones until then |
 | `/api/v1/app/system/config` | GET | — (no session) | `SystemConfigDto`: versions, links, goals, AI switches, onboarding's tracks ([settings.md](settings.md)) | live, versions, links and onboarding's tracks used |
 | `/api/v1/auth/guest` | POST | `CreateGuestRequest {deviceId, platform, displayName}`, no session | `TokenResponse`, `accountType: "guest"` ([auth.md](auth.md)) | live, used |
 | `/api/v1/app/me/onboarding` | POST | `OnboardingRequest`, with the new account's token | `OnboardingResultDto` ([auth.md](auth.md)) | live, used |
@@ -152,7 +151,7 @@ Paste-ready; each item names what the app needs and why.
 2. **Google and Apple for a guest.** Answered: `POST /api/v1/auth/guest/upgrade/google` and `/apple`.
    **Google's client.** The server must check the `idToken`'s audience against the "Web application" client of the app's Google Cloud project ([auth.md](auth.md)); the app's owner sends its ID.
 3. **Onboarding answers with account creation.** Answered: `POST /api/v1/app/me/onboarding`, sent with the new account's token right after it is made ([auth.md](auth.md)).
-4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/levels/{levelId}/units`, `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
+4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
 5. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
 6. **The password policy** in the OpenAPI document: any name length limit as `minLength`/`maxLength` (the password's 8 shows only in register's answer), and the `details` codes beyond `not_empty`. The codes per endpoint are there now, in each response's description; as an `enum` or an extension field they could be checked by a test.
 7. **`Retry-After` on 429.** Answered by the document: `auth.locked_out` (5 wrong passwords, 5 minutes) and `rate_limit.exceeded` both carry it, and the app counts it down. Not yet seen on the dev server.

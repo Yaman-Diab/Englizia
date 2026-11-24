@@ -37,7 +37,7 @@ class FakeTrackRepository implements TrackRepository {
   final List<Result<List<LearningTrack>>> tracks;
   final List<Result<List<TrackLevel>>> levels;
   final List<Result<List<TrackUnit>>> units;
-  final unitRequests = <String>[];
+  final unitRequests = <String?>[];
   var trackCalls = 0;
   final levelRequests = <String>[];
 
@@ -57,7 +57,7 @@ class FakeTrackRepository implements TrackRepository {
   }
 
   @override
-  Future<Result<List<TrackUnit>>> getUnits(String levelId) async {
+  Future<Result<List<TrackUnit>>> getUnits(String? levelId) async {
     unitRequests.add(levelId);
     return units[(unitRequests.length - 1).clamp(0, units.length - 1)];
   }

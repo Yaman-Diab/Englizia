@@ -1,6 +1,6 @@
 # Effective settings
 
-Status: **proposed** — the app runs on this contract in mock mode (`assets/mock/settings/`); nothing is confirmed by the backend team yet.
+Status: **proposed**, and not on the server until v0.5: where the effective settings will live isn't decided (the backend's answers of 2026-11-23, settings.md 1). Until then the server answers `GET /api/v1/app/settings` with `404 route.not_found`, and the app reads the bundled ones in its place (`assets/mock/settings/effective.json`), the goals limited to the minutes `system/config` offers (`dailyGoalOptions`): onboarding's goal, challenge and reminder, the settings' goal and reminder, and the downloads' limits run on them, as the backend asks. Mock mode serves the same file. `system/config` below is live.
 Requirements: server doc §17.1 (inheritance and reading), §17.7 (motivation), §17.8 (notifications), §19.2 ("the app reads the effective settings on open and caches them"; the app versions); student doc §4.2 (reminder step) and §20.
 
 ## `GET /api/v1/app/settings`

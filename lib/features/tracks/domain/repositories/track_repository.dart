@@ -16,5 +16,5 @@ abstract interface class TrackRepository {
   Future<Result<List<TrackLevel>>> getLevels(String trackId);
 
   /// Published units of [levelId], in display order.
-  Future<Result<List<TrackUnit>>> getUnits(String levelId);
+  Future<Result<List<TrackUnit>>> getUnits(String? levelId);
 }
