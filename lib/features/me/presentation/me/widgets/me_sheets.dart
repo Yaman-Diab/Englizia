@@ -9,7 +9,6 @@ import 'package:englizia/core/design_system/widgets/action_sheet.dart';
 import 'package:englizia/core/design_system/widgets/app_button.dart';
 import 'package:englizia/core/design_system/widgets/dashed_border.dart';
 import 'package:englizia/core/design_system/widgets/streak_flame.dart';
-import 'package:englizia/core/l10n/clock_format.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/me/presentation/me/cubit/me_cubit.dart';
 import 'package:englizia/features/me/presentation/me/widgets/me_sections.dart';
@@ -118,14 +117,6 @@ class _StreakSheet extends StatelessWidget {
   /// The link sits 18 − 8 under «فهمت».
   static const _aboveLink = 10.0;
 
-  static String _time(String hhmm) {
-    final parts = hhmm.split(':');
-    final hour = int.tryParse(parts.first);
-    final minute = parts.length > 1 ? int.tryParse(parts[1]) : 0;
-    if (hour == null || minute == null) return hhmm;
-    return formatClock(hour, minute);
-  }
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -181,10 +172,7 @@ class _StreakSheet extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             'me_streak_rule'.tr(
-              namedArgs: {
-                'goal': 'unit_minutes'.plural(week.goalMinutes),
-                'start': _time(week.dayStart),
-              },
+              namedArgs: {'goal': 'unit_minutes'.plural(week.goalMinutes)},
             ),
             style: texts.body,
           ),

@@ -30,11 +30,11 @@ One read of the tracks, then the account and the active track's map together (`s
 | From | In the app's shape |
 |---|---|
 | `GET /app/me`: `displayName`, `emailVerified`, `accountType`, `authMethods` | `learner.name`, `emailVerified`, `signIn`: `guest` for a guest account (its `authMethods` is empty), else `email` with `password` among `authMethods`, then `google`, then `apple` |
-| The map's completed lessons | `learner.lessonsDone`: those of this level only, as the server has no count of all (question 3) |
+| The map's completed lessons | `learner.lessonsDone`: those of this level only, as the server has no count of all (question 2) |
 | `GET /app/enrollments` `items[]` | `enrollments[]`: the track's id stands for the enrollment's too, as the server names an enrollment by its track; `track.nameAr`, the level's names, `unitNo`, `unitCount`, `isActive`. The active one's cover is its unit's, the others' their track's |
 | An enrollment's `track.onboardingAudience` | `audience`: `adult`, `child` or `school_student`. An enrollment without it is read from its `child`, its track's `kidsMode` and `levelLabel` |
 | `unlockMode` | `enrollment.ordered`: false for `all_open` |
-| `level` | `level.id`; `label` is its CEFR code (`A1`, `Pre-A1`), or its name when it has none; `name` is `nameAr` without that code in front; `cefr`. `level.completed` once every unit is `completed`. No `next` (question 2) |
+| `level`, `nextLevel` | `level.id`; `label` is its CEFR code (`A1`, `Pre-A1`), or its name when it has none; `name` is `nameAr` without that code in front; `cefr`. `level.completed` once every unit is `completed`. `level.next` is `nextLevel`, the first level published after this one, named the same way; none after the last |
 | `units[].state` | `completed` is `done`; `unlocked` is `current` for the unit that holds `nextLessonId` (else the first unlocked one) and `open` for any other; `locked` is `locked`, named after the unit before it in a track that opens in order |
 | `units[].lessons[]` | The current unit's `lessons[]`, and a locked unit's `preview`: `type` as the app's `kind`, `titleAr`, `minutes`, `bookPages.from` as `page`, `done` for `state: completed`. Where a lesson stopped is the phone's own |
 | `GET /app/placement?trackId=`, asked only while the enrollment's `placementPending` | `cards.placement.estimatedMinutes`, from `test.estimatedSeconds` without and with the deciding stage; home shows without the card if that call fails |
@@ -111,7 +111,6 @@ A part the server leaves out isn't shown, as in [me.md](me.md): no `week` or `st
     ],
     "week": {
       "goalMinutes": 10,
-      "dayStart": "04:00",
       "today": 3,
       "days": [{ "date": "2026-10-31", "minutes": 14 }, { "date": "2026-11-01", "frozen": true }, { "date": "2026-11-03", "minutes": 7 }, { "date": "2026-11-04" }]
     },
@@ -178,7 +177,11 @@ Not in the payload on purpose: the lesson's content (`GET /lessons/{id}`, preloa
 
 ### What the app decides itself
 
-The greeting's hours («صباح الخير» until 12:00) and the streak at risk from 18:00 until the learner's day starts (`week.dayStart`, 04:00 by default) are app rules (docs/STATUS.md D-096). The one-card-at-a-time priority (a one-time notice, the level done, the email, the level check, the deferred test) is the design's, applied by `HomeRules.notices`. The opening's once-a-day uses `week.dayStart` (04:00 by default), read on the phone's wall clock.
+The greeting's hours («صباح الخير» until 12:00) and the streak at risk from 18:00 until midnight are app rules (docs/STATUS.md D-096). The learner's day starts at midnight on their clock, for the streak, the days learned and the opening's once-a-day: the server has no setting for it (the backend's answers of 2026-11-23, §3); a `week.dayStart` the mock sends is still read. The one-card-at-a-time priority (a one-time notice, the level done, the email, the level check, the deferred test) is the design's, applied by `HomeRules.notices`.
+
+### The next level
+
+On a track that isn't chosen by grade the server moves the learner to the next published level by itself once the last unit is done, says so in the sync's reply (`levels: [{trackId, fromLevelId, toLevelId}]`), and refuses the change (`PUT …/level` answers `422 enrollment.grade_change_not_allowed`); with the next level not published yet, the learner stays at the one completed and moves on the first `GET /app/enrollments` after it is. On a grade track (Emar) the learner doesn't move alone: «الصف الثامن» sends `PUT /api/v1/app/enrollments/{trackId}/level` with `nextLevel.id`. So «ابدأ B1» sends the change, and when the server refuses it that way only asks for home again. Home doesn't celebrate a level the server moved past by itself: it shows the new level as it comes (STATUS D-126).
 
 Back from a lesson, the app waits 2 s for this endpoint before celebrating what the phone knows (a completion still on its way counts); an answer that comes later is shown without a celebration.
 
@@ -193,8 +196,7 @@ The common errors (`README.md`). Offline, the phone shows what it kept with «ل
 ## Questions for the backend team
 
 1. Home is put together from the account, the tracks and the map. Where will the rest come from: the week (minutes a day against the goal, and the day's start), the streak and its freezes, what is due for review, and the one-time notices (a freeze used, the streak broken)?
-2. The level after this one, for «المستوى التالي» and «ابدأ B1»: `GET /api/v1/app/tracks` lists no levels for the demo track.
-3. The lessons a learner has finished in all, for the first day and the email reminder: the map only has this level's.
-4. A lesson `in_progress`: is where it stopped kept, for another phone?
-5. A unit's `test`: what does it carry?
-6. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation and the level check among a unit's lessons, a kid's stars and recorded titles: will the map carry them?
+2. The lessons a learner has finished in all, for the first day and the email reminder: the map only has this level's.
+3. A lesson `in_progress`: is where it stopped kept, for another phone?
+4. A unit's `test`: what does it carry?
+5. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation and the level check among a unit's lessons, a kid's stars and recorded titles: will the map carry them?

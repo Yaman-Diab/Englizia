@@ -171,7 +171,7 @@ void main() {
     });
 
     testWidgets('a new day while open opens again', (tester) async {
-      now = DateTime(2026, 11, 6, 3, 58);
+      now = DateTime(2026, 11, 5, 23, 58);
       final subject = HomeCubit(
         homes,
         profiles,
@@ -184,7 +184,7 @@ void main() {
       subject.openingPlayed();
       expect(subject.state.openingDue, isFalse);
 
-      now = DateTime(2026, 11, 6, 4, 1);
+      now = DateTime(2026, 11, 6, 0, 1);
       await tester.pump(HomeCubit.tick);
       await tester.pump();
       expect(subject.state.openingDue, isTrue);
@@ -537,7 +537,7 @@ void main() {
 
   group('the day', () {
     testWidgets('the clock ticks; a new day refreshes', (tester) async {
-      now = DateTime(2026, 11, 6, 3, 58);
+      now = DateTime(2026, 11, 5, 23, 58);
       final subject = HomeCubit(
         homes,
         profiles,
@@ -549,12 +549,12 @@ void main() {
       await subject.start();
       expect(homes.fetches, 1);
 
-      now = DateTime(2026, 11, 6, 3, 59);
+      now = DateTime(2026, 11, 5, 23, 59);
       await tester.pump(HomeCubit.tick);
       expect(subject.state.now, now);
       expect(homes.fetches, 1);
 
-      now = DateTime(2026, 11, 6, 4, 1);
+      now = DateTime(2026, 11, 6, 0, 1);
       await tester.pump(HomeCubit.tick);
       await tester.pump();
       expect(homes.fetches, 2);
@@ -563,7 +563,7 @@ void main() {
 
     testWidgets('a new day starts on the phone, even offline', (tester) async {
       homes.home = _home(HomeMockScenario.goalReached);
-      now = DateTime(2026, 11, 6, 3, 58);
+      now = DateTime(2026, 11, 5, 23, 58);
       final subject = HomeCubit(
         homes,
         profiles,
@@ -576,7 +576,7 @@ void main() {
       expect(subject.state.status.kind, HomeStatusKind.goalReached);
 
       homes.failure = const NetworkFailure();
-      now = DateTime(2026, 11, 6, 4, 1);
+      now = DateTime(2026, 11, 6, 0, 1);
       await tester.pump(HomeCubit.tick);
       await tester.pump();
       expect(homes.fetches, 2);
@@ -702,6 +702,22 @@ void main() {
       expect(subject.state.switches, 0);
       expect(subject.state.home?.enrollment.id, 'enr_general');
     });
+
+    test(
+      'a level the server moves to by itself is only asked for again',
+      () async {
+        homes.home = _home(HomeMockScenario.levelComplete);
+        final subject = cubit();
+        await subject.start();
+        profiles.writeFailure = const ValidationFailure(
+          code: 'enrollment.grade_change_not_allowed',
+        );
+
+        expect(await subject.startNextLevel(), isNull);
+        expect(homes.fetches, 2);
+        expect(subject.state.levelJustDone, isFalse);
+      },
+    );
 
     test('«ابدأ B1» starts the next level, then refreshes', () async {
       homes.home = _home(HomeMockScenario.levelComplete);

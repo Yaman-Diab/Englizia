@@ -63,11 +63,13 @@ Map<String, Object?> homeFromServer({
   final units = mapUnits(map);
   final level = map.readMap('level');
   final names = levelNames(level);
+  final next = map.readMap('nextLevel');
+  final nextNames = levelNames(next);
   // The unit the learner is in: the one that holds the next lesson, else the
   // first not finished that is open.
-  final next = map.readString('nextLessonId');
+  final nextLesson = map.readString('nextLessonId');
   var current = units.indexWhere(
-    (unit) => lessonsFromMap(unit).any((lesson) => lesson['id'] == next),
+    (unit) => lessonsFromMap(unit).any((lesson) => lesson['id'] == nextLesson),
   );
   if (current < 0) {
     current = units.indexWhere((u) => u.readString('state') == 'unlocked');
@@ -106,6 +108,14 @@ Map<String, Object?> homeFromServer({
       'name': names.name,
       'cefr': ?_cefr[level?.readString('cefrCode')],
       'completed': completed,
+      // The first level published after this one; none after the last.
+      if (next?.readString('id') case final id?)
+        'next': {
+          'id': id,
+          'label': nextNames.label,
+          'name': nextNames.name,
+          'cefr': ?_cefr[next?.readString('cefrCode')],
+        },
     },
     'units': [
       for (final (i, unit) in units.indexed)

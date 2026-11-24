@@ -52,7 +52,6 @@
     },
     "week": {
       "goalMinutes": 10,
-      "dayStart": "04:00",
       "today": 4,
       "days": [
         {

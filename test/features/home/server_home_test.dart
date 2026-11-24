@@ -77,6 +77,16 @@ void main() {
       expect(home.level.next, isNull);
     });
 
+    test('the next level, named before the learner gets there', () {
+      final next = _home(map: 'app_map_with_next_level').level.next!;
+
+      expect(next.id, '01a1f24f-ebef-7519-a415-a3b0ad9a3450');
+      expect(next.label, 'A2');
+      expect(next.name, 'ما قبل المتوسط');
+      expect(next.cefr, HomeCefr.a2);
+      expect(_home().level.next, isNull, reason: 'none after the last');
+    });
+
     test('what the server doesn’t say yet is left out', () {
       final home = _home();
 

@@ -89,10 +89,11 @@ void main() {
       },
     );
 
-    test('today rolls over on the phone at the day start', () {
+    test('today rolls over on the phone at midnight', () {
       final home = _home(HomeMockScenario.goalReached);
       expect(home.todayMinutes, 12);
-      expect(HomeRules.asOf(home, DateTime(2026, 11, 6, 3, 59)), same(home));
+      expect(HomeRules.asOf(home, DateTime(2026, 11, 5, 23, 59)), same(home));
+      expect(HomeRules.asOf(home, DateTime(2026, 11, 6, 0, 1)).todayMinutes, 0);
 
       final next = HomeRules.asOf(home, DateTime(2026, 11, 6, 19));
       final week = next.week!;
@@ -231,10 +232,10 @@ void main() {
       expect(HomeRules.atRisk(_home(HomeMockScenario.v01), _evening), isFalse);
     });
 
-    test('the risk lasts until the learner\'s day starts', () {
+    test('the risk lasts until the learner\'s day ends at midnight', () {
       final risk = _home(HomeMockScenario.atRisk);
-      expect(HomeRules.atRisk(risk, DateTime(2026, 11, 6, 1, 30)), isTrue);
-      expect(HomeRules.atRisk(risk, DateTime(2026, 11, 6, 4)), isFalse);
+      expect(HomeRules.atRisk(risk, DateTime(2026, 11, 5, 23, 30)), isTrue);
+      expect(HomeRules.atRisk(risk, DateTime(2026, 11, 6, 0, 30)), isFalse);
     });
   });
 

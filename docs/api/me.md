@@ -45,7 +45,6 @@ Everything «أنا» shows, in one response. Needs a session. The phone keeps t
     "points": { "total": 1240, "week": 86 },
     "week": {
       "goalMinutes": 10,
-      "dayStart": "04:00",
       "today": 4,
       "days": [{ "date": "2026-11-01", "minutes": 14 }, { "date": "2026-11-03", "frozen": true }, { "date": "2026-11-06" }]
     },
@@ -75,7 +74,7 @@ Everything «أنا» shows, in one response. Needs a session. The phone keeps t
 | `streak` | Days in a row the daily goal was reached; `freezes` of `maxFreezes` left, and the weekday (`1` Monday … `7` Sunday) the next one is added. Absent before v1.0 |
 | `points` | XP in all and this week. Absent before v1.0 |
 | `week.days[]` | The week from Saturday to Friday that holds today (seven days, the first Saturday): `minutes`, or `frozen`, or neither for a day still to come. `today` is its index, Saturday being 0. Decided by the owner, 2026-11-08; the freezes are also added on Saturday morning (SV §17.7) |
-| `week.goalMinutes`, `dayStart` | The daily goal and when a day starts (`HH:mm`), both from the effective settings |
+| `week.goalMinutes` | The daily goal, from the effective settings. The day starts at midnight on the learner's clock, with no field for it |
 | `placement` | The last placement test: the level, when, when it can be taken again, and the whole wait (`waitDays`) for the ring |
 | `wordBank` | The bank's words and those due today, for its row |
 
