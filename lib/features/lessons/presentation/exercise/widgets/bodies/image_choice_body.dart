@@ -44,11 +44,20 @@ class ImageChoiceBody extends StatelessWidget {
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         children: [
-          for (final option in exercise.options)
+          for (final (i, option) in exercise.options.indexed)
             AnswerCard(
               look: answer.lookOf(option.id),
               radius: AppRadius.lg,
-              semanticLabel: option.alt,
+              // A picture with no text is read by its place: a caption could
+              // give the answer away (the backend's answers of 2026-11-23).
+              semanticLabel: option.alt.isNotEmpty
+                  ? option.alt
+                  : 'lesson_picture_of'.tr(
+                      namedArgs: {
+                        'n': '${i + 1}',
+                        'total': '${exercise.options.length}',
+                      },
+                    ),
               onTap: answer.chooser(option.id),
               child: Stack(
                 fit: StackFit.expand,

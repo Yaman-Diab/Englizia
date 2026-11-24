@@ -511,6 +511,7 @@
   "lesson_pair_right": "صحيح: {word}",
   "lesson_pair_wrong": "الزوج غير متطابق، جرّب مرة أخرى",
   "lesson_picture_named": "صورة: {name}",
+  "lesson_picture_of": "الصورة {n} من {total}",
   "lesson_pictures": "الصور",
   "lesson_meanings": "الكلمات العربية",
   "lesson_english_words": "الكلمات الإنجليزية",

@@ -123,4 +123,4 @@ Deleting the account, and a guest signing out, deletes its sessions and answers.
 ## Questions for the backend team
 
 1. «ابدأ من جديد» on an unfinished test (S §12.2, the design "Placement Intro"): there is no way to throw a session away, so the app offers only «تابع الاختبار» and the lessons (STATUS D-121). Is a restart planned?
-2. The onboarding step "how much English" comes before the account exists, so it can't say how long the test takes. Could `system/config` carry the published test's `estimatedSeconds`?
+2. Answered: `system/config` carries `placementTest {versionNo, listenCount, questionCount, estimatedSeconds}`, the same as `test` here, before any account; `null` with no published version. The app doesn't read it yet (STATUS D-122).

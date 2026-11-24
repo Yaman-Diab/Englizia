@@ -73,6 +73,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
+- A picture with no text is read by its place to a screen reader («الصورة 1 من 4»).
 - Home names the next level from the server, and «ابدأ B1» follows the server's own move to it; a grade is still the learner's choice. The learner's day starts at midnight.
 - «أنا» reads the server: your name, account number, tracks with their level and unit, lessons done and the days you learned.
 - Onboarding goes through to the end against the server: the goal, the challenge and the reminder read the app's own settings until the server has them, and "preparing" names the first unit from the track's map.

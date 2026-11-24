@@ -20,12 +20,12 @@ Backend: **.NET** (ASP.NET Core) REST API, separate team. Per `docs/product/dash
 | Devices | Login and register take `deviceId` (null on the first login; the server returns one in `TokenResponse`, which the app keeps on the phone, through sign-outs, and sends back) and `platform` (`DevicePlatform`: `android`, `ios`, `web`; `lib/core/session/device_platform.dart`) | confirmed |
 | User | `UserDto {id (uuid), userName, email?, displayName, emailVerified, roles[], authMethods[], timeZone, uiLanguage (ar\|en)}`, changed through `PUT /api/v1/app/me`. `authMethods` says how the account signs in; the app doesn't read it yet. `TokenResponse.isNewUser` says a sign-in made the account | confirmed |
 | Rate limiting | Register and login document `429`; the app treats it as "wait and retry" and reads `Retry-After` in seconds when present | 429 confirmed, wait time not |
-| Localization | The app sends `Accept-Language` (`ar` / `en`); whether `message` is localized is unknown, and it is not shown anyway | to confirm |
+| Localization | The app sends `Accept-Language` (`ar` / `en`); `message` is English only and doesn't follow it. The app shows its own text by `error.code` | confirmed |
 | App gate | The server returns the minimum allowed app version per platform (v0.1) and the recommended one (v1.0) (§19.2, required); no endpoint yet | required, not in the document |
 | Effective settings | The server returns settings after inheritance (global → track → level → lesson); the app reads them on open and caches them; no setting is hardcoded in the app (§19.2, student §2 principle 6) | required, proposed in [settings.md](settings.md) |
-| Times | ISO-8601 UTC; the student's day uses their time zone and a configurable day start, default 04:00 (§19.1) | confirmed (format) |
+| Times | A full ISO-8601 UTC instant with three decimals (`2026-11-23T12:13:59.529Z`), shown in the learner's time zone; a time of day is `HH:mm:ss`. The learner's day starts at midnight on their clock, with no setting | confirmed |
 
-Proposed contracts keep these rules too: ids are strings, absolute media URLs, enums are lower-camel strings and an unknown value is treated as the least privileged one, bilingual text is `{ "ar": "…", "en": "…" }` (as in the content package, server doc §20.1).
+The server's rules for every response (the backend's answers of 2026-11-23, §3): enum values are snake_case (`school_student`, `interactive_video`, `picture_choice`, `quota_out`); a field with no value is written as `null`, except in `GET /app/me/profile`, which leaves it out; a success with no data is `200` with `data: null`, never `204`, deleting included; a list is always `data.items`, never a bare array; a breaking change is `/api/v2` or a forced update (`426`), and a new field never breaks. The app's proposed contracts were written before these and use lower-camel enums in places: each will take the server's form when its task comes, as the backend announces its shape. Ids are strings, media URLs absolute, an unknown enum value is treated as the least privileged one, and bilingual text is `{ "ar": "…", "en": "…" }`.
 
 ### Envelope examples (real responses)
 
@@ -93,30 +93,30 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/system/ping` | GET | — | `PingResponse {status, serverTime}` | live, not used yet |
 | `/api/v1/app/tracks` | GET | — (a session) | `{items: TrackCatalogItemDto[]}`, each with its levels ([tracks.md](tracks.md)) | live, used |
 | `/api/v1/app/lessons/{id}` | GET | — | `{id, versionId, versionNo, type, content, questions[], media}`, with keys ([lessons.md](lessons.md)) | live, used |
-| `/api/v1/app/lessons/{id}/answers/review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{correct}` ([lessons.md](lessons.md)) | proposed, mock |
-| `/api/v1/app/lessons/{id}/words` | POST | `{spanId or wordId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed |
-| `/api/v1/app/concepts` | GET | — | today's concepts with their new questions, those later and those mastered ([concepts.md](concepts.md)) | proposed |
-| `/api/v1/app/concepts/answers` | POST | `{answerId, conceptId, questionId, correct, answeredAt}` | none; safe to repeat | proposed |
-| `/api/v1/app/concepts/reports` | POST | `{reportId, conceptId, questionId, reason}` | none; safe to repeat | proposed |
-| `/api/v1/app/explanations` | POST | `{questionId, lessonId or conceptId, answer}` | the explanation and the explanations left today, or `quotaOut` ([explanations.md](explanations.md)) | proposed |
-| `/api/v1/app/explanations/{id}/rating` | POST | `{helpful}` | none | proposed |
-| `/api/v1/app/talk` | GET | — | the scenarios by unit and the AI conversations left today ([talk.md](talk.md)) | proposed |
-| `/api/v1/app/talk/scenarios/{id}` | GET | — | the intro, role, tasks, opening line and first suggestions | proposed |
-| `/api/v1/app/talk/conversations` | POST | `{conversationId, scenarioId}` | none; counts against today's limit | proposed |
-| `/api/v1/app/talk/conversations/{id}/turns` | POST | `{turnId, text, via}` | the reply, every task done so far, suggestions, turns left; safe to repeat | proposed |
-| `/api/v1/app/talk/conversations/{id}/end` | POST | `{tasksDone}` | none | proposed |
-| `/api/v1/app/talk/conversations/{id}/notes` | GET | — | the summary's notes: `ready`, `pending` or `failed` | proposed |
-| `/api/v1/app/word-bank` | GET | — | the bank, its words and their boxes ([practice.md](practice.md)) | proposed |
-| `/api/v1/app/word-bank/reviews` | POST | `{reviewId, wordId, known, reviewedAt}` | none; safe to repeat | proposed |
-| `/api/v1/app/word-bank/words/{wordId}` | DELETE | — | none; safe to repeat | proposed |
-| `/api/v1/app/lessons/{id}/shadowing` | POST | `{sentenceId, heard, total}` | none; the server keeps the best | proposed |
-| `/api/v1/app/lessons/{id}/content-done` | POST | `{lessonVersion}` | none; safe to repeat | proposed |
-| `/api/v1/app/lessons/{id}/watch` | POST | `{videoId, lessonVersion, positionSeconds, watched}` | none; only the latest counts | proposed |
-| `/api/v1/app/lessons/{id}/questions` | GET | — | **Only the caller's** questions and replies ([lessons.md](lessons.md), ADR 14) | proposed |
-| `/api/v1/app/lessons/{id}/questions` | POST | `{questionId, text, videoSeconds?}` | The question; safe to repeat | proposed |
-| `/api/v1/app/lessons/{id}/complete` | POST | `{completionId, lessonVersion, seconds}` | The official numbers ([lessons.md](lessons.md)) | proposed |
-| `/api/v1/app/lessons/{id}/answers/spoken-review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{outcome, note?, better?}` ([lessons.md](lessons.md)) | proposed |
-| `/api/v1/app/lessons/{id}/reports` | POST | `{reportId, lessonVersion, questionId, reason, answer?}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock |
+| `/api/v1/app/lessons/{id}/answers/review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{correct}` ([lessons.md](lessons.md)) | proposed, mock; not needed on the server: word orders take saved alternatives only |
+| `/api/v1/app/lessons/{id}/words` | POST | `{spanId or wordId, saved, base?, kind?, ar?, note?, sentence?}` | none ([lessons.md](lessons.md)) | proposed; v0.4 |
+| `/api/v1/app/concepts` | GET | — | today's concepts with their new questions, those later and those mastered ([concepts.md](concepts.md)) | proposed; v0.5 |
+| `/api/v1/app/concepts/answers` | POST | `{answerId, conceptId, questionId, correct, answeredAt}` | none; safe to repeat | proposed; v0.5 |
+| `/api/v1/app/concepts/reports` | POST | `{reportId, conceptId, questionId, reason}` | none; safe to repeat | proposed; not planned on the server |
+| `/api/v1/app/explanations` | POST | `{questionId, lessonId or conceptId, answer}` | the explanation and the explanations left today, or `quotaOut` ([explanations.md](explanations.md)) | proposed; v0.5 |
+| `/api/v1/app/explanations/{id}/rating` | POST | `{helpful}` | none | proposed; v0.5 |
+| `/api/v1/app/talk` | GET | — | the scenarios by unit and the AI conversations left today ([talk.md](talk.md)) | proposed; v0.5 |
+| `/api/v1/app/talk/scenarios/{id}` | GET | — | the intro, role, tasks, opening line and first suggestions | proposed; v0.5 |
+| `/api/v1/app/talk/conversations` | POST | `{conversationId, scenarioId}` | none; counts against today's limit | proposed; v0.5 |
+| `/api/v1/app/talk/conversations/{id}/turns` | POST | `{turnId, text, via}` | the reply, every task done so far, suggestions, turns left; safe to repeat | proposed; v0.5 |
+| `/api/v1/app/talk/conversations/{id}/end` | POST | `{tasksDone}` | none | proposed; v0.5 |
+| `/api/v1/app/talk/conversations/{id}/notes` | GET | — | the summary's notes: `ready`, `pending` or `failed` | proposed; v0.5 |
+| `/api/v1/app/word-bank` | GET | — | the bank, its words and their boxes ([practice.md](practice.md)) | proposed; v0.4 |
+| `/api/v1/app/word-bank/reviews` | POST | `{reviewId, wordId, known, reviewedAt}` | none; safe to repeat | proposed; v0.4 |
+| `/api/v1/app/word-bank/words/{wordId}` | DELETE | — | none; safe to repeat | proposed; v0.4 |
+| `/api/v1/app/lessons/{id}/shadowing` | POST | `{sentenceId, heard, total}` | none; the server keeps the best | proposed; v0.4 |
+| `/api/v1/app/lessons/{id}/content-done` | POST | `{lessonVersion}` | none; safe to repeat | proposed; the server plans it for v0.3 (a text, a video) and v0.4 (vocabulary) |
+| `/api/v1/app/lessons/{id}/watch` | POST | `{videoId, lessonVersion, positionSeconds, watched}` | none; only the latest counts | proposed; the server plans it for v0.2, with where a lesson stopped |
+| `/api/v1/app/lessons/{id}/questions` | GET | — | **Only the caller's** questions and replies ([lessons.md](lessons.md), ADR 14) | proposed; v1.0 |
+| `/api/v1/app/lessons/{id}/questions` | POST | `{questionId, text, videoSeconds?}` | The question; safe to repeat | proposed; v1.0 |
+| `/api/v1/app/lessons/{id}/complete` | POST | `{completionId, lessonVersion, seconds}` | The official numbers ([lessons.md](lessons.md)) | proposed, mock lessons only; not needed on the server: the sync completes a lesson |
+| `/api/v1/app/lessons/{id}/answers/spoken-review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{outcome, note?, better?}` ([lessons.md](lessons.md)) | proposed; v0.5, through the sync with a `pending_ai` status |
+| `/api/v1/app/lessons/{id}/reports` | POST | `{reportId, lessonVersion, questionId, reason, answer?}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock; not planned on the server |
 | `/api/v1/app/sync` | POST | `{sentAt, attempts: [{clientAttemptId, lessonVersionId, questionVersionId, runId, answer, hintsUsed, clientCreatedAt}]}` | one result for each answer (`accepted`, `duplicate` or `rejected`), and what they completed; safe to repeat ([lessons.md](lessons.md)) | live, used |
 | `/api/v1/app/placement?trackId=` | GET | — | the state: `available`, `in_progress`, `result`, `done` or `unavailable`, with the test, the session and the result ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/placement/sessions` | POST | `{trackId}` | the session at its stage, with its questions ([placement.md](placement.md)) | live, used |
@@ -138,8 +138,8 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/auth/email` | PUT | `ChangeEmailRequest {newEmail}` | `202`; `409` when it has an account ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/google` | POST | `GoogleSignInRequest {idToken, deviceId, platform}` | `TokenResponse` with `isNewUser`; `401 auth.google_token_invalid`, `403 auth.account_disabled`, `409 auth.email_taken` or `auth.external_login_conflict` ([auth.md](auth.md)) | live, used (no real token sent yet, STATUS D-110) |
 | `/api/v1/auth/apple` | POST | `AppleSignInRequest {identityToken, authorizationCode, nonce, givenName, familyName, deviceId, platform}` | `TokenResponse` | live, not used |
-| `/api/v1/app/me/push-token` | PUT | `{token, platform, deviceId}` | `204` ([notifications.md](notifications.md)) | proposed, mock |
-| `/api/v1/app/lessons/{id}/download` | GET | — | `{lessonId, lessonVersion, lesson, files[]}` ([downloads.md](downloads.md)) | proposed, mock |
+| `/api/v1/app/me/push-token` | PUT | `{token, platform, deviceId}` | `204` ([notifications.md](notifications.md)) | proposed, mock; v1.0, answering `200` with no data |
+| `/api/v1/app/lessons/{id}/download` | GET | — | `{lessonId, lessonVersion, lesson, files[]}` ([downloads.md](downloads.md)) | proposed, mock; not planned on the server (an open decision) |
 | `/api/v1/auth/guest/upgrade/email` | POST | `{email, password, displayName}`, with the guest's session | `UserDto`; the session carries on ([auth.md](auth.md)) | live, used |
 | `/api/v1/auth/guest/upgrade/google` | POST | `{idToken}`, with the guest's session | `UserDto`; `409 auth.external_login_conflict` signs in to that account instead ([auth.md](auth.md)) | live, used |
 
@@ -152,15 +152,15 @@ Paste-ready; each item names what the app needs and why.
    **Google's client.** The server must check the `idToken`'s audience against the "Web application" client of the app's Google Cloud project ([auth.md](auth.md)); the app's owner sends its ID.
 3. **Onboarding answers with account creation.** Answered: `POST /api/v1/app/me/onboarding`, sent with the new account's token right after it is made ([auth.md](auth.md)).
 4. **Content and settings endpoints**, under `/api/v1/app/` and in the same envelope: `GET /app/settings` (effective settings after inheritance). Contracts in [tracks.md](tracks.md), [placement.md](placement.md), [settings.md](settings.md); the settings call must work **without a token**, because onboarding reads them before an account exists.
-5. **Time zone as an IANA name** (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
-6. **The password policy** in the OpenAPI document: any name length limit as `minLength`/`maxLength` (the password's 8 shows only in register's answer), and the `details` codes beyond `not_empty`. The codes per endpoint are there now, in each response's description; as an `enum` or an extension field they could be checked by a test.
+5. **Time zone as an IANA name.** Answered: an `Etc/GMT` zone is accepted, and a city (`Asia/Damascus`, the default) is better; the app still sends the phone's offset (STATUS D-043). Was: (`Asia/Damascus`), as `UserDto.timeZone` suggests: confirm the format and accept it at account creation, so the day start and reminders follow daylight-saving changes (the app sends a UTC offset today, STATUS D-043).
+6. **The password policy.** Answered: a password is 8 to 128 characters, a name 1 to 100, an email up to 256. Was: in the OpenAPI document: any name length limit as `minLength`/`maxLength` (the password's 8 shows only in register's answer), and the `details` codes beyond `not_empty`. The codes per endpoint are there now, in each response's description; as an `enum` or an extension field they could be checked by a test.
 7. **`Retry-After` on 429.** Answered by the document: `auth.locked_out` (5 wrong passwords, 5 minutes) and `rate_limit.exceeded` both carry it, and the app counts it down. Not yet seen on the dev server.
-8. **Refresh semantics.** Confirm that 400/401/403 from refresh always mean the session is over (the app signs out on them) and anything else is transient; whether the refresh token rotates on every call (the app stores the new one when it comes back); and whether refresh should accept the expired access token header or ignore it.
-9. **The links in the emails open the app.** Recovery and confirmation are live; their links (`https://engleazia.com/reset-password?token=…&email=…`, `/verify-email?token=…`) need `assetlinks.json` and apple-app-site-association on that host, and the Apple relay domain registered so they reach hidden Apple emails (S §5.1).
+8. **Refresh semantics.** Answered: `400`, `401` and `403` from refresh end the session, `429` and `5xx` are passing. The refresh token changes on every refresh, so the new one is always kept; one used again after 60 seconds revokes all the device's tokens (`auth.refresh_token_reused`). Refresh doesn't read `Authorization`. Was: Confirm that 400/401/403 from refresh always mean the session is over (the app signs out on them) and anything else is transient; whether the refresh token rotates on every call (the app stores the new one when it comes back); and whether refresh should accept the expired access token header or ignore it.
+9. **The links in the emails open the app.** Waiting: `assetlinks.json` and Apple's file need `engleazia.com` to be hosted, and the backend needs the Android package name, its signing key's SHA-256 and the iOS Bundle ID from the app's owner. Was: Recovery and confirmation are live; their links (`https://engleazia.com/reset-password?token=…&email=…`, `/verify-email?token=…`) need `assetlinks.json` and apple-app-site-association on that host, and the Apple relay domain registered so they reach hidden Apple emails (S §5.1).
 10. **The password change's refusals.** Answered by the document: a wrong current password is `400 auth.current_password_invalid`, an account with no password `409 auth.password_not_set`, five wrong tries `429 auth.locked_out`. The app keys on the first; it has not been seen on the dev server yet.
 11. **The confirmation link's code.** Answered: a bad `/auth/email/verify` token is now `auth.email_link_invalid` (`test/fixtures/api/auth_email_verify_link_invalid.json`), which the app reads as an expired link, like the recovery's. Please announce a code's change before it reaches the dev server: this one made the expired-link screen show a form error until the app followed.
 12. **App gate.** Answered: `GET /api/v1/app/system/config` carries the versions and the store page, and every `/app/` call refuses a version below the minimum with `426 app.update_required`; the app follows both.
-13. **Localize `message` and `details[].message` via `Accept-Language`**, for logs and support; the app never shows them.
+13. **Localize `message` and `details[].message` via `Accept-Language`.** Answered: no; `message` stays English, and the app never shows it.
 14. **Attempts** accept a client-generated id so resending never duplicates an attempt or XP. Answered for lesson questions: `clientAttemptId` in `POST /api/v1/app/sync` ([lessons.md](lessons.md)) (student requirements §2 principle 4, §7.1, §21; server requirements §19.3).
-15. **Versioning.** Keep deprecated routes alive for one release cycle, and publish the OpenAPI document with every release.
-16. **Lesson content** follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids), with its JSON Schema in v0.1.
+15. **Versioning.** Answered: the path stays `/api/v1`; a new field never breaks; a breaking change is `/api/v2` or a forced update (`426`).
+16. **Lesson content.** Answered: the package format is the content team's; the app reads only `GET /api/v1/app/lessons/{id}` ([lessons.md](lessons.md)). Was: follows the lesson package format in `docs/product/dashboard-server-requirements.md` §20 (timings in ms, stable string ids), with its JSON Schema in v0.1.

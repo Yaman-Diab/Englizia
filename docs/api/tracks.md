@@ -52,5 +52,4 @@ Mock mode keeps its own example in the shape it had (`assets/mock/tracks/units_*
 
 ## Questions for the backend team
 
-1. A level has no `nameEn`, `stageLabelEn` or `cefrCode` in `GradeLevelDto` (`EnrollmentLevelDto` has the last two): the English app shows the Arabic names. Add them?
-2. A level has no kids mode of its own; the panel sets it by level (server doc §6.6), and «تغيير الصف» marks such a grade «وضع الأطفال». The app takes the track's for now. Add `kidsMode` to `GradeLevelDto`?
+1. Answered: `GradeLevelDto` carries `nameEn`, `stageLabelEn`, `cefrCode` and `kidsMode` (the grade's own, else the track's), in `GET /app/tracks` and in `system/config`'s onboarding tracks. The app doesn't read them yet: the English app shows the Arabic names, and a grade takes its track's kids mode (STATUS D-124).

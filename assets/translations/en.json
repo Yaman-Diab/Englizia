@@ -441,6 +441,7 @@
   "lesson_your_sentence": "Your sentence",
   "lesson_pair_right": "Correct: {word}",
   "lesson_pair_wrong": "They don't match. Try again",
+  "lesson_picture_of": "Picture {n} of {total}",
   "lesson_picture_named": "Picture: {name}",
   "lesson_pictures": "Pictures",
   "lesson_meanings": "Arabic words",

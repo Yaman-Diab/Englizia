@@ -167,8 +167,14 @@ class _MatchingBodyState extends State<MatchingBody> {
       shake: _shakes[_keyOf(_Pick(side, pair))] ?? 0,
       semanticLabel: switch (side) {
         _Side.word => pair.id,
-        _Side.meaning when picture => 'lesson_picture_named'.tr(
-          namedArgs: {'name': pair.alt},
+        _Side.meaning when picture && pair.alt.isNotEmpty =>
+          'lesson_picture_named'.tr(namedArgs: {'name': pair.alt}),
+        // With no text, by its place among the pictures.
+        _Side.meaning when picture => 'lesson_picture_of'.tr(
+          namedArgs: {
+            'n': '${widget.exercise.meaningsShown.indexOf(pair) + 1}',
+            'total': '${widget.exercise.meaningsShown.length}',
+          },
         ),
         _Side.meaning => pair.meaning,
       },

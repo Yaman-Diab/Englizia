@@ -459,11 +459,16 @@ When it is sent: as each answer is checked, when the app opens with a session, w
 
 Each answer is kept under its account's id (`user.id` of the sign-in's `TokenResponse`), apart from the account's other data, so that signing out or in clears neither (the backend's note B-28, 2026-11-23). Only the account in use sends its own: the server keeps an answer for the token's owner, so another learner's waits on the phone until they sign in again. Signing out tries to send first (5 seconds at most), then keeps what is left. A session that ended (`401 auth.refresh_token_invalid`) and a trial account keep theirs too. The phone forgets an account's answers in two cases only: a guest who signs out, as the server deletes its account and answers (B-09), and `404 user.not_found`. An answer kept before answers had an owner goes with whoever is signed in. Nothing goes in the request but `sentAt` and `attempts`.
 
+## Answered by the backend (2026-11-23)
+
+- A matching sent as its two pairs changed over is right: the server marks the whole `pairs`, a valid swap counts as wrong at the first try, and the mistake goes on the question's concepts. A list short of a pair is `400 question.answer_invalid`.
+- `forms`: each row has two or three cells, the same number in every row, and none is a heading. The first is what the team writes, usually who (`I / you / we / they`); `[ ]` marks the letters the rule is about.
+- A lesson completes when every question of its version is answered in one `runId`. A template newer than the app comes with a higher `minSupportedVersion`, so the app is asked to update (`426`) rather than skipping a question.
+- Word orders are marked by saved alternatives only, with no AI, so `reviewOrders` and `answers/review` aren't needed; nor is `complete`, as the sync completes a lesson and says so in `lessons`.
+- The questions to the teacher are private, a learner seeing only theirs and the replies (v1.0).
+
 ## Questions for the backend team
 
-1. A grammar lesson with a video (`withVideo: true`): what does `video` carry (its sources, length, captions), and where does the share to watch before the exercises come from?
-2. A matching: the app corrects pair by pair, so the only whole answer it has is the right one. It sends a first wrong try as two pairs changed over. Is that what should be marked as the first try, or would the pairs that had a mistake serve better?
-3. `picture_choice` options and a matching's pictures have no text, so a screen reader has nothing to say for them. Could each carry one?
-4. `forms`: is the first cell always the row's name and the rest its forms? Can a row be a heading?
-5. A question the app can't show (a template newer than the app): does the lesson still complete without its answer?
-6. Kids' lessons use the six templates. The app's kid screens outside them are the word card, the letter card, the story, the song, the written dialogue and «كرّر بعدي» (S §13, designs `Kid Lesson` and `Kid Media`): which of them will a kids' lesson carry, and in what shape?
+1. A grade lesson's `video` is `null` until the video's hosting is decided; the share to watch (80%) comes in v0.2 with where a lesson stopped. Its shape is still awaited.
+2. Pictures have no text for a screen reader until the team decides (a caption may give the answer away); until then a picture option is read by its place, «الصورة 1 من 4».
+3. Kids' lessons use the six templates. The app's kid screens outside them are the word card, the letter card, the story, the song, the written dialogue and «كرّر بعدي» (S §13, designs `Kid Lesson` and `Kid Media`): which of them will a kids' lesson carry, and in what shape?
