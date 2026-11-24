@@ -31,10 +31,24 @@ abstract final class OnboardingModel {
     required String language,
     required String timeZone,
   }) {
+    // Each kind of track takes only its own: the server refuses any other
+    // (`422 enrollment.start_invalid`). A placement track starts at its
+    // first published level unless the test places the learner, a grade
+    // track at the grade chosen, a direct track at its first level.
     final (String? start, String? levelId) = switch (answers) {
-      OnboardingPath(placementTest: true) => ('placement', null),
+      OnboardingPath(entryMethod: TrackEntryMethod.placementTest) => (
+        answers.placementTest ? 'placement' : 'beginner',
+        null,
+      ),
+      OnboardingPath(entryMethod: TrackEntryMethod.gradeSelection) => (
+        null,
+        answers.grade?.id,
+      ),
+      OnboardingPath(entryMethod: TrackEntryMethod.directStart) => (null, null),
+      // No track kind known: what the answers chose.
       OnboardingPath(:final grade?) => (null, grade.id),
-      OnboardingPath(:final startLevel) => ('beginner', startLevel?.id),
+      OnboardingPath(placementTest: true) => ('placement', null),
+      _ => (null, null),
     };
     return {
       'uiLanguage': language,
@@ -46,11 +60,11 @@ abstract final class OnboardingModel {
         null => null,
       },
       'trackId': answers.trackId,
-      'start': start,
-      'levelId': levelId,
-      'child': answers.childName == null
-          ? null
-          : {'name': answers.childName, 'age': answers.childAge},
+      // Left out rather than null: a field a track doesn't take is refused.
+      'start': ?start,
+      'levelId': ?levelId,
+      if (answers.childName != null)
+        'child': {'name': answers.childName, 'age': answers.childAge},
       'learningReasons': [for (final reason in answers.reasons) reason.name],
       'dailyGoalMinutes': answers.dailyGoalMinutes,
       'streakGoalDays': answers.challengeDays,

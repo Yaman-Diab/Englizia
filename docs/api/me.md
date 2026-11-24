@@ -120,7 +120,7 @@ A wrong current password is `400 auth.current_password_invalid` (a 400, as the s
 
 ## `DELETE /api/v1/app/me`
 
-«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 5), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
+«حذف الحساب», which Google Play requires inside the app (and on a web page). A password account sends `{ "password": "…" }`, a wrong one being a `400` on `password`; a Google or Apple account signs in again first; how it proves that to the server isn't agreed (docs/api/auth.md, question 4), so the app's button for it opens a placeholder. Everything goes: progress in every track, saved words, test results. `204`, then the app ends the session. Proposed.
 
 ## Questions for the backend team
 

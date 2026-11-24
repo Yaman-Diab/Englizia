@@ -19,13 +19,13 @@ Onboarding's answers for a new account, sent right after it is made, whichever w
 | `timeZone` | The phone's offset as an IANA `Etc/GMT` zone (`Etc/GMT-3` for UTC+3; `UTC` when the offset has minutes; STATUS D-043) |
 | `learnerKind` | `adult`, `child` or `school_student`, from "who will learn" |
 | `trackId` | The track the audience leads to |
-| `start`, `levelId` | `placement` and no level for the placement test; no start and the grade's level for a school student; else `beginner` and the starting level |
+| `start`, `levelId` | By the track's `entryMode`, as the server refuses any other (`422 enrollment.start_invalid`, `details[].code` `not_allowed` or `required`; the backend's answers of 2026-11-23, §2.1). `placement`: `start` is `placement` for the test or `beginner` for «ابدأ من البداية دون اختبار», and no `levelId`: the server starts at the first published level. `grade_choice`: no `start`, and the grade's `levelId`. `direct`: neither. Fields a track doesn't take are left out, not sent as `null`; so is `child` without a child. The same rules hold for `POST /api/v1/app/enrollments` |
 | `child` | `{name, age}` on the child path, else null |
 | `learningReasons` | The reasons chosen, as the server names them |
 | `dailyGoalMinutes`, `streakGoalDays` | The goal and the streak challenge |
 | `reminderTime` | `"HH:mm:ss"`, phone time, or null for none |
 
-Answers `200 OnboardingResultDto { user, enrollment }`; the app doesn't read it yet. If the answers fail, a retry of the same way sends only them and makes no second account; a `409` is taken as answered already. Not seen on the dev server yet: it has no tracks to answer with.
+Answers `200 OnboardingResultDto { user, enrollment }`; the app doesn't read it yet. If the answers fail, a retry of the same way sends only them and makes no second account; a `409 onboarding.already_done` is taken as answered already, as the backend confirms.
 
 ## Upgrading a guest
 
@@ -101,5 +101,4 @@ Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. T
 1. How long an unused guest is kept.
 2. A guest who signs in to an email account that exists leaves the guest behind (the app says the email has an account and offers sign-in): merge instead?
 3. Time zone: the app sends an `Etc/GMT` zone from the phone's offset. A city (`Asia/Damascus`) follows daylight-saving changes; the app can send one once a package is chosen (STATUS D-043). Confirm `Etc/GMT-3` is accepted.
-4. Onboarding's answers: confirm `start: "beginner"` with a level is right for a learner who chose where to start, and what `409` on `me/onboarding` means.
-5. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.
+4. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.
