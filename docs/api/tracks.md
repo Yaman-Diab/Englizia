@@ -1,6 +1,6 @@
 # Tracks
 
-Status: **live** on the dev server for the tracks and their levels; a level's units are the track's map's. The dev server has one track, General English (demo), whose `levels` come empty from `GET /api/v1/app/tracks` (docs/api/home.md, question 4); the fixtures `app_system_config.json` and `app_tracks_empty.json` were saved before it existed. Mock mode serves the same shapes with the three onboarding tracks (`assets/mock/settings/system_config.json`, `assets/mock/tracks/catalog.json`); delete `trk_emar` from both to see the «قريبًا» state, exactly as hiding the track in the panel would.
+Status: **live** on the dev server for the tracks and their levels; a level's units are the track's map's. The dev server has one track, General English (demo), whose `levels` come empty from `GET /api/v1/app/tracks` (docs/api/home.md, question 2); the fixtures `app_system_config.json` and `app_tracks_empty.json` were saved before it existed. Mock mode serves the same shapes with the three onboarding tracks (`assets/mock/settings/system_config.json`, `assets/mock/tracks/catalog.json`); delete `trk_emar` from both to see the «قريبًا» state, exactly as hiding the track in the panel would.
 Requirements: student doc §3.1–3.2 and §4.2, server doc §5.2 and §19.2.
 
 A track brings its levels with it: there is no levels endpoint. The app keeps them by track for the session, from whichever list it fetched.

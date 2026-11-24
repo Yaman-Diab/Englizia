@@ -17,20 +17,23 @@ const _cefr = {
   'c1': 'c1',
 };
 
-/// Whose track it is.
-// ASSUMPTION(api): an enrollment doesn't say it; read from what it carries
-// (docs/api/home.md, question 2).
+/// Whose track it is: the track's own `onboardingAudience`, else what the
+/// enrollment carries.
 String _audience(Map<String, Object?> enrollment) {
   final track = enrollment.readMap('track');
+  if (track?.readString('onboardingAudience') case final audience?) {
+    return audience;
+  }
   if (enrollment['child'] != null || (track?.readBool('kidsMode') ?? false)) {
     return 'child';
   }
-  return track?.readString('levelLabel') == 'grade' ? 'schoolStudent' : 'self';
+  return track?.readString('levelLabel') == 'grade'
+      ? 'school_student'
+      : 'adult';
 }
 
-/// How the account signs in, as home's email reminder asks.
-// ASSUMPTION(api): `authMethods` is a list of names (docs/api/home.md,
-// question 3).
+/// How the account signs in, as home's email reminder asks: `authMethods`
+/// holds `password`, `google` and `apple`, and a guest's is empty.
 String _signIn(Map<String, Object?> me) {
   if (me.readString('accountType') == 'guest') return 'guest';
   final methods = [
@@ -160,7 +163,8 @@ Map<String, Object?> _track(
     'unit': ?enrollment.readInt('unitNo'),
     'units': ?enrollment.readInt('unitCount'),
     'unitCover':
-        ?((active ? currentUnit?.readString('coverUrl') : null) ??
+        ?(enrollment.readString('unitCoverUrl') ??
+        (active ? currentUnit?.readString('coverUrl') : null) ??
         track?.readString('coverUrl')),
     'active': active,
   };

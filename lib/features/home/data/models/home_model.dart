@@ -99,9 +99,12 @@ final class HomeModel {
     );
   }
 
+  /// The server's names (`OnboardingAudience`), and the mock's older ones.
   static const _audiences = {
-    'self': TrackAudience.self,
+    'adult': TrackAudience.self,
     'child': TrackAudience.child,
+    'school_student': TrackAudience.schoolStudent,
+    'self': TrackAudience.self,
     'schoolStudent': TrackAudience.schoolStudent,
   };
 

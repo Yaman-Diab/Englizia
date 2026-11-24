@@ -73,6 +73,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 
 ### Changed
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
+- «أنا» reads the server: your name, account number, tracks with their level and unit, lessons done and the days you learned.
 - Onboarding goes through to the end against the server: the goal, the challenge and the reminder read the app's own settings until the server has them, and "preparing" names the first unit from the track's map.
 - Onboarding finishes on every kind of track: what it sends of where the learner starts is what that track takes.
 - An answer given offline is never lost by signing out: it waits on the phone under its learner, and goes when they sign in again, even if someone else used the phone in between.

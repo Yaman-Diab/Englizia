@@ -180,26 +180,61 @@ void main() {
       expect(track.unitCoverUrl, _home().units.first.coverUrl);
     });
 
-    test('a child’s track and a school’s are told apart', () {
-      Map<String, Object?> enrollment(void Function(Map<String, Object?>) to) {
-        final one = _enrollments().single;
-        to(one);
-        return one;
-      }
+    Map<String, Object?> enrollment(void Function(Map<String, Object?>) to) {
+      final one = _enrollments().single;
+      to(one);
+      return one;
+    }
 
+    test('whose track it is, as the track says', () {
+      HomeSnapshot as(String audience) => _home(
+        enrollments: [
+          enrollment(
+            (e) => asJsonMap(e['track'])['onboardingAudience'] = audience,
+          ),
+        ],
+      );
+
+      expect(_home().enrollment.audience, TrackAudience.self, reason: 'adult');
+      expect(as('child').enrollment.audience, TrackAudience.child);
+      expect(
+        as('school_student').enrollment.audience,
+        TrackAudience.schoolStudent,
+      );
+    });
+
+    test('a track that doesn\u2019t say: read from what it carries', () {
+      void unsaid(Map<String, Object?> e) =>
+          asJsonMap(e['track']).remove('onboardingAudience');
       final child = _home(
         enrollments: [
-          enrollment((e) => e['child'] = {'name': 'Child', 'age': 7}),
+          enrollment((e) {
+            unsaid(e);
+            e['child'] = {'name': 'Child', 'age': 7};
+          }),
         ],
       );
       final school = _home(
         enrollments: [
-          enrollment((e) => asJsonMap(e['track'])['levelLabel'] = 'grade'),
+          enrollment((e) {
+            unsaid(e);
+            asJsonMap(e['track'])['levelLabel'] = 'grade';
+          }),
         ],
       );
 
       expect(child.enrollment.audience, TrackAudience.child);
       expect(school.enrollment.audience, TrackAudience.schoolStudent);
+    });
+
+    test('the active track\u2019s cover is the enrollment\u2019s own', () {
+      final track = _home(
+        enrollments: [
+          enrollment((e) => e['unitCoverUrl'] = 'https://example.com/u.webp'),
+        ],
+      ).enrollments.single;
+
+      expect(track.unitCoverUrl, 'https://example.com/u.webp');
     });
 
     test('a test put off shows its card, with how long it takes', () {

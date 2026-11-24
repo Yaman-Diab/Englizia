@@ -11,7 +11,8 @@
           "coverUrl": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-e928-7f07-88e1-f4a97a690c2e.webp",
           "entryMode": "placement",
           "kidsMode": false,
-          "levelLabel": "level"
+          "levelLabel": "level",
+          "onboardingAudience": "adult"
         },
         "level": {
           "id": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
@@ -27,10 +28,11 @@
         "joinedAt": "2026-11-20T13:27:38.622Z",
         "available": true,
         "unitNo": 1,
-        "unitCount": 2
+        "unitCount": 2,
+        "unitCoverUrl": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-ed68-767e-accc-e6c18cefd300.webp"
       }
     ]
   },
   "error": null,
-  "traceId": "c8be69c163ea55fc501125a4ca70553e"
+  "traceId": "1b1c1be7c666d7bb69f6dbcc1cd1e34a"
 }

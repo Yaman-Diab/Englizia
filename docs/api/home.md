@@ -29,12 +29,12 @@ One read of the tracks, then the account and the active track's map together (`s
 
 | From | In the app's shape |
 |---|---|
-| `GET /app/me`: `displayName`, `emailVerified`, `accountType`, `authMethods` | `learner.name`, `emailVerified`, `signIn`: `guest` for a guest account, else by `authMethods`, assumed to name `password`, `google` or `apple` (question 3) |
-| The map's completed lessons | `learner.lessonsDone`: those of this level only, as the server has no count of all (question 5) |
+| `GET /app/me`: `displayName`, `emailVerified`, `accountType`, `authMethods` | `learner.name`, `emailVerified`, `signIn`: `guest` for a guest account (its `authMethods` is empty), else `email` with `password` among `authMethods`, then `google`, then `apple` |
+| The map's completed lessons | `learner.lessonsDone`: those of this level only, as the server has no count of all (question 3) |
 | `GET /app/enrollments` `items[]` | `enrollments[]`: the track's id stands for the enrollment's too, as the server names an enrollment by its track; `track.nameAr`, the level's names, `unitNo`, `unitCount`, `isActive`. The active one's cover is its unit's, the others' their track's |
-| An enrollment's `child`, its track's `kidsMode` and `levelLabel` | `audience`: `child` with a child or a kids' track, `schoolStudent` with `levelLabel: grade`, else `self` (assumed, question 2) |
+| An enrollment's `track.onboardingAudience` | `audience`: `adult`, `child` or `school_student`. An enrollment without it is read from its `child`, its track's `kidsMode` and `levelLabel` |
 | `unlockMode` | `enrollment.ordered`: false for `all_open` |
-| `level` | `level.id`; `label` is its CEFR code (`A1`, `Pre-A1`), or its name when it has none; `name` is `nameAr` without that code in front; `cefr`. `level.completed` once every unit is `completed`. No `next` (question 4) |
+| `level` | `level.id`; `label` is its CEFR code (`A1`, `Pre-A1`), or its name when it has none; `name` is `nameAr` without that code in front; `cefr`. `level.completed` once every unit is `completed`. No `next` (question 2) |
 | `units[].state` | `completed` is `done`; `unlocked` is `current` for the unit that holds `nextLessonId` (else the first unlocked one) and `open` for any other; `locked` is `locked`, named after the unit before it in a track that opens in order |
 | `units[].lessons[]` | The current unit's `lessons[]`, and a locked unit's `preview`: `type` as the app's `kind`, `titleAr`, `minutes`, `bookPages.from` as `page`, `done` for `state: completed`. Where a lesson stopped is the phone's own |
 | `GET /app/placement?trackId=`, asked only while the enrollment's `placementPending` | `cards.placement.estimatedMinutes`, from `test.estimatedSeconds` without and with the deciding stage; home shows without the card if that call fails |
@@ -193,10 +193,8 @@ The common errors (`README.md`). Offline, the phone shows what it kept with «ل
 ## Questions for the backend team
 
 1. Home is put together from the account, the tracks and the map. Where will the rest come from: the week (minutes a day against the goal, and the day's start), the streak and its freezes, what is due for review, and the one-time notices (a freeze used, the streak broken)?
-2. Whose track an enrollment is (the learner's own, a child's, a school's): is there a field for it? The app reads it from `child`, `kidsMode` and `levelLabel`.
-3. `authMethods`: which names can it hold?
-4. The level after this one, for «المستوى التالي» and «ابدأ B1»: `GET /api/v1/app/tracks` lists no levels for the demo track.
-5. The lessons a learner has finished in all, for the first day and the email reminder: the map only has this level's.
-6. A lesson `in_progress`: is where it stopped kept, for another phone?
-7. A unit's `test`: what does it carry?
-8. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation and the level check among a unit's lessons, a kid's stars and recorded titles: will the map carry them?
+2. The level after this one, for «المستوى التالي» and «ابدأ B1»: `GET /api/v1/app/tracks` lists no levels for the demo track.
+3. The lessons a learner has finished in all, for the first day and the email reminder: the map only has this level's.
+4. A lesson `in_progress`: is where it stopped kept, for another phone?
+5. A unit's `test`: what does it carry?
+6. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation and the level check among a unit's lessons, a kid's stars and recorded titles: will the map carry them?
