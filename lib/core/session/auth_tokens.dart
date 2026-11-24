@@ -12,6 +12,7 @@ final class AuthTokens extends Equatable {
     this.accessExpiresAt,
     this.refreshExpiresAt,
     this.deviceId,
+    this.userId,
   });
 
   final String accessToken;
@@ -29,6 +30,10 @@ final class AuthTokens extends Equatable {
   /// these tokens, so it is kept in settings, not with them.
   final String? deviceId;
 
+  /// The account's id on the server (`user.id`); null for tokens kept before
+  /// it was. What the phone keeps for an account is kept under it.
+  final String? userId;
+
   /// Whether the access token expires within [margin] of [now].
   bool expiresSoon(DateTime now, {required Duration margin}) =>
       switch (accessExpiresAt) {
@@ -43,6 +48,7 @@ final class AuthTokens extends Equatable {
     String? refreshToken,
     DateTime? accessExpiresAt,
     DateTime? refreshExpiresAt,
+    String? userId,
   }) => AuthTokens(
     accessToken: accessToken,
     refreshToken: refreshToken ?? this.refreshToken,
@@ -50,6 +56,7 @@ final class AuthTokens extends Equatable {
     accessExpiresAt: accessExpiresAt,
     refreshExpiresAt: refreshExpiresAt ?? this.refreshExpiresAt,
     deviceId: deviceId,
+    userId: this.userId ?? userId,
   );
 
   /// The same session, now a member's: a guest's account upgraded keeps its
@@ -60,6 +67,7 @@ final class AuthTokens extends Equatable {
     accessExpiresAt: accessExpiresAt,
     refreshExpiresAt: refreshExpiresAt,
     deviceId: deviceId,
+    userId: userId,
   );
 
   @override
@@ -70,6 +78,7 @@ final class AuthTokens extends Equatable {
     accessExpiresAt,
     refreshExpiresAt,
     deviceId,
+    userId,
   ];
 
   // Tokens must never reach logs through string interpolation.

@@ -63,6 +63,34 @@ void main() {
     expect(tokens.accessExpiresAt, isNull);
   });
 
+  test('the account\u2019s id comes with a new session', () {
+    final tokens = TokenResponse.parse(
+      enveloped({
+        'accessToken': 'a',
+        'refreshToken': 'r',
+        'user': {'id': 'user-1', 'accountType': 'standard'},
+      }),
+      now: now,
+    );
+
+    expect(tokens.userId, 'user-1');
+  });
+
+  test('a refresh keeps the account\u2019s id, and gives one it lacked', () {
+    const known = AuthTokens(accessToken: 'a', refreshToken: 'r', userId: 'u');
+    const unknown = AuthTokens(accessToken: 'a', refreshToken: 'r');
+    final answer = enveloped({
+      'accessToken': 'new',
+      'user': {'id': 'other'},
+    });
+
+    expect(TokenResponse.parse(answer, now: now, current: known).userId, 'u');
+    expect(
+      TokenResponse.parse(answer, now: now, current: unknown).userId,
+      'other',
+    );
+  });
+
   test('expiresSoon looks ahead by the margin', () {
     final tokens = AuthTokens(
       accessToken: 'a',

@@ -36,10 +36,16 @@ class AppSessionController extends ChangeNotifier {
 
   final _leavingTasks = <Future<void> Function()>[];
   final _clearingTasks = <Future<void> Function()>[];
+  final _guestTasks = <Future<void> Function(String? userId)>[];
   SessionStatus _status = SessionStatus.unknown;
+  String? _userId;
   bool _expiring = false;
 
   SessionStatus get status => _status;
+
+  /// The account in use (`user.id`); null with none, or for tokens kept
+  /// before the id was.
+  String? get userId => _userId;
 
   /// A guest or member account is in use.
   bool get hasSession =>
@@ -56,6 +62,7 @@ class AppSessionController extends ChangeNotifier {
         await _settings.markLaunched();
       }
       final tokens = await _tokens.read();
+      _userId = tokens?.userId;
       _setStatus(_statusOf(tokens));
     } catch (error, stackTrace) {
       AppLogger.error(error, stackTrace, 'Session bootstrap failed');
@@ -69,6 +76,7 @@ class AppSessionController extends ChangeNotifier {
   Future<bool> signIn(AuthTokens tokens) async {
     final saved = await _tokens.write(tokens);
     await _clearAccountData();
+    _userId = tokens.userId;
     _setStatus(_statusOf(tokens));
     return saved;
   }
@@ -77,6 +85,7 @@ class AppSessionController extends ChangeNotifier {
   /// what the phone keeps for it stays, answers not sent yet above all.
   Future<bool> upgrade(AuthTokens tokens) async {
     final saved = await _tokens.write(tokens);
+    _userId = tokens.userId ?? _userId;
     _setStatus(_statusOf(tokens));
     return saved;
   }
@@ -97,6 +106,11 @@ class AppSessionController extends ChangeNotifier {
     }
   }
 
+  /// Adds what to forget of a guest who signs out (B-09): the server deletes
+  /// the account and all of it, so what the phone kept for it can never go.
+  void onGuestLeft(Future<void> Function(String? userId) task) =>
+      _guestTasks.add(task);
+
   /// Adds work to finish while the session's token still works: sending what
   /// the phone kept, which leaving would otherwise lose.
   void onLeaving(Future<void> Function() task) => _leavingTasks.add(task);
@@ -114,10 +128,23 @@ class AppSessionController extends ChangeNotifier {
   }
 
   /// Local sign-out. The auth feature calls the server logout first
-  /// (best effort), then this. A guest who signs out loses the account.
+  /// (best effort), then this. A guest who signs out loses the account; a
+  /// session that ended keeps what the phone kept for it, for its next sign-in.
   Future<void> signOut() async {
+    final guestLeaving = _status == SessionStatus.guest && !_expiring;
+    final leaving = _userId;
     await _tokens.clear();
     await _clearAccountData();
+    if (guestLeaving) {
+      for (final task in _guestTasks) {
+        try {
+          await task(leaving);
+        } catch (error, stackTrace) {
+          AppLogger.error(error, stackTrace, 'Forgetting a guest failed');
+        }
+      }
+    }
+    _userId = null;
     _setStatus(SessionStatus.signedOut);
   }
 

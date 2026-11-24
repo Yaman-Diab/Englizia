@@ -457,7 +457,7 @@ When the request fails whole, the server keeps nothing:
 
 When it is sent: as each answer is checked, when the app opens with a session, when the connection returns, when a lesson ends, and every 3 minutes while the app is open. One send at a time, the oldest answers first, 200 at most in a request.
 
-The queue is the account's: signing in or out clears what the phone kept, after a last try to send it (5 seconds at most). A guest's answers go with its account on the server.
+Each answer is kept under its account's id (`user.id` of the sign-in's `TokenResponse`), apart from the account's other data, so that signing out or in clears neither (the backend's note B-28, 2026-11-23). Only the account in use sends its own: the server keeps an answer for the token's owner, so another learner's waits on the phone until they sign in again. Signing out tries to send first (5 seconds at most), then keeps what is left. A session that ended (`401 auth.refresh_token_invalid`) and a trial account keep theirs too. The phone forgets an account's answers in two cases only: a guest who signs out, as the server deletes its account and answers (B-09), and `404 user.not_found`. An answer kept before answers had an owner goes with whoever is signed in. Nothing goes in the request but `sentAt` and `attempts`.
 
 ## Questions for the backend team
 

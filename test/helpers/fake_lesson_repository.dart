@@ -223,6 +223,12 @@ class FakeLessonRepository implements LessonRepository {
   @override
   Future<void> saveReport(ExerciseReport report) async => reports.add(report);
 
+  /// The accounts whose answers were forgotten.
+  final forgotten = <String?>[];
+
+  @override
+  Future<void> forgetAnswers(String? userId) async => forgotten.add(userId);
+
   /// What a send says of itself.
   SendOutcome outcome = const SendOutcome.sent();
 

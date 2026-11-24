@@ -18,6 +18,7 @@ final class SettingsStorageService {
   static const _placementProgressKey = 'account.placement_progress';
   static const _emailReminderKey = 'account.email_reminder_hidden_until';
   static const _lessonProgressKey = 'account.lesson_progress';
+  static const _answerQueueKey = 'app.answer_queue';
   static const _lessonCacheKey = 'account.lesson_cache';
   static const _videoWatchKey = 'account.video_watch';
   static const _videoQualityKey = 'settings.video_quality';
@@ -111,6 +112,15 @@ final class SettingsStorageService {
 
   Future<void> setLessonProgress(String json) async {
     await _prefs.setString(_lessonProgressKey, json);
+  }
+
+  /// The answers not on the server yet, each under its account's id, as
+  /// JSON. Not the account's data: they outlive a sign-out, so that each goes
+  /// when its learner signs in again (B-28).
+  String? get answerQueue => _prefs.getString(_answerQueueKey);
+
+  Future<void> setAnswerQueue(String json) async {
+    await _prefs.setString(_answerQueueKey, json);
   }
 
   /// The lessons last opened as they came, as JSON, to open again offline.

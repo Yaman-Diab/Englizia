@@ -33,12 +33,14 @@ abstract final class TokenResponse {
     final refreshExpiresAt = json
         .readDateTime('refreshTokenExpiresAt')
         ?.toUtc();
+    final userId = json.readMap('user')?.readString('id');
     if (current != null) {
       return current.renewed(
         accessToken: access,
         refreshToken: refresh,
         accessExpiresAt: accessExpiresAt,
         refreshExpiresAt: refreshExpiresAt,
+        userId: userId,
       );
     }
     if (refresh == null) {
@@ -55,6 +57,7 @@ abstract final class TokenResponse {
       accessExpiresAt: accessExpiresAt,
       refreshExpiresAt: refreshExpiresAt,
       deviceId: json.readString('deviceId'),
+      userId: userId,
     );
   }
 }

@@ -53,6 +53,7 @@ void registerLessonDependencies(GetIt sl) {
         // Deleted on the server while its token still works: the same end
         // as a session the server no longer takes.
         onAccountGone: () => sl<AppSessionController>().expire(),
+        userId: () => sl<AppSessionController>().userId,
       ),
     )
     ..registerLazySingleton<UnitRemoteDataSource>(
@@ -144,7 +145,8 @@ void registerLessonDependencies(GetIt sl) {
     ..registerFactoryParam<LessonCompleteCubit, LessonSummary, void>(
       (summary, _) => LessonCompleteCubit(sl(), sl(), sl(), summary: summary),
     );
-  sl<AppSessionController>().onLeaving(
-    () => sl<LessonRepository>().sendSaved(),
-  );
+  sl<AppSessionController>()
+    ..onLeaving(() => sl<LessonRepository>().sendSaved())
+    // The server deletes a guest's account and its answers as it signs out.
+    ..onGuestLeft((userId) => sl<LessonRepository>().forgetAnswers(userId));
 }

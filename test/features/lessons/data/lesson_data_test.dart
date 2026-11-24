@@ -1587,10 +1587,17 @@ void main() {
 
     Future<void> settle() => Future<void>.delayed(Duration.zero);
 
-    List<Object?> unsent() => switch (settings.lessonProgress) {
-      final saved? => (jsonDecode(saved) as Map)['unsent'] as List,
-      null => const [],
-    };
+    /// Everything waiting: the answers, every account's, then the rest.
+    List<Object?> unsent() => [
+      ...switch (settings.answerQueue) {
+        final saved? => jsonDecode(saved) as List,
+        null => const [],
+      },
+      ...switch (settings.lessonProgress) {
+        final saved? => (jsonDecode(saved) as Map)['unsent'] as List,
+        null => const [],
+      },
+    ];
 
     const spoken = ExerciseAttempt(
       lessonId: 'les',
@@ -2028,13 +2035,151 @@ void main() {
       expect(remote.sent, hasLength(1));
     });
 
-    test('leaving the account forgets all of it', () async {
+    test('leaving the account forgets its progress, not its answers', () async {
       remote.offline = true;
       await repository.saveAttempt(_attempt);
+      await repository.saveProgress(
+        'les',
+        const ExerciseProgress(done: {'q1'}),
+      );
 
       await settings.clearAccountData();
 
       expect(settings.lessonProgress, isNull);
+      expect(unsent(), hasLength(1));
+    });
+
+    group('each answer is its learner\u2019s (B-28)', () {
+      const ahmad = AuthTokens(
+        accessToken: 'a1',
+        refreshToken: 'r1',
+        userId: 'user-ahmad',
+      );
+      const sara = AuthTokens(
+        accessToken: 'a2',
+        refreshToken: 'r2',
+        userId: 'user-sara',
+      );
+      const guest = AuthTokens(
+        accessToken: 'a3',
+        refreshToken: 'r3',
+        kind: AccountKind.guest,
+        userId: 'user-guest',
+      );
+
+      late AppSessionController session;
+      late LessonRepositoryImpl phone;
+
+      setUp(() async {
+        session = _session(settings);
+        phone = LessonRepositoryImpl(
+          remote,
+          settings: settings,
+          userId: () => session.userId,
+        );
+        addTearDown(phone.dispose);
+        session.onGuestLeft(phone.forgetAnswers);
+      });
+
+      Future<void> answerOffline() async {
+        await phone.getLesson('les');
+        remote.offline = true;
+        await phone.saveAttempt(_attempt);
+        await settle();
+        remote.offline = false;
+      }
+
+      test(
+        'signed out, they wait; another learner sends only theirs',
+        () async {
+          await session.signIn(ahmad);
+          await answerOffline();
+          await session.signOut();
+          expect(unsent(), hasLength(1), reason: 'kept for Ahmad');
+
+          await session.signIn(sara);
+          await answerOffline();
+          await phone.sendSaved();
+
+          expect(remote.sent, hasLength(1), reason: 'Sara\u2019s alone');
+          expect(unsent(), hasLength(1), reason: 'Ahmad\u2019s waits');
+
+          await session.signOut();
+          await session.signIn(ahmad);
+          await phone.sendSaved();
+
+          expect(remote.sent, hasLength(2));
+          expect(unsent(), isEmpty);
+        },
+      );
+
+      test('a session that ended keeps them for its next sign-in', () async {
+        await session.signIn(ahmad);
+        await answerOffline();
+
+        await session.expire();
+        await session.signIn(ahmad);
+        await phone.sendSaved();
+
+        expect(remote.sent, hasLength(1));
+      });
+
+      test('a guest who signs out leaves nothing behind', () async {
+        await session.signIn(guest);
+        await answerOffline();
+
+        await session.signOut();
+
+        expect(unsent(), isEmpty);
+      });
+
+      test('a guest whose session ended keeps them', () async {
+        await session.signIn(guest);
+        await answerOffline();
+
+        await session.expire();
+
+        expect(unsent(), hasLength(1));
+      });
+
+      test('an account the server deleted forgets its own only', () async {
+        await session.signIn(ahmad);
+        await answerOffline();
+        await session.signOut();
+        await session.signIn(sara);
+        await answerOffline();
+        remote.refuseOnce = const ApiException(
+          statusCode: 404,
+          code: 'user.not_found',
+        );
+
+        await phone.sendSaved();
+
+        expect(unsent(), hasLength(1), reason: 'Ahmad\u2019s stays');
+      });
+
+      test(
+        'an answer kept with the account\u2019s data moves to its own place',
+        () async {
+          await session.signIn(ahmad);
+          final store = LessonStoreModel(
+            unsent: [
+              {
+                'id': 'old',
+                'kind': 'answer',
+                'lessonId': 'les',
+                'request': {'clientAttemptId': 'old'},
+              },
+            ],
+          );
+          await settings.setLessonProgress(jsonEncode(store.toJson()));
+
+          await phone.sendSaved();
+
+          expect(remote.sent.single['clientAttemptId'], 'old');
+          expect(unsent(), isEmpty);
+        },
+      );
     });
 
     test('a guest who becomes a member keeps what was not sent', () async {
@@ -2054,14 +2199,19 @@ void main() {
       expect(remote.sent, hasLength(1));
     });
 
-    test('another account starts clean', () async {
+    test('another account starts with its own progress', () async {
       remote.offline = true;
       await repository.saveAttempt(_attempt);
+      await repository.saveProgress(
+        'les',
+        const ExerciseProgress(done: {'q1'}),
+      );
       await settle();
 
       await _session(settings).signIn(_memberTokens);
 
       expect(settings.lessonProgress, isNull);
+      expect(unsent(), hasLength(1), reason: 'the answer waits for its owner');
     });
 
     test('a lesson comes in this phone\'s order, steady', () async {

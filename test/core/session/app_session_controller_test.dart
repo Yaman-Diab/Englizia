@@ -157,6 +157,64 @@ void main() {
     expect(session.status, SessionStatus.signedOut);
   });
 
+  group('whose session it is', () {
+    const ahmad = AuthTokens(
+      accessToken: 'a',
+      refreshToken: 'r',
+      userId: 'user-ahmad',
+    );
+    const guest = AuthTokens(
+      accessToken: 'g',
+      refreshToken: 'r',
+      kind: AccountKind.guest,
+      userId: 'user-guest',
+    );
+
+    test('the account\u2019s id follows the session', () async {
+      final store = FakeTokenStorage(ahmad);
+      final session = AppSessionController(
+        tokens: store,
+        settings: await settings(launchedBefore: true),
+      );
+
+      await session.bootstrap();
+      expect(session.userId, 'user-ahmad');
+
+      await session.signOut();
+      expect(session.userId, isNull);
+
+      await session.signIn(guest);
+      expect(session.userId, 'user-guest');
+
+      await session.upgrade(guest.asMember());
+      expect(session.userId, 'user-guest', reason: 'the same account');
+    });
+
+    test(
+      'a guest who signs out is forgotten; one whose session ended is not',
+      () async {
+        final session = AppSessionController(
+          tokens: FakeTokenStorage(),
+          settings: await settings(launchedBefore: true),
+        );
+        final forgotten = <String?>[];
+        session.onGuestLeft((userId) async => forgotten.add(userId));
+
+        await session.signIn(guest);
+        await session.expire();
+        expect(forgotten, isEmpty);
+
+        await session.signIn(guest);
+        await session.signOut();
+        expect(forgotten, ['user-guest']);
+
+        await session.signIn(ahmad);
+        await session.signOut();
+        expect(forgotten, ['user-guest'], reason: 'a member is kept');
+      },
+    );
+  });
+
   test('parallel expiries sign out once and notify listeners', () async {
     final storage = FakeTokenStorage(tokens);
     final session = AppSessionController(
