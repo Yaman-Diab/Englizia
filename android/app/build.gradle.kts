@@ -17,7 +17,7 @@ val keystoreProperties = Properties().apply {
 val hasReleaseKeystore = keystoreProperties.containsKey("storeFile")
 
 android {
-    // The application ID is provisional and must be final before the first store upload.
+    // The application ID is final (RELEASE.md); changing it after the first store upload isn't possible.
     namespace = "com.engleazia.app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
