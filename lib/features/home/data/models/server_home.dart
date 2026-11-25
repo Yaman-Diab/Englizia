@@ -84,7 +84,10 @@ Map<String, Object?> homeFromServer({
       // The lessons finished in this level: the server has no count of all.
       'lessonsDone': [
         for (final unit in units)
-          ...lessonsFromMap(unit).where((lesson) => lesson['done'] == true),
+          ...lessonsFromMap(
+            unit,
+            test: false,
+          ).where((lesson) => lesson['done'] == true),
       ].length,
       'emailVerified': me.readBool('emailVerified') ?? false,
       'signIn': _signIn(me),
@@ -144,11 +147,15 @@ Map<String, Object?> homeFromServer({
                   if (goal is Map)
                     ?goal.cast<String, Object?>().readString('ar'),
               ].firstOrNull,
-              'lessons': lessonsFromMap(unit),
+              'lessons': lessonsFromMap(unit, test: false),
             },
         },
     ],
-    'cards': {'placement': ?_placementCard(active, placement)},
+    'cards': {
+      'placement': ?_placementCard(active, placement),
+      // The server's own shape: `{id, direction, percent, level, suggestedLevel}`.
+      'levelSuggestion': ?map.readMap('levelCheck'),
+    },
   };
 }
 

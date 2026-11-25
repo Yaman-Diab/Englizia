@@ -13,6 +13,11 @@ AppIcon lessonKindIcon(LessonKind kind) => switch (kind) {
   LessonKind.other => AppIcon.book,
 };
 
+/// A lesson's title as shown: its kind's name when it has none, as a unit's
+/// test from the server has none.
+String shownTitle(String title, LessonKind kind) =>
+    title.isEmpty ? lessonKindName(kind) : title;
+
 String lessonKindName(LessonKind kind) => switch (kind) {
   LessonKind.vocabulary => 'lesson_kind_vocabulary'.tr(),
   LessonKind.interactiveVideo => 'lesson_kind_interactive_video'.tr(),

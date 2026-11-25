@@ -14,6 +14,7 @@ import 'package:englizia/core/design_system/widgets/goal_ring.dart';
 import 'package:englizia/core/settings/app_haptics.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/lessons/presentation/complete/widgets/kind_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -208,7 +209,7 @@ class StoneLabel extends StatelessWidget {
       text = 'home_review_action'.tr();
       style = texts.captionStrong;
     } else if (kids) {
-      text = lesson.title;
+      text = shownTitle(lesson.title, lesson.kind);
       style = strong ? texts.kidsWord : texts.kidsCard;
     } else {
       final short = kindShort(lesson);
@@ -752,7 +753,7 @@ String _lessonLabel(
     return 'home_stone_semantics_page'.tr(
       namedArgs: {
         'number': '${index + 1}',
-        'title': lesson.title,
+        'title': shownTitle(lesson.title, lesson.kind),
         'meta': lessonMeta(lesson),
         'page': '$page',
         'status': status,
@@ -762,7 +763,7 @@ String _lessonLabel(
   return 'unit_lesson_semantics'.tr(
     namedArgs: {
       'number': '${index + 1}',
-      'title': lesson.title,
+      'title': shownTitle(lesson.title, lesson.kind),
       'meta': lessonMeta(lesson),
       'status': status,
     },
@@ -816,7 +817,7 @@ class _LastStone extends StatelessWidget {
     return _Tap(
       label: 'home_last_semantics'.tr(
         namedArgs: {
-          'title': lesson.title,
+          'title': shownTitle(lesson.title, lesson.kind),
           'meta': lessonMeta(lesson),
           'status': status,
         },
@@ -918,7 +919,10 @@ class _KidStone extends StatelessWidget {
       opacity: locked ? .55 : 1,
       child: _Tap(
         label: 'unit_kid_semantics'.tr(
-          namedArgs: {'name': lesson.title, 'status': status},
+          namedArgs: {
+            'name': shownTitle(lesson.title, lesson.kind),
+            'status': status,
+          },
         ),
         shakes: locked,
         onPressed: stone.onPressed,

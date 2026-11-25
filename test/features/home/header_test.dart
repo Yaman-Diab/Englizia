@@ -20,6 +20,8 @@ import 'package:englizia/features/home/presentation/home/widgets/header/level_co
 import 'package:englizia/features/home/presentation/home/widgets/header/notice_cards.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/say_bubble.dart';
 import 'package:englizia/features/home/presentation/home/widgets/header/top_bar.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_test.dart';
+import 'package:englizia/features/lessons/presentation/unit_test/pages/unit_test_page.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -29,6 +31,14 @@ import '../../helpers/fake_home_repository.dart';
 import '../../helpers/pump_app.dart';
 
 final _morning = DateTime(2026, 11, 5, 10);
+
+const _suggestion = LevelSuggestion(
+  id: 'lc',
+  up: true,
+  percent: 100,
+  level: LevelName(id: 'a2', label: 'A2', name: 'A2'),
+  suggested: LevelName(id: 'b1', label: 'B1', name: 'B1'),
+);
 final _evening = DateTime(2026, 11, 5, 19, 30);
 
 HomeState _state(
@@ -400,6 +410,44 @@ void main() {
       expect(DayHeader.cardSlotOf(HomeCardNotice.levelDone), 140);
     });
 
+    test('a level suggested comes first, and keeps the email back', () {
+      final done = _state(HomeMockScenario.levelComplete);
+      final state = HomeState(
+        now: _morning,
+        load: LoadStatus.ready,
+        home: done.home!.copyWith(
+          cards: const HomeCards(levelSuggestion: _suggestion),
+        ),
+      );
+      final notices = state.notices(emailReminder: true);
+      expect(notices.card, HomeCardNotice.levelSuggestion);
+      expect(notices.top, HomeTopNotice.none);
+      expect(DayHeader.cardSlotOf(HomeCardNotice.levelSuggestion), 212);
+    });
+
+    for (final locale in AppLocales.supported) {
+      testWidgets('a level suggested fits its slot at 320dp '
+          '(${locale.languageCode})', (tester) async {
+        final done = _state(HomeMockScenario.general);
+        final state = HomeState(
+          now: _morning,
+          load: LoadStatus.ready,
+          home: done.home!.copyWith(
+            cards: const HomeCards(levelSuggestion: _suggestion),
+          ),
+        );
+        await tester.pumpLocalized(
+          _Stage(state: state),
+          locale: locale,
+          size: narrowViewport,
+        );
+        await _settle(tester);
+
+        expect(find.byType(LevelSuggestionCard), findsOneWidget);
+        expect(tester.takeException(), isNull);
+      });
+    }
+
     test('a level just done keeps its card at the horizon', () {
       final later = _state(HomeMockScenario.levelComplete);
       final notices = later.notices(emailReminder: false);
@@ -591,9 +639,10 @@ void main() {
           'largest text (${locale.languageCode})', (tester) async {
         tester.platformDispatcher.textScaleFactorTestValue = 1.3;
         addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
-        for (final card in [
+        for (final card in <Widget>[
           NoticeCard.levelCheck(onStart: () {}),
           NoticeCard.placement(minutes: (min: 12, max: 15), onStart: () {}),
+          LevelSuggestionCard(suggestion: _suggestion, onChoose: (_) {}),
         ]) {
           await tester.pumpLocalized(
             Material(

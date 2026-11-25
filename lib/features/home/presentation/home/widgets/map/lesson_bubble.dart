@@ -15,6 +15,7 @@ import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
 import 'package:englizia/features/home/presentation/home/geometry/island_layout.dart';
 import 'package:englizia/features/home/presentation/home/scene/home_scene.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
+import 'package:englizia/features/lessons/presentation/complete/widgets/kind_icon.dart';
 import 'package:flutter/material.dart';
 
 /// What the bubble says.
@@ -274,11 +275,13 @@ final class _Content {
       return _Content(
         kids: true,
         label: 'home_bubble_next'.tr(),
-        title: lesson.title,
+        title: shownTitle(lesson.title, lesson.kind),
         meta: '',
         unitLine: '',
         cta: '',
-        semantics: 'home_kid_bubble_semantics'.tr(args: [lesson.title]),
+        semantics: 'home_kid_bubble_semantics'.tr(
+          args: [shownTitle(lesson.title, lesson.kind)],
+        ),
         icon: null,
         picture: lesson.base.imageUrl ?? '',
       );
@@ -332,7 +335,7 @@ final class _Content {
     return _Content(
       kids: false,
       label: label,
-      title: lesson.title,
+      title: shownTitle(lesson.title, lesson.kind),
       meta: meta,
       unitLine: unit != null && page != null
           ? 'home_bubble_unit_page'.tr(
@@ -348,7 +351,7 @@ final class _Content {
           ? 'home_bubble_semantics_page'.tr(
               namedArgs: {
                 'label': label,
-                'title': lesson.title,
+                'title': shownTitle(lesson.title, lesson.kind),
                 'meta': meta,
                 'page': '$page',
                 'action': cta,
@@ -357,7 +360,7 @@ final class _Content {
           : 'home_bubble_semantics'.tr(
               namedArgs: {
                 'label': label,
-                'title': lesson.title,
+                'title': shownTitle(lesson.title, lesson.kind),
                 'meta': meta,
                 'action': cta,
               },

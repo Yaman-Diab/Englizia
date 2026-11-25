@@ -124,6 +124,61 @@ Map<String, Object?> _example(
   };
 }
 
+/// A unit test's questions (B-33b), in the shape a lesson's take: they come
+/// with no `answerKey`, hint or explanation, and in the learner's own order,
+/// which the answer is given in. The app's reader needs a key, so each gets
+/// one that keeps the cards where they came: the first options or cards.
+/// Nothing marks them on the phone; the server does.
+Map<String, Object?> unitTestQuestion(
+  Map<String, Object?> json,
+  String? Function(String?) url,
+) {
+  final body = json.readMap('body') ?? const <String, Object?>{};
+  final chips = [
+    for (final chip in body.readList('chips') ?? const <Object?>[])
+      if (chip is String) chip,
+  ];
+  final options = body.readList('options') ?? const <Object?>[];
+  final firstOption = options.isEmpty
+      ? null
+      : asJsonMap(options.first).readString('id');
+  final key = switch (json.readString('template')) {
+    'gap_choice' => {
+      'gaps': chips.take(body.readInt('gapCount') ?? 1).toList(),
+    },
+    'word_order' => {
+      'chips': chips.take(1).toList(),
+      'alternatives': const <Object?>[],
+    },
+    'matching' => {
+      'pairs': [
+        for (var i = 0; i < (body.readList('left')?.length ?? 0); i++) i,
+      ],
+    },
+    _ => {'optionId': firstOption},
+  };
+  return {
+    ..._question({...json, 'answerKey': key}, url),
+    'keepOrder': true,
+  };
+}
+
+/// A lesson of the server's from a unit test: the app's reader takes it.
+Map<String, Object?> lessonFromUnitTest(Map<String, Object?> json) {
+  final media = json.readMap('media') ?? const <String, Object?>{};
+  String? url(String? id) =>
+      id == null ? null : media.readMap(id)?.readString('url');
+  return {
+    'id': json.readString('id'),
+    'version': json.readInt('versionNo') ?? 1,
+    'versionId': json.readString('versionId'),
+    'exercises': [
+      for (final question in json.readList('questions') ?? const <Object?>[])
+        if (question is Map) unitTestQuestion(question.cast(), url),
+    ],
+  };
+}
+
 /// A question's id is its version's: the server knows no other, and an answer
 /// names it (`questionVersionId`).
 Map<String, Object?> _question(

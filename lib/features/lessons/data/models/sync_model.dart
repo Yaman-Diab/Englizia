@@ -25,22 +25,7 @@ Map<String, Object?>? syncAttemptToJson(
         question.cast<String, Object?>(),
   ].firstOrNull;
   if (question == null) return null;
-  final answer = switch ((question.readString('template'), attempt.draft)) {
-    (
-      'multipleChoice' || 'imageChoice' || 'listenChoose',
-      final ChoiceDraft d,
-    ) =>
-      {'optionId': d.optionId},
-    // Each card's text as it came: the server compares it letter for letter.
-    ('fillChoices', final SlotsDraft d) => {
-      'gaps': [for (final chip in d.chips) chip?.text ?? ''],
-    },
-    ('wordOrder', final SequenceDraft d) => {
-      'chips': [for (final chip in d.chips) chip.text],
-    },
-    ('matching', final PairsDraft d) => {'pairs': _places(question, d)},
-    _ => null,
-  };
+  final answer = serverAnswerOf(question, attempt.draft);
   if (answer == null) return null;
   return {
     'clientAttemptId': attemptId,
@@ -53,6 +38,43 @@ Map<String, Object?>? syncAttemptToJson(
     'hintsUsed': (attempt.hinted ? 1 : 0).clamp(0, _maxHints),
     'clientCreatedAt': syncTime(at),
   };
+}
+
+/// [draft] as the server takes an answer to [question] (in the app's own
+/// shape), in the sync and in a unit test alike; null for a template it
+/// doesn't mark.
+Map<String, Object?>? serverAnswerOf(
+  Map<String, Object?> question,
+  ExerciseDraft draft,
+) => switch ((question.readString('template'), draft)) {
+  ('multipleChoice' || 'imageChoice' || 'listenChoose', final ChoiceDraft d) =>
+    {'optionId': d.optionId},
+  // Each card's text as it came: the server compares it letter for letter.
+  ('fillChoices', final SlotsDraft d) => {
+    'gaps': [for (final chip in d.chips) chip?.text ?? ''],
+  },
+  ('wordOrder', final SequenceDraft d) => {
+    'chips': [for (final chip in d.chips) chip.text],
+  },
+  ('matching', final PairsDraft d) => {'pairs': _places(question, d)},
+  ('matching', final LinksDraft d) => {'pairs': _linked(question, d)},
+  _ => null,
+};
+
+/// For each word, in the order it came, the place of what the learner put it
+/// with, among what came on the other side.
+List<int> _linked(Map<String, Object?> question, LinksDraft draft) {
+  final pairs = [
+    for (final pair in question.readList('pairs') ?? const <Object?>[])
+      if (pair is Map) pair.cast<String, Object?>(),
+  ];
+  final place = {
+    for (final (i, pair) in pairs.indexed)
+      pair.readString('left'): pair.readInt('rightIndex') ?? i,
+  };
+  return [
+    for (final pair in pairs) place[draft.links[pair.readString('left')]] ?? -1,
+  ];
 }
 
 /// The phone's clock in UTC, ending in `Z`: the server refuses any other.

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:englizia/core/audio/app_sound.dart';
 import 'package:englizia/core/error/failure.dart';
+import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/features/home/data/datasources/home_mock_scenarios.dart';
 import 'package:englizia/features/home/data/models/home_model.dart';
@@ -9,7 +10,10 @@ import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/home/domain/entities/home_moment.dart';
 import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_cubit.dart';
+import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_test.dart';
+import 'package:englizia/features/lessons/domain/repositories/unit_test_repository.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../helpers/fake_home_repository.dart';
@@ -23,6 +27,37 @@ HomeSnapshot _home([HomeMockScenario scenario = HomeMockScenario.general]) =>
     mockHome(scenario: scenario, now: _morning);
 
 HomeSnapshot _afterLesson() => mockHomeAfterLesson(now: _morning);
+
+const _suggestion = LevelSuggestion(
+  id: 'lc',
+  up: true,
+  percent: 100,
+  level: LevelName(id: 'a2', label: 'A2', name: 'A2'),
+  suggested: LevelName(id: 'b1', label: 'B1', name: 'B1'),
+);
+
+/// Where a suggested level's choice goes.
+class _Levels implements UnitTestRepository {
+  final choices = <(String, bool)>[];
+  Failure? failure;
+
+  @override
+  Future<Result<void>> chooseLevel(String id, {required bool move}) async {
+    choices.add((id, move));
+    final failure = this.failure;
+    return failure == null ? const Ok(null) : Err(failure);
+  }
+
+  @override
+  Future<Result<UnitTest>> getTest(String testId) => throw UnimplementedError();
+
+  @override
+  Future<Result<UnitTestResult>> submit(
+    UnitTest test,
+    Map<String, ExerciseDraft> answers, {
+    required String submissionId,
+  }) => throw UnimplementedError();
+}
 
 /// [scenario] with unit [index] the current one.
 HomeSnapshot _movedTo(HomeMockScenario scenario, int index) {
@@ -762,6 +797,54 @@ void main() {
       expect(profiles.levels, isEmpty);
       expect(homes.fetches, fetches);
       expect(subject.state.levelJustDone, isTrue);
+    });
+
+    group('a level suggested', () {
+      late _Levels levels;
+
+      HomeCubit suggesting() {
+        levels = _Levels();
+        final home = _home();
+        homes.home = home.copyWith(
+          cards: const HomeCards(levelSuggestion: _suggestion),
+        );
+        final subject = HomeCubit(
+          homes,
+          profiles,
+          lessons,
+          connectivity,
+          sounds,
+          now: () => now,
+          levels: levels,
+        );
+        addTearDown(subject.close);
+        return subject;
+      }
+
+      test('«انتقل» goes with its id, then home again', () async {
+        final subject = suggesting();
+        await subject.start();
+        homes.home = _home();
+
+        expect(await subject.chooseLevel(move: true), isNull);
+
+        expect(levels.choices, [('lc', true)]);
+        expect(homes.fetches, 2);
+        expect(subject.state.home?.cards.levelSuggestion, isNull);
+        expect(subject.state.choosingLevel, isFalse);
+      });
+
+      test('a choice that failed keeps the card', () async {
+        final subject = suggesting();
+        await subject.start();
+        levels.failure = const NetworkFailure();
+
+        expect(await subject.chooseLevel(move: false), const NetworkFailure());
+
+        expect(homes.fetches, 1);
+        expect(subject.state.home?.cards.levelSuggestion, _suggestion);
+        expect(subject.state.choosingLevel, isFalse);
+      });
     });
 
     test('the level card closes on the next level or another track', () async {

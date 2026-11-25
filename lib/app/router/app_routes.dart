@@ -38,6 +38,7 @@ abstract final class AppRoutes {
   static const lessonVocabulary = '/lessons/:lessonId/vocabulary';
   static const lessonShadowing = '/lessons/:lessonId/shadowing';
   static const lessonExercises = '/lessons/:lessonId/exercises';
+  static const unitTest = '/unit-tests/:testId';
   static const lessonKids = '/lessons/:lessonId/kids';
   static const lessonComplete = '/lessons/:lessonId/complete';
 
@@ -82,6 +83,8 @@ abstract final class AppRoutes {
       '/talk/scenarios/$scenarioId';
 
   static String exercisesOf(String lessonId) => '/lessons/$lessonId/exercises';
+
+  static String unitTestOf(String testId) => '/unit-tests/$testId';
 
   static String completeOf(String lessonId) => '/lessons/$lessonId/complete';
 

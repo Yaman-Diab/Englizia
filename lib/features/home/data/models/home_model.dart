@@ -2,6 +2,7 @@ import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/home/domain/entities/home.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
 import 'package:englizia/features/lessons/data/models/unit_plan_model.dart';
+import 'package:englizia/features/lessons/data/models/unit_test_model.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 import 'package:englizia/features/me/data/models/profile_model.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
@@ -243,6 +244,9 @@ final class HomeModel {
       placementMinutes: min != null && max != null
           ? (min: min, max: max)
           : null,
+      levelSuggestion: levelSuggestionFromJson(
+        json?.readMap('levelSuggestion'),
+      ),
     );
   }
 

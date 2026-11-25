@@ -12,6 +12,7 @@ final class BodyAnswer {
     required this.evaluation,
     required this.onDraft,
     required this.onSubmit,
+    this.blind = false,
   });
 
   final ExerciseDraft? draft;
@@ -20,6 +21,10 @@ final class BodyAnswer {
 
   /// Checks the answer, for a body with no «تحقق» under it.
   final VoidCallback onSubmit;
+
+  /// A unit's test: nothing is marked on the phone, so a body that checks
+  /// itself lets the learner answer freely instead (B-33b).
+  final bool blind;
 
   /// How the option [id] of a choice looks now.
   AnswerLook lookOf(String id) {

@@ -30,9 +30,25 @@ Map<String, Object?> lessonFromMap(Map<String, Object?> lesson) => {
   'done': lesson.readString('state') == 'completed',
 };
 
-List<Map<String, Object?>> lessonsFromMap(Map<String, Object?> unit) => [
+/// A unit's lessons in their order, and its test last when it has one
+/// published: the lighthouse, which opens the test (B-33b). With [test]
+/// false, its lessons alone.
+List<Map<String, Object?>> lessonsFromMap(
+  Map<String, Object?> unit, {
+  bool test = true,
+}) => [
   for (final lesson in unit.readList('lessons') ?? const <Object?>[])
     if (lesson is Map) lessonFromMap(lesson.cast()),
+  if (test)
+    if (unit.readMap('test') case final test?)
+      if (test.readString('id') case final id?)
+        {
+          'id': id,
+          'kind': 'unitReview',
+          // Shown by its kind's name: a test has no title of its own.
+          'title': '',
+          'done': test.readString('state') == 'passed',
+        },
 ];
 
 /// A level as it is named on the screen: its CEFR code when it has one, and

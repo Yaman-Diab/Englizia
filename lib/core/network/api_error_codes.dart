@@ -59,6 +59,14 @@ abstract final class ApiErrorCodes {
   /// itself; only a grade is chosen.
   static const gradeChangeNotAllowed = 'enrollment.grade_change_not_allowed';
 
+  /// 422 from a unit test's submission: a failed try's wait isn't over;
+  /// `Retry-After` says how long.
+  static const unitTestRetryNotYet = 'unit_test.retry_not_yet';
+
+  /// 422 from a unit test: the unit is locked, or a lesson isn't done on the
+  /// server yet (its answers may still be on the phone).
+  static const unitTestLocked = 'unit_test.locked';
+
   /// 404: no such endpoint on this server.
   static const routeNotFound = 'route.not_found';
 

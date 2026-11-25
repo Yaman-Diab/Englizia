@@ -32,15 +32,18 @@ void main() {
       );
     });
 
-    test('a conversation naming no scenario, a review, an unknown kind: '
+    test('a conversation naming no scenario, an unknown kind: '
         'its exercises', () {
-      for (final kind in [
-        LessonKind.conversation,
-        LessonKind.unitReview,
-        LessonKind.other,
-      ]) {
+      for (final kind in [LessonKind.conversation, LessonKind.other]) {
         expect(lessonPath(id: 'l1', kind: kind), '/lessons/l1/exercises');
       }
+    });
+
+    test('a unit\u2019s review is its test', () {
+      expect(
+        lessonPath(id: 't1', kind: LessonKind.unitReview),
+        '/unit-tests/t1',
+      );
     });
 
     test('in kids mode every kind opens the kids\' screens', () {

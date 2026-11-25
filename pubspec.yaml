@@ -66,6 +66,7 @@ flutter:
     - assets/mock/practice/
     - assets/mock/talk/
     - assets/mock/units/
+    - assets/mock/unit_tests/
     - assets/mock/me/
     - assets/mock/settings/
     - assets/mock/downloads/

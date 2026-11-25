@@ -15,6 +15,7 @@ import 'package:englizia/features/home/domain/repositories/home_repository.dart'
 import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/home/presentation/home/cubit/home_state.dart';
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
+import 'package:englizia/features/lessons/domain/repositories/unit_test_repository.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/me/domain/repositories/profile_repository.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
@@ -38,11 +39,16 @@ class HomeCubit extends Cubit<HomeState> {
     this._sounds, {
     ClipPlayer? player,
     DateTime Function()? now,
+    UnitTestRepository? levels,
   }) : _voice = ClipPlayback(player ?? SilentClipPlayer()),
        _now = now ?? DateTime.now,
+       _levels = levels,
        super(HomeState(now: (now ?? DateTime.now)()));
 
   final HomeRepository _home;
+
+  /// Where a suggested level's choice goes.
+  final UnitTestRepository? _levels;
   final ProfileRepository _profiles;
   final LessonRepository _lessons;
   final ConnectivityService _connectivity;
@@ -316,6 +322,24 @@ class HomeCubit extends Cubit<HomeState> {
         emit(state.copyWith(switching: false));
         return failure;
     }
+  }
+
+  /// «انتقل» ([move]) or «ابقَ» on the level the server suggests, then home
+  /// again: its map has the level chosen, and no suggestion.
+  Future<Failure?> chooseLevel({required bool move}) async {
+    final suggestion = state.home?.cards.levelSuggestion;
+    final levels = _levels;
+    if (suggestion == null || levels == null || state.choosingLevel) {
+      return null;
+    }
+    emit(state.copyWith(choosingLevel: true));
+    final result = await levels.chooseLevel(suggestion.id, move: move);
+    if (isClosed) return null;
+    emit(state.copyWith(choosingLevel: false));
+    if (result case Err(:final failure)) return failure;
+    _keepProfile();
+    await refresh();
+    return null;
   }
 
   /// «ابدأ B1»: the next level, then its home. A grade is the learner's to
