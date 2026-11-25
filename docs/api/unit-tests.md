@@ -50,6 +50,14 @@ Before reading the test the app sends the lessons' answers waiting on the phone,
 
 After the first unit's test of a level: `{id, direction: up | down | none, percent, level, suggestedLevel, checkedAt}`, the levels as the map names them. `none` suggests no move and shows nothing. The choice is `{move: true}` («انتقل إلى B1») or `{move: false}` («ابقَ في A2»); the reply (`EnrollmentDto`) isn't read, home asks the map again.
 
+## Questions for the backend team
+
+1. When is a unit test published on the dev server's demo track? Its map has `units[].test: null` everywhere, so the app's reading of the test, the result and the level check has only been tried against the contract's examples (STATUS D-128).
+2. `levelCheck` comes after the first unit's test of a level: is it also sent on the map afterwards, until the learner chooses, or only in the result? The app shows it from the map (home's card) and from the result.
+3. The pass mark and the thresholds of the level check: the requirements say 85% to suggest the next level and 40% to suggest the one below, and the test's own pass mark comes with it. Are the first two the server's own numbers, and may the app read them from somewhere (the effective settings, S §2 principle 6), or will it never need to?
+4. `serverTime`: the app counts the wait after a fail on the phone's clock from `retryAvailableAt` and reads no `serverTime`. If a phone's clock is wrong, a test opens late or early. Should the app count from `serverTime` instead?
+5. After a failed send the app resends the same `clientSubmissionId`. Confirm a second send of an id the server already marked returns the first result (200), and not `422` or a new try.
+
 ## Not read yet
 
 The result's `lessons`, `units`, `levels` and `serverTime` (the wait counts on the phone's clock), and a question's `instructionAudioMediaId` (docs/STATUS.md D-127).
