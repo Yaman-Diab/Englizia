@@ -11,6 +11,7 @@ import 'package:englizia/features/home/presentation/home/scene/map_frame.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:englizia/features/home/presentation/home/widgets/map/stone.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
+import 'package:englizia/features/lessons/presentation/complete/widgets/kind_icon.dart';
 import 'package:flutter/material.dart';
 
 /// A stone's small card: done «أعد», locked «يُفتح بعد
@@ -135,7 +136,7 @@ class StoneCard extends StatelessWidget {
                 .copyWith(color: colors.textSecondary),
           ),
           Text(
-            lesson.title,
+            shownTitle(lesson.title, lesson.kind),
             style: texts.sized(texts.bodyStrong, size: 16, line: 24),
           ),
           Text(
@@ -186,7 +187,7 @@ class StoneCard extends StatelessWidget {
       child: Semantics(
         container: true,
         explicitChildNodes: true,
-        label: lesson.title,
+        label: shownTitle(lesson.title, lesson.kind),
         child: TweenAnimationBuilder<double>(
           key: ValueKey(lesson.id),
           tween: Tween(begin: 0, end: 1),

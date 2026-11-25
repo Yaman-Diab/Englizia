@@ -77,6 +77,8 @@ import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing
 import 'package:englizia/features/lessons/presentation/shadowing/pages/shadowing_page.dart';
 import 'package:englizia/features/lessons/presentation/unit/cubit/unit_cubit.dart';
 import 'package:englizia/features/lessons/presentation/unit/pages/unit_page.dart';
+import 'package:englizia/features/lessons/presentation/unit_test/cubit/unit_test_cubit.dart';
+import 'package:englizia/features/lessons/presentation/unit_test/pages/unit_test_page.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/pages/vocab_lesson_page.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
@@ -795,6 +797,18 @@ GoRouter createAppRouter(
             ),
           );
         },
+      ),
+      GoRoute(
+        path: AppRoutes.unitTest,
+        builder: (context, state) => BlocProvider(
+          create: (_) =>
+              sl<UnitTestCubit>(param1: state.pathParameters['testId']!)
+                ..start(),
+          child: UnitTestPage(
+            onDone: () =>
+                context.canPop() ? context.pop() : context.go(AppRoutes.home),
+          ),
+        ),
       ),
       // "Explain it to me" has no design yet.
       GoRoute(

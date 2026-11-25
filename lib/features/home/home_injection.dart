@@ -44,6 +44,7 @@ void registerHomeDependencies(GetIt sl) {
         sl(),
         player: sl(),
         now: AppConfig.isMock ? () => sl<HomeMockControls>().now() : null,
+        levels: sl(),
       ),
     );
 }

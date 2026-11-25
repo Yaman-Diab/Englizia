@@ -37,11 +37,13 @@ One read of the tracks, then the account and the active track's map together (`s
 | `level`, `nextLevel` | `level.id`; `label` is its CEFR code (`A1`, `Pre-A1`), or its name when it has none; `name` is `nameAr` without that code in front; `cefr`. `level.completed` once every unit is `completed`. `level.next` is `nextLevel`, the first level published after this one, named the same way; none after the last |
 | `units[].state` | `completed` is `done`; `unlocked` is `current` for the unit that holds `nextLessonId` (else the first unlocked one) and `open` for any other; `locked` is `locked`, named after the unit before it in a track that opens in order |
 | `units[].lessons[]` | The current unit's `lessons[]`, and a locked unit's `preview`: `type` as the app's `kind`, `titleAr`, `minutes`, `bookPages.from` as `page`, `done` for `state: completed`. Where a lesson stopped is the phone's own |
+| `units[].test` | The unit's last stone, a `unitReview` done once `passed`, which opens the test; home's counts and preview leave it out ([unit-tests.md](unit-tests.md)) |
+| `levelCheck` | `cards.levelSuggestion`, as the server sends it: «انتقل / ابقَ» ([unit-tests.md](unit-tests.md)) |
 | `GET /app/placement?trackId=`, asked only while the enrollment's `placementPending` | `cards.placement.estimatedMinutes`, from `test.estimatedSeconds` without and with the deciding stage; home shows without the card if that call fails |
 
 With no track joined there is no home to draw, and home says it failed.
 
-Not used yet: `features`, a unit's `test`, `lessons[].best` and `versionId`, `taglineAr`, and the English names of the level and the lessons (STATUS D-124).
+Not used yet: `features`, `lessons[].best` and `versionId`, `taglineAr`, and the English names of the level and the lessons (STATUS D-124).
 
 ### A unit's screen
 
@@ -198,5 +200,5 @@ The common errors (`README.md`). Offline, the phone shows what it kept with «ل
 1. Home is put together from the account, the tracks and the map. Where will the rest come from: the week (minutes a day against the goal, and the day's start), the streak and its freezes, what is due for review, and the one-time notices (a freeze used, the streak broken)?
 2. The lessons a learner has finished in all, for the first day and the email reminder: the map only has this level's.
 3. A lesson `in_progress`: is where it stopped kept, for another phone?
-4. A unit's `test`: what does it carry?
-5. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation and the level check among a unit's lessons, a kid's stars and recorded titles: will the map carry them?
+4. Answered (B-33b, 2026-11-24): a unit's `test` is its unit test's state ([unit-tests.md](unit-tests.md)).
+5. `welcomeBack` (three days without activity, by the learner's day), the AI's conversation among a unit's lessons, a kid's stars and recorded titles: will the map carry them?

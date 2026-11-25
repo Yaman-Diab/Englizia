@@ -87,6 +87,18 @@ abstract final class ApiEndpoints {
   // Confirmed in docs/api/openapi.json.
   static String lesson(String lessonId) => '/api/v1/app/lessons/$lessonId';
 
+  /// A unit's test, its questions with no keys. Confirmed in
+  /// docs/api/openapi.json, as the next two.
+  static String unitTest(String testId) => '/api/v1/app/unit-tests/$testId';
+
+  /// The whole test, sent at once.
+  static String unitTestSubmissions(String testId) =>
+      '/api/v1/app/unit-tests/$testId/submissions';
+
+  /// «انتقل» or «ابقَ» on the level the server suggests.
+  static String levelCheckChoice(String checkId) =>
+      '/api/v1/app/level-checks/$checkId/choose';
+
   /// The answers kept on the phone, in batches. Confirmed in
   /// docs/api/openapi.json.
   static const sync = '/api/v1/app/sync';

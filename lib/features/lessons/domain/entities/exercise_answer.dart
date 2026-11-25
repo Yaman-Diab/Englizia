@@ -77,6 +77,22 @@ final class PairsDraft extends ExerciseDraft {
   List<Object?> get props => [total, matched, mistakes, wrong];
 }
 
+/// Words linked freely to meanings, with no word of whether each is right:
+/// a unit's test (B-33b). Pair id of the word, to the pair id of what it was
+/// put with.
+final class LinksDraft extends ExerciseDraft {
+  const LinksDraft({required this.total, this.links = const {}});
+
+  final int total;
+  final Map<String, String> links;
+
+  @override
+  bool get isComplete => links.length >= total;
+
+  @override
+  List<Object?> get props => [total, links];
+}
+
 /// What was typed.
 final class TextDraft extends ExerciseDraft {
   const TextDraft(this.text);

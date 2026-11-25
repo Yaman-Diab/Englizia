@@ -58,10 +58,11 @@ One file per endpoint group, with request, response and example; the matching mo
 
 | Contract | Used by | Data in the app |
 |---|---|---|
-| [`openapi.json`](openapi.json) | The App API: auth, the guest and its upgrades, `/app/me`, onboarding, `system/config`, tracks, enrollments and the track's map, the placement test, a lesson, sync, ping | live, the endpoints below marked used |
+| [`openapi.json`](openapi.json) | The App API: auth, the guest and its upgrades, `/app/me`, onboarding, `system/config`, tracks, enrollments and the track's map, the placement test, a lesson, sync, a unit's test and the level check, the profile, ping | live, the endpoints below marked used |
 | [`tracks.md`](tracks.md) | Onboarding "who will learn", the grade step, "preparing" (first unit), «أنا»'s tracks and grades | live, units mock |
 | [`placement.md`](placement.md) | Onboarding "how much English do you know?", "preparing", the placement test's intro, questions and result | live |
 | [`lessons.md`](lessons.md) | A lesson, its questions and their answers: the server's lesson and the sync are live; the other templates and lesson types, the unit and what a lesson reports besides are proposed | live in part |
+| [`unit-tests.md`](unit-tests.md) | A unit's test from the map's last stone, its start, questions and result, and the level suggested after the first unit's test | live, no test published yet |
 | [`auth.md`](auth.md) | Accounts: sign-up and sign-in, password recovery, the email's confirmation, Google and Apple, "save progress"'s guest account and its upgrades (ADR 10), onboarding's answers | live |
 | [`concepts.md`](concepts.md) | «مفاهيم للتقوية»: the list and a session of new questions | mock |
 | [`explanations.md`](explanations.md) | «اشرح لي» under a wrong answer, in a lesson or a concept's session | mock |
@@ -118,6 +119,9 @@ One file per endpoint group, with request, response and example; the matching mo
 | `/api/v1/app/lessons/{id}/answers/spoken-review` | POST | `{attemptId, lessonVersion, questionId, answer, hinted}` | `{outcome, note?, better?}` ([lessons.md](lessons.md)) | proposed; v0.5, through the sync with a `pending_ai` status |
 | `/api/v1/app/lessons/{id}/reports` | POST | `{reportId, lessonVersion, questionId, reason, answer?}` | none; safe to repeat ([lessons.md](lessons.md)) | proposed, mock; not planned on the server |
 | `/api/v1/app/sync` | POST | `{sentAt, attempts: [{clientAttemptId, lessonVersionId, questionVersionId, runId, answer, hintsUsed, clientCreatedAt}]}` | one result for each answer (`accepted`, `duplicate` or `rejected`), and what they completed; safe to repeat ([lessons.md](lessons.md)) | live, used |
+| `/api/v1/app/unit-tests/{id}` | GET | — | `UnitTestAppDto`: the state and the questions with no key, in this learner's order ([unit-tests.md](unit-tests.md)) | live, used; no test published on the demo track |
+| `/api/v1/app/unit-tests/{id}/submissions` | POST | `{clientSubmissionId, versionId, answers: [{questionVersionId, answer}]}` | `UnitTestResultDto`; `422 unit_test.retry_not_yet` with `Retry-After`; safe to repeat ([unit-tests.md](unit-tests.md)) | live, used |
+| `/api/v1/app/level-checks/{id}/choose` | POST | `{move}` | `EnrollmentDto`, not read ([unit-tests.md](unit-tests.md)) | live, used |
 | `/api/v1/app/placement?trackId=` | GET | — | the state: `available`, `in_progress`, `result`, `done` or `unavailable`, with the test, the session and the result ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/placement/sessions` | POST | `{trackId}` | the session at its stage, with its questions ([placement.md](placement.md)) | live, used |
 | `/api/v1/app/placement/sessions/{id}` | GET | — | the session ([placement.md](placement.md)) | live, used |

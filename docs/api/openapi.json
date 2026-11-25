@@ -445,6 +445,105 @@
         }
       }
     },
+    "/api/v1/auth/trial": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrialSignInRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrialSignInRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrialSignInRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfTokenResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "`auth.trial_code_invalid`: no such code, or not a code. `validation.failed`: a field is missing or invalid; the details list names each field.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "`auth.account_disabled`: the account was disabled from the dashboard.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "`auth.trial_code_in_use`: the code is bound to another device; the teacher asks the Admin to free it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "`auth.trial_code_expired`: 14 days have passed since the code was created.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "`rate_limit.exceeded`: too many requests; wait for the seconds in Retry-After.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "`server.unexpected`: a fault on our side; quote the traceId when reporting it.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/auth/guest/upgrade/email": {
       "post": {
         "tags": [
@@ -554,7 +653,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -668,7 +767,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -782,7 +881,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -823,7 +922,7 @@
           "303": {
             "description": "See Other",
             "content": {
-              "application/json": {}
+              "application/json": { }
             }
           },
           "400": {
@@ -1156,7 +1255,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -1349,7 +1448,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -1690,7 +1789,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -1744,7 +1843,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       },
@@ -1846,7 +1945,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -1921,7 +2020,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2026,7 +2125,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2068,7 +2167,7 @@
           "304": {
             "description": "Not Modified",
             "content": {
-              "application/json": {}
+              "application/json": { }
             }
           },
           "400": {
@@ -2114,7 +2213,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2156,7 +2255,7 @@
           "304": {
             "description": "Not Modified",
             "content": {
-              "application/json": {}
+              "application/json": { }
             }
           },
           "400": {
@@ -2202,7 +2301,196 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/app/preview/lessons/{externalId}": {
+      "get": {
+        "tags": [
+          "LessonPreview"
+        ],
+        "parameters": [
+          {
+            "name": "externalId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfLessonPreviewDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/app/level-checks/{checkId}/choose": {
+      "post": {
+        "tags": [
+          "LevelChecks"
+        ],
+        "parameters": [
+          {
+            "name": "checkId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChooseLevelCheckRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChooseLevelCheckRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChooseLevelCheckRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfEnrollmentDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
           }
         ]
       }
@@ -2256,7 +2544,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       },
@@ -2328,7 +2616,71 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/app/me/profile": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfProfileDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
           }
         ]
       }
@@ -2422,7 +2774,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2526,7 +2878,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2600,7 +2952,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2714,7 +3066,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2789,7 +3141,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -2906,7 +3258,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -3021,7 +3373,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -3125,7 +3477,7 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
           }
         ]
       }
@@ -3277,7 +3629,197 @@
         },
         "security": [
           {
-            "Bearer": []
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/app/unit-tests/{unitTestId}": {
+      "get": {
+        "tags": [
+          "UnitTestApp"
+        ],
+        "parameters": [
+          {
+            "name": "unitTestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUnitTestAppDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
+          }
+        ]
+      }
+    },
+    "/api/v1/app/unit-tests/{unitTestId}/submissions": {
+      "post": {
+        "tags": [
+          "UnitTestApp"
+        ],
+        "parameters": [
+          {
+            "name": "unitTestId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitUnitTestRequest"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitUnitTestRequest"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitUnitTestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfUnitTestResultDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseOfObject"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Bearer": [ ]
           }
         ]
       }
@@ -3288,7 +3830,8 @@
       "AccountType": {
         "enum": [
           "standard",
-          "guest"
+          "guest",
+          "trial"
         ]
       },
       "AiEnabledSettings": {
@@ -3409,6 +3952,52 @@
               },
               {
                 "$ref": "#/components/schemas/LessonContentDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseOfLessonPreviewDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LessonPreviewDto"
               }
             ]
           },
@@ -3586,7 +4175,7 @@
           "message": {
             "type": "string"
           },
-          "data": {},
+          "data": { },
           "error": {
             "oneOf": [
               {
@@ -3786,6 +4375,52 @@
           }
         }
       },
+      "ApiResponseOfProfileDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProfileDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
       "ApiResponseOfResetTokenInfo": {
         "required": [
           "statusCode",
@@ -3952,6 +4587,98 @@
               },
               {
                 "$ref": "#/components/schemas/TokenResponse"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseOfUnitTestAppDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/UnitTestAppDto"
+              }
+            ]
+          },
+          "error": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ApiError"
+              }
+            ]
+          },
+          "traceId": {
+            "type": "string"
+          }
+        }
+      },
+      "ApiResponseOfUnitTestResultDto": {
+        "required": [
+          "statusCode",
+          "message",
+          "data",
+          "error",
+          "traceId"
+        ],
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/UnitTestResultDto"
               }
             ]
           },
@@ -4320,6 +5047,20 @@
           }
         }
       },
+      "ChooseLevelCheckRequest": {
+        "required": [
+          "move"
+        ],
+        "type": "object",
+        "properties": {
+          "move": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          }
+        }
+      },
       "ChoosePlacementLevelRequest": {
         "required": [
           "trackId",
@@ -4497,6 +5238,12 @@
               "string"
             ],
             "format": "int32"
+          },
+          "unitCoverUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -4551,7 +5298,8 @@
           "coverUrl",
           "entryMode",
           "kidsMode",
-          "levelLabel"
+          "levelLabel",
+          "onboardingAudience"
         ],
         "type": "object",
         "properties": {
@@ -4585,6 +5333,16 @@
           },
           "levelLabel": {
             "$ref": "#/components/schemas/LevelLabel"
+          },
+          "onboardingAudience": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/OnboardingAudience"
+              }
+            ]
           }
         }
       },
@@ -4686,8 +5444,12 @@
         "required": [
           "id",
           "nameAr",
+          "nameEn",
           "gradeNumber",
-          "stageLabelAr"
+          "stageLabelAr",
+          "stageLabelEn",
+          "cefrCode",
+          "kidsMode"
         ],
         "type": "object",
         "properties": {
@@ -4697,6 +5459,12 @@
           },
           "nameAr": {
             "type": "string"
+          },
+          "nameEn": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "gradeNumber": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
@@ -4712,6 +5480,25 @@
               "null",
               "string"
             ]
+          },
+          "stageLabelEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cefrCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CefrLevel"
+              }
+            ]
+          },
+          "kidsMode": {
+            "type": "boolean"
           }
         }
       },
@@ -4825,8 +5612,8 @@
               }
             ]
           },
-          "body": {},
-          "answerKey": {}
+          "body": { },
+          "answerKey": { }
         }
       },
       "LearningReason": {
@@ -4925,7 +5712,7 @@
           "publishedAt": {
             "format": "date-time"
           },
-          "content": {},
+          "content": { },
           "questions": {
             "type": "array",
             "items": {
@@ -4961,6 +5748,115 @@
               "string"
             ],
             "format": "int64"
+          }
+        }
+      },
+      "LessonPreviewDto": {
+        "required": [
+          "id",
+          "versionId",
+          "versionNo",
+          "unitId",
+          "type",
+          "titleAr",
+          "titleEn",
+          "objectiveAr",
+          "objectiveEn",
+          "minutes",
+          "bookPages",
+          "publishedAt",
+          "content",
+          "questions",
+          "media",
+          "preview"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/LessonType"
+          },
+          "titleAr": {
+            "type": "string"
+          },
+          "titleEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "objectiveAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "objectiveEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "minutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "bookPages": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/BookPagesDto"
+              }
+            ]
+          },
+          "publishedAt": {
+            "format": "date-time"
+          },
+          "content": { },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LearnerQuestionDto"
+            }
+          },
+          "media": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LessonMediaItemDto"
+            }
+          },
+          "preview": {
+            "$ref": "#/components/schemas/PreviewInfoDto"
           }
         }
       },
@@ -5012,6 +5908,50 @@
           "all_open"
         ]
       },
+      "LevelCheckDirection": {
+        "enum": [
+          "up",
+          "down",
+          "none"
+        ]
+      },
+      "LevelCheckDto": {
+        "required": [
+          "id",
+          "direction",
+          "percent",
+          "level",
+          "suggestedLevel",
+          "checkedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "direction": {
+            "$ref": "#/components/schemas/LevelCheckDirection"
+          },
+          "percent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "level": {
+            "$ref": "#/components/schemas/MapLevelDto"
+          },
+          "suggestedLevel": {
+            "$ref": "#/components/schemas/MapLevelDto"
+          },
+          "checkedAt": {
+            "format": "date-time"
+          }
+        }
+      },
       "LevelLabel": {
         "enum": [
           "level",
@@ -5027,6 +5967,7 @@
           "kidsMode",
           "features",
           "level",
+          "nextLevel",
           "nextLessonId",
           "unitCount",
           "units"
@@ -5052,6 +5993,16 @@
           "level": {
             "$ref": "#/components/schemas/MapLevelDto"
           },
+          "nextLevel": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MapLevelDto"
+              }
+            ]
+          },
           "nextLessonId": {
             "type": [
               "null",
@@ -5072,6 +6023,16 @@
             "items": {
               "$ref": "#/components/schemas/MapUnitDto"
             }
+          },
+          "levelCheck": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LevelCheckDto"
+              }
+            ]
           }
         }
       },
@@ -5129,6 +6090,21 @@
             "items": {
               "$ref": "#/components/schemas/TrackCatalogItemDto"
             }
+          }
+        }
+      },
+      "LocalizedText": {
+        "required": [
+          "ar",
+          "en"
+        ],
+        "type": "object",
+        "properties": {
+          "ar": {
+            "type": "string"
+          },
+          "en": {
+            "type": "string"
           }
         }
       },
@@ -5437,12 +6413,69 @@
           "state": {
             "$ref": "#/components/schemas/UnitState"
           },
-          "test": {},
+          "test": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/MapUnitTestDto"
+              }
+            ]
+          },
           "lessons": {
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MapLessonDto"
             }
+          }
+        }
+      },
+      "MapUnitTestDto": {
+        "required": [
+          "id",
+          "questionCount",
+          "passPercent",
+          "state",
+          "bestPercent",
+          "retryAvailableAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "state": {
+            "$ref": "#/components/schemas/UnitTestState"
+          },
+          "bestPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "retryAvailableAt": {
+            "format": "date-time"
           }
         }
       },
@@ -5456,7 +6489,8 @@
         "enum": [
           "child",
           "adult",
-          "school_student"
+          "school_student",
+          null
         ]
       },
       "OnboardingAudienceDto": {
@@ -5578,6 +6612,9 @@
             "format": "int16"
           },
           "reminderTime": {
+            "examples": [
+              "20:00:00"
+            ],
             "format": "time"
           }
         }
@@ -5859,7 +6896,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/EnrollmentLevelDto"
+                "$ref": "#/components/schemas/PlacementResultLevelDto"
               }
             ]
           },
@@ -5869,7 +6906,7 @@
                 "type": "null"
               },
               {
-                "$ref": "#/components/schemas/EnrollmentLevelDto"
+                "$ref": "#/components/schemas/PlacementResultLevelDto"
               }
             ]
           },
@@ -5888,6 +6925,64 @@
                 "$ref": "#/components/schemas/PlacementSkill"
               }
             ]
+          }
+        }
+      },
+      "PlacementResultLevelDto": {
+        "required": [
+          "id",
+          "nameAr",
+          "nameEn",
+          "cefrCode",
+          "gradeNumber",
+          "taglineAr",
+          "canDoStatements"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nameAr": {
+            "type": "string"
+          },
+          "nameEn": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "cefrCode": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/CefrLevel"
+              }
+            ]
+          },
+          "gradeNumber": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int16"
+          },
+          "taglineAr": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "canDoStatements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LocalizedText"
+            }
           }
         }
       },
@@ -6202,6 +7297,205 @@
           null
         ]
       },
+      "PreviewInfoDto": {
+        "required": [
+          "savedAt",
+          "skippedQuestions"
+        ],
+        "type": "object",
+        "properties": {
+          "savedAt": {
+            "format": "date-time"
+          },
+          "skippedQuestions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SkippedQuestionDto"
+            }
+          }
+        }
+      },
+      "ProfileDto": {
+        "required": [
+          "name",
+          "email",
+          "emailVerified",
+          "learningSince",
+          "accountNumber",
+          "whatsapp",
+          "signIn",
+          "tracks",
+          "lessonsDone",
+          "learningDays",
+          "placement"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emailVerified": {
+            "type": "boolean"
+          },
+          "learningSince": {
+            "format": "date-time"
+          },
+          "accountNumber": {
+            "type": "string"
+          },
+          "whatsapp": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "signIn": {
+            "$ref": "#/components/schemas/SignInMethod"
+          },
+          "tracks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProfileTrackDto"
+            }
+          },
+          "lessonsDone": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "learningDays": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "placement": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/ProfilePlacementDto"
+              }
+            ]
+          }
+        }
+      },
+      "ProfilePlacementDto": {
+        "required": [
+          "level",
+          "takenAt",
+          "retestAt",
+          "waitDays"
+        ],
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "string"
+          },
+          "takenAt": {
+            "format": "date-time"
+          },
+          "retestAt": {
+            "format": "date-time"
+          },
+          "waitDays": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ProfileTrackDto": {
+        "required": [
+          "enrollmentId",
+          "trackId",
+          "title",
+          "audience",
+          "levelId",
+          "levelLabel",
+          "levelName",
+          "unit",
+          "units",
+          "unitCover",
+          "active"
+        ],
+        "type": "object",
+        "properties": {
+          "enrollmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "trackId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string"
+          },
+          "audience": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/OnboardingAudience"
+              }
+            ]
+          },
+          "levelId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "levelLabel": {
+            "type": "string"
+          },
+          "levelName": {
+            "type": "string"
+          },
+          "unit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "units": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "unitCover": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "active": {
+            "type": "boolean"
+          }
+        }
+      },
       "ProgressLessonDto": {
         "required": [
           "lessonId",
@@ -6350,6 +7644,35 @@
           }
         }
       },
+      "SignInMethod": {
+        "enum": [
+          "email",
+          "google",
+          "apple",
+          "guest",
+          "trial"
+        ]
+      },
+      "SkippedQuestionDto": {
+        "required": [
+          "position",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "position": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "code": {
+            "type": "string"
+          }
+        }
+      },
       "StartPlacementRequest": {
         "required": [
           "trackId"
@@ -6378,6 +7701,39 @@
             ],
             "items": {
               "$ref": "#/components/schemas/PlacementAnswerRequest"
+            }
+          }
+        }
+      },
+      "SubmitUnitTestRequest": {
+        "required": [
+          "clientSubmissionId",
+          "versionId",
+          "answers"
+        ],
+        "type": "object",
+        "properties": {
+          "clientSubmissionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "answers": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/UnitTestAnswerRequest"
             }
           }
         }
@@ -6517,7 +7873,8 @@
           "termsUrl",
           "dailyGoalOptions",
           "aiEnabled",
-          "onboarding"
+          "onboarding",
+          "placementTest"
         ],
         "type": "object",
         "properties": {
@@ -6574,6 +7931,16 @@
             "items": {
               "$ref": "#/components/schemas/OnboardingAudienceDto"
             }
+          },
+          "placementTest": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/PlacementTestDto"
+              }
+            ]
           }
         }
       },
@@ -6710,6 +8077,42 @@
           null
         ]
       },
+      "TrialSignInRequest": {
+        "required": [
+          "code",
+          "deviceId",
+          "platform",
+          "displayName"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "deviceId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "platform": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/DevicePlatform"
+              }
+            ]
+          },
+          "displayName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "UiLanguage": {
         "enum": [
           "ar",
@@ -6721,6 +8124,284 @@
           "locked",
           "unlocked",
           "completed"
+        ]
+      },
+      "UnitTestAnswerRequest": {
+        "required": [
+          "questionVersionId",
+          "answer"
+        ],
+        "type": "object",
+        "properties": {
+          "questionVersionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "answer": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/AttemptAnswerRequest"
+              }
+            ]
+          }
+        }
+      },
+      "UnitTestAppDto": {
+        "required": [
+          "id",
+          "unitId",
+          "versionId",
+          "versionNo",
+          "questionCount",
+          "passPercent",
+          "state",
+          "bestPercent",
+          "retryAvailableAt",
+          "questions",
+          "media"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionNo": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "state": {
+            "$ref": "#/components/schemas/UnitTestState"
+          },
+          "bestPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "retryAvailableAt": {
+            "format": "date-time"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitTestQuestionDto"
+            }
+          },
+          "media": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/LessonMediaItemDto"
+            }
+          }
+        }
+      },
+      "UnitTestQuestionDto": {
+        "required": [
+          "versionId",
+          "externalId",
+          "template",
+          "instructionAr",
+          "instructionIsDefault",
+          "instructionAudioMediaId",
+          "body"
+        ],
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "externalId": {
+            "type": "string"
+          },
+          "template": {
+            "$ref": "#/components/schemas/QuestionTemplate"
+          },
+          "instructionAr": {
+            "type": "string"
+          },
+          "instructionIsDefault": {
+            "type": "boolean"
+          },
+          "instructionAudioMediaId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "body": { }
+        }
+      },
+      "UnitTestQuestionResultDto": {
+        "required": [
+          "questionVersionId",
+          "isCorrect"
+        ],
+        "type": "object",
+        "properties": {
+          "questionVersionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isCorrect": {
+            "type": "boolean"
+          }
+        }
+      },
+      "UnitTestResultDto": {
+        "required": [
+          "submissionId",
+          "unitTestId",
+          "versionId",
+          "correct",
+          "questionCount",
+          "percent",
+          "passed",
+          "retryAvailableAt",
+          "bestPercent",
+          "questions",
+          "lessons",
+          "units",
+          "levels",
+          "levelCheck",
+          "serverTime"
+        ],
+        "type": "object",
+        "properties": {
+          "submissionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "unitTestId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "versionId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "correct": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "percent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "retryAvailableAt": {
+            "format": "date-time"
+          },
+          "bestPercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UnitTestQuestionResultDto"
+            }
+          },
+          "lessons": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressLessonDto"
+            }
+          },
+          "units": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProgressUnitDto"
+            }
+          },
+          "levels": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LevelMoveDto"
+            }
+          },
+          "levelCheck": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LevelCheckDto"
+              }
+            ]
+          },
+          "serverTime": {
+            "format": "date-time"
+          }
+        }
+      },
+      "UnitTestState": {
+        "enum": [
+          "locked",
+          "available",
+          "cooldown",
+          "passed"
         ]
       },
       "UpdateLearningRequest": {
@@ -6740,6 +8421,9 @@
             "format": "int16"
           },
           "reminderTime": {
+            "examples": [
+              "20:00:00"
+            ],
             "format": "time"
           }
         }
@@ -6939,6 +8623,9 @@
             "format": "int16"
           },
           "reminderTime": {
+            "examples": [
+              "20:00:00"
+            ],
             "format": "time"
           },
           "onboardedAt": {
@@ -6978,6 +8665,12 @@
       "name": "LessonContent"
     },
     {
+      "name": "LessonPreview"
+    },
+    {
+      "name": "LevelChecks"
+    },
+    {
       "name": "Me"
     },
     {
@@ -6991,6 +8684,9 @@
     },
     {
       "name": "TrackCatalog"
+    },
+    {
+      "name": "UnitTestApp"
     }
   ]
 }

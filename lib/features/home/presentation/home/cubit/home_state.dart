@@ -24,6 +24,7 @@ final class HomeState extends Equatable {
     this.momentId = 0,
     this.seenEvents = const {},
     this.switching = false,
+    this.choosingLevel = false,
     this.switches = 0,
     this.switchedTo,
     this.levelJustDone = false,
@@ -61,6 +62,9 @@ final class HomeState extends Equatable {
   final int momentId;
   final Set<String> seenEvents;
   final bool switching;
+
+  /// A suggested level's choice is on its way.
+  final bool choosingLevel;
 
   /// Grows with each track switch, for the strip «انتقلت إلى …».
   final int switches;
@@ -142,6 +146,7 @@ final class HomeState extends Equatable {
     int? momentId,
     Set<String>? seenEvents,
     bool? switching,
+    bool? choosingLevel,
     int? switches,
     String? Function()? switchedTo,
     bool? levelJustDone,
@@ -161,6 +166,7 @@ final class HomeState extends Equatable {
     momentId: momentId ?? this.momentId,
     seenEvents: seenEvents ?? this.seenEvents,
     switching: switching ?? this.switching,
+    choosingLevel: choosingLevel ?? this.choosingLevel,
     switches: switches ?? this.switches,
     switchedTo: switchedTo != null ? switchedTo() : this.switchedTo,
     levelJustDone: levelJustDone ?? this.levelJustDone,
@@ -183,6 +189,7 @@ final class HomeState extends Equatable {
     momentId,
     seenEvents,
     switching,
+    choosingLevel,
     switches,
     switchedTo,
     levelJustDone,

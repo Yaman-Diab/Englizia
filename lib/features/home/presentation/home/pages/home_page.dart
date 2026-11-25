@@ -794,6 +794,11 @@ class _HomePageState extends State<HomePage>
     if (unit != null) widget.actions.openUnit(unit.id);
   }
 
+  Future<void> _chooseLevel({required bool move}) async {
+    final failure = await _cubit.chooseLevel(move: move);
+    if (failure != null && mounted) showFailureSnackBar(context, failure);
+  }
+
   Future<void> _startLevel() async {
     final failure = await _cubit.startNextLevel();
     if (failure != null && mounted) showFailureSnackBar(context, failure);
@@ -1161,6 +1166,7 @@ class _HomePageState extends State<HomePage>
           onLevelCheck: _levelCheck,
           onPlacement: widget.actions.openPlacement,
           onStartLevel: () => unawaited(_startLevel()),
+          onChooseLevel: (move) => unawaited(_chooseLevel(move: move)),
           onListen: () => unawaited(_cubit.sayGreeting()),
           minutesInRing: ringShowsMinutes(
             kids: home.kids,

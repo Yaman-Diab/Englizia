@@ -10,11 +10,13 @@ import 'package:englizia/features/lessons/data/datasources/explain_remote_data_s
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/datasources/teacher_question_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/datasources/unit_remote_data_source.dart';
+import 'package:englizia/features/lessons/data/datasources/unit_test_remote_data_source.dart';
 import 'package:englizia/features/lessons/data/repositories/concept_repository_impl.dart';
 import 'package:englizia/features/lessons/data/repositories/explain_repository_impl.dart';
 import 'package:englizia/features/lessons/data/repositories/lesson_repository_impl.dart';
 import 'package:englizia/features/lessons/data/repositories/teacher_question_repository_impl.dart';
 import 'package:englizia/features/lessons/data/repositories/unit_repository_impl.dart';
+import 'package:englizia/features/lessons/data/repositories/unit_test_repository_impl.dart';
 import 'package:englizia/features/lessons/domain/entities/explanation.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/repositories/concept_repository.dart';
@@ -22,6 +24,7 @@ import 'package:englizia/features/lessons/domain/repositories/explain_repository
 import 'package:englizia/features/lessons/domain/repositories/lesson_repository.dart';
 import 'package:englizia/features/lessons/domain/repositories/teacher_question_repository.dart';
 import 'package:englizia/features/lessons/domain/repositories/unit_repository.dart';
+import 'package:englizia/features/lessons/domain/repositories/unit_test_repository.dart';
 import 'package:englizia/features/lessons/presentation/complete/cubit/lesson_complete_cubit.dart';
 import 'package:englizia/features/lessons/presentation/concepts/cubit/concept_session_cubit.dart';
 import 'package:englizia/features/lessons/presentation/concepts/cubit/concepts_cubit.dart';
@@ -34,6 +37,7 @@ import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_video_cubit.dart';
 import 'package:englizia/features/lessons/presentation/shadowing/cubit/shadowing_cubit.dart';
 import 'package:englizia/features/lessons/presentation/unit/cubit/unit_cubit.dart';
+import 'package:englizia/features/lessons/presentation/unit_test/cubit/unit_test_cubit.dart';
 import 'package:englizia/features/lessons/presentation/vocabulary/cubit/vocab_lesson_cubit.dart';
 import 'package:flutter/services.dart';
 import 'package:get_it/get_it.dart';
@@ -137,6 +141,17 @@ void registerLessonDependencies(GetIt sl) {
     )
     ..registerFactory(() => ConceptsCubit(sl()))
     ..registerFactory(() => ConceptSessionCubit(sl(), sl(), sounds: sl()))
+    ..registerLazySingleton<UnitTestRemoteDataSource>(
+      () => AppConfig.isMock
+          ? UnitTestFakeDataSource(rootBundle)
+          : UnitTestRemoteDataSourceImpl(sl()),
+    )
+    ..registerLazySingleton<UnitTestRepository>(
+      () => UnitTestRepositoryImpl(sl(), settings: sl()),
+    )
+    ..registerFactoryParam<UnitTestCubit, String, void>(
+      (testId, _) => UnitTestCubit(sl(), sl(), sl(), testId: testId),
+    )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(
       (lessonId, _) =>

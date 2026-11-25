@@ -4,7 +4,7 @@ import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 /// Where a lesson opens, by its kind: from home, a unit's timeline and a
 /// lesson's «الدرس التالي» alike, so none of them opens a kind differently.
 /// A kids' lesson opens its own screens; a conversation opens its «تحدّث»
-/// scenario, or its exercises when it names none.
+/// scenario, or its exercises when it names none; a unit's review, its test.
 String lessonPath({
   required String id,
   required LessonKind kind,
@@ -16,6 +16,8 @@ String lessonPath({
   LessonKind.interactiveVideo => AppRoutes.videoOf(id),
   LessonKind.grammarVideo => AppRoutes.grammarOf(id),
   LessonKind.interactiveText => AppRoutes.textOf(id),
+  // A unit's review is its test, marked by the server (B-33b).
+  LessonKind.unitReview => AppRoutes.unitTestOf(id),
   LessonKind.conversation when scenarioId != null => AppRoutes.talkScenarioOf(
     scenarioId,
   ),

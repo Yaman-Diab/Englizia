@@ -5,6 +5,7 @@ import 'package:englizia/core/design_system/icons/app_icon.dart';
 import 'package:englizia/core/design_system/kids/kid_parts.dart';
 import 'package:englizia/core/design_system/motion/app_motion.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
+import 'package:englizia/features/lessons/presentation/complete/widgets/kind_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -132,7 +133,7 @@ class _KidCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    lesson.title,
+                    shownTitle(lesson.title, lesson.kind),
                     textDirection: TextDirection.ltr,
                     textAlign: TextAlign.center,
                     style: context.texts.kidsCard.copyWith(
@@ -180,7 +181,10 @@ class _KidCard extends StatelessWidget {
     card = Semantics(
       button: true,
       label: 'unit_kid_semantics'.tr(
-        namedArgs: {'name': lesson.title, 'status': state},
+        namedArgs: {
+          'name': shownTitle(lesson.title, lesson.kind),
+          'status': state,
+        },
       ),
       excludeSemantics: true,
       child: Opacity(opacity: locked ? _dimmed : 1, child: card),

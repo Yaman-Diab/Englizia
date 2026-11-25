@@ -113,7 +113,9 @@ Exercise? _exercise(
   final bookReference = _bookReference(json.readMap('bookRef'));
   final explanation = json.readMap('explanation')?.readString('ar');
   final audio = prompt.readString('audio');
-  final key = '$seed:$id';
+  // A unit test's options come in the learner's own order, which the answer
+  // is given in: none is shuffled (B-33b).
+  final key = (json.readBool('keepOrder') ?? false) ? '' : '$seed:$id';
   return switch (template) {
     'fillChoices' => _fillChoices(
       json,
@@ -375,7 +377,7 @@ ChoiceExercise _choice(
   if (options.isEmpty || !options.any((o) => o.id == answer)) {
     throw const FormatException('Exercise: no options, or no right one');
   }
-  final shown = stableOrder(options, key);
+  final shown = _shuffled(options, key);
   return switch (template) {
     'multipleChoice' => _multipleChoice(
       id: id,
@@ -648,8 +650,8 @@ MatchingExercise _matching(
     id: id,
     instruction: instruction,
     pairs: pairs,
-    meaningsShown: stableOrder(pairs, '$key:meanings'),
-    wordsShown: stableOrder(pairs, '$key:words'),
+    meaningsShown: _shuffled(pairs, key.isEmpty ? '' : '$key:meanings'),
+    wordsShown: _shuffled(pairs, key.isEmpty ? '' : '$key:words'),
     pictures: pictures,
     hint: hint,
     bookReference: bookReference,
@@ -674,9 +676,13 @@ List<String> _distractors(Map<String, Object?> json) => [
 ];
 
 /// The cards in this learner's order. Ids go by position, as a word may repeat.
-List<WordChip> _bank(List<String> words, String key) => stableOrder([
+List<WordChip> _bank(List<String> words, String key) => _shuffled([
   for (final (i, word) in words.indexed) WordChip(id: 'c$i', text: word),
 ], key);
+
+/// [items] in this learner's order; as they are with no [key].
+List<T> _shuffled<T>(List<T> items, String key) =>
+    key.isEmpty ? [...items] : stableOrder(items, key);
 
 List<String> _strings(List<Object?>? values) => [
   for (final value in values ?? const <Object?>[])
@@ -765,6 +771,7 @@ Map<String, Object?> answerToJson(ExerciseDraft draft) => switch (draft) {
     'words': [for (final chip in chips) chip.text],
   },
   PairsDraft(:final mistakes) => {'mistakes': mistakes.toList()},
+  LinksDraft(:final links) => {'links': links},
   TextDraft(:final text) => {'text': text},
   SpeechDraft(:final heard) => {
     'heardWords': heard.where((word) => word).length,

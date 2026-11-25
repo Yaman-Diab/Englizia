@@ -1,6 +1,7 @@
 import 'package:englizia/features/home/domain/services/home_rules.dart';
 import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
+import 'package:englizia/features/lessons/domain/entities/unit_test.dart';
 import 'package:englizia/features/me/domain/entities/profile.dart';
 import 'package:englizia/features/tracks/domain/entities/learning_track.dart';
 import 'package:equatable/equatable.dart';
@@ -470,7 +471,11 @@ final class HomeReview extends Equatable {
 
 /// Cards the server offers between the header and the map.
 final class HomeCards extends Equatable {
-  const HomeCards({this.levelCheckLessonId, this.placementMinutes});
+  const HomeCards({
+    this.levelCheckLessonId,
+    this.placementMinutes,
+    this.levelSuggestion,
+  });
 
   /// The level check is available and not taken: «ابدأ الفحص» opens it.
   final String? levelCheckLessonId;
@@ -478,8 +483,16 @@ final class HomeCards extends Equatable {
   /// The placement test was put off: «12 إلى 15 دقيقة».
   final ({int min, int max})? placementMinutes;
 
+  /// After the first unit's test: the level above or below, until the
+  /// learner chooses (the map's `levelCheck`, B-33b).
+  final LevelSuggestion? levelSuggestion;
+
   @override
-  List<Object?> get props => [levelCheckLessonId, placementMinutes];
+  List<Object?> get props => [
+    levelCheckLessonId,
+    placementMinutes,
+    levelSuggestion,
+  ];
 }
 
 /// A freeze used, or a streak ended, told once.

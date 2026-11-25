@@ -17,7 +17,17 @@ typedef HomeStatus = ({HomeStatusKind kind, int minutesLeft});
 enum HomeTopNotice { none, email, offline, refreshFailed }
 
 /// The card between the header and the map.
-enum HomeCardNotice { none, freeze, broke, levelDone, levelCheck, placement }
+enum HomeCardNotice {
+  none,
+  freeze,
+  broke,
+  levelDone,
+  levelCheck,
+  placement,
+
+  /// «نقترح B1. انتقل أو ابقَ», after the first unit's test.
+  levelSuggestion,
+}
 
 /// What the notice area shows: one card at most, and the strip; [event] is
 /// the one-time notice behind a freeze or broke card.
@@ -256,6 +266,8 @@ abstract final class HomeRules {
         ? (event.kind == HomeEventKind.freezeUsed
               ? HomeCardNotice.freeze
               : HomeCardNotice.broke)
+        : home.cards.levelSuggestion != null
+        ? HomeCardNotice.levelSuggestion
         : home.level.completed && home.level.next != null
         ? HomeCardNotice.levelDone
         : email
@@ -267,6 +279,7 @@ abstract final class HomeRules {
         : HomeCardNotice.none;
     final emailWins =
         event == null &&
+        home.cards.levelSuggestion == null &&
         !(home.level.completed && home.level.next != null) &&
         email;
     final top = refreshFailed

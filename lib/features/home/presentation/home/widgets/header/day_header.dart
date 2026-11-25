@@ -18,6 +18,7 @@ import 'package:englizia/features/home/presentation/home/widgets/header/level_co
 import 'package:englizia/features/home/presentation/home/widgets/header/notice_cards.dart';
 import 'package:englizia/features/home/presentation/home/widgets/home_texts.dart';
 import 'package:englizia/features/home/presentation/home/widgets/stage/read_order.dart';
+import 'package:englizia/features/lessons/presentation/unit_test/pages/unit_test_page.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
@@ -48,6 +49,7 @@ class DayHeader extends StatelessWidget {
     required this.onLevelCheck,
     required this.onPlacement,
     required this.onStartLevel,
+    this.onChooseLevel,
     required this.onListen,
     this.minutesInRing = false,
     this.overrides = HeaderOverrides.none,
@@ -70,6 +72,9 @@ class DayHeader extends StatelessWidget {
   final VoidCallback onLevelCheck;
   final VoidCallback onPlacement;
   final VoidCallback onStartLevel;
+
+  /// «انتقل» (true) or «ابقَ» on the level suggested.
+  final ValueChanged<bool>? onChooseLevel;
   final VoidCallback onListen;
   final bool minutesInRing;
   final HeaderOverrides overrides;
@@ -101,6 +106,8 @@ class DayHeader extends StatelessWidget {
     HomeCardNotice.freeze => 120,
     HomeCardNotice.broke => 104,
     HomeCardNotice.levelCheck || HomeCardNotice.placement => 92,
+    // ASSUMPTION(design): no design for it; the result page's card.
+    HomeCardNotice.levelSuggestion => 212,
     HomeCardNotice.levelDone => 140,
   };
 
@@ -123,6 +130,8 @@ class DayHeader extends StatelessWidget {
         HomeCardNotice.none,
       HomeCardNotice.broke when notices.event == null => HomeCardNotice.none,
       HomeCardNotice.placement when home.cards.placementMinutes == null =>
+        HomeCardNotice.none,
+      HomeCardNotice.levelSuggestion when home.cards.levelSuggestion == null =>
         HomeCardNotice.none,
       final card => card,
     };
@@ -234,6 +243,11 @@ class DayHeader extends StatelessWidget {
       onStart: onStartLevel,
     ),
     HomeCardNotice.levelCheck => NoticeCard.levelCheck(onStart: onLevelCheck),
+    HomeCardNotice.levelSuggestion => LevelSuggestionCard(
+      suggestion: home.cards.levelSuggestion!,
+      busy: state.choosingLevel,
+      onChoose: (move) => onChooseLevel?.call(move),
+    ),
     HomeCardNotice.placement => NoticeCard.placement(
       minutes: home.cards.placementMinutes!,
       onStart: onPlacement,

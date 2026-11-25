@@ -1,0 +1,182 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "ut_mock",
+    "unitId": "unit_gen_a2_03",
+    "versionId": "ut_mock_v1",
+    "versionNo": 1,
+    "questionCount": 5,
+    "passPercent": 70,
+    "state": "available",
+    "bestPercent": null,
+    "retryAvailableAt": null,
+    "questions": [
+      {
+        "versionId": "utq_01",
+        "externalId": "q01",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "prompt": "They ___ football on Fridays.",
+          "options": [
+            {
+              "id": "a",
+              "text": "goes"
+            },
+            {
+              "id": "b",
+              "text": "go"
+            },
+            {
+              "id": "c",
+              "text": "going"
+            }
+          ]
+        },
+        "mockKey": {
+          "optionId": "b"
+        }
+      },
+      {
+        "versionId": "utq_02",
+        "externalId": "q02",
+        "template": "gap_choice",
+        "instructionAr": "أكمل الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "sentence": "Sara ___ the chickens every morning.",
+          "gapCount": 1,
+          "chips": [
+            "feed",
+            "feeds",
+            "feeding"
+          ]
+        },
+        "mockKey": {
+          "gaps": [
+            "feeds"
+          ]
+        }
+      },
+      {
+        "versionId": "utq_03",
+        "externalId": "q03",
+        "template": "word_order",
+        "instructionAr": "رتّب الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "meaningAr": "البقرة في الحظيرة.",
+          "chips": [
+            "in",
+            "The",
+            "barn.",
+            "the",
+            "is",
+            "cow",
+            "are"
+          ]
+        },
+        "mockKey": {
+          "chips": [
+            "The",
+            "cow",
+            "is",
+            "in",
+            "the",
+            "barn."
+          ]
+        }
+      },
+      {
+        "versionId": "utq_04",
+        "externalId": "q04",
+        "template": "matching",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "rightKind": "text",
+          "left": [
+            "cow",
+            "egg",
+            "field"
+          ],
+          "right": [
+            {
+              "text": "حقل",
+              "imageMediaId": null
+            },
+            {
+              "text": "بقرة",
+              "imageMediaId": null
+            },
+            {
+              "text": "بيضة",
+              "imageMediaId": null
+            }
+          ]
+        },
+        "mockKey": {
+          "pairs": [
+            1,
+            2,
+            0
+          ]
+        }
+      },
+      {
+        "versionId": "utq_05",
+        "externalId": "q05",
+        "template": "multiple_choice",
+        "instructionAr": "اختر ما يكمل الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "prompt": "We ___ in the barn now.",
+          "options": [
+            {
+              "id": "a",
+              "text": "is"
+            },
+            {
+              "id": "b",
+              "text": "am"
+            },
+            {
+              "id": "c",
+              "text": "are"
+            }
+          ]
+        },
+        "mockKey": {
+          "optionId": "c"
+        }
+      }
+    ],
+    "media": {},
+    "mockLevels": {
+      "current": {
+        "id": "lvl_gen_a2",
+        "nameAr": "ما قبل المتوسط",
+        "cefrCode": "a2"
+      },
+      "above": {
+        "id": "lvl_gen_b1",
+        "nameAr": "المتوسط",
+        "cefrCode": "b1"
+      },
+      "below": {
+        "id": "lvl_gen_a1",
+        "nameAr": "المبتدئ",
+        "cefrCode": "a1"
+      }
+    }
+  },
+  "error": null,
+  "traceId": "mock"
+}

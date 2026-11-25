@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 ## [Unreleased]
 
 ### Added
+- A unit's test, from its unit's last stone: what it takes and the pass mark, the questions one at a time with no hint or correction, then the result with a mark per question, the pass mark on a fail and the wait before another try counted down. After the first unit's test, a suggestion to move to the level above or below, or to stay, on the result and on home. A matching in a test is linked freely, each link numbered on both sides.
 - Notifications: a banner over the app when a teacher answers, the daily goal is due or the streak is at risk, held while touched and swiped away; none while you learn, where a reply waits as a dot on «أنا». Tapping one, in the app or on the phone, opens its lesson or your next lesson. After your first lesson, «نذكّرك بدرسك؟» asks once when to remind you and then asks the phone, with a child's own version; «أنا» says when reminders are off and how to turn them on.
 - Signing in and creating an account with Google, from sign-in and from "save progress": one press, Google's own sheet, and the button waits meanwhile. The way used last is marked on the sign-in screen.
 - Clips play for real: listening questions, words, sentences and the guide's lines, from the server; in mock mode each says its word or sentence in an English voice. The app's sounds keep quiet while one plays.

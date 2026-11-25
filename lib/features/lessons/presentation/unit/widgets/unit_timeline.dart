@@ -130,7 +130,7 @@ class _LessonRow extends StatelessWidget {
     return 'unit_lesson_semantics'.tr(
       namedArgs: {
         'number': '$number',
-        'title': lesson.title,
+        'title': shownTitle(lesson.title, lesson.kind),
         'meta': unitLessonMeta(lesson),
         'status': state,
       },
@@ -417,7 +417,7 @@ class _CurrentCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxs),
           ExcludeSemantics(
             child: Text(
-              lesson.title,
+              shownTitle(lesson.title, lesson.kind),
               style: texts.bodyStrong.copyWith(fontSize: 18, height: 28 / 18),
             ),
           ),
@@ -517,7 +517,7 @@ class _FlatRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      lesson.title,
+                      shownTitle(lesson.title, lesson.kind),
                       style: texts.bodyStrong.copyWith(
                         color: locked
                             ? colors.textSecondary
