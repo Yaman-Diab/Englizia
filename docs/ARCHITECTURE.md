@@ -19,7 +19,7 @@ lib/
 │   ├── error/         Failure (sealed) · FailureMapper
 │   ├── l10n/          AppLocales · CurrentLanguage · FailureL10n (failure → translated text)
 │   ├── logging/       AppLogger · Redactor · CrashReporter (no-op until a provider is chosen)
-│   ├── network/       ApiClient · ApiException (server envelope) · NetworkException · TokenResponse · interceptors · DioFactory · JsonReader
+│   ├── network/       ApiClient · ApiException (server envelope) · NetworkException · TokenResponse · interceptors · DioFactory · JsonReader · ServerClock (the server's time, which its waits count on)
 │   ├── session/       AuthTokens · AppSessionController (GoRouter refreshListenable)
 │   ├── storage/       TokenStorage (secure; says whether a write reached the phone) · SettingsStorageService (SharedPreferences, non-sensitive)
 │   ├── router/        RoutePolicy · AppRedirect

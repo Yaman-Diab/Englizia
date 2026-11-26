@@ -504,9 +504,10 @@ class _Panel extends StatelessWidget {
                                   color: colors.textSecondary,
                                 ),
                               ),
-                              if (mode == ReaderMode.arabicOnly)
+                              if (next.arabic case final arabic?
+                                  when mode == ReaderMode.arabicOnly)
                                 Text(
-                                  next.arabic,
+                                  arabic,
                                   textDirection: TextDirection.rtl,
                                   style: texts.caption.copyWith(
                                     color: colors.textSecondary,

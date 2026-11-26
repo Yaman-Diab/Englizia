@@ -1886,6 +1886,23 @@ void main() {
 
         expect(remote.sent.map((a) => a['runId']).toSet(), hasLength(2));
       });
+
+      test('reading it and repeating after it send nothing (B-21)', () async {
+        await repository.sendContentDone('real', 1);
+        await repository.saveShadowingScore(
+          const ShadowingScore(
+            lessonId: 'real',
+            sentenceId: 's1',
+            heard: 5,
+            total: 6,
+          ),
+        );
+        await settle();
+
+        expect(remote.contentDone, isEmpty);
+        expect(remote.shadowing, isEmpty);
+        expect(unsent(), isEmpty);
+      });
     });
 
     test('with no connection it waits, and goes with its one id', () async {

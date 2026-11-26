@@ -291,7 +291,7 @@ void main() {
       await pump(tester);
 
       expect(said(practised.first.words.first.text), findsOneWidget);
-      expect(said(practised.first.arabic), findsOneWidget);
+      expect(said(practised.first.arabic!), findsOneWidget);
       expect(said('shadow_listen_model'.tr()), findsOneWidget);
       expect(said('shadow_mode_repeat_hint'.tr()), findsOneWidget);
       expect(
@@ -358,7 +358,7 @@ void main() {
       await pump(tester);
 
       expect(find.byType(HiddenWords), findsOneWidget);
-      expect(said(practised.first.arabic), findsNothing);
+      expect(said(practised.first.arabic!), findsNothing);
       expect(said('shadow_start_together'.tr()), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('lesson_mic_press'.tr()).first);
@@ -370,7 +370,7 @@ void main() {
         ..finish();
       await settle(tester);
       expect(find.byType(HiddenWords), findsNothing);
-      expect(said(practised.first.arabic), findsOneWidget);
+      expect(said(practised.first.arabic!), findsOneWidget);
       await leave(tester);
     });
 

@@ -206,6 +206,12 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
     final hidden = mode == ReaderMode.listening && !view.revealed;
     final image = sentence.imageUrl;
     final speaker = sentence.speaker;
+    // A sentence with no translation shows its English in every way of
+    // showing, and offers no translation.
+    final arabic = sentence.arabic;
+    final arabicLeads =
+        arabic != null &&
+        (mode == ReaderMode.arabicFirst || mode == ReaderMode.arabicOnly);
     final translation =
         (mode == ReaderMode.onTap && view.open) ||
         mode == ReaderMode.below ||
@@ -232,10 +238,9 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (speaker != null) _Speaker(name: speaker),
-              if (mode == ReaderMode.arabicFirst ||
-                  mode == ReaderMode.arabicOnly) ...[
+              if (arabicLeads) ...[
                 _Arabic(
-                  text: sentence.arabic,
+                  text: arabic,
                   strong: mode == ReaderMode.arabicOnly && !view.dim,
                 ),
                 if (mode == ReaderMode.arabicFirst)
@@ -248,7 +253,7 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   size: view.size,
                   onReveal: widget.video ? null : widget.onReveal,
                 )
-              else if (mode != ReaderMode.arabicOnly)
+              else if (mode != ReaderMode.arabicOnly || arabic == null)
                 _words(context),
               if (image != null) ...[
                 const SizedBox(height: AppSpacing.md),
@@ -278,8 +283,8 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   mode == ReaderMode.below ||
                   mode == ReaderMode.currentTranslated)
                 SmoothSize(
-                  child: translation
-                      ? _Translation(text: sentence.arabic)
+                  child: translation && arabic != null
+                      ? _Translation(text: arabic)
                       : const SizedBox(width: double.infinity),
                 ),
               if (view.current &&
@@ -293,8 +298,9 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   distance: AppMotion.distanceMicro,
                   child: _Tools(
                     showsTranslation:
-                        mode == ReaderMode.onTap ||
-                        mode == ReaderMode.currentTranslated,
+                        arabic != null &&
+                        (mode == ReaderMode.onTap ||
+                            mode == ReaderMode.currentTranslated),
                     video: widget.video,
                     open: view.open,
                     onListen: widget.onListen,

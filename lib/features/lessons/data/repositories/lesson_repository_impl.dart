@@ -493,20 +493,28 @@ final class LessonRepositoryImpl implements LessonRepository {
   }
 
   @override
-  Future<void> saveShadowingScore(ShadowingScore score) => _enqueue(
-    _shadowingKind,
-    score.lessonId,
-    SettingsStorageService.randomId(),
-    shadowingScoreToJson(score),
-  );
+  Future<void> saveShadowingScore(ShadowingScore score) async {
+    if (_fromServer(score.lessonId)) return;
+    await _enqueue(
+      _shadowingKind,
+      score.lessonId,
+      SettingsStorageService.randomId(),
+      shadowingScoreToJson(score),
+    );
+  }
 
+  /// The server completes a lesson by its questions alone: reading, listening
+  /// and repeating send it nothing (the backend's note B-21).
   @override
-  Future<void> sendContentDone(String lessonId, int lessonVersion) => _enqueue(
-    _contentDoneKind,
-    lessonId,
-    SettingsStorageService.randomId(),
-    {'lessonVersion': lessonVersion},
-  );
+  Future<void> sendContentDone(String lessonId, int lessonVersion) async {
+    if (_fromServer(lessonId)) return;
+    await _enqueue(
+      _contentDoneKind,
+      lessonId,
+      SettingsStorageService.randomId(),
+      {'lessonVersion': lessonVersion},
+    );
+  }
 
   @override
   Future<void> saveReport(ExerciseReport report) async {

@@ -9,6 +9,7 @@ import 'package:englizia/core/state/load_status.dart';
 import 'package:englizia/core/video/silent_audio_engine.dart';
 import 'package:englizia/core/video/video_engine.dart';
 import 'package:englizia/features/lessons/data/datasources/lesson_remote_data_source.dart';
+import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/reader_model.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/presentation/reader/cubit/interactive_text_cubit.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../../../helpers/api_fixtures.dart';
 import '../../../helpers/fake_lesson_repository.dart';
 import '../../../helpers/fakes.dart';
 import '../../../helpers/pump_app.dart';
@@ -423,7 +425,7 @@ void main() {
       tester,
     ) async {
       final subject = await pump(tester);
-      final arabic = _content.sentences[0].arabic;
+      final arabic = _content.sentences[0].arabic!;
       expect(find.text(arabic), findsNothing);
 
       await tester.tap(find.text('reader_translation'.tr()));
@@ -558,8 +560,8 @@ void main() {
       await tester.pump();
       await tester.settleEntrance(_settled);
 
-      expect(find.text(_content.sentences[0].arabic), findsOneWidget);
-      expect(find.text(_content.sentences[5].arabic), findsOneWidget);
+      expect(find.text(_content.sentences[0].arabic!), findsOneWidget);
+      expect(find.text(_content.sentences[5].arabic!), findsOneWidget);
       expect(find.text('reader_translation'.tr()), findsNothing);
       await leave(tester);
     });
@@ -584,7 +586,7 @@ void main() {
       await pump(tester);
 
       expect(word('wakes'), findsNothing);
-      expect(find.text(_content.sentences[0].arabic), findsOneWidget);
+      expect(find.text(_content.sentences[0].arabic!), findsOneWidget);
       await leave(tester);
     });
 
@@ -642,6 +644,115 @@ void main() {
 
       expect(continued, isFalse);
       await leave(tester);
+    });
+
+    group('the dev server’s own text (B-21)', () {
+      // Six sentences: the fourth and the last with no translation, two with
+      // a picture, one said by «Mum», and no word to save.
+      final live = LessonModel(
+        asJsonMap(ApiClient.unwrap(apiFixture('app_lesson_interactive_text'))),
+      ).toEntity('seed').reader!;
+
+      setUp(() => lessons.reader = live);
+
+      testWidgets('a sentence with no translation offers none', (tester) async {
+        final subject = await pump(tester);
+        expect(find.text('reader_translation'.tr()), findsOneWidget);
+
+        await subject.goTo(3);
+        await tester.pump();
+        await tester.settleEntrance(_settled);
+
+        expect(word('bigger'), findsOneWidget);
+        expect(find.text('reader_listen'.tr()), findsOneWidget);
+        expect(find.text('reader_translation'.tr()), findsNothing);
+        await leave(tester);
+      });
+
+      testWidgets('translation only keeps the English of one with none', (
+        tester,
+      ) async {
+        lessons.prefs = const ReaderPrefs(mode: ReaderMode.arabicOnly);
+        await pump(tester);
+
+        expect(find.text(live.sentences[0].arabic!), findsOneWidget);
+        expect(word('wakes'), findsNothing);
+        expect(word('bigger'), findsOneWidget);
+        expect(word('laughs'), findsOneWidget);
+        await leave(tester);
+      });
+
+      testWidgets('who speaks is named over the sentence', (tester) async {
+        await pump(tester);
+
+        expect(find.text('Mum'), findsOneWidget);
+        await leave(tester);
+      });
+
+      testWidgets('a span’s card has no star: no word is saved yet', (
+        tester,
+      ) async {
+        final subject = await pump(tester);
+
+        subject.selectWord(4, 1);
+        await tester.pump();
+        await tester.settleEntrance(_settled);
+
+        expect(find.text('turn off'), findsOneWidget);
+        expect(find.text('reader_kind_phrasal'.tr()), findsOneWidget);
+        expect(find.text('يُطفئ'), findsOneWidget);
+        expect(find.bySemanticsLabel('reader_save'.tr()), findsNothing);
+        await subject.closeCard();
+
+        subject.selectWord(1, 1);
+        await tester.pump();
+        await tester.settleEntrance(_settled);
+        expect(find.text('have breakfast'), findsOneWidget);
+        expect(find.text('reader_kind_idiom'.tr()), findsOneWidget);
+        await leave(tester);
+      }, semanticsEnabled: true);
+
+      test('a word of no span opens nothing', () async {
+        final subject = cubit();
+        await subject.start();
+
+        expect(subject.selectWord(4, 0), isFalse);
+        expect(subject.selectWord(4, 2), isFalse, reason: '«it», between');
+        expect(subject.selectWord(4, 3), isTrue);
+        expect(subject.state.selection?.span?.id, 'sp4');
+      });
+
+      test('«اسمع» on a span runs from its first word to its last', () async {
+        final subject = cubit();
+        await subject.start();
+        subject.selectWord(4, 1);
+
+        await subject.sayCard();
+
+        expect(engine.opened.single.from, const Duration(milliseconds: 19125));
+
+        subject.tick(const Duration(milliseconds: 20505 - 19125));
+
+        expect(subject.state.playing, isFalse);
+        expect(subject.state.position, const Duration(milliseconds: 20505));
+      });
+
+      testLayouts('every way of showing fits', (tester, layout) async {
+        for (final mode in ReaderMode.values) {
+          lessons.prefs = ReaderPrefs(mode: mode);
+          final subject = await pump(
+            tester,
+            locale: layout.locale,
+            size: layout.size,
+            themeMode: layout.themeMode,
+          );
+          await subject.goTo(3);
+          await tester.pump();
+          await tester.settleEntrance(_settled);
+          expect(tester.takeException(), isNull);
+          await leave(tester);
+        }
+      });
     });
 
     testWidgets('leaving is one press', (tester) async {

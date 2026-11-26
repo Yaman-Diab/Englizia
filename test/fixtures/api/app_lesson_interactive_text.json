@@ -1,0 +1,628 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "01a2160b-d9a5-7a4c-a3a5-47829fa48bc0",
+    "versionId": "01a2160b-defc-7b9f-9d75-f94a3d45ec1b",
+    "versionNo": 1,
+    "unitId": "01a1f250-05f7-707c-a836-b42c56952530",
+    "type": "interactive_text",
+    "titleAr": "يوم في حياة سارة",
+    "titleEn": "A day in Sara's life",
+    "objectiveAr": "أن تقرأ نصًا قصيرًا وتسمعه، وتعرف المقارنة فيه.",
+    "objectiveEn": null,
+    "minutes": 8,
+    "bookPages": null,
+    "publishedAt": "2026-11-26T04:10:06.397Z",
+    "content": {
+      "type": "interactive_text",
+      "media": {
+        "mediaId": "01a2160b-dbc6-7a77-803e-98e1a72af617",
+        "durationMs": 26336
+      },
+      "sentences": [
+        {
+          "id": "s1",
+          "speaker": null,
+          "textEn": "Sara wakes up early every morning.",
+          "textAr": "تستيقظ سارة باكرًا كل صباح.",
+          "startMs": 300,
+          "endMs": 3650,
+          "imageMediaId": null,
+          "shadowing": true,
+          "tokens": [
+            {
+              "id": "s1t1",
+              "text": "Sara",
+              "startMs": 300,
+              "endMs": 791
+            },
+            {
+              "id": "s1t2",
+              "text": "wakes",
+              "startMs": 881,
+              "endMs": 1449
+            },
+            {
+              "id": "s1t3",
+              "text": "up",
+              "startMs": 1539,
+              "endMs": 1900
+            },
+            {
+              "id": "s1t4",
+              "text": "early",
+              "startMs": 1990,
+              "endMs": 2375
+            },
+            {
+              "id": "s1t5",
+              "text": "every",
+              "startMs": 2465,
+              "endMs": 2969
+            },
+            {
+              "id": "s1t6",
+              "text": "morning.",
+              "startMs": 3059,
+              "endMs": 3650
+            }
+          ],
+          "spans": [
+            {
+              "id": "sp1",
+              "tokenIds": [
+                "s1t2",
+                "s1t3"
+              ],
+              "kind": "phrasal_verb",
+              "lemma": "wake up",
+              "textAr": "يستيقظ",
+              "noteAr": null
+            }
+          ]
+        },
+        {
+          "id": "s2",
+          "speaker": null,
+          "textEn": "She has breakfast with her family.",
+          "textAr": "تتناول الفطور مع عائلتها.",
+          "startMs": 4300,
+          "endMs": 7916,
+          "imageMediaId": "01a2160b-db19-7bf0-ac7e-bed182df166d",
+          "shadowing": false,
+          "tokens": [
+            {
+              "id": "s2t1",
+              "text": "She",
+              "startMs": 4300,
+              "endMs": 4732
+            },
+            {
+              "id": "s2t2",
+              "text": "has",
+              "startMs": 4822,
+              "endMs": 5382
+            },
+            {
+              "id": "s2t3",
+              "text": "breakfast",
+              "startMs": 5472,
+              "endMs": 6145
+            },
+            {
+              "id": "s2t4",
+              "text": "with",
+              "startMs": 6235,
+              "endMs": 6724
+            },
+            {
+              "id": "s2t5",
+              "text": "her",
+              "startMs": 6814,
+              "endMs": 7237
+            },
+            {
+              "id": "s2t6",
+              "text": "family.",
+              "startMs": 7327,
+              "endMs": 7916
+            }
+          ],
+          "spans": [
+            {
+              "id": "sp2",
+              "tokenIds": [
+                "s2t2",
+                "s2t3"
+              ],
+              "kind": "expression",
+              "lemma": "have breakfast",
+              "textAr": "يتناول الفطور",
+              "noteAr": null
+            }
+          ]
+        },
+        {
+          "id": "s3",
+          "speaker": null,
+          "textEn": "Then she takes the bus to school.",
+          "textAr": "ثم تركب الحافلة إلى المدرسة.",
+          "startMs": 8565,
+          "endMs": 12261,
+          "imageMediaId": "01a2160b-dbae-7c65-aad5-13ff8a4fbaa1",
+          "shadowing": true,
+          "tokens": [
+            {
+              "id": "s3t1",
+              "text": "Then",
+              "startMs": 8565,
+              "endMs": 9084
+            },
+            {
+              "id": "s3t2",
+              "text": "she",
+              "startMs": 9174,
+              "endMs": 9606
+            },
+            {
+              "id": "s3t3",
+              "text": "takes",
+              "startMs": 9696,
+              "endMs": 10234
+            },
+            {
+              "id": "s3t4",
+              "text": "the",
+              "startMs": 10324,
+              "endMs": 10674
+            },
+            {
+              "id": "s3t5",
+              "text": "bus",
+              "startMs": 10764,
+              "endMs": 11185
+            },
+            {
+              "id": "s3t6",
+              "text": "to",
+              "startMs": 11275,
+              "endMs": 11655
+            },
+            {
+              "id": "s3t7",
+              "text": "school.",
+              "startMs": 11745,
+              "endMs": 12261
+            }
+          ],
+          "spans": []
+        },
+        {
+          "id": "s4",
+          "speaker": null,
+          "textEn": "Her new school is bigger than her old school.",
+          "textAr": null,
+          "startMs": 12911,
+          "endMs": 17817,
+          "imageMediaId": null,
+          "shadowing": false,
+          "tokens": [
+            {
+              "id": "s4t1",
+              "text": "Her",
+              "startMs": 12911,
+              "endMs": 13333
+            },
+            {
+              "id": "s4t2",
+              "text": "new",
+              "startMs": 13423,
+              "endMs": 13875
+            },
+            {
+              "id": "s4t3",
+              "text": "school",
+              "startMs": 13965,
+              "endMs": 14481
+            },
+            {
+              "id": "s4t4",
+              "text": "is",
+              "startMs": 14571,
+              "endMs": 14975
+            },
+            {
+              "id": "s4t5",
+              "text": "bigger",
+              "startMs": 15065,
+              "endMs": 15531
+            },
+            {
+              "id": "s4t6",
+              "text": "than",
+              "startMs": 15621,
+              "endMs": 16103
+            },
+            {
+              "id": "s4t7",
+              "text": "her",
+              "startMs": 16193,
+              "endMs": 16616
+            },
+            {
+              "id": "s4t8",
+              "text": "old",
+              "startMs": 16706,
+              "endMs": 17211
+            },
+            {
+              "id": "s4t9",
+              "text": "school.",
+              "startMs": 17300,
+              "endMs": 17817
+            }
+          ],
+          "spans": [
+            {
+              "id": "sp3",
+              "tokenIds": [
+                "s4t5"
+              ],
+              "kind": "word",
+              "lemma": "big",
+              "textAr": "أكبر",
+              "noteAr": "bigger صيغة المقارنة من big."
+            }
+          ]
+        },
+        {
+          "id": "s5",
+          "speaker": "Mum",
+          "textEn": "Please turn it off before you leave.",
+          "textAr": "من فضلك أطفئه قبل أن تغادر.",
+          "startMs": 18467,
+          "endMs": 22319,
+          "imageMediaId": null,
+          "shadowing": true,
+          "tokens": [
+            {
+              "id": "s5t1",
+              "text": "Please",
+              "startMs": 18467,
+              "endMs": 19036
+            },
+            {
+              "id": "s5t2",
+              "text": "turn",
+              "startMs": 19125,
+              "endMs": 19600
+            },
+            {
+              "id": "s5t3",
+              "text": "it",
+              "startMs": 19690,
+              "endMs": 20008
+            },
+            {
+              "id": "s5t4",
+              "text": "off",
+              "startMs": 20098,
+              "endMs": 20505
+            },
+            {
+              "id": "s5t5",
+              "text": "before",
+              "startMs": 20595,
+              "endMs": 21207
+            },
+            {
+              "id": "s5t6",
+              "text": "you",
+              "startMs": 21297,
+              "endMs": 21712
+            },
+            {
+              "id": "s5t7",
+              "text": "leave.",
+              "startMs": 21802,
+              "endMs": 22319
+            }
+          ],
+          "spans": [
+            {
+              "id": "sp4",
+              "tokenIds": [
+                "s5t2",
+                "s5t4"
+              ],
+              "kind": "phrasal_verb",
+              "lemma": "turn off",
+              "textAr": "يُطفئ",
+              "noteAr": null
+            },
+            {
+              "id": "sp5",
+              "tokenIds": [
+                "s5t5"
+              ],
+              "kind": "word",
+              "lemma": "before",
+              "textAr": "قبل",
+              "noteAr": null
+            }
+          ]
+        },
+        {
+          "id": "s6",
+          "speaker": null,
+          "textEn": "Sara laughs and runs.",
+          "textAr": null,
+          "startMs": 22969,
+          "endMs": 25329,
+          "imageMediaId": null,
+          "shadowing": false,
+          "tokens": [
+            {
+              "id": "s6t1",
+              "text": "Sara",
+              "startMs": 22969,
+              "endMs": 23460
+            },
+            {
+              "id": "s6t2",
+              "text": "laughs",
+              "startMs": 23550,
+              "endMs": 24110
+            },
+            {
+              "id": "s6t3",
+              "text": "and",
+              "startMs": 24200,
+              "endMs": 24653
+            },
+            {
+              "id": "s6t4",
+              "text": "runs.",
+              "startMs": 24742,
+              "endMs": 25329
+            }
+          ],
+          "spans": []
+        }
+      ]
+    },
+    "questions": [
+      {
+        "versionId": "01a2160b-ded3-7c2e-9726-c15c0ec4b18d",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "المقارنة بين مدرستين: bigger.",
+        "bookPages": null,
+        "body": {
+          "prompt": "Sara's new school is ___ than her old school.",
+          "options": [
+            {
+              "id": "a",
+              "text": "bigger"
+            },
+            {
+              "id": "b",
+              "text": "big"
+            },
+            {
+              "id": "c",
+              "text": "more big"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a2160b-dee3-7275-aa8c-b9b90a96fe65",
+        "template": "picture_choice",
+        "instructionAr": "اختر الصورة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "الحافلة أكبر من السيارة، وسارة تركبها إلى المدرسة.",
+        "bookPages": null,
+        "body": {
+          "prompt": "Sara takes it to school. It is bigger than a car.",
+          "promptAudioMediaId": null,
+          "options": [
+            {
+              "id": "a",
+              "imageMediaId": "01a2160b-dbae-7c65-aad5-13ff8a4fbaa1"
+            },
+            {
+              "id": "b",
+              "imageMediaId": "01a2160b-dd4d-7a57-8dc8-27ed39369921"
+            },
+            {
+              "id": "c",
+              "imageMediaId": "01a2160b-dd68-7af0-8ab9-0784eac4e5fe"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a2160b-dee3-7b37-bd87-0f562f94b48f",
+        "template": "listen_choose",
+        "instructionAr": "استمع واختر ما سمعته",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "سمعت colder than: أبرد من.",
+        "bookPages": null,
+        "body": {
+          "audioMediaId": "01a2160b-ddbf-71b5-a169-28a8c624f084",
+          "transcript": "Today is colder than yesterday.",
+          "options": [
+            {
+              "id": "a",
+              "text": "colder than yesterday"
+            },
+            {
+              "id": "b",
+              "text": "cold than yesterday"
+            },
+            {
+              "id": "c",
+              "text": "colder then yesterday"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a2160b-dee3-71ec-9b84-d6698180e87a",
+        "template": "gap_choice",
+        "instructionAr": "أكمل الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "بعد المقارنة نقول than، لا then.",
+        "bookPages": null,
+        "body": {
+          "sentence": "Her new school is bigger ___ her old school.",
+          "gapCount": 1,
+          "chips": [
+            "than",
+            "then",
+            "that"
+          ]
+        },
+        "answerKey": {
+          "gaps": [
+            "than"
+          ]
+        }
+      },
+      {
+        "versionId": "01a2160b-dee3-7aae-bec7-6919bea9f09d",
+        "template": "word_order",
+        "instructionAr": "رتّب الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "bigger than: أكبر من.",
+        "bookPages": null,
+        "body": {
+          "meaningAr": "الحافلة أكبر من السيارة.",
+          "chips": [
+            "The",
+            "bus",
+            "is",
+            "bigger",
+            "than",
+            "the",
+            "car",
+            "big"
+          ]
+        },
+        "answerKey": {
+          "chips": [
+            "The",
+            "bus",
+            "is",
+            "bigger",
+            "than",
+            "the",
+            "car"
+          ],
+          "alternatives": []
+        }
+      },
+      {
+        "versionId": "01a2160b-dee4-702d-85ea-4e223c566bc6",
+        "template": "matching",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "نضيف er، ونضاعف الحرف في hot، وy تصبح ier.",
+        "bookPages": null,
+        "body": {
+          "rightKind": "text",
+          "left": [
+            "fast",
+            "long",
+            "hot",
+            "easy"
+          ],
+          "right": [
+            {
+              "text": "faster",
+              "imageMediaId": null
+            },
+            {
+              "text": "longer",
+              "imageMediaId": null
+            },
+            {
+              "text": "hotter",
+              "imageMediaId": null
+            },
+            {
+              "text": "easier",
+              "imageMediaId": null
+            }
+          ]
+        },
+        "answerKey": {
+          "pairs": [
+            0,
+            1,
+            2,
+            3
+          ]
+        }
+      }
+    ],
+    "media": {
+      "01a2160b-dbc6-7a77-803e-98e1a72af617": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a2160b-dbc6-7a77-803e-98e1a72af617.mp3",
+        "sizeBytes": 158059
+      },
+      "01a2160b-db19-7bf0-ac7e-bed182df166d": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-db19-7bf0-ac7e-bed182df166d.webp",
+        "sizeBytes": 2812
+      },
+      "01a2160b-dbae-7c65-aad5-13ff8a4fbaa1": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-dbae-7c65-aad5-13ff8a4fbaa1.webp",
+        "sizeBytes": 3876
+      },
+      "01a2160b-dd4d-7a57-8dc8-27ed39369921": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-dd4d-7a57-8dc8-27ed39369921.webp",
+        "sizeBytes": 3842
+      },
+      "01a2160b-dd68-7af0-8ab9-0784eac4e5fe": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-dd68-7af0-8ab9-0784eac4e5fe.webp",
+        "sizeBytes": 4804
+      },
+      "01a2160b-ddbf-71b5-a169-28a8c624f084": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a2160b-ddbf-71b5-a169-28a8c624f084.mp3",
+        "sizeBytes": 16057
+      }
+    }
+  },
+  "error": null,
+  "traceId": "5c12d7701f52dc8420e6a4d216c1ac8a"
+}
