@@ -230,7 +230,7 @@ class _ReaderCardLayerState extends State<ReaderCardLayer> {
             area: size,
             saved: state.saved.contains(selection.span?.id),
             onSay: widget.cubit.sayCard,
-            onSave: widget.cubit.toggleSaved,
+            onSave: state.content!.savesWords ? widget.cubit.toggleSaved : null,
           ),
         ],
       );

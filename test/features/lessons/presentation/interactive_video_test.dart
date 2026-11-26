@@ -478,7 +478,7 @@ void main() {
       expect(said('Good'), findsOneWidget);
       expect(said('Omar'), findsWidgets);
       expect(said('reader_again'.tr()), findsNothing);
-      expect(said(_content.sentences.first.arabic), findsNothing);
+      expect(said(_content.sentences.first.arabic!), findsNothing);
       expect(find.byIcon(Icons.play_arrow_rounded), findsOneWidget);
       await leave(tester);
     });
@@ -490,11 +490,11 @@ void main() {
 
       await playAt(tester, subject, 1, 2);
 
-      expect(said(_content.sentences[1].arabic), findsOneWidget);
+      expect(said(_content.sentences[1].arabic!), findsOneWidget);
       expect(said('reader_again'.tr()), findsOneWidget);
       expect(said('reader_translation'.tr()), findsOneWidget);
       expect(said('reader_listen'.tr()), findsNothing);
-      expect(said(_content.sentences[2].arabic), findsNothing);
+      expect(said(_content.sentences[2].arabic!), findsNothing);
       await subject.pause();
       await leave(tester);
     });
@@ -508,7 +508,7 @@ void main() {
       await tester.tap(said('reader_translation'.tr()));
       await tester.pump();
       await tester.pump(_settled);
-      expect(said(_content.sentences[1].arabic), findsNothing);
+      expect(said(_content.sentences[1].arabic!), findsNothing);
 
       await tester.tap(said('reader_again'.tr()));
       await tester.pump();
@@ -557,8 +557,8 @@ void main() {
       await playAt(tester, subject, 1, 1);
 
       expect(said('kilo.'), findsNothing);
-      expect(said(_content.sentences[1].arabic), findsOneWidget);
-      expect(said(_content.sentences[0].arabic), findsOneWidget);
+      expect(said(_content.sentences[1].arabic!), findsOneWidget);
+      expect(said(_content.sentences[0].arabic!), findsOneWidget);
       await subject.pause();
       await leave(tester);
     });
@@ -571,7 +571,7 @@ void main() {
 
       await playAt(tester, subject, 1, 1);
 
-      expect(said(_content.sentences[1].arabic), findsNothing);
+      expect(said(_content.sentences[1].arabic!), findsNothing);
       expect(said('reader_translation'.tr()), findsNothing);
       expect(said('reader_again'.tr()), findsOneWidget);
       await subject.pause();
@@ -764,7 +764,7 @@ void main() {
         await turn(tester);
 
         expect(said('Fine.'), findsOneWidget);
-        expect(said(_content.sentences[3].arabic), findsOneWidget);
+        expect(said(_content.sentences[3].arabic!), findsOneWidget);
         expect(said(_content.sentences[4].english), findsOneWidget);
         expect(said('reader_again'.tr()), findsNothing);
         expect(tester.takeException(), isNull);

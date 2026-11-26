@@ -505,10 +505,10 @@ class _SentenceCard extends StatelessWidget {
                     : SaidWord(word: words[i].text, index: i, heard: heard[i]),
               ),
             ),
-          if (!hidden) ...[
+          if (sentence.arabic case final arabic? when !hidden) ...[
             const SizedBox(height: AppSpacing.xs + AppSpacing.xxs),
             Text(
-              sentence.arabic,
+              arabic,
               textAlign: TextAlign.center,
               textDirection: TextDirection.rtl,
               style: texts.body.copyWith(color: colors.textSecondary),

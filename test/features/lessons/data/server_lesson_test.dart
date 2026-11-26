@@ -9,6 +9,7 @@ import 'package:englizia/features/lessons/data/models/exercise_model.dart';
 import 'package:englizia/features/lessons/data/models/sync_model.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise.dart';
 import 'package:englizia/features/lessons/domain/entities/exercise_answer.dart';
+import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 import 'package:englizia/features/lessons/domain/services/exercise_evaluator.dart';
 import 'package:flutter_test/flutter_test.dart' hide Evaluation;
 
@@ -266,6 +267,151 @@ void main() {
         'They are not',
         'home.',
       ]);
+    });
+  });
+
+  group('an interactive text (the dev server’s own, B-21)', () {
+    late Lesson lesson;
+    late ReaderContent reader;
+
+    setUp(() {
+      lesson = LessonModel(
+        _data('app_lesson_interactive_text'),
+      ).toEntity('seed');
+      reader = lesson.reader!;
+    });
+
+    test('one sound for the lesson, and its questions after it', () {
+      expect(lesson.id, '01a2160b-d9a5-7a4c-a3a5-47829fa48bc0');
+      expect(lesson.grammar, isNull);
+      expect(reader.video, isNull);
+      expect(reader.audioUrl, endsWith('.mp3'));
+      expect(reader.duration, const Duration(milliseconds: 26336));
+      expect(lesson.exercises.map((e) => e.runtimeType), [
+        MultipleChoiceExercise,
+        ImageChoiceExercise,
+        ListenChooseExercise,
+        FillChoicesExercise,
+        WordOrderExercise,
+        MatchingExercise,
+      ]);
+    });
+
+    test('its sentences, each word with its time in the sound', () {
+      expect(reader.sentences.map((s) => s.id), [
+        's1',
+        's2',
+        's3',
+        's4',
+        's5',
+        's6',
+      ]);
+      final second = reader.sentences[1];
+      expect(second.english, 'She has breakfast with her family.');
+      expect(second.arabic, 'تتناول الفطور مع عائلتها.');
+      expect(second.start, const Duration(milliseconds: 4300));
+      expect(second.end, const Duration(milliseconds: 7916));
+      expect(second.words[2].text, 'breakfast');
+      expect(second.words[2].start, const Duration(milliseconds: 5472));
+      expect(second.words[2].end, const Duration(milliseconds: 6145));
+      expect(second.words.last.text, 'family.', reason: 'its full stop');
+    });
+
+    test('a sentence may have no translation, a picture, or a speaker', () {
+      expect(reader.sentences.map((s) => s.arabic == null), [
+        false,
+        false,
+        false,
+        true,
+        false,
+        true,
+      ]);
+      expect(reader.sentences.map((s) => s.imageUrl != null), [
+        false,
+        true,
+        true,
+        false,
+        false,
+        false,
+      ]);
+      expect(reader.sentences[1].imageUrl, endsWith('.webp'));
+      expect(reader.sentences.map((s) => s.speaker), [
+        null,
+        null,
+        null,
+        null,
+        'Mum',
+        null,
+      ]);
+    });
+
+    test('only the sentences marked are repeated after', () {
+      expect(reader.hasShadowing, isTrue);
+      expect(reader.sentences.map((s) => s.shadowing), [
+        true,
+        false,
+        true,
+        false,
+        true,
+        false,
+      ]);
+    });
+
+    test('its spans: a word, a phrasal verb, an expression', () {
+      expect(reader.spans.map((s) => (s.id, s.sentenceId, s.kind, s.base)), [
+        ('sp1', 's1', SpanKind.phrasalVerb, 'wake up'),
+        ('sp2', 's2', SpanKind.idiom, 'have breakfast'),
+        ('sp3', 's4', SpanKind.word, 'big'),
+        ('sp4', 's5', SpanKind.phrasalVerb, 'turn off'),
+        ('sp5', 's5', SpanKind.word, 'before'),
+      ]);
+      expect(reader.spans[2].arabic, 'أكبر');
+      expect(reader.spans[2].note, 'bigger صيغة المقارنة من big.');
+      expect(reader.spans[0].note, isNull);
+    });
+
+    test('a span’s words needn’t be side by side: turn … off', () {
+      final mum = reader.sentences[4];
+      ReaderSpan? spanOf(String word) =>
+          reader.spanOf(mum, mum.words.firstWhere((w) => w.text == word));
+
+      expect(spanOf('turn')?.id, 'sp4');
+      expect(spanOf('off')?.id, 'sp4');
+      expect(spanOf('it'), isNull, reason: 'between them, and not of them');
+      expect(spanOf('Please'), isNull);
+      // Its sound runs from its first word to its last, the one between
+      // included (the backend's rule R197).
+      final words = [
+        for (final word in mum.words)
+          if (reader.spans[3].wordIds.contains(word.id)) word,
+      ];
+      expect(words.first.start, const Duration(milliseconds: 19125));
+      expect(words.last.end, const Duration(milliseconds: 20505));
+    });
+
+    test('no word can be saved from it yet', () {
+      expect(reader.savesWords, isFalse);
+    });
+
+    test('a sentence with no word can’t be read, and the page says so', () {
+      final json = _data('app_lesson_interactive_text');
+      asJsonMap(
+        asJsonMap(json['content']).readList('sentences')!.first,
+      )['tokens'] = const <Object?>[];
+
+      expect(LessonModel(json).toEntity('seed').reader, isNull);
+    });
+
+    test('an interactive video has no media yet, so no reader', () {
+      final json = _data('app_lesson_interactive_text');
+      asJsonMap(json['content'])
+        ..['type'] = 'interactive_video'
+        ..['media'] = null;
+
+      final lesson = LessonModel(json).toEntity('seed');
+
+      expect(lesson.reader, isNull);
+      expect(lesson.exercises, hasLength(6));
     });
   });
 

@@ -29,6 +29,7 @@ Map<String, Object?> lessonFromServer(Map<String, Object?> json) {
     'title': json.readString('titleAr'),
     'bookRef': ?_bookPage(json.readMap('bookPages')),
     'content': ?_content(json.readMap('content'), url),
+    'reader': ?_reader(json.readMap('content'), url),
     'exercises': [
       for (final question in json.readList('questions') ?? const <Object?>[])
         if (question is Map) _question(question.cast(), url),
@@ -70,6 +71,62 @@ Map<String, Object?>? _content(
       ],
     },
     if (!video) ...{'requiredWatchPercent': 0, 'exercisesOpen': true},
+  };
+}
+
+/// The server's span kinds, by the names the app's reader knows.
+const _spanKinds = {
+  'word': 'word',
+  'phrasal_verb': 'phrasalVerb',
+  'expression': 'idiom',
+};
+
+/// An interactive text (the backend's note B-21): one sound for the lesson,
+/// each sentence and word with its time in it, and the spans a sentence
+/// marks. A sentence may come with no translation. Saving a span's word has
+/// no call yet (N-5), so the reader offers none. An interactive video has no
+/// media before the server takes videos (N-9), and can't be shown.
+Map<String, Object?>? _reader(
+  Map<String, Object?>? content,
+  String? Function(String?) url,
+) {
+  if (content?.readString('type') != 'interactive_text') return null;
+  final media = content?.readMap('media');
+  final sentences = [
+    for (final sentence in content?.readList('sentences') ?? const <Object?>[])
+      if (sentence is Map) sentence.cast<String, Object?>(),
+  ];
+  return {
+    'audio': {
+      'url': url(media?.readString('mediaId')),
+      'durationMs': media?.readInt('durationMs'),
+    },
+    'savesWords': false,
+    'sentences': [
+      for (final sentence in sentences)
+        {
+          'id': sentence.readString('id'),
+          'ar': ?sentence.readString('textAr'),
+          'speaker': ?sentence.readString('speaker'),
+          'image': ?url(sentence.readString('imageMediaId')),
+          'shadowing': sentence.readBool('shadowing') ?? false,
+          'words': sentence.readList('tokens'),
+        },
+    ],
+    'spans': [
+      for (final sentence in sentences)
+        for (final span in sentence.readList('spans') ?? const <Object?>[])
+          if (span is Map)
+            {
+              'id': span['id'],
+              'sentenceId': sentence.readString('id'),
+              'wordIds': span['tokenIds'],
+              'kind': _spanKinds[span['kind']] ?? span['kind'],
+              'base': span['lemma'],
+              'ar': span['textAr'],
+              'note': ?span['noteAr'],
+            },
+    ],
   };
 }
 

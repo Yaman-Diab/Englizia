@@ -14,7 +14,8 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 /// A tapped word's card, pointing at it: above when there is room, and never past
 /// the screen's edges. A span has its form, kind, meaning and note, its sound and
-/// the star; a word with only a meaning has a small one.
+/// the star, which a lesson whose words can't be saved leaves out ([onSave]
+/// null); a word with only a meaning has a small one.
 class ReaderCard extends StatelessWidget {
   const ReaderCard({
     required this.span,
@@ -37,7 +38,7 @@ class ReaderCard extends StatelessWidget {
   final Size area;
   final bool saved;
   final VoidCallback onSay;
-  final VoidCallback onSave;
+  final VoidCallback? onSave;
 
   static const _fullWidth = 296.0;
   static const _smallWidth = 220.0;
@@ -244,7 +245,8 @@ class ReaderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _SayButton(label: span.base, onTap: onSay),
-              SaveStar(saved: saved, onTap: onSave),
+              if (onSave case final onSave?)
+                SaveStar(saved: saved, onTap: onSave),
             ],
           ),
         ],

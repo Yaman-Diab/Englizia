@@ -26,7 +26,7 @@ The published lesson, whole, with its questions and their keys: «تحقق» has
 |---|---|
 | `versionId` | The version the learner sees; every answer names it (`lessonVersionId`). A lesson in progress carries on with the version it started on, kept on the phone |
 | `versionNo` | The version as a number, for what the app still sends to proposed endpoints |
-| `type` | `grammar_video`, `interactive_video`, `interactive_text`, `vocabulary`, `conversation`. Only `grammar_video` is published; the app reads the others from the mock, in its own shape (below) |
+| `type` | `grammar_video`, `interactive_video`, `interactive_text`, `vocabulary`, `conversation`. `grammar_video` and `interactive_text` are published and read; the app reads the others from the mock, in its own shape (below) |
 | `titleAr`, `titleEn` | The app shows `titleAr` in both languages for now (D-123) |
 | `content.ruleCard` | The rule's summary: `summaryAr`; `forms`, rows whose first cell says who and whose others are joined, the letters between `[` and `]` marked; `examples`, where `highlight` counts the words of `textEn` from 0, split at its spaces |
 | `content.withVideo`, `video` | With no video the exercises are open at once. No lesson with a video is published, so the shape of `video` isn't known: such a lesson's content can't be shown yet, and the page says so (question 1) |
@@ -47,6 +47,38 @@ The six templates, each with its `body` and `answerKey`:
 | `matching` | `rightKind` (`text` or `image`), `left[]`, `right[{text, imageMediaId}]` | `{pairs[]}`: for each of `left`, the place in `right` of what goes with it | `matching` |
 
 The app puts this lesson in its own shape before reading it (`server_lesson.dart`), so one reader serves it and the mock's lessons. Options are shuffled on the phone, the same for this phone each time. A question the app can't read is skipped and logged, and a template it doesn't know is left out (question 5). A picture has no text for a screen reader (question 3).
+
+### An interactive text's `content` (live)
+
+From the backend's note B-21 (2026-11-24). Published on the dev server: «يوم في حياة سارة» (`demo-gen-a2-u02-l03`, General English, A2, unit 2, lesson 3), saved as `test/fixtures/api/app_lesson_interactive_text.json`, and a kids' story (`demo-kids-k1-u02-l03`), which the app doesn't read yet (STATUS D-133).
+
+```json
+"content": { "type": "interactive_text",
+  "media": { "mediaId": "…", "durationMs": 26336 },
+  "sentences": [
+    { "id": "s5", "speaker": "Mum", "textEn": "Please turn it off before you leave.", "textAr": "من فضلك أطفئه قبل أن تغادر.",
+      "startMs": 18467, "endMs": 22319, "imageMediaId": null, "shadowing": true,
+      "tokens": [ { "id": "s5t1", "text": "Please", "startMs": 18467, "endMs": 19036 }, "…" ],
+      "spans": [ { "id": "sp4", "tokenIds": ["s5t2", "s5t4"], "kind": "phrasal_verb", "lemma": "turn off",
+                   "textAr": "يُطفئ", "noteAr": null } ] } ] }
+```
+
+| Field | The app |
+|---|---|
+| `media` | The lesson's one sound, from `media[mediaId].url`, and its length. Every time below is a moment in it; there is no file for a sentence or a span. `null` for an interactive video, which has no media until the server takes videos (N-9): its content can't be shown, and the page says so |
+| `sentences[]` | In their order (1 to 200) |
+| `id` | Kept as it is; its form isn't relied on |
+| `speaker` | Who says it, over the sentence |
+| `textEn` | Not read: the sentence is its `tokens`, each `text` as it is with a space between |
+| `textAr` | Its translation. `null`: the sentence offers no «الترجمة», shows no Arabic in any way of showing, and keeps its English in «الترجمة فقط» |
+| `startMs`, `endMs` | Not read: a sentence runs from its first word's start to its last word's end, which are the same moments |
+| `imageMediaId` | Its picture, from `media`, under the sentence |
+| `shadowing` | «كرّر بعدي» takes only these sentences. The learner's voice stays on the phone |
+| `tokens[]` | `{id, text, startMs, endMs}`, its words in order, punctuation in its word (`leave.`). The word lit is the one whose time holds the sound's moment; between two words, none |
+| `spans[]` | What can be pressed (0 to 10 a sentence): `tokenIds` in the sentence's order, side by side or not (`turn … off`), a word in one span at most. `kind`: `word`, `phrasal_verb`, `expression` (the app's `idiom`, «تعبير»). `lemma`, `textAr` (the meaning here) and `noteAr` fill its card. A word of no span opens nothing |
+| A span's sound | From its first word's start to its last word's end, what lies between included (the backend's rule R197) |
+
+Reading, listening, «كرّر بعدي» and opening a span send the server nothing: the lesson completes by its questions, through the sync, as any lesson. So for a lesson of the server's the app sends no `content-done` and no `shadowing` (both proposed, below). **Saving a span's word has no call yet (N-5): the card shows no star.** The lesson's sound isn't kept for offline use (downloads are v1.0, [downloads.md](downloads.md)).
 
 ### Marking on the phone
 
@@ -472,3 +504,5 @@ Each answer is kept under its account's id (`user.id` of the sign-in's `TokenRes
 1. A grade lesson's `video` is `null` until the video's hosting is decided; the share to watch (80%) comes in v0.2 with where a lesson stopped. Its shape is still awaited.
 2. Pictures have no text for a screen reader until the team decides (a caption may give the answer away); until then a picture option is read by its place, «الصورة 1 من 4».
 3. Kids' lessons use the six templates. The app's kid screens outside them are the word card, the letter card, the story, the song, the written dialogue and «كرّر بعدي» (S §13, designs `Kid Lesson` and `Kid Media`): which of them will a kids' lesson carry, and in what shape?
+4. An interactive text's picture (`imageMediaId`) has no text for a screen reader either. A word of no span has no meaning of its own (the mock's `gloss`): is that meant, or will single words get one?
+5. The kids' story (`demo-kids-k1-u02-l03`) comes as an `interactive_text` whose sentences each have a picture. The app's story screen (design `Kid Media`) also has pages that turn and marked words' cards with a picture and a sound: is a sentence a page, and does a span's card get a picture?

@@ -4,7 +4,10 @@ import 'package:englizia/features/lessons/data/models/grammar_model.dart';
 import 'package:englizia/features/lessons/domain/entities/grammar_lesson.dart';
 import 'package:englizia/features/lessons/domain/entities/reader_content.dart';
 
-// ASSUMPTION(api): this whole file is proposed (docs/api/lessons.md).
+// The app's own shape of a reader (docs/api/lessons.md): the mock's lessons
+// come in it, and the server's interactive text is put in it
+// (`server_lesson.dart`). ASSUMPTION(api): an interactive video's part is
+// proposed, as the server has none yet.
 
 const _kinds = {
   'word': SpanKind.word,
@@ -39,6 +42,7 @@ ReaderContent? readerFromJson(Map<String, Object?> lesson) {
       audioUrl: audio == null ? '' : _required(audio.readString('url')),
       video: video,
       shadowingMode: _shadowingMode(json.readString('shadowingMode')),
+      savesWords: json.readBool('savesWords') ?? true,
       duration: video?.video.duration ?? _ms(audio?.readInt('durationMs')),
       sentences: sentences,
       spans: [
@@ -83,7 +87,7 @@ ReaderSentence _sentence(Map<String, Object?> json) {
   return ReaderSentence(
     id: _required(json.readString('id')),
     words: words,
-    arabic: _required(json.readString('ar')),
+    arabic: json.readString('ar'),
     imageUrl: json.readString('image'),
     imageAlt: json.readString('imageAlt'),
     speaker: json.readString('speaker'),

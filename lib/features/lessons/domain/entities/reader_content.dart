@@ -27,7 +27,7 @@ final class ReaderSentence extends Equatable {
   const ReaderSentence({
     required this.id,
     required this.words,
-    required this.arabic,
+    this.arabic,
     this.imageUrl,
     this.imageAlt,
     this.speaker,
@@ -37,7 +37,9 @@ final class ReaderSentence extends Equatable {
 
   final String id;
   final List<ReaderWord> words;
-  final String arabic;
+
+  /// Its translation; a sentence may have none, and then offers none.
+  final String? arabic;
   final String? imageUrl;
   final String? imageAlt;
 
@@ -149,6 +151,7 @@ final class ReaderContent extends Equatable {
     this.video,
     this.spans = const [],
     this.shadowingMode = ShadowingMode.repeat,
+    this.savesWords = true,
   });
 
   /// A text's sound.
@@ -162,6 +165,9 @@ final class ReaderContent extends Equatable {
 
   /// How shadowing starts, by the learner's level (S §9).
   final ShadowingMode shadowingMode;
+
+  /// Whether a span's word can be saved to the word bank: the star shows.
+  final bool savesWords;
 
   bool get hasShadowing => sentences.any((s) => s.shadowing);
 
@@ -198,6 +204,7 @@ final class ReaderContent extends Equatable {
     sentences,
     spans,
     shadowingMode,
+    savesWords,
   ];
 }
 
