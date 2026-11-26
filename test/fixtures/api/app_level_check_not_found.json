@@ -1,0 +1,10 @@
+{
+  "statusCode": 404,
+  "message": "The level check was not found.",
+  "data": null,
+  "error": {
+    "code": "level_check.not_found",
+    "details": null
+  },
+  "traceId": "bc0618ad11c13a396967551b02b01422"
+}

@@ -1,0 +1,10 @@
+{
+  "statusCode": 422,
+  "message": "The unit test opens when every lesson of the unit is completed.",
+  "data": null,
+  "error": {
+    "code": "unit_test.locked",
+    "details": null
+  },
+  "traceId": "0dbf17564dea71974426bc5cc8f9dd1c"
+}

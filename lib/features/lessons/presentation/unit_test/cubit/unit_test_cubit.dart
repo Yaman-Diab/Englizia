@@ -61,7 +61,7 @@ final class UnitTestViewState extends Equatable {
   /// When another try opens, while a failed one waits.
   final DateTime? retryAt;
 
-  /// The clock the wait counts down on.
+  /// The clock the wait counts down on: the server's, as [retryAt] is.
   final DateTime? now;
   final ClipStatus audio;
   final bool slow;
@@ -306,8 +306,8 @@ class UnitTestCubit extends Cubit<UnitTestViewState> {
     }
   }
 
-  /// The wait counts down on the phone's clock; when it is over the test is
-  /// read again, as its state has changed.
+  /// The wait counts down on the server's clock (`ServerClock`); when it is
+  /// over the test is read again, as its state has changed.
   void _countDown() {
     _clock?.cancel();
     if (state.waitLeft == null) return;

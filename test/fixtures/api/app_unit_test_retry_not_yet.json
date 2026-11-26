@@ -1,0 +1,10 @@
+{
+  "statusCode": 422,
+  "message": "A new try is accepted 10 minutes after a failed one.",
+  "data": null,
+  "error": {
+    "code": "unit_test.retry_not_yet",
+    "details": null
+  },
+  "traceId": "43573df15a4e65d28a4b0226e18491f0"
+}

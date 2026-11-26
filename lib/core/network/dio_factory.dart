@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/network/auth_interceptor.dart';
 import 'package:englizia/core/network/redacting_log_interceptor.dart';
+import 'package:englizia/core/network/server_clock.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/network/update_required.dart';
 import 'package:englizia/core/storage/token_storage.dart';
@@ -17,7 +18,8 @@ abstract final class DioFactory {
     responseType: ResponseType.json,
   );
 
-  /// App-wide client: headers → a too old version → auth → (debug) logger.
+  /// App-wide client: headers → the server's clock → a too old version →
+  /// auth → (debug) logger.
   /// Uploads override `sendTimeout` per request.
   static Dio createMainDio({
     required String baseUrl,
@@ -26,10 +28,12 @@ abstract final class DioFactory {
     required TokenRefresher refresher,
     required Future<void> Function() onSessionExpired,
     UpdateRequiredSignal? updateRequired,
+    ServerClock? clock,
   }) {
     final dio = Dio(baseOptions(baseUrl));
     dio.interceptors.addAll([
       headers,
+      if (clock != null) ServerClockInterceptor(clock),
       if (updateRequired != null) UpdateRequiredInterceptor(updateRequired),
       AuthInterceptor(
         tokens: tokens,

@@ -1,5 +1,6 @@
 import 'package:englizia/core/network/json_reader.dart';
 import 'package:englizia/features/lessons/data/models/lesson_result_model.dart';
+import 'package:englizia/features/lessons/domain/entities/lesson_result.dart';
 import 'package:englizia/features/lessons/domain/entities/unit_plan.dart';
 
 // The app's own shape of a unit (docs/api/lessons.md). Against the server it
@@ -56,13 +57,16 @@ final class UnitPlanModel {
   static UnitLesson? lessonOf(Object? item) {
     if (item is! Map<String, Object?>) return null;
     final id = item.readString('id');
-    final title = item.readString('title');
+    final kind = lessonKindFrom(item.readString('kind'));
+    // A unit's test has no title of its own: it shows by its kind's name.
+    final title =
+        item.readString('title') ?? (kind == LessonKind.unitReview ? '' : null);
     if (id == null || title == null) return null;
     final resume = item.readMap('resume');
     final question = resume?.readInt('question');
     return UnitLesson(
       id: id,
-      kind: lessonKindFrom(item.readString('kind')),
+      kind: kind,
       title: title,
       minutes: item.readInt('minutes'),
       page: item.readInt('page'),

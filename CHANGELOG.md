@@ -69,6 +69,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The guide character «بلبل», drawn in code with 16 expressions (including «واثق»), light and dark versions, a silhouette, and an idle wave, float and blink.
 
 ### Fixed
+- A unit's test now shows as its unit's last stone against the server: with no title of its own it was left out of the map and the unit's list.
+- The wait before another try of a unit's test counts on the server's clock, so a phone set to the wrong time waits as long as any other; a test passed once stays done through a later try, and a level suggestion already answered or closed leaves the screen quietly.
 - An old link from the email that confirms your address shows "this link has expired" again, and a wrong current password is said under its field, after the server gave each its own code.
 - The line of a unit's chain on the lesson's end was never drawn: it had no height.
 

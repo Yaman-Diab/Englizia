@@ -202,7 +202,7 @@ class _Intro extends StatelessWidget {
         Padding(
           padding: const EdgeInsetsDirectional.all(AppSpacing.xl),
           child: AppButton(
-            label: status.state == UnitTestState.passed
+            label: status.bestPercent != null
                 ? 'unit_test_again'.tr()
                 : 'unit_test_start'.tr(),
             size: AppButtonSize.large,

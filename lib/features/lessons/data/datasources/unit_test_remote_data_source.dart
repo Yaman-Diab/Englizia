@@ -44,8 +44,7 @@ final class UnitTestRemoteDataSourceImpl implements UnitTestRemoteDataSource {
 
 /// Mock mode (`env/mock.json`): a test in the server's shape, marked here by
 /// a key only the mock has, failed tries waiting their ten minutes, and a
-/// level suggested after the first. Deleted once a track on the dev server
-/// has a published test to try.
+/// level suggested after the first.
 final class UnitTestFakeDataSource implements UnitTestRemoteDataSource {
   UnitTestFakeDataSource(
     this._bundle, {

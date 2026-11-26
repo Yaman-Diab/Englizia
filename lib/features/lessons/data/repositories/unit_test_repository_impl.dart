@@ -1,6 +1,8 @@
 import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/api_status_codes.dart';
+import 'package:englizia/core/network/json_reader.dart';
+import 'package:englizia/core/network/server_clock.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
@@ -14,10 +16,21 @@ final class UnitTestRepositoryImpl implements UnitTestRepository {
   UnitTestRepositoryImpl(
     this._remote, {
     required SettingsStorageService settings,
-  }) : _settings = settings;
+    ServerClock? clock,
+  }) : _settings = settings,
+       _clock = clock;
+
+  /// A level check that can't be answered any more: answered before, closed
+  /// (the learner left the level, or the level suggested went), or unknown.
+  static const _levelCheckGone = {
+    ApiErrorCodes.levelCheckAlreadyChosen,
+    ApiErrorCodes.levelCheckClosed,
+    ApiErrorCodes.levelCheckNotFound,
+  };
 
   final UnitTestRemoteDataSource _remote;
   final SettingsStorageService _settings;
+  final ServerClock? _clock;
 
   /// Each test as it came, which its answers are built from.
   final _models = <String, UnitTestModel>{};
@@ -39,11 +52,16 @@ final class UnitTestRepositoryImpl implements UnitTestRepository {
     final model = _models[test.id];
     if (model == null) throw StateError('Unit test sent before it came');
     try {
+      final answer = await _remote.submit(
+        test.id,
+        model.submission(answers, submissionId: submissionId),
+      );
+      // The wait before another try counts from the server's own time.
+      if (answer.readDateTime('serverTime') case final time?) {
+        _clock?.read(time);
+      }
       return unitTestResultFromJson(
-        await _remote.submit(
-          test.id,
-          model.submission(answers, submissionId: submissionId),
-        ),
+        answer,
         passPercent: test.status.passPercent,
       );
     } on ApiException catch (error) {
@@ -60,5 +78,13 @@ final class UnitTestRepositoryImpl implements UnitTestRepository {
 
   @override
   Future<Result<void>> chooseLevel(String suggestionId, {required bool move}) =>
-      guard(() => _remote.chooseLevel(suggestionId, move: move));
+      guard(() async {
+        try {
+          await _remote.chooseLevel(suggestionId, move: move);
+        } on ApiException catch (error) {
+          // Nothing is left to choose: the card goes, and the map says where
+          // the learner stands.
+          if (!_levelCheckGone.contains(error.code)) rethrow;
+        }
+      });
 }

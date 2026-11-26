@@ -1,5 +1,6 @@
 import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/media/media_vault.dart';
+import 'package:englizia/core/network/server_clock.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/video/silent_audio_engine.dart';
 import 'package:englizia/core/video/video_engine.dart';
@@ -147,10 +148,16 @@ void registerLessonDependencies(GetIt sl) {
           : UnitTestRemoteDataSourceImpl(sl()),
     )
     ..registerLazySingleton<UnitTestRepository>(
-      () => UnitTestRepositoryImpl(sl(), settings: sl()),
+      () => UnitTestRepositoryImpl(sl(), settings: sl(), clock: sl()),
     )
     ..registerFactoryParam<UnitTestCubit, String, void>(
-      (testId, _) => UnitTestCubit(sl(), sl(), sl(), testId: testId),
+      (testId, _) => UnitTestCubit(
+        sl(),
+        sl(),
+        sl(),
+        testId: testId,
+        now: sl<ServerClock>().now,
+      ),
     )
     ..registerLazySingleton(() => AnswersSync(sl(), sl(), sl()))
     ..registerFactoryParam<ExerciseCubit, String, void>(

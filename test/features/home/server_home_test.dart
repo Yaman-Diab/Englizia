@@ -265,6 +265,34 @@ void main() {
     });
   });
 
+  group('a level suggested on the map (the dev server’s maps)', () {
+    test('up, after a first try passed well', () {
+      final suggestion = _home(
+        map: 'app_map_test_passed_level_check',
+      ).cards.levelSuggestion!;
+
+      expect(suggestion.up, isTrue);
+      expect(suggestion.percent, 100);
+      expect(suggestion.level.label, 'A1');
+      expect(suggestion.suggested.label, 'A2');
+    });
+
+    test('down, after a first try failed badly', () {
+      final suggestion = _home(
+        map: 'app_map_test_cooldown_level_check',
+      ).cards.levelSuggestion!;
+
+      expect(suggestion.up, isFalse);
+      expect(suggestion.percent, 16);
+      expect(suggestion.level.label, 'A2');
+      expect(suggestion.suggested.label, 'A1');
+    });
+
+    test('none with no check', () {
+      expect(_home(map: 'app_map_test_locked').cards.levelSuggestion, isNull);
+    });
+  });
+
   group('a unit from the map', () {
     UnitPlan unit(String id, {String map = 'app_map_in_progress'}) =>
         UnitPlanModel(unitFromMap(_data(map), id)!).toEntity();
@@ -287,6 +315,30 @@ void main() {
       expect(first.lockedBy, isNull);
       expect(first.next?.id, _unit2);
       expect(first.next?.number, 2);
+    });
+
+    test('its test is its last stone, done once passed (the dev server’s '
+        'maps)', () {
+      const test = '01a21630-cb90-7442-b2d2-efca81dc5f2b';
+      final locked = unit(_unit1, map: 'app_map_test_locked');
+      final passed = unit(_unit1, map: 'app_map_test_passed_level_check');
+      final waiting = unit(
+        '01a1f24f-ffab-77b3-bcf3-ff116434a658',
+        map: 'app_map_test_cooldown_level_check',
+      );
+
+      expect(locked.lessons.map((l) => (l.id, l.done)), [
+        (_lesson1, false),
+        (_lesson2, false),
+        (test, false),
+      ]);
+      expect(passed.lessons.last.id, test);
+      expect(passed.lessons.every((l) => l.done), isTrue);
+      expect(waiting.lessons.map((l) => l.done), [true, true, false]);
+      // Home's island has the same stones.
+      final island = _home(map: 'app_map_test_locked').currentUnit!;
+      expect(island.lessons.last.id, test);
+      expect(island.lessons.last.kind, LessonKind.unitReview);
     });
 
     test('a locked unit names the one that opens it', () {

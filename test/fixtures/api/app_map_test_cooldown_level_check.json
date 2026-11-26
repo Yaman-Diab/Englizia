@@ -1,0 +1,178 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "trackId": "01a1f24f-ea3e-7693-b3a7-a60061ac9a53",
+    "levelLabel": "level",
+    "unlockMode": "sequential",
+    "kidsMode": false,
+    "features": {
+      "aiConversation": false,
+      "comments": false,
+      "leaderboard": false,
+      "errorBankUi": false
+    },
+    "level": {
+      "id": "01a1f24f-ebef-7519-a415-a3b0ad9a3450",
+      "nameAr": "A2 ما قبل المتوسط",
+      "nameEn": "A2 Elementary",
+      "cefrCode": "a2",
+      "gradeNumber": null,
+      "taglineAr": null
+    },
+    "nextLevel": null,
+    "nextLessonId": null,
+    "unitCount": 2,
+    "units": [
+      {
+        "id": "01a1f24f-ffab-77b3-bcf3-ff116434a658",
+        "titleAr": "الماضي",
+        "titleEn": "The past",
+        "coverUrl": "https://api-dev.engleazia.com/media/image/2026/11/01a1f24f-ff90-7caf-8c38-4cab92460f9f.webp",
+        "objectives": [],
+        "concepts": [
+          {
+            "nameAr": "الماضي من to be: was وwere",
+            "nameEn": "Was and were"
+          },
+          {
+            "nameAr": "الماضي البسيط بإضافة ed",
+            "nameEn": "Past simple with -ed"
+          }
+        ],
+        "bookPages": null,
+        "lessonCount": 2,
+        "minutes": 17,
+        "state": "unlocked",
+        "test": {
+          "id": "01a21630-d0b0-7b9e-8709-ddd6b4deb126",
+          "questionCount": 6,
+          "passPercent": 70,
+          "state": "cooldown",
+          "bestPercent": 16,
+          "retryAvailableAt": "2026-11-26T09:49:15.426Z"
+        },
+        "lessons": [
+          {
+            "id": "01a1f24f-ffd0-74c3-90ac-2658e8c86dcb",
+            "versionId": "01a1f250-01cb-7834-8603-b53290ac5658",
+            "versionNo": 1,
+            "type": "grammar_video",
+            "titleAr": "الماضي من to be: was وwere",
+            "titleEn": "Was and were",
+            "minutes": 8,
+            "bookPages": null,
+            "state": "completed",
+            "best": {
+              "firstTryCorrect": 6,
+              "questionCount": 6
+            }
+          },
+          {
+            "id": "01a1f250-01e6-7790-b622-3056d2dff832",
+            "versionId": "01a1f250-0562-7d95-a1b1-03e49b1e329d",
+            "versionNo": 1,
+            "type": "grammar_video",
+            "titleAr": "الماضي البسيط بإضافة ed",
+            "titleEn": "Past simple with -ed",
+            "minutes": 9,
+            "bookPages": null,
+            "state": "completed",
+            "best": {
+              "firstTryCorrect": 6,
+              "questionCount": 6
+            }
+          }
+        ]
+      },
+      {
+        "id": "01a1f250-05f7-707c-a836-b42c56952530",
+        "titleAr": "المقارنة",
+        "titleEn": "Comparing",
+        "coverUrl": "https://api-dev.engleazia.com/media/image/2026/11/01a1f250-05bd-7527-87af-2153f5de55bf.webp",
+        "objectives": [],
+        "concepts": [
+          {
+            "nameAr": "المقارنة بإضافة er",
+            "nameEn": "Comparatives with -er"
+          },
+          {
+            "nameAr": "than بعد المقارنة",
+            "nameEn": "Than after a comparative"
+          },
+          {
+            "nameAr": "التفضيل: the مع est",
+            "nameEn": "Superlatives with the -est"
+          }
+        ],
+        "bookPages": null,
+        "lessonCount": 3,
+        "minutes": 26,
+        "state": "locked",
+        "test": null,
+        "lessons": [
+          {
+            "id": "01a1f250-063d-7d35-9d45-e45504356378",
+            "versionId": "01a1f250-0a4a-756d-aac1-34a1cd047b6c",
+            "versionNo": 1,
+            "type": "grammar_video",
+            "titleAr": "المقارنة: er وthan",
+            "titleEn": "Comparatives: -er and than",
+            "minutes": 9,
+            "bookPages": null,
+            "state": "locked",
+            "best": null
+          },
+          {
+            "id": "01a1f250-0a83-71d5-996f-1cf929ad10b2",
+            "versionId": "01a1f250-0e85-70ff-88a5-d80cb05e31f4",
+            "versionNo": 1,
+            "type": "grammar_video",
+            "titleAr": "التفضيل: the مع est",
+            "titleEn": "Superlatives: the -est",
+            "minutes": 9,
+            "bookPages": null,
+            "state": "locked",
+            "best": null
+          },
+          {
+            "id": "01a2160b-d9a5-7a4c-a3a5-47829fa48bc0",
+            "versionId": "01a2160b-defc-7b9f-9d75-f94a3d45ec1b",
+            "versionNo": 1,
+            "type": "interactive_text",
+            "titleAr": "يوم في حياة سارة",
+            "titleEn": "A day in Sara's life",
+            "minutes": 8,
+            "bookPages": null,
+            "state": "locked",
+            "best": null
+          }
+        ]
+      }
+    ],
+    "levelCheck": {
+      "id": "01a21739-376d-7798-a3f4-1a9e467d74fa",
+      "direction": "down",
+      "percent": 16,
+      "level": {
+        "id": "01a1f24f-ebef-7519-a415-a3b0ad9a3450",
+        "nameAr": "A2 ما قبل المتوسط",
+        "nameEn": "A2 Elementary",
+        "cefrCode": "a2",
+        "gradeNumber": null,
+        "taglineAr": null
+      },
+      "suggestedLevel": {
+        "id": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
+        "nameAr": "A1 المبتدئ",
+        "nameEn": "A1 Beginner",
+        "cefrCode": "a1",
+        "gradeNumber": null,
+        "taglineAr": null
+      },
+      "checkedAt": "2026-11-26T09:39:15.438Z"
+    }
+  },
+  "error": null,
+  "traceId": "d3722b7c2e176a54de8678b8c8b9350f"
+}

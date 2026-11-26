@@ -47,7 +47,12 @@ List<Map<String, Object?>> lessonsFromMap(
           'kind': 'unitReview',
           // Shown by its kind's name: a test has no title of its own.
           'title': '',
-          'done': test.readString('state') == 'passed',
+          // A pass stays one: a later try that fails only waits
+          // (`cooldown`, its best kept).
+          'done':
+              test.readString('state') == 'passed' ||
+              (test.readInt('bestPercent') ?? -1) >=
+                  (test.readInt('passPercent') ?? 101),
         },
 ];
 
