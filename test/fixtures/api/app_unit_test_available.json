@@ -1,0 +1,188 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "01a21630-cb90-7442-b2d2-efca81dc5f2b",
+    "unitId": "01a1f24f-eda5-7458-8d96-85170e60ccd1",
+    "versionId": "01a21630-cfbc-70d6-a3a3-e280bec6318d",
+    "versionNo": 1,
+    "questionCount": 6,
+    "passPercent": 70,
+    "state": "available",
+    "bestPercent": null,
+    "retryAvailableAt": null,
+    "questions": [
+      {
+        "versionId": "01a21630-cfa2-7bc1-8179-d0fcb17772ae",
+        "externalId": "q01",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "prompt": "They ___ my friends.",
+          "options": [
+            {
+              "id": "a",
+              "text": "are"
+            },
+            {
+              "id": "b",
+              "text": "is"
+            },
+            {
+              "id": "c",
+              "text": "am"
+            }
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-cfb2-7504-8740-085d7dfc43ef",
+        "externalId": "q02",
+        "template": "picture_choice",
+        "instructionAr": "اختر الصورة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "prompt": "an egg",
+          "promptAudioMediaId": null,
+          "options": [
+            {
+              "id": "a",
+              "imageMediaId": "01a21630-cdcd-7b6f-b022-2cd3824780ea"
+            },
+            {
+              "id": "b",
+              "imageMediaId": "01a21630-ce6b-76b3-bea9-d84d8d8fbee7"
+            },
+            {
+              "id": "c",
+              "imageMediaId": "01a21630-ce7b-7e24-91e5-8e27a34d912b"
+            }
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-cfb2-7903-9c32-2550923a6b46",
+        "externalId": "q03",
+        "template": "gap_choice",
+        "instructionAr": "أكمل الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "sentence": "He ___ a teacher and I ___ a student.",
+          "gapCount": 2,
+          "chips": [
+            "is",
+            "am",
+            "are"
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-cfb2-77c2-8275-3857f8232e50",
+        "externalId": "q04",
+        "template": "word_order",
+        "instructionAr": "رتّب الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "meaningAr": "هي معلّمة.",
+          "chips": [
+            "is",
+            "teacher",
+            "an",
+            "a",
+            "She"
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-cfb3-7a7f-b210-875b8f1e63c4",
+        "externalId": "q05",
+        "template": "matching",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "rightKind": "text",
+          "left": [
+            "I",
+            "you",
+            "he",
+            "she"
+          ],
+          "right": [
+            {
+              "text": "هي",
+              "imageMediaId": null
+            },
+            {
+              "text": "أنا",
+              "imageMediaId": null
+            },
+            {
+              "text": "أنت",
+              "imageMediaId": null
+            },
+            {
+              "text": "هو",
+              "imageMediaId": null
+            }
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-cfb3-7908-baf1-597061b8ec86",
+        "externalId": "q06",
+        "template": "listen_choose",
+        "instructionAr": "استمع واختر ما سمعته",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "audioMediaId": "01a21630-cf32-72c3-bf3d-e0f0bee0f009",
+          "transcript": null,
+          "options": [
+            {
+              "id": "a",
+              "text": "I have a cat."
+            },
+            {
+              "id": "b",
+              "text": "I have an cat."
+            },
+            {
+              "id": "c",
+              "text": "I am a cat."
+            }
+          ]
+        }
+      }
+    ],
+    "media": {
+      "01a21630-cdcd-7b6f-b022-2cd3824780ea": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a21630-cdcd-7b6f-b022-2cd3824780ea.webp",
+        "sizeBytes": 2812
+      },
+      "01a21630-ce6b-76b3-bea9-d84d8d8fbee7": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a21630-ce6b-76b3-bea9-d84d8d8fbee7.webp",
+        "sizeBytes": 5420
+      },
+      "01a21630-ce7b-7e24-91e5-8e27a34d912b": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a21630-ce7b-7e24-91e5-8e27a34d912b.webp",
+        "sizeBytes": 5640
+      },
+      "01a21630-cf32-72c3-bf3d-e0f0bee0f009": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a21630-cf32-72c3-bf3d-e0f0bee0f009.mp3",
+        "sizeBytes": 8847
+      }
+    }
+  },
+  "error": null,
+  "traceId": "433bd9910f602c1f1b776f28ae7db781"
+}

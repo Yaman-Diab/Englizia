@@ -1,0 +1,185 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "01a21630-d0b0-7b9e-8709-ddd6b4deb126",
+    "unitId": "01a1f24f-ffab-77b3-bcf3-ff116434a658",
+    "versionId": "01a21630-d205-7a46-bf61-30fe8799855d",
+    "versionNo": 1,
+    "questionCount": 6,
+    "passPercent": 70,
+    "state": "cooldown",
+    "bestPercent": 16,
+    "retryAvailableAt": "2026-11-26T09:49:15.426Z",
+    "questions": [
+      {
+        "versionId": "01a21630-d204-76a9-83eb-feaf0b3d5624",
+        "externalId": "q01",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "prompt": "I ___ happy yesterday.",
+          "options": [
+            {
+              "id": "a",
+              "text": "was"
+            },
+            {
+              "id": "b",
+              "text": "were"
+            },
+            {
+              "id": "c",
+              "text": "am"
+            }
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-d204-79dd-9b99-7db9e7c91874",
+        "externalId": "q02",
+        "template": "picture_choice",
+        "instructionAr": "اختر الصورة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "prompt": "It was snowy yesterday.",
+          "promptAudioMediaId": null,
+          "options": [
+            {
+              "id": "a",
+              "imageMediaId": "01a21630-d0e6-7392-b88c-1e75f94ec864"
+            },
+            {
+              "id": "b",
+              "imageMediaId": "01a21630-d0f8-75a3-b960-03e2cdf4d381"
+            },
+            {
+              "id": "c",
+              "imageMediaId": "01a21630-d10c-77f0-b859-8450b8d6eebb"
+            }
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-d205-707e-8756-c8c069a335ba",
+        "externalId": "q03",
+        "template": "gap_choice",
+        "instructionAr": "أكمل الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "sentence": "They ___ at home and we ___ football.",
+          "gapCount": 2,
+          "chips": [
+            "played",
+            "play",
+            "was",
+            "were"
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-d205-706d-891c-a35faf238b4c",
+        "externalId": "q04",
+        "template": "word_order",
+        "instructionAr": "رتّب الجملة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "meaningAr": "هي شاهدت فيلمًا أمس.",
+          "chips": [
+            "film",
+            "a",
+            "watch",
+            "She",
+            "watched",
+            "yesterday"
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-d205-73e7-ba48-5dbe598af979",
+        "externalId": "q05",
+        "template": "matching",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "rightKind": "text",
+          "left": [
+            "walk",
+            "cook",
+            "live"
+          ],
+          "right": [
+            {
+              "text": "cooked",
+              "imageMediaId": null
+            },
+            {
+              "text": "lived",
+              "imageMediaId": null
+            },
+            {
+              "text": "walked",
+              "imageMediaId": null
+            }
+          ]
+        }
+      },
+      {
+        "versionId": "01a21630-d205-7448-86fc-1c5e5b6ee08e",
+        "externalId": "q06",
+        "template": "listen_choose",
+        "instructionAr": "استمع واختر ما سمعته",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "body": {
+          "audioMediaId": "01a21630-d1cf-73a9-8978-48e3fc708e7a",
+          "transcript": null,
+          "options": [
+            {
+              "id": "a",
+              "text": "They were happy."
+            },
+            {
+              "id": "b",
+              "text": "They was happy."
+            },
+            {
+              "id": "c",
+              "text": "They are happy."
+            }
+          ]
+        }
+      }
+    ],
+    "media": {
+      "01a21630-d0e6-7392-b88c-1e75f94ec864": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a21630-d0e6-7392-b88c-1e75f94ec864.webp",
+        "sizeBytes": 5110
+      },
+      "01a21630-d0f8-75a3-b960-03e2cdf4d381": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a21630-d0f8-75a3-b960-03e2cdf4d381.webp",
+        "sizeBytes": 5408
+      },
+      "01a21630-d10c-77f0-b859-8450b8d6eebb": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a21630-d10c-77f0-b859-8450b8d6eebb.webp",
+        "sizeBytes": 3380
+      },
+      "01a21630-d1cf-73a9-8978-48e3fc708e7a": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a21630-d1cf-73a9-8978-48e3fc708e7a.mp3",
+        "sizeBytes": 8690
+      }
+    }
+  },
+  "error": null,
+  "traceId": "6ea0a7df66415bb3cb29e447d26b8087"
+}

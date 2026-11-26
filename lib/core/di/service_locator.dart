@@ -28,6 +28,7 @@ import 'package:englizia/core/network/app_headers_interceptor.dart';
 import 'package:englizia/core/network/connectivity_service.dart';
 import 'package:englizia/core/network/dio_factory.dart';
 import 'package:englizia/core/network/media_client.dart';
+import 'package:englizia/core/network/server_clock.dart';
 import 'package:englizia/core/network/token_refresh_service.dart';
 import 'package:englizia/core/network/update_required.dart';
 import 'package:englizia/core/notifications/notification_permission.dart';
@@ -87,6 +88,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
       ),
     )
     ..registerLazySingleton(UpdateRequiredSignal.new)
+    ..registerLazySingleton(ServerClock.new)
     ..registerLazySingleton<Dio>(
       () => DioFactory.createMainDio(
         baseUrl: AppConfig.baseUrl,
@@ -95,6 +97,7 @@ Future<void> setupCoreDependencies(GetIt sl) async {
         refresher: sl(),
         onSessionExpired: sl<AppSessionController>().expire,
         updateRequired: sl(),
+        clock: sl(),
       ),
     )
     ..registerLazySingleton(() => ApiClient(sl()))

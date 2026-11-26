@@ -96,10 +96,24 @@ The `403` and `409` answers are from the document, not yet seen on the dev serve
 
 Live (docs/api/openapi.json): `{refreshToken}`, sent without the access token. The app calls it on sign-out and never waits on it: signing out works offline, and a failure only means the server forgets the session later. Signing out as a guest loses the account; the app warns first («ستفقد تقدّمك لأنه غير محفوظ في حساب»).
 
+## A trial account: `POST /api/v1/auth/trial` (not used yet)
+
+From the backend's answers of 2026-11-26; its full note (N-4a, 2026-11-23) hasn't reached the app's side, and the screen has no design yet (STATUS D-130).
+
+- **What for:** trying the placement test before it is opened to everyone. An admin prints codes such as `PT-UYRK`, a teacher hands them to learners they know, then compares each result with the level they expected, in the panel. It isn't a school's account.
+- **In the app:** a link under «ليس لديك حساب؟ أنشئ حسابًا» on sign-in (4.01), and a new screen «رمز التجربة» (the designer's changes, batch 3, rows 8 and 9).
+- **What it sees:** what any learner sees: onboarding, the placement test, then the whole track, until the code ends.
+- **After 14 days:** the refresh answers `401 auth.refresh_token_invalid`, and the app is to open «رمز التجربة», not sign-in; signing in with the code answers `422 auth.trial_code_expired`. Its answers and progress stay on the server for the report, but the learner doesn't come back to them, and they don't move to another account.
+- **No upgrade:** the guest's upgrade requests answer `409 auth.not_guest`. With `accountType: "trial"` the app is to hide «أنشئ حسابًا» and every offer to upgrade; whoever wants a full account makes a new one.
+- **One phone:** the code is bound to the phone, so `deviceId` is kept and always sent. Signing out doesn't delete a trial account, unlike a guest: the same code on the same phone returns to it.
+
+## Answered by the backend (2026-11-26)
+
+1. **An unused guest is kept 90 days.** A daily job deletes a guest made 90 days ago whose phone wasn't seen in those days; a phone is seen at each sign-in and refresh, so a guest who opens the app is never deleted. A guest's session lasts 60 days, as any other. Deleting takes its progress and enrollments.
+2. **No merge** (decision of 2026-11-16): a guest's progress isn't merged into an account that exists, and upgrading to an email or a Google account that has one answers `409`. The app's way stands: the guest is left, and sign-in offered. Suggested, not built (STATUS D-131): tell the learner the guest's progress won't move, and once they sign in, send `POST /api/v1/auth/logout` with the guest's session first, so it is deleted at once and not after 90 days.
+3. **`Etc/GMT-3` is accepted:** any IANA name .NET knows, else `400 validation.failed` with the code `time_zone` (`UTC+3` and `GMT+03:00` are refused). The phone's own zone (`Asia/Damascus`) is better, with `Etc/GMT±N` only as a fallback: a fixed offset starts the day, and the streak, an hour wrong for half the year where clocks change (STATUS D-043).
+4. **Deleting an account that signs in with Google:** `DELETE /api/v1/app/me` isn't built yet (B-38). A fresh `idToken` in the request (`identityToken` for Apple), checked to be the same account's and recent, is what the backend leans to; the screen is built on it, and B-38 settles it.
+
 ## Questions for the backend team
 
-1. How long an unused guest is kept.
-2. A guest who signs in to an email account that exists leaves the guest behind (the app says the email has an account and offers sign-in): merge instead?
-3. Time zone: the app sends an `Etc/GMT` zone from the phone's offset. A city (`Asia/Damascus`) follows daylight-saving changes; the app can send one once a package is chosen (STATUS D-043). Confirm `Etc/GMT-3` is accepted.
-4. Deleting an account that signs in with Google (docs/api/me.md): how does it prove itself first? Proposed: a fresh `idToken` in the delete request.
-5. `POST /api/v1/auth/trial` (a code a teacher hands out, bound to a phone, good for 14 days, `accountType: "trial"`) isn't used by the app. Is it for the school's trial, and should the app offer «لدي رمز تجربة» on sign-in? What does a trial account see (the whole track, or part)? What happens at day 15: its answers and progress stay and the learner signs up, or they are lost? Is a `trial` account upgraded to a full one like a guest (ADR 10)?
+None open. The backend asks the app's side for: the signing certificate's SHA-256 of each Android app, the Apple Team ID, and whether the beta is a separate app (`com.engleazia.app.beta`) or the same one, for the `engleazia.com/open/…` links (its note N-8, §6). The owner's to answer (RELEASE.md).

@@ -1,0 +1,69 @@
+{
+  "statusCode": 200,
+  "message": "Unit test submitted successfully",
+  "data": {
+    "submissionId": "01a21739-3769-7edd-ab4a-8c5601c6efb9",
+    "unitTestId": "01a21630-d0b0-7b9e-8709-ddd6b4deb126",
+    "versionId": "01a21630-d205-7a46-bf61-30fe8799855d",
+    "correct": 1,
+    "questionCount": 6,
+    "percent": 16,
+    "passed": false,
+    "retryAvailableAt": "2026-11-26T09:49:15.426Z",
+    "bestPercent": 16,
+    "questions": [
+      {
+        "questionVersionId": "01a21630-d204-76a9-83eb-feaf0b3d5624",
+        "isCorrect": false
+      },
+      {
+        "questionVersionId": "01a21630-d204-79dd-9b99-7db9e7c91874",
+        "isCorrect": true
+      },
+      {
+        "questionVersionId": "01a21630-d205-707e-8756-c8c069a335ba",
+        "isCorrect": false
+      },
+      {
+        "questionVersionId": "01a21630-d205-706d-891c-a35faf238b4c",
+        "isCorrect": false
+      },
+      {
+        "questionVersionId": "01a21630-d205-73e7-ba48-5dbe598af979",
+        "isCorrect": false
+      },
+      {
+        "questionVersionId": "01a21630-d205-7448-86fc-1c5e5b6ee08e",
+        "isCorrect": false
+      }
+    ],
+    "lessons": [],
+    "units": [],
+    "levels": [],
+    "levelCheck": {
+      "id": "01a21739-376d-7798-a3f4-1a9e467d74fa",
+      "direction": "down",
+      "percent": 16,
+      "level": {
+        "id": "01a1f24f-ebef-7519-a415-a3b0ad9a3450",
+        "nameAr": "A2 ما قبل المتوسط",
+        "nameEn": "A2 Elementary",
+        "cefrCode": "a2",
+        "gradeNumber": null,
+        "taglineAr": null
+      },
+      "suggestedLevel": {
+        "id": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
+        "nameAr": "A1 المبتدئ",
+        "nameEn": "A1 Beginner",
+        "cefrCode": "a1",
+        "gradeNumber": null,
+        "taglineAr": null
+      },
+      "checkedAt": "2026-11-26T09:39:15.438Z"
+    },
+    "serverTime": "2026-11-26T09:39:15.426Z"
+  },
+  "error": null,
+  "traceId": "b0ed7061453086cf5f03dcb245fed673"
+}

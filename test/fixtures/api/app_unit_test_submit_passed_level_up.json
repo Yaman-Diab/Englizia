@@ -1,0 +1,84 @@
+{
+  "statusCode": 200,
+  "message": "Unit test submitted successfully",
+  "data": {
+    "submissionId": "01a21737-c52b-7d7a-afd1-acedd75e3288",
+    "unitTestId": "01a21630-cb90-7442-b2d2-efca81dc5f2b",
+    "versionId": "01a21630-cfbc-70d6-a3a3-e280bec6318d",
+    "correct": 6,
+    "questionCount": 6,
+    "percent": 100,
+    "passed": true,
+    "retryAvailableAt": null,
+    "bestPercent": 100,
+    "questions": [
+      {
+        "questionVersionId": "01a21630-cfa2-7bc1-8179-d0fcb17772ae",
+        "isCorrect": true
+      },
+      {
+        "questionVersionId": "01a21630-cfb2-7504-8740-085d7dfc43ef",
+        "isCorrect": true
+      },
+      {
+        "questionVersionId": "01a21630-cfb2-7903-9c32-2550923a6b46",
+        "isCorrect": true
+      },
+      {
+        "questionVersionId": "01a21630-cfb2-77c2-8275-3857f8232e50",
+        "isCorrect": true
+      },
+      {
+        "questionVersionId": "01a21630-cfb3-7a7f-b210-875b8f1e63c4",
+        "isCorrect": true
+      },
+      {
+        "questionVersionId": "01a21630-cfb3-7908-baf1-597061b8ec86",
+        "isCorrect": true
+      }
+    ],
+    "lessons": [
+      {
+        "lessonId": "01a1f24f-f54b-7838-a9f7-73cf57f53e9c",
+        "state": "available",
+        "best": null
+      }
+    ],
+    "units": [
+      {
+        "unitId": "01a1f24f-eda5-7458-8d96-85170e60ccd1",
+        "state": "completed"
+      },
+      {
+        "unitId": "01a1f24f-f52a-7be8-b2e8-eacf638e789f",
+        "state": "unlocked"
+      }
+    ],
+    "levels": [],
+    "levelCheck": {
+      "id": "01a21737-c563-7a91-8efb-df74b40c69b8",
+      "direction": "up",
+      "percent": 100,
+      "level": {
+        "id": "01a1f24f-ea3e-7f94-9d61-e30272387f0a",
+        "nameAr": "A1 المبتدئ",
+        "nameEn": "A1 Beginner",
+        "cefrCode": "a1",
+        "gradeNumber": null,
+        "taglineAr": null
+      },
+      "suggestedLevel": {
+        "id": "01a1f24f-ebef-7519-a415-a3b0ad9a3450",
+        "nameAr": "A2 ما قبل المتوسط",
+        "nameEn": "A2 Elementary",
+        "cefrCode": "a2",
+        "gradeNumber": null,
+        "taglineAr": null
+      },
+      "checkedAt": "2026-11-26T09:37:40.746Z"
+    },
+    "serverTime": "2026-11-26T09:37:40.634Z"
+  },
+  "error": null,
+  "traceId": "4ea526d66afa8d2dd5a16ba291b806d9"
+}

@@ -67,6 +67,12 @@ abstract final class ApiErrorCodes {
   /// server yet (its answers may still be on the phone).
   static const unitTestLocked = 'unit_test.locked';
 
+  /// `422`: a level check answered before, or closed (the learner left the
+  /// level, or the level suggested is no longer published); `404`: unknown.
+  static const levelCheckAlreadyChosen = 'level_check.already_chosen';
+  static const levelCheckClosed = 'level_check.closed';
+  static const levelCheckNotFound = 'level_check.not_found';
+
   /// 404: no such endpoint on this server.
   static const routeNotFound = 'route.not_found';
 

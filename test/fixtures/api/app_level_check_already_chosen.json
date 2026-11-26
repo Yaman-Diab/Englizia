@@ -1,0 +1,10 @@
+{
+  "statusCode": 422,
+  "message": "A choice was already made for this level check.",
+  "data": null,
+  "error": {
+    "code": "level_check.already_chosen",
+    "details": null
+  },
+  "traceId": "5bb4c43b8b8604b418b88c11ff6fd4fc"
+}
