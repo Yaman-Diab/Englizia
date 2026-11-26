@@ -2,6 +2,7 @@ import 'package:englizia/core/config/app_config.dart';
 import 'package:englizia/core/l10n/app_locales.dart';
 import 'package:englizia/core/session/app_session_controller.dart';
 import 'package:englizia/core/session/device_platform.dart';
+import 'package:englizia/core/session/phone_time_zone.dart';
 import 'package:englizia/core/storage/settings_storage_service.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/datasources/google_identity_source.dart';
@@ -77,6 +78,7 @@ void registerAccountDependencies(GetIt sl) {
         tokens: sl(),
         // The app's language for a new account's onboarding answers.
         language: () => sl<CurrentLanguage>().code,
+        timeZone: const PlatformPhoneTimeZone(),
         savedDeviceId: () => sl<SettingsStorageService>().deviceId,
         saveDeviceId: sl<SettingsStorageService>().setDeviceId,
         devicePlatform: devicePlatform(),

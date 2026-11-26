@@ -11,6 +11,7 @@ import 'package:englizia/core/network/network_exception.dart';
 import 'package:englizia/core/network/token_response.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/core/session/phone_time_zone.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/models/guest_account_model.dart';
 import 'package:englizia/features/account/data/repositories/account_repository_impl.dart';
@@ -38,6 +39,15 @@ class _DiskBundle extends CachingAssetBundle {
   @override
   Future<ByteData> load(String key) async =>
       ByteData.sublistView(File(key).readAsBytesSync());
+}
+
+class _Zone implements PhoneTimeZone {
+  const _Zone(this.zone);
+
+  final String? zone;
+
+  @override
+  Future<String?> name() async => zone;
 }
 
 class _RecordingDataSource implements AccountRemoteDataSource {
@@ -356,16 +366,19 @@ void main() {
   });
 
   group('AccountRepositoryImpl', () {
-    AccountRepositoryImpl repository(_RecordingDataSource source) =>
-        AccountRepositoryImpl(
-          source,
-          tokens: FakeTokenStorage(),
-          savedDeviceId: () => null,
-          saveDeviceId: (_) async {},
-          devicePlatform: 'android',
-          language: () => 'en',
-          timeZone: () => 'Etc/GMT-3',
-        );
+    AccountRepositoryImpl repository(
+      _RecordingDataSource source, {
+      String? zone = 'Asia/Damascus',
+    }) => AccountRepositoryImpl(
+      source,
+      tokens: FakeTokenStorage(),
+      savedDeviceId: () => null,
+      saveDeviceId: (_) async {},
+      devicePlatform: 'android',
+      language: () => 'en',
+      timeZone: _Zone(zone),
+      utcOffset: () => const Duration(hours: 3),
+    );
 
     test('keeps the device id a new guest gets', () async {
       String? saved;
@@ -393,9 +406,16 @@ void main() {
       });
       final (answers, token) = source.onboardings.single;
       expect(answers['uiLanguage'], 'en');
-      expect(answers['timeZone'], 'Etc/GMT-3');
+      expect(answers['timeZone'], 'Asia/Damascus', reason: 'the zone’s name');
       expect(answers['trackId'], 'trk_general');
       expect(token, 'a');
+    });
+
+    test('a phone that names no zone gives its offset instead', () async {
+      final source = _RecordingDataSource();
+      await repository(source, zone: null).createGuestAccount(answers: adult);
+
+      expect(source.onboardings.single.$1['timeZone'], 'Etc/GMT-3');
     });
 
     test('answers that failed are sent again, with no second guest', () async {

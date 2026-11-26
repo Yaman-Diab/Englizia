@@ -16,7 +16,7 @@ Onboarding's answers for a new account, sent right after it is made, whichever w
 | Field | From the app |
 |---|---|
 | `uiLanguage` | The app's language, `ar` or `en` |
-| `timeZone` | The phone's offset as an IANA `Etc/GMT` zone (`Etc/GMT-3` for UTC+3; `UTC` when the offset has minutes; STATUS D-043) |
+| `timeZone` | The phone's zone by its IANA name (`Asia/Damascus`), read through `flutter_timezone`. When the phone names none the server would take (`GMT+03:00`), its offset as an `Etc/GMT` zone (`Etc/GMT-3` for UTC+3; `UTC` when the offset has minutes). STATUS D-043 |
 | `learnerKind` | `adult`, `child` or `school_student`, from "who will learn" |
 | `trackId` | The track the audience leads to |
 | `start`, `levelId` | By the track's `entryMode`, as the server refuses any other (`422 enrollment.start_invalid`, `details[].code` `not_allowed` or `required`; the backend's answers of 2026-11-23, §2.1). `placement`: `start` is `placement` for the test or `beginner` for «ابدأ من البداية دون اختبار», and no `levelId`: the server starts at the first published level. `grade_choice`: no `start`, and the grade's `levelId`. `direct`: neither. Fields a track doesn't take are left out, not sent as `null`; so is `child` without a child. The same rules hold for `POST /api/v1/app/enrollments` |
@@ -111,7 +111,7 @@ From the backend's answers of 2026-11-26; its full note (N-4a, 2026-11-23) hasn'
 
 1. **An unused guest is kept 90 days.** A daily job deletes a guest made 90 days ago whose phone wasn't seen in those days; a phone is seen at each sign-in and refresh, so a guest who opens the app is never deleted. A guest's session lasts 60 days, as any other. Deleting takes its progress and enrollments.
 2. **No merge** (decision of 2026-11-16): a guest's progress isn't merged into an account that exists, and upgrading to an email or a Google account that has one answers `409`. The app's way stands: the guest is left, and sign-in offered. Suggested, not built (STATUS D-131): tell the learner the guest's progress won't move, and once they sign in, send `POST /api/v1/auth/logout` with the guest's session first, so it is deleted at once and not after 90 days.
-3. **`Etc/GMT-3` is accepted:** any IANA name .NET knows, else `400 validation.failed` with the code `time_zone` (`UTC+3` and `GMT+03:00` are refused). The phone's own zone (`Asia/Damascus`) is better, with `Etc/GMT±N` only as a fallback: a fixed offset starts the day, and the streak, an hour wrong for half the year where clocks change (STATUS D-043).
+3. **`Etc/GMT-3` is accepted:** any IANA name .NET knows, else `400 validation.failed` with the code `time_zone` (`UTC+3` and `GMT+03:00` are refused). The phone's own zone (`Asia/Damascus`) is better, with `Etc/GMT±N` only as a fallback: a fixed offset starts the day, and the streak, an hour wrong for half the year where clocks change. The app sends it so (above).
 4. **Deleting an account that signs in with Google:** `DELETE /api/v1/app/me` isn't built yet (B-38). A fresh `idToken` in the request (`identityToken` for Apple), checked to be the same account's and recent, is what the backend leans to; the screen is built on it, and B-38 settles it.
 
 ## Questions for the backend team

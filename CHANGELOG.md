@@ -75,6 +75,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) · Versioning: 
 - The line of a unit's chain on the lesson's end was never drawn: it had no height.
 
 ### Changed
+- A new account tells the server its time zone by name, so the day and the streak keep their hour where clocks change.
 - An interactive text now comes from the server: one recording for the lesson with every word lit as it is said, its marked words and expressions with their cards, pictures under sentences and who speaks. A sentence with no translation offers none.
 - The app is version 0.1.0, and reads its versions from the server's system settings; the server refusing an old version shows the update screen.
 - A picture with no text is read by its place to a screen reader («الصورة 1 من 4»).

@@ -6,6 +6,7 @@ import 'package:englizia/core/network/api_status_codes.dart';
 import 'package:englizia/core/result/guard.dart';
 import 'package:englizia/core/result/result.dart';
 import 'package:englizia/core/session/auth_tokens.dart';
+import 'package:englizia/core/session/phone_time_zone.dart';
 import 'package:englizia/core/storage/token_storage.dart';
 import 'package:englizia/features/account/data/datasources/account_remote_data_source.dart';
 import 'package:englizia/features/account/data/datasources/google_identity_source.dart';
@@ -29,13 +30,13 @@ final class AccountRepositoryImpl implements AccountRepository {
     required this.devicePlatform,
     GoogleIdentitySource? google,
     String Function()? language,
-    String Function()? timeZone,
+    PhoneTimeZone? timeZone,
+    Duration Function()? utcOffset,
   }) : _tokens = tokens,
        _google = google,
        _language = language ?? (() => 'ar'),
-       _timeZone =
-           timeZone ??
-           (() => OnboardingModel.timeZoneOf(DateTime.now().timeZoneOffset));
+       _zone = timeZone,
+       _utcOffset = utcOffset ?? (() => DateTime.now().timeZoneOffset);
 
   final AccountRemoteDataSource _remote;
   final TokenStorage _tokens;
@@ -45,7 +46,13 @@ final class AccountRepositoryImpl implements AccountRepository {
 
   /// The app's language, and the phone's time zone, for a new account.
   final String Function() _language;
-  final String Function() _timeZone;
+  final PhoneTimeZone? _zone;
+  final Duration Function() _utcOffset;
+
+  /// The zone's own name, which follows its clock's changes; when the phone
+  /// gives none the server takes, its offset now as an `Etc/GMT` zone.
+  Future<String> _timeZone() async =>
+      await _zone?.name() ?? OnboardingModel.timeZoneOf(_utcOffset());
 
   /// A new account the server made whose onboarding answers didn't reach it:
   /// a retry of the same way gives them, and makes no second account.
@@ -122,7 +129,7 @@ final class AccountRepositoryImpl implements AccountRepository {
         OnboardingModel.request(
           answers,
           language: _language(),
-          timeZone: _timeZone(),
+          timeZone: await _timeZone(),
         ),
         accessToken: account.accessToken,
       );
