@@ -47,12 +47,12 @@ List<Map<String, Object?>> lessonsFromMap(
           'kind': 'unitReview',
           // Shown by its kind's name: a test has no title of its own.
           'title': '',
-          // A pass stays one: a later try that fails only waits
-          // (`cooldown`, its best kept).
+          // Passed, or its unit done: the unit's own state says so, as a
+          // test passed once may wait again after a later try (`cooldown`),
+          // and a pass mark may change. No percent is compared here.
           'done':
               test.readString('state') == 'passed' ||
-              (test.readInt('bestPercent') ?? -1) >=
-                  (test.readInt('passPercent') ?? 101),
+              unit.readString('state') == 'completed',
         },
 ];
 

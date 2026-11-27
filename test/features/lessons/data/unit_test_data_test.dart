@@ -353,15 +353,38 @@ void main() {
   });
 
   group('the map', () {
-    test('a test passed once stays done through a later try’s wait', () {
-      Object? done(Map<String, Object?> test) => lessonsFromMap({
+    test('its stone is done when it is passed, or its unit is done', () {
+      Object? done(String unit, Map<String, Object?> test) => lessonsFromMap({
+        'state': unit,
         'lessons': const <Object?>[],
         'test': {'id': 't1', ...test},
       }).single['done'];
 
-      expect(done(_live('app_unit_test_cooldown_after_pass')), isTrue);
-      expect(done(_live('app_unit_test_cooldown')), isFalse);
-      expect(done(_live('app_unit_test_available')), isFalse);
+      // Passed, then a later try failed: it waits, and its unit stays done.
+      expect(
+        done('completed', _live('app_unit_test_cooldown_after_pass')),
+        isTrue,
+      );
+      // Its unit was done by its lessons before the test was published.
+      expect(done('completed', _live('app_unit_test_available')), isTrue);
+      // The unit's own state decides, never a percent against the pass
+      // mark, which may change.
+      expect(
+        done('unlocked', {
+          ..._live('app_unit_test_available'),
+          'bestPercent': 75,
+          'passPercent': 70,
+        }),
+        isFalse,
+      );
+      expect(done('unlocked', _live('app_unit_test_cooldown')), isFalse);
+      expect(
+        done('unlocked', {
+          ..._live('app_unit_test_available'),
+          'state': 'passed',
+        }),
+        isTrue,
+      );
     });
 
     test('a unit’s test is its last stone; its lessons don’t count it', () {
@@ -529,6 +552,55 @@ void main() {
         value.retryAt!.difference(clock.now()),
         const Duration(minutes: 10),
       );
+    });
+
+    test('a test that waits asks the server its time first', () async {
+      const path = '/api/v1/app/unit-tests/$_liveTest';
+      answers[path] = FakeResponse(
+        200,
+        body: apiFixture('app_unit_test_cooldown_after_pass'),
+      );
+      answers['/api/v1/app/system/ping'] = FakeResponse(
+        200,
+        body: apiFixture('system_ping_ok'),
+      );
+
+      final result = await repository.getTest(_liveTest);
+
+      expect(result, isA<Ok<UnitTest>>());
+      expect(adapter.requests.map((r) => r.path), [
+        path,
+        '/api/v1/app/system/ping',
+      ]);
+      expect(clock.now(), DateTime.utc(2026, 10, 27, 21, 14, 12, 387));
+    });
+
+    test('with the time not answered, the test still opens', () async {
+      const path = '/api/v1/app/unit-tests/$_liveTest';
+      answers[path] = FakeResponse(
+        200,
+        body: apiFixture('app_unit_test_cooldown_after_pass'),
+      );
+
+      final result = await repository.getTest(_liveTest);
+
+      expect(
+        (result as Ok<UnitTest>).value.status.state,
+        UnitTestState.cooldown,
+      );
+      expect(clock.now(), DateTime.utc(2025), reason: 'as it last heard');
+    });
+
+    test('a test that doesn’t wait asks no time', () async {
+      const path = '/api/v1/app/unit-tests/$_liveTest';
+      answers[path] = FakeResponse(
+        200,
+        body: apiFixture('app_unit_test_available'),
+      );
+
+      await repository.getTest(_liveTest);
+
+      expect(adapter.requests.map((r) => r.path), [path]);
     });
 
     test('a level check answered before, closed or gone is as good as '

@@ -8,12 +8,12 @@ Status: **live, used**, from the backend's note B-33b (2026-11-24), its answers 
 
 | Field | Shape | In the app |
 |---|---|---|
-| `units[].test` | `null`, or `{id, questionCount, passPercent, state, bestPercent, retryAvailableAt}`; `state`: `locked`, `available`, `cooldown`, `passed` | The unit's last stone, `unitReview`, with no title of its own; it opens `/unit-tests/{id}`. Done when `passed`, or when `bestPercent` reaches `passPercent`: a passed test may be taken again, and a try that then fails puts it in `cooldown` with its best kept. A unit with a published test is done when its test is passed. Home's lesson counts and preview leave it out |
+| `units[].test` | `null`, or `{id, questionCount, passPercent, state, bestPercent, retryAvailableAt}`; `state` is the first that holds of `locked`, `cooldown`, `passed`, `available` (the backend's rule R187) | The unit's last stone, `unitReview`, with no title of its own; it opens `/unit-tests/{id}`. Its stone is done when it is `passed`, or when its unit's own `state` is `completed`: a passed test may be taken again, and a try that then fails puts it in `cooldown` with its best kept, its unit still completed. **A unit is done by `units[].state` alone**, never by `bestPercent` against `passPercent`: a unit may be completed by its lessons before its test is published, and the pass mark may change. Home's lesson counts and preview leave the test out |
 | `levelCheck` | `null`, or `LevelCheckDto` below, for as long as the check is open | Home's card «انتقل / ابقَ», before a level done and over the email reminder |
 
 ## `GET /api/v1/app/unit-tests/{unitTestId}`
 
-`{id, unitId, versionId, versionNo, questionCount, passPercent, state, bestPercent, retryAvailableAt, questions[], media}`. A question is `{versionId, externalId, template, instructionAr, instructionIsDefault, instructionAudioMediaId, body}`, a lesson's question with **no key, hint or explanation**. Templates and bodies are a lesson's ([lessons.md](lessons.md)); the server shuffles the options and cards for this learner, so the app keeps them **in the order they come**.
+`{id, unitId, versionId, versionNo, questionCount, passPercent, state, bestPercent, retryAvailableAt, questions[], media}`. A question is `{versionId, externalId, template, instructionAr, instructionIsDefault, instructionAudioMediaId, body}`, a lesson's question with **no key, hint or explanation**. Templates and bodies are a lesson's ([lessons.md](lessons.md)); the server orders the cards for this learner (and the options too, once its fix is out: below), so the app keeps them **in the order they come**.
 
 The questions are put in the app's own shape (`lessonFromUnitTest`) so the exercise screen's bodies show them; with no key, each is given a stand-in one only so a draft can be built, and nothing is marked on the phone.
 
@@ -40,7 +40,7 @@ Reply `UnitTestResultDto`: `{submissionId, unitTestId, versionId, correct, quest
 
 **The same try sent again** (its reply lost) answers `200` with the result kept, whatever the answers now sent: no `422`, no second try, no new wait. Its `lessons`, `units` and `levels` are then empty, and `levelCheck` is that try's check if it is still open. A new try after a fail is a new `clientSubmissionId`.
 
-**The wait** is ten minutes after a failed try, `retryAvailableAt` on the server's clock. The app counts it on that clock, not the phone's (`ServerClock`): each answer's `Date` header and the result's `serverTime` say what time the server has, and the phone only counts on from there, so a phone set to the wrong time waits as long as any other. The server is the judge all the same: a try sent early is refused with the seconds left in `Retry-After`, which the count then starts from.
+**The wait** is ten minutes after a failed try, `retryAvailableAt` on the server's clock. The app counts it on that clock, not the phone's (`ServerClock`), so a phone set to the wrong time waits as long as any other. The server says its time in the result's `serverTime`, and before a test that waits is shown the app asks `GET /api/v1/app/system/ping` for it; the phone only counts on from there. An answer's `Date` header stands in until the server has said its time, and never replaces it: the contract doesn't promise the header (a proxy writes it; the backend's answers of 2026-11-26). The server is the judge all the same: a try sent early is refused with the seconds left in `Retry-After`, which the count then starts from.
 
 | Error | In the app |
 |---|---|
@@ -68,13 +68,21 @@ The check stays open, on the map and in the result of the try that made it, with
 
 | Error | In the app |
 |---|---|
-| `422 level_check.already_chosen`, `422 level_check.closed`, `404 level_check.not_found` | As a choice made: the card goes, and home asks the map again |
+| `404 level_check.not_found`: no such check, or another learner's (another account on the phone) | The card goes, and home asks the map again |
+| `422 level_check.already_chosen`: the other choice was made before (on another phone) | The same; the map says where the learner now stands, which may not be what was pressed |
+| `422 level_check.closed`: the learner left the level, or the level suggested is no longer published | The same |
 | Anything else | «تعذّر…» as any failure, the card stays |
+
+The app never applies a choice by itself: after any of these, as after a choice taken, home reads the account, the enrollments and the map again. The same choice sent twice (two presses, a reply lost) answers `200` with the enrollment as it is.
+
+## Answered by the backend (2026-11-26, after the app's try)
+
+- The server shuffles a `gap_choice`'s and a `word_order`'s cards and a `matching`'s right side for each learner (its rule R190), but **not yet the options** of `multiple_choice`, `picture_choice` and `listen_choose`, which come in the editor's order (in the demo, the right one first). The fix is the server's: the same order for a learner and a question's version each time, marked by `optionId` as now. The app shows them as they come, before and after it. Lessons and the placement test don't change: the app shuffles those.
+- `Date` isn't the contract's: see the wait, above.
 
 ## Questions for the backend team
 
-1. The app sets its count of the server's time by each answer's `Date` header, which on the dev server is the second of the body's `serverTime`. Will it stay the API's own clock in production (behind a proxy or a CDN)? If not, the app will ask `GET /api/v1/app/system/ping` instead.
-2. An open test's options came in the content's own order for one guest (the key first in each question), and its cards shuffled. Are options shuffled for each learner, as the note says?
+None open.
 
 ## Not read yet
 

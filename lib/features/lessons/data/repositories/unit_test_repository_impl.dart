@@ -1,3 +1,4 @@
+import 'package:englizia/core/logging/app_logger.dart';
 import 'package:englizia/core/network/api_error_codes.dart';
 import 'package:englizia/core/network/api_exception.dart';
 import 'package:englizia/core/network/api_status_codes.dart';
@@ -40,8 +41,19 @@ final class UnitTestRepositoryImpl implements UnitTestRepository {
     final model = await _remote.getTest(testId);
     final test = model.toEntity(await _settings.installationId());
     _models[testId] = model;
+    // A wait is about to be counted: on the server's time, asked for now.
+    if (test.status.state == UnitTestState.cooldown) await _askTheTime();
     return test;
   });
+
+  /// When the server can't be asked, the clock stands as it last heard.
+  Future<void> _askTheTime() async {
+    try {
+      if (await _remote.serverTime() case final time?) _clock?.read(time);
+    } on Exception catch (error) {
+      AppLogger.warning('The server\'s time wasn\'t read: $error');
+    }
+  }
 
   @override
   Future<Result<UnitTestResult>> submit(

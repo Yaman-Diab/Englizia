@@ -402,6 +402,35 @@ void main() {
       expect(LessonModel(json).toEntity('seed').reader, isNull);
     });
 
+    test('the kids’ story is the same shape, a picture for each sentence', () {
+      final story = LessonModel(
+        _data('app_lesson_kids_story'),
+      ).toEntity('seed');
+      final reader = story.reader!;
+
+      expect(reader.sentences.map((s) => s.english), [
+        'This is my ball.',
+        'It is on the chair.',
+        'Now it is under the chair.',
+        'Look! It is in the box.',
+      ]);
+      expect(reader.sentences.every((s) => s.imageUrl != null), isTrue);
+      expect(reader.sentences.every((s) => s.arabic != null), isTrue);
+      expect(reader.spans.map((s) => (s.kind, s.base, s.arabic)), [
+        (SpanKind.word, 'on', 'على'),
+        (SpanKind.word, 'under', 'تحت'),
+      ]);
+      // Its questions: three the kids' screens show, and a written gap they
+      // have no screen for yet (docs/STATUS.md D-133).
+      expect(story.exercises.map((e) => e.runtimeType), [
+        ImageChoiceExercise,
+        ListenChooseExercise,
+        MatchingExercise,
+        MultipleChoiceExercise,
+      ]);
+      expect(story.kids, isNull);
+    });
+
     test('an interactive video has no media yet, so no reader', () {
       final json = _data('app_lesson_interactive_text');
       asJsonMap(json['content'])

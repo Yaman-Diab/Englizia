@@ -38,7 +38,7 @@ void main() {
   });
 
   test(
-    'an answer’s Date sets it, and the phone counts on from there',
+    'until then an answer’s Date stands in, and the phone counts on',
     () async {
       answer(
         200,
@@ -54,7 +54,7 @@ void main() {
     },
   );
 
-  test('a refusal’s Date sets it too', () async {
+  test('a refusal’s Date stands in too', () async {
     answer(
       422,
       apiFixture('app_unit_test_retry_not_yet'),
@@ -75,8 +75,22 @@ void main() {
     expect(clock.now(), phone);
   });
 
-  test('a body’s own time is taken as it is', () {
+  test('the server’s own word is taken as it is', () {
     clock.read(DateTime.utc(2026, 11, 26, 9, 37, 40, 634));
+    expect(clock.now(), DateTime.utc(2026, 11, 26, 9, 37, 40, 634));
+  });
+
+  test('once the server has said its time, a Date never replaces it', () async {
+    clock.read(DateTime.utc(2026, 11, 26, 9, 37, 40, 634));
+
+    // A proxy's clock, a minute off.
+    answer(
+      200,
+      apiFixture('system_ping_ok'),
+      date: 'Thu, 26 Nov 2026 09:38:40 GMT',
+    );
+    await client.get('/api/v1/app/system/ping');
+
     expect(clock.now(), DateTime.utc(2026, 11, 26, 9, 37, 40, 634));
   });
 }

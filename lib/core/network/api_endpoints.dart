@@ -59,6 +59,10 @@ abstract final class ApiEndpoints {
   // Confirmed in docs/api/openapi.json; answered without a session.
   static const systemConfig = '/api/v1/app/system/config';
 
+  /// The server's time (`serverTime`), which its waits are counted on.
+  /// Confirmed in docs/api/openapi.json.
+  static const systemPing = '/api/v1/app/system/ping';
+
   // Confirmed in docs/api/openapi.json.
   static String placementSession(String sessionId) =>
       '/api/v1/app/placement/sessions/$sessionId';
