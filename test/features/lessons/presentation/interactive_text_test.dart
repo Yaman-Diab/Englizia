@@ -682,6 +682,28 @@ void main() {
         await leave(tester);
       });
 
+      testWidgets(
+        'a picture with no words of its own isn’t announced',
+        (tester) async {
+          await pump(tester);
+
+          // Each picture's own node, around its tinted box.
+          final pictures = tester.widgetList<Semantics>(
+            find.byWidgetPredicate(
+              (widget) => widget is Semantics && widget.child is ColoredBox,
+            ),
+          );
+          expect(pictures, isNotEmpty);
+          for (final picture in pictures) {
+            expect(picture.excludeSemantics, isTrue);
+            expect(picture.properties.image, isFalse);
+            expect(picture.properties.label, isNull);
+          }
+          await leave(tester);
+        },
+        semanticsEnabled: true,
+      );
+
       testWidgets('who speaks is named over the sentence', (tester) async {
         await pump(tester);
 

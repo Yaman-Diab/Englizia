@@ -1,0 +1,400 @@
+{
+  "statusCode": 200,
+  "message": "Data retrieved successfully",
+  "data": {
+    "id": "01a2160b-e093-73f7-9cf7-0bed7bad29cb",
+    "versionId": "01a2160b-e257-71d8-8de1-34eba5648385",
+    "versionNo": 1,
+    "unitId": "01a1f250-1717-7905-bfc7-b6a02bd7a47f",
+    "type": "interactive_text",
+    "titleAr": "قصة: أين كرتي؟",
+    "titleEn": "Story: Where is my ball?",
+    "objectiveAr": "أن تفهم قصة قصيرة وتعرف on وunder وin.",
+    "objectiveEn": null,
+    "minutes": 5,
+    "bookPages": null,
+    "publishedAt": "2026-11-26T04:10:07.315Z",
+    "content": {
+      "type": "interactive_text",
+      "media": {
+        "mediaId": "01a2160b-e0da-71ed-bef3-c16e12989f79",
+        "durationMs": 14633
+      },
+      "sentences": [
+        {
+          "id": "s1",
+          "speaker": null,
+          "textEn": "This is my ball.",
+          "textAr": "هذه كرتي.",
+          "startMs": 300,
+          "endMs": 2626,
+          "imageMediaId": "01a2160b-e0a5-7601-b67b-ac18f125d059",
+          "shadowing": true,
+          "tokens": [
+            {
+              "id": "s1t1",
+              "text": "This",
+              "startMs": 300,
+              "endMs": 804
+            },
+            {
+              "id": "s1t2",
+              "text": "is",
+              "startMs": 894,
+              "endMs": 1350
+            },
+            {
+              "id": "s1t3",
+              "text": "my",
+              "startMs": 1440,
+              "endMs": 2026
+            },
+            {
+              "id": "s1t4",
+              "text": "ball.",
+              "startMs": 2116,
+              "endMs": 2626
+            }
+          ],
+          "spans": []
+        },
+        {
+          "id": "s2",
+          "speaker": null,
+          "textEn": "It is on the chair.",
+          "textAr": "إنها على الكرسي.",
+          "startMs": 3276,
+          "endMs": 5867,
+          "imageMediaId": "01a2160b-e0af-7677-b124-01eb8c2df257",
+          "shadowing": false,
+          "tokens": [
+            {
+              "id": "s2t1",
+              "text": "It",
+              "startMs": 3276,
+              "endMs": 3631
+            },
+            {
+              "id": "s2t2",
+              "text": "is",
+              "startMs": 3721,
+              "endMs": 4177
+            },
+            {
+              "id": "s2t3",
+              "text": "on",
+              "startMs": 4267,
+              "endMs": 4774
+            },
+            {
+              "id": "s2t4",
+              "text": "the",
+              "startMs": 4864,
+              "endMs": 5255
+            },
+            {
+              "id": "s2t5",
+              "text": "chair.",
+              "startMs": 5345,
+              "endMs": 5867
+            }
+          ],
+          "spans": [
+            {
+              "id": "sp1",
+              "tokenIds": [
+                "s2t3"
+              ],
+              "kind": "word",
+              "lemma": "on",
+              "textAr": "على",
+              "noteAr": null
+            }
+          ]
+        },
+        {
+          "id": "s3",
+          "speaker": null,
+          "textEn": "Now it is under the chair.",
+          "textAr": "الآن هي تحت الكرسي.",
+          "startMs": 6517,
+          "endMs": 9843,
+          "imageMediaId": "01a2160b-e0b9-7d80-ab19-3a48ad4a5387",
+          "shadowing": false,
+          "tokens": [
+            {
+              "id": "s3t1",
+              "text": "Now",
+              "startMs": 6517,
+              "endMs": 7103
+            },
+            {
+              "id": "s3t2",
+              "text": "it",
+              "startMs": 7193,
+              "endMs": 7548
+            },
+            {
+              "id": "s3t3",
+              "text": "is",
+              "startMs": 7638,
+              "endMs": 8094
+            },
+            {
+              "id": "s3t4",
+              "text": "under",
+              "startMs": 8184,
+              "endMs": 8750
+            },
+            {
+              "id": "s3t5",
+              "text": "the",
+              "startMs": 8840,
+              "endMs": 9231
+            },
+            {
+              "id": "s3t6",
+              "text": "chair.",
+              "startMs": 9321,
+              "endMs": 9843
+            }
+          ],
+          "spans": [
+            {
+              "id": "sp2",
+              "tokenIds": [
+                "s3t4"
+              ],
+              "kind": "word",
+              "lemma": "under",
+              "textAr": "تحت",
+              "noteAr": null
+            }
+          ]
+        },
+        {
+          "id": "s4",
+          "speaker": null,
+          "textEn": "Look! It is in the box.",
+          "textAr": "انظر! إنها في الصندوق.",
+          "startMs": 10493,
+          "endMs": 13629,
+          "imageMediaId": "01a2160b-e0c8-7345-9ccc-dd2a00f2649d",
+          "shadowing": false,
+          "tokens": [
+            {
+              "id": "s4t1",
+              "text": "Look!",
+              "startMs": 10493,
+              "endMs": 10945
+            },
+            {
+              "id": "s4t2",
+              "text": "It",
+              "startMs": 11035,
+              "endMs": 11390
+            },
+            {
+              "id": "s4t3",
+              "text": "is",
+              "startMs": 11480,
+              "endMs": 11936
+            },
+            {
+              "id": "s4t4",
+              "text": "in",
+              "startMs": 12026,
+              "endMs": 12454
+            },
+            {
+              "id": "s4t5",
+              "text": "the",
+              "startMs": 12544,
+              "endMs": 12934
+            },
+            {
+              "id": "s4t6",
+              "text": "box.",
+              "startMs": 13024,
+              "endMs": 13629
+            }
+          ],
+          "spans": []
+        }
+      ]
+    },
+    "questions": [
+      {
+        "versionId": "01a2160b-e254-7af1-a209-839b6478a737",
+        "template": "picture_choice",
+        "instructionAr": "اختر الصورة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "الكرة تحت الكرسي: under.",
+        "bookPages": null,
+        "body": {
+          "prompt": "The ball is under the chair.",
+          "promptAudioMediaId": "01a2160b-e161-7701-8677-0694cabc7e11",
+          "options": [
+            {
+              "id": "a",
+              "imageMediaId": "01a2160b-e0b9-7d80-ab19-3a48ad4a5387"
+            },
+            {
+              "id": "b",
+              "imageMediaId": "01a2160b-e0af-7677-b124-01eb8c2df257"
+            },
+            {
+              "id": "c",
+              "imageMediaId": "01a2160b-e0c8-7345-9ccc-dd2a00f2649d"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a2160b-e254-7fbf-a643-9eb730d1cd80",
+        "template": "listen_choose",
+        "instructionAr": "استمع واختر ما سمعته",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "سمعت on: على.",
+        "bookPages": null,
+        "body": {
+          "audioMediaId": "01a2160b-e1af-7343-962e-3298aee5f4dd",
+          "transcript": "The cat is on the chair.",
+          "options": [
+            {
+              "id": "a",
+              "text": "on"
+            },
+            {
+              "id": "b",
+              "text": "under"
+            },
+            {
+              "id": "c",
+              "text": "in"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      },
+      {
+        "versionId": "01a2160b-e254-723b-a35d-5a031463b67f",
+        "template": "matching",
+        "instructionAr": "طابق كل كلمة بمعناها",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "on على، وunder تحت، وin في.",
+        "bookPages": null,
+        "body": {
+          "rightKind": "image",
+          "left": [
+            "on",
+            "under",
+            "in"
+          ],
+          "right": [
+            {
+              "text": null,
+              "imageMediaId": "01a2160b-e0af-7677-b124-01eb8c2df257"
+            },
+            {
+              "text": null,
+              "imageMediaId": "01a2160b-e0b9-7d80-ab19-3a48ad4a5387"
+            },
+            {
+              "text": null,
+              "imageMediaId": "01a2160b-e0c8-7345-9ccc-dd2a00f2649d"
+            }
+          ]
+        },
+        "answerKey": {
+          "pairs": [
+            0,
+            1,
+            2
+          ]
+        }
+      },
+      {
+        "versionId": "01a2160b-e255-73e1-b764-c9942b698197",
+        "template": "multiple_choice",
+        "instructionAr": "اختر الكلمة المناسبة",
+        "instructionIsDefault": true,
+        "instructionAudioMediaId": null,
+        "hintAr": null,
+        "explanationAr": "في آخر القصة الكرة في الصندوق: in.",
+        "bookPages": null,
+        "body": {
+          "prompt": "The ball is ___ the box.",
+          "options": [
+            {
+              "id": "a",
+              "text": "in"
+            },
+            {
+              "id": "b",
+              "text": "on"
+            },
+            {
+              "id": "c",
+              "text": "under"
+            }
+          ]
+        },
+        "answerKey": {
+          "optionId": "a"
+        }
+      }
+    ],
+    "media": {
+      "01a2160b-e0da-71ed-bef3-c16e12989f79": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a2160b-e0da-71ed-bef3-c16e12989f79.mp3",
+        "sizeBytes": 87841
+      },
+      "01a2160b-e0a5-7601-b67b-ac18f125d059": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-e0a5-7601-b67b-ac18f125d059.webp",
+        "sizeBytes": 4804
+      },
+      "01a2160b-e0af-7677-b124-01eb8c2df257": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-e0af-7677-b124-01eb8c2df257.webp",
+        "sizeBytes": 4424
+      },
+      "01a2160b-e0b9-7d80-ab19-3a48ad4a5387": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-e0b9-7d80-ab19-3a48ad4a5387.webp",
+        "sizeBytes": 4062
+      },
+      "01a2160b-e0c8-7345-9ccc-dd2a00f2649d": {
+        "kind": "image",
+        "url": "https://api-dev.engleazia.com/media/image/2026/11/01a2160b-e0c8-7345-9ccc-dd2a00f2649d.webp",
+        "sizeBytes": 3874
+      },
+      "01a2160b-e161-7701-8677-0694cabc7e11": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a2160b-e161-7701-8677-0694cabc7e11.mp3",
+        "sizeBytes": 13079
+      },
+      "01a2160b-e1af-7343-962e-3298aee5f4dd": {
+        "kind": "audio",
+        "url": "https://api-dev.engleazia.com/media/audio/2026/11/01a2160b-e1af-7343-962e-3298aee5f4dd.mp3",
+        "sizeBytes": 11982
+      }
+    },
+    "hiddenQuestionCount": 0
+  },
+  "error": null,
+  "traceId": "b82385d1b4034f43db076ecd6ba4badc"
+}

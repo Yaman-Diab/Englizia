@@ -17,6 +17,10 @@ abstract interface class UnitTestRemoteDataSource {
   );
 
   Future<void> chooseLevel(String suggestionId, {required bool move});
+
+  /// The server's time now (`GET /api/v1/app/system/ping`); null when it
+  /// says none.
+  Future<DateTime?> serverTime();
 }
 
 final class UnitTestRemoteDataSourceImpl implements UnitTestRemoteDataSource {
@@ -40,6 +44,11 @@ final class UnitTestRemoteDataSourceImpl implements UnitTestRemoteDataSource {
   @override
   Future<void> chooseLevel(String suggestionId, {required bool move}) => _client
       .post(ApiEndpoints.levelCheckChoice(suggestionId), data: {'move': move});
+
+  @override
+  Future<DateTime?> serverTime() async => asJsonMap(
+    await _client.get(ApiEndpoints.systemPing),
+  ).readDateTime('serverTime');
 }
 
 /// Mock mode (`env/mock.json`): a test in the server's shape, marked here by
@@ -165,4 +174,8 @@ final class UnitTestFakeDataSource implements UnitTestRemoteDataSource {
   @override
   Future<void> chooseLevel(String suggestionId, {required bool move}) =>
       Future<void>.delayed(latency);
+
+  /// The mock's waits count on the phone's clock.
+  @override
+  Future<DateTime?> serverTime() async => null;
 }

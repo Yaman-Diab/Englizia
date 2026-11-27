@@ -261,19 +261,26 @@ class _ReaderSentenceBlockState extends State<ReaderSentenceBlock> {
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   child: AspectRatio(
                     aspectRatio: 16 / 9,
+                    // A picture with no words of its own only shows its
+                    // sentence, which is read with it: it isn't said twice.
                     child: Semantics(
-                      image: true,
+                      image: sentence.imageAlt != null,
                       label: sentence.imageAlt,
+                      excludeSemantics: sentence.imageAlt == null,
                       child: ColoredBox(
                         color: colors.primary.surface,
                         child: image.startsWith('http')
                             ? Image(
                                 image: KeptMedia.image(image),
                                 fit: BoxFit.cover,
+                                excludeFromSemantics: true,
                                 errorBuilder: (_, _, _) =>
                                     const SizedBox.shrink(),
                               )
-                            : SvgPicture.asset(image),
+                            : SvgPicture.asset(
+                                image,
+                                excludeFromSemantics: true,
+                              ),
                       ),
                     ),
                   ),
