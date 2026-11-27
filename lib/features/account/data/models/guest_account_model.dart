@@ -80,10 +80,10 @@ abstract final class OnboardingModel {
       '${time.hour.toString().padLeft(2, '0')}:'
       '${time.minute.toString().padLeft(2, '0')}:00';
 
-  /// The phone's offset as an IANA name: `Etc/GMT-3` is three hours ahead
-  /// of UTC (the zone's sign is reversed by its standard).
-  // ASSUMPTION(api): an `Etc/GMT` zone is accepted where a city is expected;
-  // an offset with minutes has none, so it goes as UTC (STATUS D-043).
+  /// The phone's offset as an IANA name, for a phone that names no zone:
+  /// `Etc/GMT-3` is three hours ahead of UTC (the zone's sign is reversed by
+  /// its standard). The server takes it (docs/api/auth.md). An offset with
+  /// minutes has none, so it goes as UTC.
   static String timeZoneOf(Duration offset) {
     if (offset.inMinutes % 60 != 0 || offset == Duration.zero) return 'UTC';
     final hours = offset.inHours;
